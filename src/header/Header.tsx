@@ -1,13 +1,15 @@
 import React from 'react';
 
+import './Header.scss';
+
 const Header = () => {
     return (
         <header>
             <div className="blackbox d-flex justify-content-between">
-                <h1 className="display-1">
+                <div className="header-logo">
                     <span className="mathnews-logo"></span>
-                </h1>
-                <div className="d-flex-column text-right py-2">
+                </div>
+                <div className="header-info">
                     <h1>Volume ??? Issue ???</h1>
                     <h3>August 6th, 2016</h3>
                 </div>
