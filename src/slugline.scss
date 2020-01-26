@@ -1,3 +1,13 @@
+@font-face {
+    font-family: "DIN Next";
+    src: url("./fonts/din_next.woff") format('woff');
+}
+
+@font-face {
+    font-family: "Joanna Nova";
+    src: url("./fonts/joanna_nova.woff") format("woff");
+}
+
 @import "slugline_vars";
 
 @import "~bootstrap/scss/bootstrap.scss";
