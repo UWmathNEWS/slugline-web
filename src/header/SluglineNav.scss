@@ -1,0 +1,11 @@
+@import "../slugline_vars";
+
+nav.blackbox {
+    background: black !important;
+    padding: 0.5em 0.5em;
+}
+
+.nav-link > h4 {
+    color: $theme-color;
+    margin-bottom: 0;
+}
