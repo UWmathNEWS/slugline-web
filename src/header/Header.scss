@@ -1,9 +1,26 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
 .header-logo {
-    font-size: 6rem;
-    line-height: 6rem;
+    font-size: 7vw;
+    line-height: 7vw;
 }
 
 .header-info {
     height: 6rem;
     text-align: right;
 }
+
+@include media-breakpoint-down(sm) {
+    .header-logo {
+        text-align: center;
+        font-size: 15vw;
+        line-height: 15vw;
+    }
+
+    .header-info {
+        display: none;
+    }
+}
+
