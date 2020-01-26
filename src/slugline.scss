@@ -1,3 +1,22 @@
 @import "slugline_vars";
 
 @import "~bootstrap/scss/bootstrap.scss";
+
+// Common blackbox class
+.blackbox {
+    background: black;
+    color: $theme-color;
+    padding: 1rem 2rem;
+    margin-bottom: 1rem;
+}
+
+// Convenient class for mathnews logo
+.mathnews-logo::before {
+    content: "math";
+    font-family: Joanna Nova;
+}
+
+.mathnews-logo::after {
+    content: "NEWS";
+    font-family: DIN Next;
+}
