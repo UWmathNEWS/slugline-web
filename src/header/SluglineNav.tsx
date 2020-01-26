@@ -6,7 +6,7 @@ import './SluglineNav.scss';
 
 const SluglineNav = () => {
     return (
-        <Navbar bg="dark" expand="lg" className="blackbox">
+        <Navbar variant="dark" expand="lg" className="blackbox">
             <Navbar.Toggle aria-controls="slugline-nav"/>
             <Navbar.Collapse id="slugline-nav">
                 <Nav className="w-100" justify>
