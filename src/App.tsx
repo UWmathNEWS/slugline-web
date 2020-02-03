@@ -3,6 +3,7 @@ import './slugline.scss';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 import Header from './header/Header';
+import IssuesList from './issues/issues_list';
 
 const App: React.FC = () => {
     return (
@@ -15,7 +16,7 @@ const App: React.FC = () => {
                             HOME CONTENT
                         </Route>
                         <Route path="/issues">
-                            ISSUES CONTENT
+                            <IssuesList/>
                         </Route>
                     </Switch>
                     <p>CONTENT</p>

@@ -30,3 +30,7 @@ function getApiUrl(url: string) {
 export function getLatestIssue(): Promise<AxiosResponse<Issue>> {
     return axios.get<Issue>(getApiUrl('issues/latest/'));
 }
+
+export function getAllIssues(): Promise<AxiosResponse<Issue[]>> {
+    return axios.get<Issue[]>(getApiUrl('issues/'));
+}
