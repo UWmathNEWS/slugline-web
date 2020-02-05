@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Issue, getAllIssues } from '../api/api';
 
 import './issues_list.scss';
-import { useRouteMatch, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export interface VolumeIssuesProps {
     volume: Issue[];
@@ -11,8 +11,6 @@ export interface VolumeIssuesProps {
 const IMG_DEFAULT = 'https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_1600/gynfui2kgjtnzdwlsxqy.jpg';
 
 const VolumeIssues = (props: VolumeIssuesProps) => {
-    let { path, url } = useRouteMatch();
-
     return (
         <>
             <h5 className="blackbox">Volume {props.volume[0].volume_num}</h5>
@@ -27,7 +25,11 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
                             className="volume-issue flex-shrink-1" 
                             key={issue.id}
                         >
-                            <img className="volume-issue-img mb-1" src={IMG_DEFAULT} />
+                            <img 
+                                className="volume-issue-img mb-1" 
+                                src={IMG_DEFAULT}
+                                alt={`Volume ${issue.volume_num} Issue ${issue.issue_num} cover`}
+                            />
                             <h6 className="text-center">{`Issue ${issue.issue_num}`}</h6>
                         </Link>
                     )
