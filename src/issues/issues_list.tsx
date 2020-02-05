@@ -19,7 +19,14 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
             <div className="volume-issue-list d-flex overflow-auto">
                 {props.volume.map(issue => {
                     return (
-                        <Link to={`/issues/${issue.id}`} className="volume-issue flex-shrink-1" key={issue.id}>
+                        <Link 
+                            to={{
+                                pathname: `/issues/${issue.id}`,
+                                state: issue
+                            }} 
+                            className="volume-issue flex-shrink-1" 
+                            key={issue.id}
+                        >
                             <img className="volume-issue-img mb-1" src={IMG_DEFAULT} />
                             <h6 className="text-center">{`Issue ${issue.issue_num}`}</h6>
                         </Link>

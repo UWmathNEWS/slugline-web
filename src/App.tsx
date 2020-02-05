@@ -4,6 +4,7 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 import Header from './header/Header';
 import IssuesList from './issues/issues_list';
+import IssuePage from './issues/issues_page';
 
 const App: React.FC = () => {
     return (
@@ -14,6 +15,9 @@ const App: React.FC = () => {
                     <Switch>
                         <Route exact path="/">
                             HOME CONTENT
+                        </Route>
+                        <Route path="/issues/:issue_id">
+                            <IssuePage/>
                         </Route>
                         <Route path="/issues">
                             <IssuesList/>

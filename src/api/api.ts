@@ -34,3 +34,7 @@ export function getLatestIssue(): Promise<AxiosResponse<Issue>> {
 export function getAllIssues(): Promise<AxiosResponse<Issue[]>> {
     return axios.get<Issue[]>(getApiUrl('issues/'));
 }
+
+export function getIssue(issue_id: number): Promise<AxiosResponse<Issue>> {
+    return axios.get<Issue>(getApiUrl(`issues/${issue_id}`));
+}
