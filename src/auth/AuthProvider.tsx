@@ -26,7 +26,7 @@ export const AuthProvider: React.FC = (props) => {
   const [csrfToken, setCsrfToken] = useState<string | undefined>(undefined);
 
   const isAuthenticated = () => {
-    return user === undefined;
+    return user !== undefined;
   }
 
   const login = (username: string, password: string) => {
