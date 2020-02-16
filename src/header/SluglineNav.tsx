@@ -1,13 +1,15 @@
 import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
 
 import './SluglineNav.scss';
 
 const SluglineNav = () => {
+
     return (
         <Navbar variant="dark" expand="lg" className="blackbox">
-            <Navbar.Toggle aria-controls="slugline-nav"/>
+            <Navbar.Toggle aria-controls="slugline-nav" />
             <Navbar.Collapse id="slugline-nav">
                 <Nav className="w-100" justify>
                     <Nav.Item>

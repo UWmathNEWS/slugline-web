@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import { User } from "../auth/AuthProvider";
 
 export interface Article {
     id: number,
@@ -37,4 +38,16 @@ export function getAllIssues(): Promise<AxiosResponse<Issue[]>> {
 
 export function getIssue(issue_id: number): Promise<AxiosResponse<Issue>> {
     return axios.get<Issue>(getApiUrl(`issues/${issue_id}`));
+}
+
+export function login(username: string, password: string): Promise<AxiosResponse<User>> {
+    const body = {
+        username: username,
+        password: password
+    }
+    return axios.post<User>(getApiUrl('login/'), body);
+}
+
+export function logout(): Promise<AxiosResponse<void>> {
+    return axios.post<void>(getApiUrl('logout/'))
 }
