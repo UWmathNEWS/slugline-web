@@ -1,14 +1,15 @@
 import React, { createContext, useState, useContext } from "react"
 import Cookie from 'js-cookie';
 
-import { login, logout } from '../api/api'
 import { User } from "../shared/types";
+import axios from "axios";
+import { getApiUrl } from "../api/api";
 
 export interface AuthContext {
   user?: User,
   csrfToken?: string,
   isAuthenticated: () => boolean,
-  login: (username: string, password: string) => Promise<void>,
+  login: (username: string, password: string) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -25,23 +26,31 @@ export const AuthProvider: React.FC = (props) => {
   const [csrfToken, setCsrfToken] = useState<string | undefined>(undefined);
 
   const isAuthenticated = () => {
-    return user == undefined;
+    return user === undefined;
   }
 
-  const authLogin = (username: string, password: string) => {
-    return login(username, password).then(resp => {
+  const login = (username: string, password: string) => {
+    const body = {
+      username: username,
+      password: password
+    }
+    const headers = csrfToken ? { 'X-CSRFToken': csrfToken } : {}
+    return axios.post<User>(getApiUrl('login/'), body, {
+      headers: headers
+    }).then(resp => {
       setUser(resp.data);
-      const token = Cookie.get('csrftoken');
-      console.log(token);
-      setCsrfToken(token);
-    })
+      setCsrfToken(Cookie.get('csrftoken'))
+    });
   }
 
-  const authLogout = () => {
-    return logout().then(resp => {
+  const logout = () => {
+    const headers = csrfToken ? { 'X-CSRFToken': csrfToken } : {}
+    return axios.post<User>(getApiUrl('logout/'), {}, {
+      headers: headers
+    }).then(() => {
       setUser(undefined);
-      setCsrfToken(undefined);
-    })
+      setCsrfToken(Cookie.get('csrftoken'))
+    });
   }
 
   return <Auth.Provider
@@ -49,8 +58,8 @@ export const AuthProvider: React.FC = (props) => {
       user: user,
       csrfToken: csrfToken,
       isAuthenticated: isAuthenticated,
-      login: authLogin,
-      logout: authLogout
+      login: login,
+      logout: logout,
     }}
   >
     {props.children}

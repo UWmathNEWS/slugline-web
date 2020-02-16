@@ -1,25 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
-import { getIssue } from "../api/api";
-import { Issue } from "../shared/types";
+import { useIssue } from "../api/api";
 
 const IssuePage = () => {
 
     const { issue_id } = useParams();
-    const [issue, setIssue] = useState<Issue | null>(null);
+    const issue = useIssue(Number(issue_id));
 
-    useEffect(() => {
-        const id = Number(issue_id);
-        if (id) {
-            getIssue(id).then(resp => {
-                setIssue(resp.data);
-            })
-        }
-    }, [issue_id]);
-
-    return issue && (
-        <h1>{`Volume ${issue.volume_num} Issue ${issue.issue_num}`}</h1>
-    )
+    if (issue) {
+        return <h1>{`Volume ${issue?.volume_num} Issue ${issue?.issue_num}`}</h1>
+    }
+    else {
+        return <h1>LOADING...</h1>
+    }
 }
 
 export default IssuePage;

@@ -1,32 +1,50 @@
-import axios, { AxiosResponse } from "axios";
-import { Issue, User } from "../shared/types";
+import axios from "axios";
+import { Issue } from "../shared/types";
+import { useAuth } from "../auth/AuthProvider";
+import { useState, useEffect } from "react";
 
 const API_ROOT = '/api';
 
-function getApiUrl(url: string) {
-    return `${API_ROOT}/${url}`;
+export const getApiUrl = (url: string) => {
+    return `${API_ROOT}/${url}`
 }
 
-export function getLatestIssue(): Promise<AxiosResponse<Issue>> {
-    return axios.get<Issue>(getApiUrl('issues/latest/'));
+const useApiGet = <T>(url: string): T | undefined => {
+    const [response, setResponse] = useState<T | undefined>(undefined);
+
+    useEffect(() => {
+        axios.get(getApiUrl(url)).then(axiosResp => { setResponse(axiosResp.data) });
+    }, [url])
+    return response
 }
 
-export function getAllIssues(): Promise<AxiosResponse<Issue[]>> {
-    return axios.get<Issue[]>(getApiUrl('issues/'));
-}
+const useApiPost = <T>(url: string, data?: unknown): T | undefined => {
+    const auth = useAuth()
+    const [response, setResponse] = useState<T | undefined>(undefined);
 
-export function getIssue(issue_id: number): Promise<AxiosResponse<Issue>> {
-    return axios.get<Issue>(getApiUrl(`issues/${issue_id}`));
-}
-
-export function login(username: string, password: string): Promise<AxiosResponse<User>> {
-    const body = {
-        username: username,
-        password: password
+    let headers: { [header: string]: string } = {}
+    if (auth.csrfToken) {
+        headers['X-CSRFToken'] = auth.csrfToken;
     }
-    return axios.post<User>(getApiUrl('login/'), body);
+
+    useEffect(() => {
+        axios.post<T>(getApiUrl(url), data, {
+            headers: headers
+        }).then(axiosResp => {
+            setResponse(axiosResp.data);
+        });
+    }, [url, data, headers])
+    return response;
 }
 
-export function logout(): Promise<AxiosResponse<void>> {
-    return axios.post<void>(getApiUrl('logout/'))
+export const useLatestIssue = (): Issue | undefined => {
+    return useApiGet<Issue>('issues/latest/');
+}
+
+export const useAllIssues = (): Issue[] | undefined => {
+    return useApiGet<Issue[]>('issues/');
+}
+
+export const useIssue = (issueId?: number): Issue | undefined => {
+    return useApiGet<Issue>(`issues/${issueId}`);
 }

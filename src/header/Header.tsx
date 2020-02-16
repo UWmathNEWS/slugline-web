@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import './Header.scss';
-import { getLatestIssue } from '../api/api';
+import { useLatestIssue } from '../api/api';
 import SluglineNav from './SluglineNav';
-import { Issue } from '../shared/types';
 
 const headerDateOpts = {
     year: 'numeric',
@@ -13,13 +12,7 @@ const headerDateOpts = {
 
 const Header = () => {
 
-    const [latestIssue, setLatestIssue] = useState<Issue>();
-
-    useEffect(() => {
-        getLatestIssue().then((resp) => {
-            setLatestIssue(resp.data);
-        });
-    }, []);
+    const latestIssue = useLatestIssue()
 
     return (
         <React.Fragment>

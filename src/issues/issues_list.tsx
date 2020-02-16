@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllIssues } from '../api/api';
+import { useAllIssues } from '../api/api';
 
 import './issues_list.scss';
 import { Link } from 'react-router-dom';
@@ -42,24 +42,25 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
 
 const IssuesList = () => {
 
+    const issues = useAllIssues();
     const [volumes, setVolumes] = useState<Issue[][]>([]);
 
     useEffect(() => {
-        getAllIssues().then(resp => {
-            const issues = resp.data;
-            let vols: Issue[][] = [[]];
-            let volumeNum = issues[0].volume_num;
-            // split the issues into groups by volume num
-            issues.forEach(issue => {
-                if (issue.volume_num !== volumeNum) {
-                    vols.push([]);
-                }
-                vols[vols.length - 1].push(issue);
-                volumeNum = issue.volume_num;
-            });
-            setVolumes(vols);
+        if (!issues) {
+            return;
+        }
+        let vols: Issue[][] = [[]];
+        let volumeNum = issues[0].volume_num;
+        // split the issues into groups by volume num
+        issues.forEach(issue => {
+            if (issue.volume_num !== volumeNum) {
+                vols.push([]);
+            }
+            vols[vols.length - 1].push(issue);
+            volumeNum = issue.volume_num;
         });
-    }, []);
+        setVolumes(vols);
+    }, [issues]);
 
     return (
         <>
