@@ -1,17 +1,8 @@
 import React, { createContext, useState, useContext } from "react"
 import Cookie from 'js-cookie';
 
-
 import { login, logout } from '../api/api'
-
-export interface User {
-  username: string,
-  first_name: string,
-  last_name: string,
-  email: string,
-  is_staff: boolean,
-  writer_name: string
-}
+import { User } from "../shared/types";
 
 export interface AuthContext {
   user?: User,
@@ -20,7 +11,6 @@ export interface AuthContext {
   login: (username: string, password: string) => Promise<void>,
   logout: () => Promise<void>
 }
-
 
 const Auth = createContext<AuthContext>({
   user: undefined,

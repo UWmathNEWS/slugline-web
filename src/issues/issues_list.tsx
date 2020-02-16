@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Issue, getAllIssues } from '../api/api';
+import { getAllIssues } from '../api/api';
 
 import './issues_list.scss';
 import { Link } from 'react-router-dom';
+import { Issue } from '../shared/types';
 
 export interface VolumeIssuesProps {
     volume: Issue[];
@@ -17,16 +18,16 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
             <div className="volume-issue-list d-flex overflow-auto">
                 {props.volume.map(issue => {
                     return (
-                        <Link 
+                        <Link
                             to={{
                                 pathname: `/issues/${issue.id}`,
                                 state: issue
-                            }} 
-                            className="volume-issue flex-shrink-1" 
+                            }}
+                            className="volume-issue flex-shrink-1"
                             key={issue.id}
                         >
-                            <img 
-                                className="volume-issue-img mb-1" 
+                            <img
+                                className="volume-issue-img mb-1"
                                 src={IMG_DEFAULT}
                                 alt={`Volume ${issue.volume_num} Issue ${issue.issue_num} cover`}
                             />
@@ -46,7 +47,7 @@ const IssuesList = () => {
     useEffect(() => {
         getAllIssues().then(resp => {
             const issues = resp.data;
-            let vols: Issue[][] = [ [] ];
+            let vols: Issue[][] = [[]];
             let volumeNum = issues[0].volume_num;
             // split the issues into groups by volume num
             issues.forEach(issue => {
@@ -64,7 +65,7 @@ const IssuesList = () => {
         <>
             <h1>Issues</h1>
             {volumes.map(volume => {
-                return <VolumeIssues volume={volume}/>
+                return <VolumeIssues volume={volume} />
             })}
         </>
     )

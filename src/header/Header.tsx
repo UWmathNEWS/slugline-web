@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
 import './Header.scss';
-import { getLatestIssue, Issue } from '../api/api';
+import { getLatestIssue } from '../api/api';
 import SluglineNav from './SluglineNav';
+import { Issue } from '../shared/types';
 
 const headerDateOpts = {
     year: 'numeric',
