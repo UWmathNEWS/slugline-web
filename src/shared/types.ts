@@ -27,3 +27,8 @@ export interface User {
   is_staff: boolean,
   writer_name: string
 }
+
+export interface AuthResponse {
+  user?: User,
+  is_authenticated: boolean
+}

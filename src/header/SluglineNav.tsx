@@ -21,7 +21,7 @@ const SluglineNav = () => {
                     </Nav.Item>
                     <Nav.Item>
                         {auth.isAuthenticated()
-                            ? <Link to="/" className="nav-link"><h4>Logout</h4></Link>
+                            ? <Link to="/" onClick={() => auth.logout()} className="nav-link"><h4>Logout</h4></Link>
                             : <Link to="/login" className="nav-link"><h4>Login</h4></Link>
                         }
                     </Nav.Item>

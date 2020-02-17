@@ -1,7 +1,7 @@
-import React, { createContext, useState, useContext } from "react"
+import React, { createContext, useState, useContext, useEffect } from "react"
 import Cookie from 'js-cookie';
 
-import { User } from "../shared/types";
+import { User, AuthResponse } from "../shared/types";
 import axios from "axios";
 import { getApiUrl } from "../api/api";
 
@@ -21,6 +21,8 @@ const Auth = createContext<AuthContext>({
   logout: () => Promise.resolve()
 })
 
+const CSRF_COOKIE = 'csrftoken';
+
 export const AuthProvider: React.FC = (props) => {
   const [user, setUser] = useState<User | undefined>(undefined);
   const [csrfToken, setCsrfToken] = useState<string | undefined>(undefined);
@@ -28,6 +30,18 @@ export const AuthProvider: React.FC = (props) => {
   const isAuthenticated = () => {
     return user !== undefined;
   }
+
+  useEffect(() => {
+    axios.get<AuthResponse>(getApiUrl('auth/')).then((resp) => {
+      setCsrfToken(Cookie.get(CSRF_COOKIE));
+      if (resp.data.user) {
+        setUser(resp.data.user);
+      }
+      else {
+        setUser(undefined);
+      }
+    });
+  }, [])
 
   const login = (username: string, password: string) => {
     const body = {
