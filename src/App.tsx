@@ -6,6 +6,7 @@ import Header from './header/Header';
 import IssuesList from './issues/issues_list';
 import IssuePage from './issues/issues_page';
 import { AuthProvider } from './auth/AuthProvider';
+import Login from './auth/Login';
 
 const App: React.FC = () => {
     return (
@@ -18,6 +19,9 @@ const App: React.FC = () => {
                             <Route exact path="/">
                                 HOME CONTENT
                             </Route>
+                            <Route path="/login">
+                                <Login />
+                            </Route>
                             <Route path="/issues/:issue_id">
                                 <IssuePage />
                             </Route>
@@ -25,7 +29,6 @@ const App: React.FC = () => {
                                 <IssuesList />
                             </Route>
                         </Switch>
-                        <p>CONTENT</p>
                     </div>
                 </div>
             </BrowserRouter>

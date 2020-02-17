@@ -8,19 +8,6 @@ import { useAuth } from "../auth/AuthProvider";
 const SluglineNav = () => {
     const auth = useAuth();
 
-    const onLoginClick = () => {
-        auth.login('admin', 'admin').then(() => {
-            console.log('LOGIN COMPLETE');
-            console.log(auth.user);
-        });
-    }
-
-    const onLogoutClick = () => {
-        auth.logout().then(() => {
-            console.log('LOGOUT COMPLETE');
-        })
-    }
-
     return (
         <Navbar variant="dark" expand="lg" className="blackbox">
             <Navbar.Toggle aria-controls="slugline-nav" />
@@ -34,12 +21,8 @@ const SluglineNav = () => {
                     </Nav.Item>
                     <Nav.Item>
                         {auth.isAuthenticated()
-                            ? <a href="#" className="nav-link" onClick={onLoginClick}>
-                                <h4>Login</h4>
-                            </a>
-                            : <a href="#" className="nav-link" onClick={onLogoutClick}>
-                                <h4>Logout</h4>
-                            </a>
+                            ? <Link to="/" className="nav-link"><h4>Logout</h4></Link>
+                            : <Link to="/login" className="nav-link"><h4>Login</h4></Link>
                         }
                     </Nav.Item>
                 </Nav>
