@@ -7,6 +7,8 @@ import IssuesList from "./issues/IssuesList";
 import IssuePage from "./issues/IssuePage";
 import { AuthProvider } from "./auth/AuthProvider";
 import Login from "./auth/Login";
+import PrivateRoute from "./auth/PrivateRoute";
+import Dash from "./dash/Dash";
 
 const App: React.FC = () => {
   return (
@@ -28,6 +30,9 @@ const App: React.FC = () => {
               <Route path="/issues">
                 <IssuesList />
               </Route>
+              <PrivateRoute path="/dash">
+                <Dash />
+              </PrivateRoute>
             </Switch>
           </div>
         </div>

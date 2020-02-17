@@ -23,6 +23,13 @@ const SluglineNav = () => {
               <h4>Issues</h4>
             </Link>
           </Nav.Item>
+          {auth.isAuthenticated() && (
+            <Nav.Item>
+              <Link to="/dash" className="nav-link">
+                <h4>Dash</h4>
+              </Link>
+            </Nav.Item>
+          )}
           <Nav.Item>
             {auth.isAuthenticated() ? (
               <Link to="/" onClick={() => auth.logout()} className="nav-link">
