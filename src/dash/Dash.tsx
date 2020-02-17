@@ -7,7 +7,6 @@ const Dash = () => {
   // just cram the article editor in here for now
   return (
     <>
-      <h1>{`Welcome ${auth.user?.username}`}</h1>
       <ArticleEditor />
     </>
   );

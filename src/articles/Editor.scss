@@ -1,3 +1,32 @@
+.editor-header {
+  margin-bottom: 1em;
+}
+
+input.editor-header-input {
+  font-family: DIN Next;
+  width: 100%;
+  border: none;
+  background: none;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  &.title-input {
+    font-size: 3em;
+    text-transform: uppercase;
+  }
+
+  &.subtitle-input {
+    font-size: 1.5em;
+    font-style: italic;
+  }
+}
+
 div.editor-body {
   border: 1px solid black;
   height: 70vh;

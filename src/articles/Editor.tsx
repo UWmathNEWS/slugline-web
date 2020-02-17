@@ -8,15 +8,40 @@ const ArticleEditor: React.FC = () => {
   const [editorState, setEditorState] = useState<EditorState>(
     EditorState.createEmpty()
   );
+  const [title, setTitle] = useState<string>("");
+  const [subtitle, setSubtitle] = useState<string>("");
 
-  const onChange = (state: EditorState) => {
+  const onEditorChange = (state: EditorState) => {
+    console.log(state.getCurrentContent());
     setEditorState(state);
   };
 
   return (
-    <div className="editor-body">
-      <Editor editorState={editorState} onChange={onChange} />
-    </div>
+    <>
+      <div className="editor-header">
+        <input
+          className="editor-header-input title-input"
+          type="text"
+          placeholder="YOUR TITLE"
+          value={title}
+          onChange={evt => {
+            setTitle(evt.currentTarget.value);
+          }}
+        ></input>
+        <input
+          className="editor-header-input subtitle-input"
+          type="text"
+          placeholder="YOUR SUBTITLE"
+          value={subtitle}
+          onChange={evt => {
+            setSubtitle(evt.currentTarget.value);
+          }}
+        ></input>
+      </div>
+      <div className="editor-body">
+        <Editor editorState={editorState} onChange={onEditorChange} />
+      </div>
+    </>
   );
 };
 
