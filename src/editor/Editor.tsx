@@ -12,7 +12,6 @@ const ArticleEditor: React.FC = () => {
   const [subtitle, setSubtitle] = useState<string>("");
 
   const onEditorChange = (state: EditorState) => {
-    console.log(state.getCurrentContent());
     setEditorState(state);
   };
 

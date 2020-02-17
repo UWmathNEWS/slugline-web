@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../auth/AuthProvider";
-import ArticleEditor from "../articles/Editor";
+import ArticleEditor from "../editor/Editor";
 
 const Dash = () => {
   const auth = useAuth();
