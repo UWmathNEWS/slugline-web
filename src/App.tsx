@@ -3,8 +3,8 @@ import "./slugline.scss";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 import Header from "./header/Header";
-import IssuesList from "./issues/issues_list";
-import IssuePage from "./issues/issues_page";
+import IssuesList from "./issues/IssuesList";
+import IssuePage from "./issues/IssuePage";
 import { AuthProvider } from "./auth/AuthProvider";
 import Login from "./auth/Login";
 
