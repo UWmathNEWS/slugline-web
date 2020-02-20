@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Editor, EditorState } from "draft-js";
+import { Editor, EditorState, RichUtils, DraftHandleValue } from "draft-js";
 
 import "draft-js/dist/Draft.css";
 import "./Editor.scss";
+import EditorHeader from "./EditorHeader";
 
 const ArticleEditor: React.FC = () => {
   const [editorState, setEditorState] = useState<EditorState>(
@@ -13,6 +14,19 @@ const ArticleEditor: React.FC = () => {
 
   const onEditorChange = (state: EditorState) => {
     setEditorState(state);
+  };
+
+  const handleKeyCommand = (
+    command: string,
+    state: EditorState
+  ): DraftHandleValue => {
+    const newState = RichUtils.handleKeyCommand(state, command);
+    if (newState) {
+      onEditorChange(newState);
+      return "handled";
+    } else {
+      return "not-handled";
+    }
   };
 
   return (
@@ -37,8 +51,13 @@ const ArticleEditor: React.FC = () => {
           }}
         ></input>
       </div>
+      <EditorHeader state={editorState} setState={setEditorState} />
       <div className="editor-body">
-        <Editor editorState={editorState} onChange={onEditorChange} />
+        <Editor
+          editorState={editorState}
+          handleKeyCommand={handleKeyCommand}
+          onChange={onEditorChange}
+        />
       </div>
     </>
   );
