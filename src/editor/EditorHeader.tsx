@@ -2,7 +2,13 @@ import React from "react";
 import { EditorState } from "draft-js";
 
 import "./EditorHeader.scss";
-import { BoldControl, ItalicControl, UnderlineControl } from "./EditorControls";
+import {
+  BoldControl,
+  ItalicControl,
+  UnderlineControl,
+  StrikethroughControl,
+  CodeControl
+} from "./EditorControls";
 
 interface EditorHeaderProps {
   state: EditorState;
@@ -12,12 +18,19 @@ interface EditorHeaderProps {
 const EditorHeader: React.FC<EditorHeaderProps> = (
   props: EditorHeaderProps
 ) => {
-  const controls = [BoldControl, ItalicControl, UnderlineControl];
+  const basicControls = [
+    BoldControl,
+    ItalicControl,
+    UnderlineControl,
+    StrikethroughControl,
+    CodeControl
+  ];
   return (
     <div className="editor-controls">
-      {controls.map(Control => (
+      {basicControls.map(Control => (
         <Control state={props.state} setState={props.setState} />
       ))}
+      <div className="editor-separator" />
     </div>
   );
 };

@@ -6,16 +6,17 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import "./EditorControls.scss";
 import { InlineStyles } from "./types";
 
-interface ToggleControlProps {
-  active: boolean;
+interface ToggleInlineStyleControlProps {
+  style: InlineStyles;
   icon: string;
-  onClick: () => void;
+  state: EditorState;
+  setState: (state: EditorState) => void;
 }
 
-const ToggleControl: React.FC<ToggleControlProps> = (
-  props: ToggleControlProps
+const ToggleInlineStyleControl: React.FC<ToggleInlineStyleControlProps> = (
+  props: ToggleInlineStyleControlProps
 ) => {
-  const className = props.active
+  const className = props.state.getCurrentInlineStyle().contains(props.style)
     ? "editor-control-icon active"
     : "editor-control-icon";
   return (
@@ -23,7 +24,7 @@ const ToggleControl: React.FC<ToggleControlProps> = (
       className={className}
       onMouseDown={(evt: React.SyntheticEvent) => {
         evt.preventDefault();
-        props.onClick();
+        props.setState(RichUtils.toggleInlineStyle(props.state, props.style));
       }}
     >
       <FontAwesomeIcon icon={props.icon as IconProp} />
@@ -40,14 +41,10 @@ export const BoldControl: React.FC<EditorControlProps> = (
   props: EditorControlProps
 ) => {
   return (
-    <ToggleControl
+    <ToggleInlineStyleControl
       icon="bold"
-      active={props.state.getCurrentInlineStyle().contains(InlineStyles.Bold)}
-      onClick={() => {
-        props.setState(
-          RichUtils.toggleInlineStyle(props.state, InlineStyles.Bold)
-        );
-      }}
+      style={InlineStyles.Bold}
+      {...props}
     />
   );
 };
@@ -56,14 +53,10 @@ export const ItalicControl: React.FC<EditorControlProps> = (
   props: EditorControlProps
 ) => {
   return (
-    <ToggleControl
+    <ToggleInlineStyleControl
       icon="italic"
-      active={props.state.getCurrentInlineStyle().contains(InlineStyles.Italic)}
-      onClick={() => {
-        props.setState(
-          RichUtils.toggleInlineStyle(props.state, InlineStyles.Italic)
-        );
-      }}
+      style={InlineStyles.Italic}
+      {...props}
     />
   );
 };
@@ -72,16 +65,34 @@ export const UnderlineControl: React.FC<EditorControlProps> = (
   props: EditorControlProps
 ) => {
   return (
-    <ToggleControl
+    <ToggleInlineStyleControl
       icon="underline"
-      active={props.state
-        .getCurrentInlineStyle()
-        .contains(InlineStyles.Underline)}
-      onClick={() => {
-        props.setState(
-          RichUtils.toggleInlineStyle(props.state, InlineStyles.Underline)
-        );
-      }}
+      style={InlineStyles.Underline}
+      {...props}
+    />
+  );
+};
+
+export const StrikethroughControl: React.FC<EditorControlProps> = (
+  props: EditorControlProps
+) => {
+  return (
+    <ToggleInlineStyleControl
+      icon="strikethrough"
+      style={InlineStyles.Strikethrough}
+      {...props}
+    />
+  );
+};
+
+export const CodeControl: React.FC<EditorControlProps> = (
+  props: EditorControlProps
+) => {
+  return (
+    <ToggleInlineStyleControl
+      icon="code"
+      style={InlineStyles.Code}
+      {...props}
     />
   );
 };
