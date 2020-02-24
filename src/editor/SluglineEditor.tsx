@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from "react";
 
 import { Node, createEditor } from "slate";
-import { Slate, Editable, withReact } from "slate-react";
+import { Slate, Editable, withReact, RenderLeafProps } from "slate-react";
+
+import { Leaf } from "./components/Leaf";
+import * as EditorHelpers from "./helpers";
+import { Mark } from "./types";
 
 import "./SluglineEditor.scss";
 
@@ -19,6 +23,10 @@ const SluglineEditor = () => {
 
   const [title, setTitle] = useState<string>("");
   const [subtitle, setSubtitle] = useState<string>("");
+
+  const renderLeaf = (props: RenderLeafProps) => {
+    return <Leaf {...props} />;
+  };
 
   return (
     <Slate value={value} onChange={setValue} editor={editor}>
@@ -43,7 +51,25 @@ const SluglineEditor = () => {
         ></input>
       </div>
       <div className="editor-body">
-        <Editable placeholder="Start your masterpiece..." />
+        <Editable
+          placeholder="Start your masterpiece..."
+          renderLeaf={renderLeaf}
+          onKeyDown={(evt: React.KeyboardEvent) => {
+            if (evt.ctrlKey) {
+              switch (evt.key) {
+                case "b":
+                  EditorHelpers.toggleMark(editor, Mark.Bold);
+                  break;
+                case "i":
+                  EditorHelpers.toggleMark(editor, Mark.Italic);
+                  break;
+                case "u":
+                  EditorHelpers.toggleMark(editor, Mark.Underline);
+                  break;
+              }
+            }
+          }}
+        />
       </div>
     </Slate>
   );
