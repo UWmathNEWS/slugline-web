@@ -25,6 +25,7 @@ export interface User {
   last_name: string;
   email: string;
   is_staff: boolean;
+  is_editor: boolean;
   writer_name: string;
 }
 

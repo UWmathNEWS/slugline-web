@@ -9,6 +9,7 @@ export interface AuthContext {
   user?: User;
   csrfToken?: string;
   isAuthenticated: () => boolean;
+  isEditor: () => boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -17,6 +18,7 @@ const Auth = createContext<AuthContext>({
   user: undefined,
   csrfToken: undefined,
   isAuthenticated: () => false,
+  isEditor: () => false,
   login: (username: string, password: string) => Promise.resolve(),
   logout: () => Promise.resolve()
 });
@@ -29,6 +31,10 @@ export const AuthProvider: React.FC = props => {
 
   const isAuthenticated = () => {
     return user !== undefined;
+  };
+
+  const isEditor = () => {
+    return user?.is_editor ?? false;
   };
 
   useEffect(() => {
@@ -77,11 +83,12 @@ export const AuthProvider: React.FC = props => {
   return (
     <Auth.Provider
       value={{
-        user: user,
-        csrfToken: csrfToken,
-        isAuthenticated: isAuthenticated,
-        login: login,
-        logout: logout
+        user,
+        csrfToken,
+        isAuthenticated,
+        isEditor,
+        login,
+        logout
       }}
     >
       {props.children}

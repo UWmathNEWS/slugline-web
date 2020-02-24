@@ -8,6 +8,7 @@ import IssuePage from "./issues/IssuePage";
 import { AuthProvider } from "./auth/AuthProvider";
 import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
+import AdminRoute from "./auth/AdminRoute";
 import Dash from "./dash/Dash";
 import { initLibrary } from "./shared/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -37,6 +38,9 @@ const App: React.FC = () => {
               <PrivateRoute path="/dash">
                 <Dash />
               </PrivateRoute>
+              <AdminRoute path="/admin">
+                LOL
+              </AdminRoute>
             </Switch>
           </div>
         </div>

@@ -24,3 +24,6 @@ yarn-error.log*
 
 # we shouldn't redistribute fonts
 src/fonts/
+
+# IDEA files
+.idea/
