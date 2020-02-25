@@ -6,16 +6,16 @@ import axios from "axios";
 import { getApiUrl } from "../api/api";
 
 export interface AuthContext {
-  user?: User;
-  csrfToken?: string;
+  user: User | null;
+  csrfToken: string | null;
   isAuthenticated: () => boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const Auth = createContext<AuthContext>({
-  user: undefined,
-  csrfToken: undefined,
+  user: null,
+  csrfToken: null,
   isAuthenticated: () => false,
   login: (username: string, password: string) => Promise.resolve(),
   logout: () => Promise.resolve()
@@ -23,9 +23,24 @@ const Auth = createContext<AuthContext>({
 
 const CSRF_COOKIE = "csrftoken";
 
+const USER_LOCALSTORAGE_KEY = "slugline-user";
+
 export const AuthProvider: React.FC = props => {
-  const [user, setUser] = useState<User | undefined>(undefined);
-  const [csrfToken, setCsrfToken] = useState<string | undefined>(undefined);
+  const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
+
+  const [user, setUserState] = useState<User | null>(
+    storedUser !== null ? JSON.parse(storedUser) : null
+  );
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
+
+  const setUser = (user: User | null) => {
+    setUserState(user);
+    if (user === null) {
+      localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+    } else {
+      localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(user));
+    }
+  };
 
   const isAuthenticated = () => {
     return user !== undefined;
@@ -33,11 +48,11 @@ export const AuthProvider: React.FC = props => {
 
   useEffect(() => {
     axios.get<AuthResponse>(getApiUrl("auth/")).then(resp => {
-      setCsrfToken(Cookie.get(CSRF_COOKIE));
+      setCsrfToken(Cookie.get(CSRF_COOKIE) || null);
       if (resp.data.user) {
         setUser(resp.data.user);
       } else {
-        setUser(undefined);
+        setUser(null);
       }
     });
   }, []);
@@ -54,7 +69,7 @@ export const AuthProvider: React.FC = props => {
       })
       .then(resp => {
         setUser(resp.data);
-        setCsrfToken(Cookie.get("csrftoken"));
+        setCsrfToken(Cookie.get(CSRF_COOKIE) || null);
       });
   };
 
@@ -69,8 +84,8 @@ export const AuthProvider: React.FC = props => {
         }
       )
       .then(() => {
-        setUser(undefined);
-        setCsrfToken(Cookie.get("csrftoken"));
+        setUser(null);
+        setCsrfToken(Cookie.get(CSRF_COOKIE) || null);
       });
   };
 
