@@ -29,6 +29,30 @@ export interface User {
   writer_name: string;
 }
 
+export interface UserAPIError {
+  detail?: string[];
+  username?: string[];
+  email?: string[];
+  password?: string[];
+}
+
+export interface UserAPIResponse {
+  success: boolean;
+  user?: User;
+  error?: UserAPIError | string;
+}
+
+export interface AuthContext {
+  user?: User;
+  csrfToken?: string;
+  check: (force?: boolean) => Promise<void> | undefined;
+  isAuthenticated: () => boolean;
+  isEditor: () => boolean;
+  post: <T>(endpoint: string, post_data: T) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
 export interface AuthResponse {
   user?: User;
   is_authenticated: boolean;

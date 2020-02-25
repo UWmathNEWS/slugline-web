@@ -1,18 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import Cookie from "js-cookie";
 
-import { User, AuthResponse } from "../shared/types";
+import { User, UserAPIError, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
 import axios from "axios";
 import { getApiUrl } from "../api/api";
-
-export interface AuthContext {
-  user?: User;
-  csrfToken?: string;
-  isAuthenticated: () => boolean;
-  isEditor: () => boolean;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
 
 const Auth = createContext<AuthContext>({
   user: undefined,
