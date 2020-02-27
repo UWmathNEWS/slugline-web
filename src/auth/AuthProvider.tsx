@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import Cookie from "js-cookie";
 
 import { User, UserAPIError, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import { getApiUrl } from "../api/api";
 
 const Auth = createContext<AuthContext>({
@@ -11,7 +11,7 @@ const Auth = createContext<AuthContext>({
   check: (force: boolean = false) => undefined,
   isAuthenticated: () => false,
   isEditor: () => false,
-  post: <T extends {}>(endpoint: string, post_data: T) => Promise.resolve(),
+  post: <T extends {}>(endpoint: string, post_data: T, setCurUser: boolean = false) => Promise.resolve(),
   login: (username: string, password: string) => Promise.resolve(),
   logout: () => Promise.resolve()
 });
@@ -25,7 +25,7 @@ export const AuthProvider: React.FC = props => {
   let is_waiting = false;
 
   const check = (force: boolean = false) => {
-    if (!is_waiting && readyPromise === undefined) {
+    if (!is_waiting && (force || readyPromise === undefined)) {
       is_waiting = true;
       setReadyPromise(axios.get<AuthResponse>(getApiUrl("auth/")).then(resp => {
         setCsrfToken(Cookie.get(CSRF_COOKIE));
@@ -48,17 +48,19 @@ export const AuthProvider: React.FC = props => {
     return user?.is_editor ?? false;
   };
 
-  const post = <T extends {}>(endpoint: string, post_data: T) => {
+  const post = <T extends {}>(endpoint: string, post_data: T, setCurUser: boolean = false) => {
     const headers = csrfToken ? { "X-CSRFToken": csrfToken } : {};
     return axios
       .post<UserAPIResponse>(getApiUrl(endpoint), post_data, {
         headers: headers
       })
       .then(resp => {
-        if (resp.data.success || resp.data.user === undefined) {
-          throw new Error(); // TODO: throw something better;
+        if (!resp.data.success || resp.data.user === undefined) {
+          throw resp.data.error ?? ["Request did not succeed."];
         }
         setUser(resp.data.user)
+      }, (err: AxiosError) => {
+        throw err.response?.data.error ?? ["Request did not succeed."];
       });
   };
 
@@ -94,9 +96,7 @@ export const AuthProvider: React.FC = props => {
       });
   };
 
-  useEffect(() => {
-    check();
-  });
+  check();
 
   return (
     <Auth.Provider

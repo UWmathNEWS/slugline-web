@@ -31,9 +31,11 @@ export interface User {
 
 export interface UserAPIError {
   detail?: string[];
+  user?: string[];
   username?: string[];
   email?: string[];
   password?: string[];
+  writer_name?: string[];
 }
 
 export interface UserAPIResponse {
@@ -48,7 +50,7 @@ export interface AuthContext {
   check: (force?: boolean) => Promise<void> | undefined;
   isAuthenticated: () => boolean;
   isEditor: () => boolean;
-  post: <T>(endpoint: string, post_data: T) => Promise<void>;
+  post: <T>(endpoint: string, post_data: T, setCurUser?: boolean) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
