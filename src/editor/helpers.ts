@@ -1,7 +1,7 @@
-import { Editor } from "slate";
+import { Editor, Transforms, Element, Range } from "slate";
 import isHotkey from "is-hotkey";
 
-import { Mark } from "./types";
+import { Mark, ElementType, LinkElement } from "./types";
 
 export function isMarkActive(editor: Editor, mark: Mark): boolean {
   const marks = Editor.marks(editor);
@@ -31,4 +31,18 @@ export function keyDown(editor: Editor, evt: React.KeyboardEvent): void {
       toggleMark(editor, mark);
     }
   });
+  if (isHotkey("mod+q", evt.nativeEvent)) {
+    // empty selection, create a node
+    const collapsed = editor.selection && Range.isCollapsed(editor.selection);
+    const newLink: LinkElement = {
+      type: ElementType.Link,
+      href: "google.com",
+      children: collapsed ? [{ text: "google.com" }] : []
+    };
+    if (collapsed) {
+      Transforms.insertNodes(editor, newLink as Element);
+    } else {
+      Transforms.wrapNodes(editor, newLink as Element, { split: true });
+    }
+  }
 }
