@@ -3,6 +3,7 @@ import { Button, Form, Row, Col, OverlayTrigger, Popover, Alert } from "react-bo
 import { User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
 import { useToast } from "../shared/ToastContext";
+import ERRORS from "../shared/errors";
 
 interface ChangedPassword {
   cur_password?: string;
@@ -43,45 +44,31 @@ const ProfileSecurity = ({ user } : { user: User }) => {
           prevState.cur_password = value;
           break;
         case "new_password": {
-          const newErrors: Set<string> = new Set(errors.password);
+          const newErrors: string[] = [];
 
           if (value.length < 8) {
-            newErrors.add("Password must be at least 8 characters long.");
-          } else {
-            newErrors.delete("Password must be at least 8 characters long.");
+            newErrors.push("USER.PASSWORD.TOO_SHORT.8");
           }
 
           if (/^\d*$/.test(value)) {
-            newErrors.add("Password must contain at least one letter or symbol.");
-          } else {
-            newErrors.delete("Password must contain at least one letter or symbol.");
+            newErrors.push("USER.PASSWORD.ENTIRELY_NUMERIC");
           }
 
           if (value !== prevState.repeat_password && prevState.repeat_password?.length) {
-            newErrors.add("Passwords must match.");
-          } else {
-            newErrors.delete("Passwords must match.");
+            newErrors.push("USER.PASSWORD.MUST_MATCH");
           }
 
           setErrors(prevErrors => ({
             ...prevErrors,
-            password: Array.from(newErrors)
+            password: newErrors
           }));
           prevState.new_password = value;
           break;
         }
         case "repeat_password": {
-          const newErrors: Set<string> = new Set(errors.password);
-
-          if (value !== prevState.new_password) {
-            newErrors.add("Passwords must match.");
-          } else {
-            newErrors.delete("Passwords must match.");
-          }
-
           setErrors(prevErrors => ({
             ...prevErrors,
-            password: Array.from(newErrors)
+            password: value != prevState.new_password ? ["USER.PASSWORD.MUST_MATCH"] : []
           }));
           prevState.repeat_password = value;
           break;
@@ -97,7 +84,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
     if (Object.values(errors).flat().length) {
       toast.addToasts([{
         id: Math.random().toString(),
-        body: "Please correct the errors in the form before submitting.",
+        body: ERRORS.FORMS.NOT_YET_VALID,
         delay: 3000
       }]);
       return;
@@ -116,10 +103,12 @@ const ProfileSecurity = ({ user } : { user: User }) => {
         ]);
         setLoading(false);
         setGeneralErrors([]);
+        setChangedPassword({});
       }, (err: UserAPIError | string[]) => {
         if (Array.isArray(err)) {
           setGeneralErrors(err);
         } else {
+          setGeneralErrors([]);
           setErrors(err);
         }
         setLoading(false);
@@ -130,7 +119,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
     <Form noValidate onSubmit={onSubmit}>
       <h2>Security</h2>
 
-      {generalErrors.length > 0 && generalErrors.map(err => <Alert key={err} variant="danger">{err}</Alert>)}
+      {generalErrors.length > 0 && generalErrors.map(err => <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
 
       <h3>Change password</h3>
 
@@ -140,12 +129,12 @@ const ProfileSecurity = ({ user } : { user: User }) => {
           <Form.Control
             type="password"
             name="cur_password"
-            placeholder="Current password"
             onChange={onPasswordChange}
-            isInvalid={errors.user && errors.user.length > 0} />
+            isInvalid={errors.user && errors.user.length > 0}
+            value={changedPassword?.cur_password ?? ''} />
           <Form.Control.Feedback type="invalid">
             <ul>
-              {errors.user?.map((msg) => <li key={msg}>{msg}</li>)}
+              {errors.user?.map((msg) => <li key={msg}>{ERRORS[msg]}</li>)}
             </ul>
           </Form.Control.Feedback>
         </Col>
@@ -154,19 +143,19 @@ const ProfileSecurity = ({ user } : { user: User }) => {
         <Form.Label column sm={3}>
           New password
           <OverlayTrigger trigger="hover" placement="right" overlay={password_info}>
-            <a href="#">(i)</a>
+            <span>(i)</span>
           </OverlayTrigger>
         </Form.Label>
         <Col sm={9}>
           <Form.Control
             type="password"
             name="new_password"
-            placeholder="New password"
             onChange={onPasswordChange}
-            isInvalid={errors.password && errors.password.length > 0} />
+            isInvalid={errors.password && errors.password.length > 0}
+            value={changedPassword?.new_password ?? ''} />
           <Form.Control.Feedback type="invalid">
             <ul>
-              {errors.password?.map((msg) => <li key={msg}>{msg}</li>)}
+              {errors.password?.map((msg) => <li key={msg}>{ERRORS[msg]}</li>)}
             </ul>
           </Form.Control.Feedback>
         </Col>
@@ -177,8 +166,9 @@ const ProfileSecurity = ({ user } : { user: User }) => {
           <Form.Control
             type="password"
             name="repeat_password"
-            placeholder="Repeat password"
-            onChange={onPasswordChange} />
+            onChange={onPasswordChange}
+            isInvalid={errors.password && errors.password.includes("USER.PASSWORD.MUST_MATCH")}
+            value={changedPassword?.repeat_password ?? ''} />
         </Col>
       </Form.Group>
 

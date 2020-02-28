@@ -30,6 +30,13 @@ const SluglineNav = () => {
               </Link>
             </Nav.Item>
           )}
+          {auth.isAuthenticated() && (
+            <Nav.Item>
+              <Link to="/profile" className="nav-link">
+                <h4>Profile</h4>
+              </Link>
+            </Nav.Item>
+          )}
           {auth.isEditor() && (
               <Nav.Item>
                 <Link to="/admin" className="nav-link">

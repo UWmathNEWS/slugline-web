@@ -3,6 +3,7 @@ import { Button, Form, Row, Col, Alert } from "react-bootstrap";
 import { User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
 import { useToast } from "../shared/ToastContext";
+import ERRORS from "../shared/errors";
 
 export interface ChangedUser {
   first_name?: string;
@@ -33,21 +34,17 @@ const ProfileGeneral = ({ user } : { user: User }) => {
       switch (name) {
         case "email": {
           // check validity
-          const newErrors: Set<string> = new Set(errors.email);
+          const newErrors: string[] = [];
 
           if (!/^\S+@\S+(\.[a-z]+)+$/.test(value)) {
-            newErrors.add("Email must be valid.");
-          } else {
-            newErrors.delete("Email must be valid.");
+            newErrors.push("USER.EMAIL.INVALID");
           }
 
           setErrors(prevErrors => ({
             ...prevErrors,
-            email: Array.from(newErrors)
+            email: newErrors
           }));
-          if (newErrors.size === 0) {
-            prevState.email = value;
-          }
+          prevState.email = value;
           break;
         }
         case "name": {
@@ -62,18 +59,11 @@ const ProfileGeneral = ({ user } : { user: User }) => {
           break;
         }
         case "writer_name":
-          if (value.length) {
-            prevState.writer_name = value;
-            setErrors(prevErrors => ({
-              ...prevErrors,
-              writer_name: []
-            }));
-          } else {
-            setErrors(prevErrors => ({
-              ...prevErrors,
-              writer_name: ["Must provide a writer name."]
-            }));
-          }
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            writer_name: value.length ? ["USER.WRITER_NAME.EMPTY"] : []
+          }));
+          prevState.writer_name = value;
           break;
       }
       return prevState;
@@ -86,7 +76,7 @@ const ProfileGeneral = ({ user } : { user: User }) => {
     if (Object.values(errors).flat().length) {
       toast.addToasts([{
         id: Math.random().toString(),
-        body: "Please correct the errors in the form before submitting.",
+        body: ERRORS.FORMS.NOT_YET_VALID,
         delay: 3000
       }]);
       return;
@@ -109,6 +99,7 @@ const ProfileGeneral = ({ user } : { user: User }) => {
         if (Array.isArray(err)) {
           setGeneralErrors(err);
         } else {
+          setGeneralErrors([]);
           setErrors(err);
         }
         setLoading(false);
@@ -119,7 +110,7 @@ const ProfileGeneral = ({ user } : { user: User }) => {
     <Form noValidate onSubmit={onSubmit}>
       <h2>General settings</h2>
 
-      {generalErrors.length > 0 && generalErrors.map(err => <Alert key={err} variant="danger">{err}</Alert>)}
+      {generalErrors.length > 0 && generalErrors.map(err => <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
 
       <Form.Group as={Row} controlId="profileUsername">
         <Form.Label column sm={2}>Username</Form.Label>
@@ -141,7 +132,7 @@ const ProfileGeneral = ({ user } : { user: User }) => {
             isInvalid={errors.email && errors.email.length > 0} />
           <Form.Control.Feedback type="invalid">
             <ul>
-              {errors.email?.map((msg) => <li key={msg}>{msg}</li>)}
+              {errors.email?.map((msg) => <li key={msg}>{ERRORS[msg]}</li>)}
             </ul>
           </Form.Control.Feedback>
         </Col>
@@ -169,7 +160,7 @@ const ProfileGeneral = ({ user } : { user: User }) => {
             isInvalid={errors.writer_name && errors.writer_name.length > 0}/>
           <Form.Control.Feedback type="invalid">
             <ul>
-              {errors.writer_name?.map((msg) => <li key={msg}>{msg}</li>)}
+              {errors.writer_name?.map((msg) => <li key={msg}>{ERRORS[msg]}</li>)}
             </ul>
           </Form.Control.Feedback>
         </Col>

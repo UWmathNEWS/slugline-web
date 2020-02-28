@@ -4,6 +4,7 @@ import Cookie from "js-cookie";
 import { User, UserAPIError, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
 import axios, {AxiosError} from "axios";
 import { getApiUrl } from "../api/api";
+import ERRORS from "../shared/errors";
 
 const Auth = createContext<AuthContext>({
   user: undefined,
@@ -56,11 +57,11 @@ export const AuthProvider: React.FC = props => {
       })
       .then(resp => {
         if (!resp.data.success || resp.data.user === undefined) {
-          throw resp.data.error ?? ["Request did not succeed."];
+          throw resp.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
         }
         setUser(resp.data.user)
       }, (err: AxiosError) => {
-        throw err.response?.data.error ?? ["Request did not succeed."];
+        throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
       });
   };
 

@@ -5,12 +5,10 @@ import { useAuth } from "../auth/AuthProvider";
 import ProfileGeneral from "./ProfileGeneral";
 import ProfileSecurity from "./ProfileSecurity";
 
-const Profile = ({ user } : { user: User | undefined }) => {
+const Profile = ({ user } : { user: User }) => {
   const auth = useAuth();
 
   const [errors, setErrors] = useState<UserAPIError>({});
-
-  if (user === undefined) return <></>;
 
   return (
     <Tab.Container defaultActiveKey="general">

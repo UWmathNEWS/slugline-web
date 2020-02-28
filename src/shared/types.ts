@@ -36,6 +36,7 @@ export interface UserAPIError {
   email?: string[];
   password?: string[];
   writer_name?: string[];
+  [key: string]: string[] | undefined;
 }
 
 export interface UserAPIResponse {
