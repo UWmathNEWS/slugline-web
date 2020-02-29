@@ -6,7 +6,8 @@ import {
   Editable,
   withReact,
   RenderLeafProps,
-  RenderElementProps
+  RenderElementProps,
+  useSlate
 } from "slate-react";
 
 import { Leaf } from "./components/Leaf";
@@ -15,6 +16,7 @@ import { Mark, SluglineElement, ElementType } from "./types";
 
 import "./SluglineEditor.scss";
 import Link from "./components/Link";
+import EditorControls from "./EditorControls";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -90,6 +92,7 @@ const SluglineEditor = () => {
           }}
         ></input>
       </div>
+      <EditorControls />
       <div className="editor-body">
         <Editable
           placeholder="Start your masterpiece..."

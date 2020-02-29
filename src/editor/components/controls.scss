@@ -1,0 +1,26 @@
+.editor-control {
+  height: 30px;
+  width: 30px;
+  font-size: 18px;
+  border: 1px solid black;
+  background: none;
+  border-radius: 5px;
+  margin: 2.5px;
+
+  & > svg {
+    display: block;
+    margin: auto;
+    height: 100%;
+    max-width: 100%;
+    width: auto;
+  }
+
+  &.active,
+  &:hover {
+    background-color: black;
+
+    & > svg > path {
+      fill: white;
+    }
+  }
+}

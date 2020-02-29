@@ -17,6 +17,21 @@ export function toggleMark(editor: Editor, mark: Mark): void {
   }
 }
 
+export function toggleLink(editor: Editor, href: string): void {
+  // empty selection, create a node
+  const collapsed = editor.selection && Range.isCollapsed(editor.selection);
+  const newLink: LinkElement = {
+    type: ElementType.Link,
+    href: href,
+    children: collapsed ? [{ text: href }] : []
+  };
+  if (collapsed) {
+    Transforms.insertNodes(editor, newLink as Element);
+  } else {
+    Transforms.wrapNodes(editor, newLink as Element, { split: true });
+  }
+}
+
 const MARK_HOTKEYS: Array<[Mark, string]> = [
   [Mark.Bold, "mod+b"],
   [Mark.Italic, "mod+i"],
@@ -31,18 +46,4 @@ export function keyDown(editor: Editor, evt: React.KeyboardEvent): void {
       toggleMark(editor, mark);
     }
   });
-  if (isHotkey("mod+q", evt.nativeEvent)) {
-    // empty selection, create a node
-    const collapsed = editor.selection && Range.isCollapsed(editor.selection);
-    const newLink: LinkElement = {
-      type: ElementType.Link,
-      href: "google.com",
-      children: collapsed ? [{ text: "google.com" }] : []
-    };
-    if (collapsed) {
-      Transforms.insertNodes(editor, newLink as Element);
-    } else {
-      Transforms.wrapNodes(editor, newLink as Element, { split: true });
-    }
-  }
 }
