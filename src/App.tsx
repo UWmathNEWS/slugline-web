@@ -2,7 +2,7 @@ import React from "react";
 import "./slugline.scss";
 import { Router, Switch, Route } from "react-router-dom";
 import { Toast } from "react-bootstrap";
-import { createBrowserHistory, Location } from "history";
+import { createBrowserHistory } from "history";
 
 import Header from "./header/Header";
 import IssuesList from "./issues/IssuesList";
@@ -10,7 +10,6 @@ import IssuePage from "./issues/IssuePage";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
-import AdminRoute from "./auth/AdminRoute";
 import Dash from "./dash/Dash";
 import Profile from "./profile/Profile";
 import AdminPanel from "./admin/Admin";
@@ -22,13 +21,18 @@ initLibrary();
 
 const history = createBrowserHistory();
 
+const protectedRoutes = ['/dash', '/profile', '/admin'];
+
 const App: React.FC = () => {
   const auth = useAuth();
 
-  history.listen(() => {
-    // TODO: why does this call stack
-    // auth.check(true);
-  });
+  React.useEffect(() => {
+    history.listen((loc) => {
+      if (protectedRoutes.includes(loc.pathname)) {
+        auth.check(true);
+      }
+    });
+  }, []);
 
   return (
     <Router history={history}>
@@ -54,9 +58,9 @@ const App: React.FC = () => {
             <PrivateRoute path="/profile">
               <Profile user={auth.user!} />
             </PrivateRoute>
-            <AdminRoute path="/admin">
+            <PrivateRoute admin={true} path="/admin">
               <AdminPanel />
-            </AdminRoute>
+            </PrivateRoute>
           </Switch>
         </div>
       </div>

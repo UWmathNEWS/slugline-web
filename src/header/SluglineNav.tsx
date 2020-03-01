@@ -4,6 +4,40 @@ import { Link } from "react-router-dom";
 
 import "./SluglineNav.scss";
 import { useAuth } from "../auth/AuthProvider";
+import { useToast } from "../shared/ToastContext";
+
+const LoginLogoutLink = () => {
+  const auth = useAuth();
+  const toast = useToast();
+
+  return <Nav.Item>
+    {auth.isAuthenticated() ? (
+      <Link to="/" onClick={() => {
+        auth.logout()
+          .then(() => {
+            toast.addToasts([{
+              id: Math.random.toString(),
+              body: "Logout successful!",
+              delay: 3000
+            }]);
+          }, (errors: string[]) => {
+            toast.addToasts(errors.map(e => ({
+              id: Math.random.toString(),
+              title: "Logout error",
+              body: e,
+              delay: 3000
+            })));
+          })
+      }} className="nav-link">
+        <h4>Logout</h4>
+      </Link>
+    ) : (
+      <Link to="/login" className="nav-link">
+        <h4>Login</h4>
+      </Link>
+    )}
+  </Nav.Item>;
+};
 
 const SluglineNav = () => {
   const auth = useAuth();
@@ -44,17 +78,7 @@ const SluglineNav = () => {
                 </Link>
               </Nav.Item>
           )}
-          <Nav.Item>
-            {auth.isAuthenticated() ? (
-              <Link to="/" onClick={() => auth.logout()} className="nav-link">
-                <h4>Logout</h4>
-              </Link>
-            ) : (
-              <Link to="/login" className="nav-link">
-                <h4>Login</h4>
-              </Link>
-            )}
-          </Nav.Item>
+          <LoginLogoutLink />
         </Nav>
       </Navbar.Collapse>
     </Navbar>

@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Alert, Form, Button } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
 import { useHistory } from "react-router-dom";
+import { useToast } from "../shared/ToastContext";
+import ERRORS from "../shared/errors";
 
 const Login: React.FC = () => {
   const auth = useAuth();
+  const toast = useToast();
   const history = useHistory();
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errors, setErrors] = useState<string[]>([]);
 
   const onChange = (evt: React.FormEvent<HTMLInputElement>) => {
     if (evt.currentTarget.name === "username") {
@@ -20,14 +24,25 @@ const Login: React.FC = () => {
 
   const onSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
-    auth.login(username, password).then(() => {
-      history.push("/");
-    });
+    auth.login(username, password)
+      .then(user => {
+        history.push("/");
+        toast.addToasts([{
+          id: Math.random().toString(),
+          body: `Logged in as ${user?.username}.`,
+          delay: 3000
+        }]);
+      }, (errors: string[]) => {
+        setErrors(errors);
+      });
   };
 
   return (
     <>
       <h1>LOGIN:</h1>
+
+      {errors.map(err => <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
+
       <Form onSubmit={onSubmit}>
         <Form.Group controlId="loginUsername">
           <Form.Label>Username:</Form.Label>
