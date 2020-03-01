@@ -64,14 +64,7 @@ const SluglineEditor = () => {
   const [subtitle, setSubtitle] = useState<string>("");
 
   return (
-    <Slate
-      value={value}
-      onChange={val => {
-        console.log(editor.selection);
-        setValue(val);
-      }}
-      editor={editor}
-    >
+    <Slate value={value} onChange={setValue} editor={editor}>
       <div className="editor-header">
         <input
           className="editor-header-input title-input"
