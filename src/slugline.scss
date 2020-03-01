@@ -1,11 +1,11 @@
 @font-face {
-    font-family: "DIN Next";
-    src: url("./fonts/din_next.woff") format('woff');
+  font-family: "DIN Next";
+  src: url("./fonts/din_next.woff") format("woff");
 }
 
 @font-face {
-    font-family: "Joanna Nova";
-    src: url("./fonts/joanna_nova.woff") format("woff");
+  font-family: "Joanna Nova";
+  src: url("./fonts/joanna_nova.woff") format("woff");
 }
 
 @import "slugline_vars";
@@ -14,23 +14,33 @@
 
 // Common blackbox class
 .blackbox {
-    background: black;
-    color: $theme-color;
-    padding: 1rem 2rem;
-    margin-bottom: 1rem;
+  background: black;
+  color: $theme-color;
+  padding: 1rem 2rem;
+  margin-bottom: 1rem;
 }
 
 // Convenient class for mathnews logo
 .mathnews-logo::before {
-    content: "math";
-    font-family: Joanna Nova;
+  content: "math";
+  font-family: Joanna Nova;
 }
 
 .mathnews-logo::after {
-    content: "NEWS";
-    font-family: DIN Next;
+  content: "NEWS";
+  font-family: DIN Next;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    text-transform: uppercase;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-transform: uppercase;
+}
+
+a {
+  font-family: Consolas;
+  text-decoration: underline;
 }
