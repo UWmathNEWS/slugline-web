@@ -1,6 +1,8 @@
 import React from "react";
-import { ToggleMarkButton } from "./components/controls";
+import { ToggleMarkButton, LinkButton } from "./components/controls";
 import { Mark } from "./types";
+
+import "./EditorControls.scss";
 
 const EditorControls: React.FC = () => {
   return (
@@ -10,6 +12,8 @@ const EditorControls: React.FC = () => {
       <ToggleMarkButton icon="underline" mark={Mark.Underline} />
       <ToggleMarkButton icon="strikethrough" mark={Mark.Strikethrough} />
       <ToggleMarkButton icon="code" mark={Mark.Code} />
+      <div className="editor-separator" />
+      <LinkButton />
     </div>
   );
 };

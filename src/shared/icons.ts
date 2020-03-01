@@ -4,9 +4,10 @@ import {
   faItalic,
   faUnderline,
   faStrikethrough,
-  faCode
+  faCode,
+  faLink
 } from "@fortawesome/free-solid-svg-icons";
 
 export const initLibrary = () => {
-  library.add(faBold, faItalic, faUnderline, faStrikethrough, faCode);
+  library.add(faBold, faItalic, faUnderline, faStrikethrough, faCode, faLink);
 };

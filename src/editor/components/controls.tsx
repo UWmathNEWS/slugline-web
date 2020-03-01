@@ -3,7 +3,7 @@ import { Mark } from "../types";
 import { useSlate } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { toggleMark, isMarkActive } from "../helpers";
+import { toggleMark, isMarkActive, toggleLink } from "../helpers";
 
 import "./controls.scss";
 
@@ -26,6 +26,20 @@ export const ToggleMarkButton: React.FC<ToggleMarkButtonProps> = (
       }}
     >
       <FontAwesomeIcon icon={props.icon as IconProp} />
+    </button>
+  );
+};
+
+export const LinkButton: React.FC = () => {
+  const editor = useSlate();
+  return (
+    <button
+      className="editor-control"
+      onClick={() => {
+        toggleLink(editor, "google.com");
+      }}
+    >
+      <FontAwesomeIcon icon="link" />
     </button>
   );
 };
