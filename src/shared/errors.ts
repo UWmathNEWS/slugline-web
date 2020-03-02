@@ -9,7 +9,8 @@ const errorFactory = (templ: (...prop: string[]) => string) => new Proxy({}, {
 
 const errors = {
   REQUEST: {
-    DID_NOT_SUCCEED: "Request did not succeed."
+    DID_NOT_SUCCEED: "Request did not succeed.",
+    NEEDS_AUTHENTICATION: "Request requires authentication."
   },
   FORMS: {
     NOT_YET_VALID: "Please correct the errors in the form before submitting."
@@ -23,7 +24,7 @@ const errors = {
     COULD_NOT_CREATE: "Could not create user.",
     COULD_NOT_UPDATE: "Could not update profile.",
     COULD_NOT_DELETE: "Could not delete user.",
-    NOT_ENOUGH_PRIVILEGES: "Not enough privileges to change field.",
+    INSUFFICIENT_PRIVILEGES: "Not enough privileges to change field.",
     USERNAME: {
       ALREADY_EXISTS: "Username already exists."
     },

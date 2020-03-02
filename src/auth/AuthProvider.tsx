@@ -1,19 +1,29 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useReducer } from "react";
 import Cookie from "js-cookie";
 
-import { User, UserAPIError, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
+import { User, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
 import axios, {AxiosError} from "axios";
 import { getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
 
+interface AuthState {
+  user?: User;
+  csrfToken?: string;
+}
+
+type AuthAction =
+  { type: 'post', user: User } |
+  { type: 'login', user: User } |
+  { type: 'logout' };
+
 const Auth = createContext<AuthContext>({
   user: undefined,
   csrfToken: undefined,
-  check: (force: boolean = false) => undefined,
+  check: () => undefined,
   isAuthenticated: () => false,
   isEditor: () => false,
-  post: <T extends {}>(endpoint: string, post_data: T, setCurUser: boolean = false) => Promise.resolve(undefined),
-  login: (username: string, password: string) => Promise.resolve(undefined),
+  post: () => Promise.resolve(undefined),
+  login: () => Promise.resolve(undefined),
   logout: () => Promise.resolve()
 });
 
@@ -21,27 +31,42 @@ const CSRF_COOKIE = "csrftoken";
 
 export const AuthProvider: React.FC = props => {
   const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(undefined);
-  const [user, setUser] = useState<{ user?: User, csrfToken?: string }>({});
+  const [user, dispatchUser] = useReducer((state: AuthState, action: AuthAction) => {
+    switch (action.type) {
+    case 'post':
+      return {
+        user: action.user,
+        csrfToken: state.csrfToken
+      };
+    case 'login':
+      return {
+        user: action.user,
+        csrfToken: Cookie.get(CSRF_COOKIE)
+      };
+    case 'logout':
+      return {
+        csrfToken: Cookie.get(CSRF_COOKIE)
+      };
+    }
+    return state;
+  }, {});
   let is_waiting = false;
 
   const check = (force: boolean = false) => {
     if (!is_waiting && (force || readyPromise === undefined)) {
       is_waiting = true;
-      setReadyPromise(axios.get<AuthResponse>(getApiUrl("auth/")).then(resp => {
-        if (resp.data.user) {
-          setUser({
-            user: resp.data.user,
-            csrfToken: Cookie.get(CSRF_COOKIE)
-          });
-        } else {
-          setUser({
-            csrfToken: Cookie.get(CSRF_COOKIE)
-          });
+      const promise = axios.get<AuthResponse>(getApiUrl("auth/")).then(resp => {
+        if (resp.data.user && user.user === undefined) {
+          dispatchUser({ type: 'login', user: resp.data.user });
+        } else if (resp.data.user === undefined) {
+          dispatchUser({ type: 'logout' });
         }
         is_waiting = false;
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
-      }));
+      });
+      setReadyPromise(promise);
+      return promise;
     }
     return readyPromise;
   };
@@ -61,13 +86,16 @@ export const AuthProvider: React.FC = props => {
         headers: headers
       })
       .then(resp => {
+        if (resp.data.success === undefined && resp.data.user === undefined) {
+          // auth error
+          throw ERRORS.REQUEST.NEEDS_AUTHENTICATION;
+        }
         if (!resp.data.success || resp.data.user === undefined) {
           throw resp.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
         }
-        setUser(prevUser => ({
-          user: resp.data.user,
-          csrfToken: prevUser.csrfToken
-        }));
+        if (setCurUser) {
+          dispatchUser({type: 'post', user: resp.data.user});
+        }
         return resp.data.user;
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
@@ -85,10 +113,7 @@ export const AuthProvider: React.FC = props => {
         headers: headers
       })
       .then(resp => {
-        setUser({
-          user: resp.data,
-          csrfToken: Cookie.get(CSRF_COOKIE)
-        });
+        dispatchUser({ type: 'login', user: resp.data });
         return resp.data;
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
@@ -106,15 +131,15 @@ export const AuthProvider: React.FC = props => {
         }
       )
       .then(() => {
-        setUser({
-          csrfToken: Cookie.get(CSRF_COOKIE)
-        });
+        dispatchUser({ type: 'logout' });
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
       });
   };
 
-  check();
+  useEffect(() => {
+    check();
+  }, []);
 
   return (
     <Auth.Provider

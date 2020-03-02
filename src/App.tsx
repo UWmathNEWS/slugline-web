@@ -37,7 +37,7 @@ const App: React.FC = () => {
   return (
     <Router history={history}>
       <div className="container">
-        <Header/>
+        <Header />
         <div>
           <Switch>
             <Route exact path="/">

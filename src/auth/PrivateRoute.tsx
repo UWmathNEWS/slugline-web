@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { RouteProps, Route, Redirect } from "react-router-dom";
+import React, { useEffect, useReducer } from "react";
+import { RouteProps, Route, Redirect, useHistory } from "react-router-dom";
 import { Alert } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
 
@@ -7,29 +7,57 @@ interface PrivateRouteProps extends RouteProps {
   admin?: boolean
 }
 
+interface PrivateRouteState {
+  ready: boolean,
+  errors: string[]
+}
+
+type PrivateRouteAction =
+  { type: 'done loading' } |
+  { type: 'is loading' } |
+  { type: 'error', data: string[] }
+
 const PrivateRoute: React.FC<PrivateRouteProps> = (props: PrivateRouteProps) => {
   const auth = useAuth();
-  const [ready, setReady] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
-  useEffect(() => {
-    auth.check()
-      ?.then(() => {
-        setReady(true);
-        setErrors([]);
-      }, e => { setErrors(e); });
+  const history = useHistory();
+  const [state, dispatch] = useReducer((state: PrivateRouteState, action: PrivateRouteAction) => {
+    switch (action.type) {
+    case 'done loading':
+      return { ready: true, errors: [] };
+    case 'is loading':
+      return { ready: false, errors: [] };
+    case 'error':
+      return { ready: false, errors: action.data }
+    }
+    return state;
+  }, {
+    ready: false,
+    errors: []
   });
 
-  if (ready) {
-    if (auth.isAuthenticated() && ((props.admin && auth.isEditor()) || !props.admin)) {
-      return <Route {...props}>{props.children}</Route>;
+  useEffect(() => {
+    dispatch({ type: 'is loading' });
+    auth.check()?.then(() => {
+      dispatch({ type: 'done loading' });
+    }, e => {
+      dispatch({ type: 'error', data: e });
+    });
+  }, [history.location.pathname]);
+
+  if (state.errors.length === 0) {
+    if (state.ready) {
+      if (auth.isAuthenticated() && ((props.admin && auth.isEditor()) || !props.admin)) {
+        return <Route {...props}>{props.children}</Route>;
+      } else {
+        return <Redirect to="/login"/>;
+      }
     } else {
-      return <Redirect to="/login"/>;
+      return <h1>Loading...</h1>;
     }
   } else {
-    return errors.length ? (<>
-      {errors.map(err => <Alert key={err} variant="danger">{err}</Alert>)}
-    </>) : <h1>Loading...</h1>;
+    return <>
+      {state.errors.map(err => <Alert key={err} variant="danger">{err}</Alert>)}
+    </>;
   }
 };
 
