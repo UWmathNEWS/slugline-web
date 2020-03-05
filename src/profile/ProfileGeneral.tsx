@@ -2,7 +2,6 @@ import React, { useReducer } from "react";
 import { Button, Form, Row, Col, Alert } from "react-bootstrap";
 import { User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
-import { useToast } from "../shared/ToastContext";
 import ERRORS from "../shared/errors";
 import { ProfileAction, profileReducer, ProfileState } from "./Profile";
 
@@ -18,9 +17,10 @@ interface ProfileGeneralState extends ProfileState {
   changedUser: ChangedUser;
 }
 
-const ProfileGeneral = ({ user } : { user: User }) => {
+const ProfileGeneral: React.FC<{
+  user: User
+}> = ({ user }) => {
   const auth = useAuth();
-  const toast = useToast();
 
   const [state, dispatch] = useReducer((state: ProfileGeneralState, action: ProfileAction<ChangedUser>) => {
     switch (action.type) {
@@ -34,9 +34,10 @@ const ProfileGeneral = ({ user } : { user: User }) => {
       return profileReducer(state, action);
     }
   }, {
-    changedUser: { is_editor: user.is_editor },
+    changedUser: auth.isEditor() ? { is_editor: user.is_editor } : {},
     errors: {},
     generalErrors: [],
+    successMessage: "",
     isLoading: false
   });
 
@@ -99,25 +100,16 @@ const ProfileGeneral = ({ user } : { user: User }) => {
     evt.preventDefault();
 
     if (Object.values(state.errors).flat().length) {
-      toast.addToasts([{
-        id: Math.random().toString(),
-        body: ERRORS.FORMS.NOT_YET_VALID,
-        delay: 3000
-      }]);
+      dispatch({ type: 'set general error', errors: [ERRORS.FORMS.NOT_YET_VALID] });
       return;
     }
 
     dispatch({ type: 'is loading' });
 
-    auth.post<ChangedUser>("user/update", state.changedUser, user.username === auth.user?.username)
+    auth.post<ChangedUser>(user === auth.user ? "user/update" : `users/${user.username}/update`,
+                           state.changedUser,
+                           user === auth.user)
       .then(() => {
-        toast.addToasts([
-          {
-            id: Math.random().toString(),
-            body: "Profile saved!",
-            delay: 3000
-          }
-        ]);
         dispatch({ type: 'done loading success' });
       }, (err: UserAPIError | string | string[]) => {
         dispatch({ type: 'done loading error', errors: err });
@@ -126,10 +118,13 @@ const ProfileGeneral = ({ user } : { user: User }) => {
 
   return (
     <Form noValidate onSubmit={onSubmit}>
-      <h2>General settings</h2>
-
       {state.generalErrors.length > 0 && state.generalErrors.map(err =>
         <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
+
+      {state.successMessage.length > 0 &&
+        <Alert variant="success" onClose={() => dispatch({ type: 'set success message', message: '' })} dismissible>
+          {state.successMessage}
+        </Alert>}
 
       <Form.Group as={Row} controlId="profileUsername">
         <Form.Label column sm={2}>Username</Form.Label>
@@ -193,11 +188,11 @@ const ProfileGeneral = ({ user } : { user: User }) => {
             aria-label="Editor privileges"
             onChange={onChange}
             checked={state.changedUser.is_editor}
-            disabled={auth.user === user && !user.is_staff} />
+            disabled={auth.user?.username === user.username && !user.is_staff} />
         </Col>
       </Form.Group>}
 
-      <Button type="submit" disabled={state.isLoading}>
+      <Button type="submit" disabled={state.isLoading || Object.values(state.errors).flat().length > 0}>
         {state.isLoading ? "Saving..." : "Save"}
       </Button>
     </Form>

@@ -1,21 +1,24 @@
 import React from "react";
 import { Tab, Row, Col, Nav } from "react-bootstrap";
-import { User, UserAPIError } from "../shared/types"
+import { UserAPIError } from "../shared/types"
 import ProfileGeneral from "./ProfileGeneral";
 import ProfileSecurity from "./ProfileSecurity";
+import { useAuth } from "../auth/AuthProvider";
 
 export interface ProfileState {
   errors: UserAPIError,
   generalErrors: string[],
+  successMessage: string,
   isLoading: boolean
 }
 
 export type ProfileAction<T> =
   { type: 'is loading' } |
-  { type: 'done loading success' } |
+  { type: 'done loading success', message?: string } |
   { type: 'done loading error', errors: UserAPIError | string | string[] } |
   { type: 'set error', errors: UserAPIError } |
   { type: 'set general error', errors: string[] } |
+  { type: 'set success message', message: string } |
   { type: 'set data', data: T, errors?: UserAPIError };
 
 export const profileReducer = <T extends ProfileState, U>(state: T, action: ProfileAction<U>): T => {
@@ -23,7 +26,12 @@ export const profileReducer = <T extends ProfileState, U>(state: T, action: Prof
   case 'is loading':
     return { ...state, isLoading: true };
   case 'done loading success':
-    return { ...state, isLoading: false, generalErrors: [] };
+    return {
+      ...state,
+      isLoading: false,
+      generalErrors: [],
+      successMessage: action.message ?? "Profile successfully saved!"
+    };
   case 'done loading error':
     if (typeof action.errors === 'string') {
       // definitely a authentication error; this is the only time we'd throw a string
@@ -44,11 +52,22 @@ export const profileReducer = <T extends ProfileState, U>(state: T, action: Prof
       ...state,
       generalErrors: state.generalErrors.concat(action.errors)
     };
+  case 'set success message':
+    return {
+      ...state,
+      successMessage: action.message
+    };
   }
   return state;
 };
 
-const Profile = ({ user } : { user: User }) => {
+const Profile = () => {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <></>;
+  }
+
   return (
     <Tab.Container defaultActiveKey="general">
       <Row>
@@ -65,9 +84,11 @@ const Profile = ({ user } : { user: User }) => {
         <Col sm={10}>
           <Tab.Content>
             <Tab.Pane eventKey="general">
+              <h2>General settings</h2>
               <ProfileGeneral user={user} />
             </Tab.Pane>
             <Tab.Pane eventKey="security">
+              <h2>Security</h2>
               <ProfileSecurity user={user} />
             </Tab.Pane>
           </Tab.Content>

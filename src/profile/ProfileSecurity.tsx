@@ -2,7 +2,6 @@ import React, { useReducer } from "react";
 import { Button, Form, Row, Col, OverlayTrigger, Popover, Alert } from "react-bootstrap";
 import { User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
-import { useToast } from "../shared/ToastContext";
 import ERRORS from "../shared/errors";
 import { ProfileAction, profileReducer, ProfileState } from "./Profile";
 
@@ -30,7 +29,6 @@ const password_info = (<Popover id="password_info">
 
 const ProfileSecurity = ({ user } : { user: User }) => {
   const auth = useAuth();
-  const toast = useToast();
 
   const [state, dispatch] = useReducer((state: ProfileSecurityState, action: ProfileAction<ChangedPassword>) => {
     switch (action.type) {
@@ -49,6 +47,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
     changedPassword: {},
     errors: {},
     generalErrors: [],
+    successMessage: "",
     isLoading: false
   });
 
@@ -109,11 +108,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
     evt.preventDefault();
 
     if (Object.values(state.errors).flat().length) {
-      toast.addToasts([{
-        id: Math.random().toString(),
-        body: ERRORS.FORMS.NOT_YET_VALID,
-        delay: 3000
-      }]);
+      dispatch({ type: 'set general error', errors: [ERRORS.FORMS.NOT_YET_VALID] });
       return;
     }
 
@@ -121,14 +116,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
 
     auth.post<ChangedPassword>("user/update", state.changedPassword, true)
       .then(() => {
-        toast.addToasts([
-          {
-            id: Math.random().toString(),
-            body: "Password saved!",
-            delay: 3000
-          }
-        ]);
-        dispatch({ type: 'done loading success' });
+        dispatch({ type: 'done loading success', message: "Password successfully changed!" });
       }, (err: UserAPIError | string | string[]) => {
         dispatch({ type: 'done loading error', errors: err });
       });
@@ -136,10 +124,13 @@ const ProfileSecurity = ({ user } : { user: User }) => {
 
   return (
     <Form noValidate onSubmit={onSubmit}>
-      <h2>Security</h2>
-
       {state.generalErrors.length > 0 && state.generalErrors.map(err =>
         <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
+
+      {state.successMessage.length > 0 &&
+      <Alert variant="success" onClose={() => dispatch({ type: 'set success message', message: '' })} dismissible>
+        {state.successMessage}
+      </Alert>}
 
       <h3>Change password</h3>
 
@@ -192,7 +183,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
         </Col>
       </Form.Group>
 
-      <Button type="submit" disabled={state.isLoading}>
+      <Button type="submit" disabled={state.isLoading || Object.values(state.errors).flat().length > 0}>
         {state.isLoading ? "Saving..." : "Save"}
       </Button>
     </Form>

@@ -56,7 +56,7 @@ const App: React.FC = () => {
               <Dash />
             </PrivateRoute>
             <PrivateRoute path="/profile">
-              <Profile user={auth.user!} />
+              <Profile />
             </PrivateRoute>
             <PrivateRoute admin={true} path="/admin">
               <AdminPanel />
