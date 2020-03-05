@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useReducer } from "react";
+import React, { createContext, useState, useContext, useEffect, useReducer, useRef } from "react";
 import Cookie from "js-cookie";
 
 import { User, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
@@ -31,6 +31,7 @@ const CSRF_COOKIE = "csrftoken";
 
 export const AuthProvider: React.FC = props => {
   const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(undefined);
+  const isWaiting = useRef<boolean>(false);
   const [user, dispatchUser] = useReducer((state: AuthState, action: AuthAction) => {
     switch (action.type) {
     case 'post':
@@ -50,18 +51,17 @@ export const AuthProvider: React.FC = props => {
     }
     return state;
   }, {});
-  let is_waiting = false;
 
   const check = (force: boolean = false) => {
-    if (!is_waiting && (force || readyPromise === undefined)) {
-      is_waiting = true;
+    if (!isWaiting.current && (force || readyPromise === undefined)) {
+      isWaiting.current = true;
       const promise = axios.get<AuthResponse>(getApiUrl("auth/")).then(resp => {
         if (resp.data.user && user.user === undefined) {
           dispatchUser({ type: 'login', user: resp.data.user });
         } else if (resp.data.user === undefined) {
           dispatchUser({ type: 'logout' });
         }
-        is_waiting = false;
+        isWaiting.current = false;
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
       });
