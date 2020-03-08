@@ -4,13 +4,7 @@ import { Mark } from "./types";
 
 import "./EditorControls.scss";
 
-interface EditorControlsProps {
-  focus: () => void;
-}
-
-const EditorControls: React.FC<EditorControlsProps> = (
-  props: EditorControlsProps
-) => {
+const EditorControls: React.FC = () => {
   return (
     <div className="editor-controls">
       <ToggleMarkButton icon="bold" mark={Mark.Bold} />
@@ -19,7 +13,7 @@ const EditorControls: React.FC<EditorControlsProps> = (
       <ToggleMarkButton icon="strikethrough" mark={Mark.Strikethrough} />
       <ToggleMarkButton icon="code" mark={Mark.Code} />
       <div className="editor-separator" />
-      <LinkButton focus={props.focus} />
+      <LinkButton />
     </div>
   );
 };

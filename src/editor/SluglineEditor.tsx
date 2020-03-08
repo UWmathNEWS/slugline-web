@@ -86,11 +86,7 @@ const SluglineEditor = () => {
           }}
         ></input>
       </div>
-      <EditorControls
-        focus={() => {
-          ReactEditor.focus(editor);
-        }}
-      />
+      <EditorControls />
       <div className="editor-body">
         <Editable
           placeholder="Start your masterpiece..."

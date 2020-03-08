@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Mark } from "../types";
-import { useSlate } from "slate-react";
+import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { toggleMark, isMarkActive, toggleLink } from "../helpers";
@@ -31,20 +31,14 @@ export const ToggleMarkButton: React.FC<ToggleMarkButtonProps> = (
   );
 };
 
-interface LinkButtonProps {
-  focus: () => void;
-}
-
-export const LinkButton: React.FC<LinkButtonProps> = (
-  props: LinkButtonProps
-) => {
+export const LinkButton: React.FC = () => {
   const editor = useSlate();
   const ref = useRef<HTMLButtonElement>(null);
 
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const setHref = (href: string) => {
-    props.focus();
+    ReactEditor.focus(editor);
     setShowPopover(false);
     toggleLink(editor, href);
   };
