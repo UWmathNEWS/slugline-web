@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 
-import { Node, createEditor, Element } from "slate";
+import { Node, createEditor, Element, Range } from "slate";
 import {
   Slate,
   Editable,
@@ -59,6 +59,7 @@ const SluglineEditor = () => {
       ]
     }
   ]);
+  const [selection, setSelection] = useState<Range | null>(editor.selection);
 
   const [title, setTitle] = useState<string>("");
   const [subtitle, setSubtitle] = useState<string>("");
@@ -93,6 +94,12 @@ const SluglineEditor = () => {
           renderElement={renderElement}
           onKeyDown={(evt: React.KeyboardEvent) => {
             EditorHelpers.keyDown(editor, evt);
+          }}
+          onBlur={() => {
+            setSelection(editor.selection);
+          }}
+          onFocus={() => {
+            editor.selection = selection;
           }}
         />
       </div>
