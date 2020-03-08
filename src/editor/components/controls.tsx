@@ -31,13 +31,20 @@ export const ToggleMarkButton: React.FC<ToggleMarkButtonProps> = (
   );
 };
 
-export const LinkButton: React.FC = () => {
+interface LinkButtonProps {
+  focus: () => void;
+}
+
+export const LinkButton: React.FC<LinkButtonProps> = (
+  props: LinkButtonProps
+) => {
   const editor = useSlate();
   const ref = useRef<HTMLButtonElement>(null);
 
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const setHref = (href: string) => {
+    props.focus();
     setShowPopover(false);
     toggleLink(editor, href);
   };

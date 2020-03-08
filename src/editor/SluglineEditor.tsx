@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 
-import { Node, createEditor, Element, Range } from "slate";
+import { Node, createEditor, Element, Range, Editor } from "slate";
 import {
   Slate,
   Editable,
   withReact,
   RenderLeafProps,
   RenderElementProps,
-  useSlate
+  ReactEditor
 } from "slate-react";
 
 import { Leaf } from "./components/Leaf";
@@ -86,7 +86,11 @@ const SluglineEditor = () => {
           }}
         ></input>
       </div>
-      <EditorControls />
+      <EditorControls
+        focus={() => {
+          ReactEditor.focus(editor);
+        }}
+      />
       <div className="editor-body">
         <Editable
           placeholder="Start your masterpiece..."
