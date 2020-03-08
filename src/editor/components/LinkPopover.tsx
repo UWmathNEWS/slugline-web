@@ -14,7 +14,14 @@ const LinkPopover: React.FC<LinkPopoverProps> = (props: LinkPopoverProps) => {
   return (
     // these render props are untyped so let's hope we don't need them
     <Overlay target={props.target} show={props.show} placement="top">
-      {(overlayProps: any) => {
+      {({
+        placement,
+        scheduleUpdate,
+        arrowProps,
+        outOfBoundaries,
+        show,
+        ...overlayProps
+      }: any) => {
         return (
           <div {...overlayProps} className="control-popover">
             <Form.Group controlId="linkHref">
