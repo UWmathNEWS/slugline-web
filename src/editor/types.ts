@@ -10,7 +10,8 @@ export enum Mark {
 
 export enum ElementType {
   Default = "default",
-  Link = "link"
+  Link = "link",
+  InlineLatex = "inline-latex"
 }
 
 export interface DefaultElement extends Element {
@@ -22,4 +23,9 @@ export interface LinkElement extends Element {
   href: string;
 }
 
-export type SluglineElement = DefaultElement | LinkElement;
+export interface InlineLatexElement extends Element {
+  type: ElementType.InlineLatex;
+  latex: string;
+}
+
+export type SluglineElement = DefaultElement | LinkElement | InlineLatexElement;

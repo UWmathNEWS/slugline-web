@@ -17,6 +17,7 @@ import { Mark, SluglineElement, ElementType } from "./types";
 import "./SluglineEditor.scss";
 import Link from "./components/Link";
 import EditorControls from "./EditorControls";
+import InlineLatex from "./components/InlineLatex";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -27,6 +28,8 @@ const renderElement = (props: RenderElementProps) => {
   switch (element.type) {
     case ElementType.Link:
       return <Link {...props} />;
+    case ElementType.InlineLatex:
+      return <InlineLatex {...props} />;
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }
@@ -37,6 +40,18 @@ const isInline = (element: Element) => {
   switch (e.type) {
     case ElementType.Link:
       return true;
+    case ElementType.InlineLatex:
+      return true;
+    default:
+      return false;
+  }
+};
+
+const isVoid = (element: Element) => {
+  const e = element as SluglineElement;
+  switch (e.type) {
+    case ElementType.InlineLatex:
+      return true;
     default:
       return false;
   }
@@ -45,6 +60,7 @@ const isInline = (element: Element) => {
 const createCustomEditor = () => {
   const editor = createEditor();
   editor.isInline = isInline;
+  editor.isVoid = isVoid;
   return editor;
 };
 

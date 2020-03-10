@@ -28,7 +28,6 @@ export function wrapInline(editor: Editor, inline: SluglineElement): void {
     ...inline,
     children: []
   };
-  console.log(topLevel);
   Transforms.wrapNodes(editor, topLevel, {
     split: true
   });

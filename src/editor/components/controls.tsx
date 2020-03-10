@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Mark, LinkElement, ElementType } from "../types";
+import { Mark, LinkElement, ElementType, InlineLatexElement } from "../types";
 import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -7,6 +7,7 @@ import { toggleMark, isMarkActive, toggleInline } from "../helpers";
 
 import "./controls.scss";
 import LinkPopover from "./LinkPopover";
+import LatexPopover from "./LatexPopover";
 
 interface ToggleMarkButtonProps {
   icon: string;
@@ -65,6 +66,46 @@ export const LinkButton: React.FC = () => {
           href=""
           show={showPopover}
           setHref={setHref}
+        />
+      )}
+    </>
+  );
+};
+
+export const InlineLatexButton: React.FC = () => {
+  const editor = useSlate();
+  const ref = useRef<HTMLButtonElement>(null);
+
+  const [showPopover, setShowPopover] = useState<boolean>(false);
+
+  const setLatex = (latex: string) => {
+    ReactEditor.focus(editor);
+    setShowPopover(false);
+    const newLatex: InlineLatexElement = {
+      type: ElementType.InlineLatex,
+      latex: latex,
+      children: [{ text: "" }]
+    };
+    toggleInline(editor, newLatex);
+  };
+
+  return (
+    <>
+      <button
+        ref={ref}
+        className="editor-control"
+        onClick={() => {
+          setShowPopover(true);
+        }}
+      >
+        <FontAwesomeIcon icon="dollar-sign" />
+      </button>
+      {ref.current && (
+        <LatexPopover
+          target={ref.current}
+          latex=""
+          show={showPopover}
+          setLatex={setLatex}
         />
       )}
     </>

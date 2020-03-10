@@ -1,5 +1,9 @@
 import React from "react";
-import { ToggleMarkButton, LinkButton } from "./components/controls";
+import {
+  ToggleMarkButton,
+  LinkButton,
+  InlineLatexButton
+} from "./components/controls";
 import { Mark } from "./types";
 
 import "./EditorControls.scss";
@@ -14,6 +18,7 @@ const EditorControls: React.FC = () => {
       <ToggleMarkButton icon="code" mark={Mark.Code} />
       <div className="editor-separator" />
       <LinkButton />
+      <InlineLatexButton />
     </div>
   );
 };
