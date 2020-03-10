@@ -1,4 +1,4 @@
-import { Editor, Transforms, Element, Range } from "slate";
+import { Editor, Transforms, Element, Range, Node, Text } from "slate";
 import isHotkey from "is-hotkey";
 
 import { Mark, ElementType, LinkElement, SluglineElement } from "./types";
@@ -18,43 +18,39 @@ export function toggleMark(editor: Editor, mark: Mark): void {
   }
 }
 
-export function createLink(editor: Editor, href: string): void {
-  const newLink: LinkElement = {
-    href: href,
-    type: ElementType.Link,
-    children: [{ text: href }]
-  };
-  Transforms.insertNodes(editor, newLink);
+export function createInline(editor: Editor, inline: SluglineElement): void {
+  Transforms.insertNodes(editor, inline);
 }
 
-export function wrapLink(editor: Editor, href: string): void {
-  const newLink: LinkElement = {
-    href: href,
-    type: ElementType.Link,
+export function wrapInline(editor: Editor, inline: SluglineElement): void {
+  // remove any children since we're wrapping an existing node
+  const topLevel = {
+    ...inline,
     children: []
   };
-  Transforms.wrapNodes(editor, newLink, {
+  console.log(topLevel);
+  Transforms.wrapNodes(editor, topLevel, {
     split: true
   });
 }
 
-export function toggleLink(editor: Editor, href: string): void {
+export function toggleInline(editor: Editor, inline: SluglineElement): void {
   const selection = editor.selection;
   if (!selection) {
-    createLink(editor, href);
+    createInline(editor, inline);
   } else {
     const linkNodes = Array.from(
       Editor.nodes(editor, {
         at: selection,
-        match: node => (node as SluglineElement).type === ElementType.Link
+        mode: "lowest"
       })
     );
-    //only insert new links if a link isn't already selected
-    if (linkNodes.length === 0) {
+    //only insert new inlines if we're not in any non text nodes
+    if (linkNodes.every(([node, path]) => Text.isText(node))) {
       if (Range.isCollapsed(selection)) {
-        createLink(editor, href);
+        createInline(editor, inline);
       } else {
-        wrapLink(editor, href);
+        wrapInline(editor, inline);
       }
     }
   }

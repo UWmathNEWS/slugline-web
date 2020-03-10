@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
-import { Mark } from "../types";
+import { Mark, LinkElement, ElementType } from "../types";
 import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { toggleMark, isMarkActive, toggleLink } from "../helpers";
+import { toggleMark, isMarkActive, toggleInline } from "../helpers";
 
 import "./controls.scss";
 import LinkPopover from "./LinkPopover";
@@ -40,7 +40,12 @@ export const LinkButton: React.FC = () => {
   const setHref = (href: string) => {
     ReactEditor.focus(editor);
     setShowPopover(false);
-    toggleLink(editor, href);
+    const newLink: LinkElement = {
+      type: ElementType.Link,
+      href: href,
+      children: [{ text: href }]
+    };
+    toggleInline(editor, newLink);
   };
 
   return (
