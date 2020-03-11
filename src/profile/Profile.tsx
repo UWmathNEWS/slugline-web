@@ -14,7 +14,7 @@ export interface ProfileState {
 
 export type ProfileAction<T> =
   { type: 'is loading' } |
-  { type: 'done loading success', message?: string } |
+  { type: 'done loading success' } |
   { type: 'done loading error', errors: UserAPIError | string | string[] } |
   { type: 'set error', errors: UserAPIError } |
   { type: 'set general error', errors: string[] } |
@@ -30,7 +30,7 @@ export const profileReducer = <T extends ProfileState, U>(state: T, action: Prof
       ...state,
       isLoading: false,
       generalErrors: [],
-      successMessage: action.message ?? "Profile successfully saved!"
+      successMessage: "Profile successfully saved!"
     };
   case 'done loading error':
     if (typeof action.errors === 'string') {

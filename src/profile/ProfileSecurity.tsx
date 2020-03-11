@@ -33,7 +33,13 @@ const ProfileSecurity = ({ user } : { user: User }) => {
   const [state, dispatch] = useReducer((state: ProfileSecurityState, action: ProfileAction<ChangedPassword>) => {
     switch (action.type) {
     case 'done loading success':
-      return { ...state, isLoading: false, generalErrors: [], changedPassword: {} };
+      return {
+        ...state,
+        isLoading: false,
+        generalErrors: [],
+        successMessage: "Password successfully changed!",
+        changedPassword: {}
+      };
     case 'set data':
       return {
         ...state,
@@ -116,7 +122,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
 
     auth.post<ChangedPassword>("user/update", state.changedPassword, true)
       .then(() => {
-        dispatch({ type: 'done loading success', message: "Password successfully changed!" });
+        dispatch({ type: 'done loading success' });
       }, (err: UserAPIError | string | string[]) => {
         dispatch({ type: 'done loading error', errors: err });
       });
@@ -183,7 +189,12 @@ const ProfileSecurity = ({ user } : { user: User }) => {
         </Col>
       </Form.Group>
 
-      <Button type="submit" disabled={state.isLoading || Object.values(state.errors).flat().length > 0}>
+      <Button type="submit" disabled={
+        state.isLoading ||
+        Object.values(state.errors).flat().length > 0 ||
+        state.changedPassword.cur_password === undefined ||
+        state.changedPassword.cur_password?.length == 0
+      }>
         {state.isLoading ? "Saving..." : "Save"}
       </Button>
     </Form>

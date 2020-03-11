@@ -129,7 +129,8 @@ const ToastContainer = () => {
             {msg.title && <Toast.Header>
               <strong className="mr-auto">{msg.title}</strong>
             </Toast.Header>}
-            <Toast.Body dangerouslySetInnerHTML={{__html: msg.body}}>
+            <Toast.Body>
+              {msg.body}
             </Toast.Body>
           </Toast>
         );

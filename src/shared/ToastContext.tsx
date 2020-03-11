@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction } from "react";
 export interface ToastMessage {
   id: string;
   title?: string;
-  body: string;
+  body: string | React.ReactNode;
   delay?: number;
   _delay?: number;
   start?: number;

@@ -29,6 +29,12 @@ const Auth = createContext<AuthContext>({
 
 const CSRF_COOKIE = "csrftoken";
 
+/**
+ * Hardcoded endpoint because api.ts depends on this file.
+ * Check here if endpoint changes and stuff breaks.
+ */
+const initialPromise = axios.get<AuthResponse>("/api/auth/");
+
 export const AuthProvider: React.FC = props => {
   const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(undefined);
   const isWaiting = useRef<boolean>(false);
@@ -55,16 +61,18 @@ export const AuthProvider: React.FC = props => {
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
-      const promise = axios.get<AuthResponse>(getApiUrl("auth/")).then(resp => {
-        if (resp.data.user && user.user === undefined) {
-          dispatchUser({ type: 'login', user: resp.data.user });
-        } else if (resp.data.user === undefined) {
-          dispatchUser({ type: 'logout' });
-        }
-        isWaiting.current = false;
-      }, (err: AxiosError) => {
-        throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
-      });
+      const promise = (force ? axios.get<AuthResponse>(getApiUrl("auth/")) : initialPromise)
+      // const promise = axios.get<AuthResponse>(getApiUrl("auth/"))
+        .then(resp => {
+          if (resp.data.user && user.user === undefined) {
+            dispatchUser({ type: 'login', user: resp.data.user });
+          } else if (resp.data.user === undefined) {
+            dispatchUser({ type: 'logout' });
+          }
+          isWaiting.current = false;
+        }, (err: AxiosError) => {
+          throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
+        });
       setReadyPromise(promise);
       return promise;
     }

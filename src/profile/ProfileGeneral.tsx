@@ -18,8 +18,9 @@ interface ProfileGeneralState extends ProfileState {
 }
 
 const ProfileGeneral: React.FC<{
-  user: User
-}> = ({ user }) => {
+  user: User,
+  renderFooter?: (isLoading: boolean, hasErrors: boolean) => React.ReactNode
+}> = ({ user, renderFooter }) => {
   const auth = useAuth();
 
   const [state, dispatch] = useReducer((state: ProfileGeneralState, action: ProfileAction<ChangedUser>) => {
@@ -192,9 +193,11 @@ const ProfileGeneral: React.FC<{
         </Col>
       </Form.Group>}
 
-      <Button type="submit" disabled={state.isLoading || Object.values(state.errors).flat().length > 0}>
-        {state.isLoading ? "Saving..." : "Save"}
-      </Button>
+      {renderFooter ?
+        renderFooter(state.isLoading, Object.values(state.errors).flat().length > 0) :
+        <Button type="submit" disabled={state.isLoading || Object.values(state.errors).flat().length > 0}>
+          {state.isLoading ? "Saving..." : "Save"}
+        </Button>}
     </Form>
   );
 };
