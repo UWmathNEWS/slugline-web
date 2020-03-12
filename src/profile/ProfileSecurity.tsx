@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useImperativeHandle, forwardRef, useRef } from "react";
 import { Button, Form, Row, Col, OverlayTrigger, Popover, Alert } from "react-bootstrap";
 import { User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
@@ -27,7 +27,13 @@ const password_info = (<Popover id="password_info">
   </Popover.Content>
 </Popover>);
 
-const ProfileSecurity = ({ user } : { user: User }) => {
+const ProfileSecurity: React.FC<{
+  user?: User,
+  renderFooter?: (isLoading: boolean, hasErrors: boolean) => React.ReactNode
+}> = (
+  { user, renderFooter},
+  ref: React.RefObject<unknown>
+) => {
   const auth = useAuth();
 
   const [state, dispatch] = useReducer((state: ProfileSecurityState, action: ProfileAction<ChangedPassword>) => {
@@ -100,7 +106,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
 
         dispatch({
           type: 'set data',
-          data: {repeat_password: value},
+          data: { repeat_password: value },
           errors: {
             password: Array.from(errors)
           }
@@ -110,8 +116,12 @@ const ProfileSecurity = ({ user } : { user: User }) => {
     }
   };
 
-  const onSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
-    evt.preventDefault();
+  const onSubmit = (evt?: React.FormEvent<HTMLFormElement>) => {
+    evt?.preventDefault();
+
+    if (Object.values(state.changedPassword).every(p => !p)) {
+      return;
+    }
 
     if (Object.values(state.errors).flat().length) {
       dispatch({ type: 'set general error', errors: [ERRORS.FORMS.NOT_YET_VALID] });
@@ -120,13 +130,19 @@ const ProfileSecurity = ({ user } : { user: User }) => {
 
     dispatch({ type: 'is loading' });
 
-    auth.post<ChangedPassword>("user/update", state.changedPassword, true)
+    auth.post<ChangedPassword>(user === auth.user ? "user/update" : `users/${user?.username}/update`,
+                               state.changedPassword,
+                               user === auth.user)
       .then(() => {
         dispatch({ type: 'done loading success' });
       }, (err: UserAPIError | string | string[]) => {
         dispatch({ type: 'done loading error', errors: err });
       });
   };
+
+  useImperativeHandle(ref, () => ({
+    submit: onSubmit
+  }));
 
   return (
     <Form noValidate onSubmit={onSubmit}>
@@ -140,7 +156,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
 
       <h3>Change password</h3>
 
-      <Form.Group as={Row} controlId="profileCurPassword">
+      {auth.user === user && <Form.Group as={Row} controlId="profileCurPassword">
         <Form.Label column sm={3}>Current password</Form.Label>
         <Col sm={9}>
           <Form.Control
@@ -155,7 +171,7 @@ const ProfileSecurity = ({ user } : { user: User }) => {
             </ul>
           </Form.Control.Feedback>
         </Col>
-      </Form.Group>
+      </Form.Group>}
       <Form.Group as={Row} controlId="profileNewPassword">
         <Form.Label column sm={3}>
           New password
@@ -189,16 +205,18 @@ const ProfileSecurity = ({ user } : { user: User }) => {
         </Col>
       </Form.Group>
 
-      <Button type="submit" disabled={
-        state.isLoading ||
-        Object.values(state.errors).flat().length > 0 ||
-        state.changedPassword.cur_password === undefined ||
-        state.changedPassword.cur_password?.length == 0
-      }>
-        {state.isLoading ? "Saving..." : "Save"}
-      </Button>
+      {renderFooter ?
+        renderFooter(state.isLoading, Object.values(state.errors).flat().length > 0) :
+        <Button type="submit" disabled={
+          state.isLoading ||
+          Object.values(state.errors).flat().length > 0 ||
+          state.changedPassword.cur_password === undefined ||
+          state.changedPassword.cur_password?.length == 0
+        }>
+          {state.isLoading ? "Saving..." : "Save"}
+        </Button>}
     </Form>
   );
 };
 
-export default ProfileSecurity;
+export default forwardRef(ProfileSecurity);

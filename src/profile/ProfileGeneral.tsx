@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { forwardRef, useImperativeHandle, useReducer, useRef } from "react";
 import { Button, Form, Row, Col, Alert } from "react-bootstrap";
 import { User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
@@ -18,9 +18,12 @@ interface ProfileGeneralState extends ProfileState {
 }
 
 const ProfileGeneral: React.FC<{
-  user: User,
+  user?: User,
   renderFooter?: (isLoading: boolean, hasErrors: boolean) => React.ReactNode
-}> = ({ user, renderFooter }) => {
+}> = (
+  { user, renderFooter },
+  ref: React.RefObject<unknown>
+) => {
   const auth = useAuth();
 
   const [state, dispatch] = useReducer((state: ProfileGeneralState, action: ProfileAction<ChangedUser>) => {
@@ -35,7 +38,7 @@ const ProfileGeneral: React.FC<{
       return profileReducer(state, action);
     }
   }, {
-    changedUser: auth.isEditor() ? { is_editor: user.is_editor } : {},
+    changedUser: auth.isEditor() ? { is_editor: user?.is_editor ?? false } : {},
     errors: {},
     generalErrors: [],
     successMessage: "",
@@ -85,7 +88,7 @@ const ProfileGeneral: React.FC<{
         dispatch({
           type: 'set data',
           data: { writer_name: value },
-          errors: { writer_name: value.length ? ["USER.WRITER_NAME.EMPTY"] : [] }
+          errors: { writer_name: value.length === 0 ? ["USER.WRITER_NAME.EMPTY"] : [] }
         });
         break;
       case "is_editor":
@@ -97,8 +100,12 @@ const ProfileGeneral: React.FC<{
     }
   };
 
-  const onSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
-    evt.preventDefault();
+  const onSubmit = (evt?: React.FormEvent<HTMLFormElement>) => {
+    evt?.preventDefault();
+
+    if (Object.values(state.changedUser).every(p => !p)) {
+      return;
+    }
 
     if (Object.values(state.errors).flat().length) {
       dispatch({ type: 'set general error', errors: [ERRORS.FORMS.NOT_YET_VALID] });
@@ -107,7 +114,7 @@ const ProfileGeneral: React.FC<{
 
     dispatch({ type: 'is loading' });
 
-    auth.post<ChangedUser>(user === auth.user ? "user/update" : `users/${user.username}/update`,
+    auth.post<ChangedUser>(user === auth.user ? "user/update" : `users/${user?.username}/update`,
                            state.changedUser,
                            user === auth.user)
       .then(() => {
@@ -116,6 +123,10 @@ const ProfileGeneral: React.FC<{
         dispatch({ type: 'done loading error', errors: err });
       });
   };
+
+  useImperativeHandle(ref, () => ({
+    submit: onSubmit
+  }));
 
   return (
     <Form noValidate onSubmit={onSubmit}>
@@ -130,7 +141,7 @@ const ProfileGeneral: React.FC<{
       <Form.Group as={Row} controlId="profileUsername">
         <Form.Label column sm={2}>Username</Form.Label>
         <Col sm={10}>
-          <Form.Control readOnly defaultValue={user.username} />
+          <Form.Control readOnly defaultValue={user?.username} />
         </Col>
       </Form.Group>
 
@@ -142,7 +153,7 @@ const ProfileGeneral: React.FC<{
             name="email"
             required
             placeholder="example@example.com"
-            defaultValue={user.email}
+            defaultValue={user ? user.email : ""}
             onChange={onChange}
             isInvalid={state.errors.email && state.errors.email.length > 0} />
           <Form.Control.Feedback type="invalid">
@@ -159,7 +170,7 @@ const ProfileGeneral: React.FC<{
           <Form.Control
             name="name"
             placeholder="e.g. Johnny Appleseed"
-            defaultValue={`${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`}
+            defaultValue={user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}` : ""}
             onChange={onChange} />
         </Col>
       </Form.Group>
@@ -170,7 +181,7 @@ const ProfileGeneral: React.FC<{
           <Form.Control
             name="writer_name"
             placeholder="e.g. Grower of Apples"
-            defaultValue={user.writer_name}
+            defaultValue={user ? user.writer_name : ""}
             onChange={onChange}
             isInvalid={state.errors.writer_name && state.errors.writer_name.length > 0}/>
           <Form.Control.Feedback type="invalid">
@@ -189,7 +200,7 @@ const ProfileGeneral: React.FC<{
             aria-label="Editor privileges"
             onChange={onChange}
             checked={state.changedUser.is_editor}
-            disabled={auth.user?.username === user.username && !user.is_staff} />
+            disabled={auth.user?.username === user?.username && !user?.is_staff} />
         </Col>
       </Form.Group>}
 
@@ -202,4 +213,4 @@ const ProfileGeneral: React.FC<{
   );
 };
 
-export default ProfileGeneral;
+export default forwardRef(ProfileGeneral);

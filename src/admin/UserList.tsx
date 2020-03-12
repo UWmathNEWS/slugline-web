@@ -1,15 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useUsersList } from "../api/api";
 import { Row, InputGroup, Form, Table, Modal, Button } from "react-bootstrap";
 import { User } from "../shared/types";
 import ProfileGeneral from "../profile/ProfileGeneral";
 
 import "./UserList.scss";
+import ProfileSecurity from "../profile/ProfileSecurity";
 
 const UserList = () => {
   const usersList: User[] | undefined = useUsersList();
   const [filteredUsers, setFilteredUsers] = useState<User[] | undefined>(undefined);
   const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [generalErrors, setGeneralErrors] = useState<boolean>(false);
+  const [securityErrors, setSecurityErrors] = useState<boolean>(false);
+  const generalRef = useRef({ submit: () => {} });
+  const securityRef = useRef({ submit: () => {} });
 
   const search = (evt: React.FormEvent<HTMLInputElement>) => {
     // TODO: make better w/ memoization, etc
@@ -74,17 +80,33 @@ const UserList = () => {
         <Modal.Title>Editing {currentUser?.username}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {currentUser !== undefined &&
-        <ProfileGeneral user={currentUser} renderFooter={(isLoading, hasErrors) =>
-          <Row>
-            <Button variant="secondary" onClick={() => { setCurrentUser(undefined); }} className="ml-3">
-              Close without saving
-            </Button>
-            <Button type="submit" disabled={isLoading || hasErrors} className="ml-auto mr-3">
-              {isLoading ? "Saving..." : "Save"}
-            </Button>
-          </Row>} />}
+        <ProfileGeneral user={currentUser} ref={generalRef} renderFooter={(isLoading, hasErrors) => {
+          setIsLoading(isLoading);
+          setGeneralErrors(hasErrors);
+          return <></>;
+        }} />
+        <ProfileSecurity user={currentUser} ref={securityRef} renderFooter={(isLoading, hasErrors) => {
+          setIsLoading(isLoading);
+          setSecurityErrors(hasErrors);
+          return <></>;
+        }} />
       </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => { setCurrentUser(undefined); }} className="ml-3">
+          Close without saving
+        </Button>
+        <Button
+          type="submit"
+          disabled={isLoading || generalErrors || securityErrors}
+          className="ml-auto mr-3"
+          onClick={() => {
+            generalRef.current.submit();
+            securityRef.current.submit();
+          }}
+        >
+          {isLoading ? "Saving..." : "Save"}
+        </Button>
+      </Modal.Footer>
     </Modal>
   </div>;
 };
