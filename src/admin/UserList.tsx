@@ -2,20 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import { useUsersList } from "../api/api";
 import { Row, InputGroup, Form, Table, Modal, Button } from "react-bootstrap";
 import { User } from "../shared/types";
-import ProfileGeneral from "../profile/ProfileGeneral";
+import ProfileForm from "../profile/ProfileForm";
 
 import "./UserList.scss";
-import ProfileSecurity from "../profile/ProfileSecurity";
 
 const UserList = () => {
   const usersList: User[] | undefined = useUsersList();
   const [filteredUsers, setFilteredUsers] = useState<User[] | undefined>(undefined);
   const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [generalErrors, setGeneralErrors] = useState<boolean>(false);
-  const [securityErrors, setSecurityErrors] = useState<boolean>(false);
-  const generalRef = useRef({ submit: () => {} });
-  const securityRef = useRef({ submit: () => {} });
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editUserErrors, setEditUserErrors] = useState(false);
+  const [createUserErrors, setCreateUserErrors] = useState(false);
+  const editUserRef = useRef({ submit: () => {} });
+  const createUserRef = useRef({ submit: () => {} });
 
   const search = (evt: React.FormEvent<HTMLInputElement>) => {
     // TODO: make better w/ memoization, etc
@@ -37,6 +37,7 @@ const UserList = () => {
   }, [usersList]);
 
   return <div>
+    <Button variant="secondary" onClick={() => {setShowCreateUser(true)}}>New User</Button>
     <InputGroup className="mb-3">
       <Form.Control placeholder="Search..." onChange={search} />
     </InputGroup>
@@ -80,28 +81,53 @@ const UserList = () => {
         <Modal.Title>Editing {currentUser?.username}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <ProfileGeneral user={currentUser} ref={generalRef} renderFooter={(isLoading, hasErrors) => {
+        <ProfileForm user={currentUser} ref={editUserRef} renderFooter={(isLoading, hasErrors) => {
           setIsLoading(isLoading);
-          setGeneralErrors(hasErrors);
-          return <></>;
-        }} />
-        <ProfileSecurity user={currentUser} ref={securityRef} renderFooter={(isLoading, hasErrors) => {
-          setIsLoading(isLoading);
-          setSecurityErrors(hasErrors);
+          setEditUserErrors(hasErrors);
           return <></>;
         }} />
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => { setCurrentUser(undefined); }} className="ml-3">
+        <Button variant="secondary" onClick={() => { setCurrentUser(undefined); }}>
           Close without saving
         </Button>
         <Button
           type="submit"
-          disabled={isLoading || generalErrors || securityErrors}
-          className="ml-auto mr-3"
+          disabled={isLoading || editUserErrors}
+          className="ml-auto"
           onClick={() => {
-            generalRef.current.submit();
-            securityRef.current.submit();
+            editUserRef.current.submit();
+          }}
+        >
+          {isLoading ? "Saving..." : "Save"}
+        </Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal
+      show={showCreateUser}
+      onHide={() => { setShowCreateUser(false) }}
+      dialogClassName="UserList_modal"
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>New User</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <ProfileForm ref={createUserRef} renderFooter={(isLoading, hasErrors) => {
+          setIsLoading(isLoading);
+          setCreateUserErrors(hasErrors);
+          return <></>;
+        }} />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => { setShowCreateUser(false); }}>
+          Close without saving
+        </Button>
+        <Button
+          type="submit"
+          disabled={isLoading || createUserErrors}
+          className="ml-auto"
+          onClick={() => {
+            createUserRef.current.submit();
           }}
         >
           {isLoading ? "Saving..." : "Save"}
