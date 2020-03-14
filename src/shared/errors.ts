@@ -25,8 +25,11 @@ const errors = {
     COULD_NOT_UPDATE: "Could not update profile.",
     COULD_NOT_DELETE: "Could not delete user.",
     INSUFFICIENT_PRIVILEGES: "Not enough privileges to change field.",
+    REQUIRED: errorFactory(attr => `Must provide a ${attr}.`),
     USERNAME: {
-      ALREADY_EXISTS: "Username already exists."
+      ALREADY_EXISTS: "Username already exists.",
+      CANNOT_CHANGE: "You cannot change your username after registration.",
+      TOO_LONG: "Username is too long."
     },
     EMAIL: {
       INVALID: "Email must be valid."
@@ -38,9 +41,6 @@ const errors = {
       TOO_SIMILAR: errorFactory(attr => `Password is too similar to ${attr}.`),
       ENTIRELY_NUMERIC: "Password must contain at least one letter or symbol.",
       MUST_MATCH: "Passwords must match."
-    },
-    WRITER_NAME: {
-      EMPTY: "Must provide a writer name."
     }
   }
 };

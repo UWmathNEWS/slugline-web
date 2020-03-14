@@ -54,5 +54,5 @@ export const useIssue = (issueId?: number): Issue | undefined => {
 };
 
 export const useUsersList = (): User[] | undefined => {
-  return useApiGet<User[]>("users/list");
+  return useApiGet<User[]>("allusers");
 };

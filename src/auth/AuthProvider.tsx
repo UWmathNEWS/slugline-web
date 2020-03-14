@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useReducer, useR
 import Cookie from "js-cookie";
 
 import { User, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
-import axios, {AxiosError} from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, Method as AxiosMethod } from "axios";
 import { getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
 
@@ -23,11 +23,18 @@ const Auth = createContext<AuthContext>({
   isAuthenticated: () => false,
   isEditor: () => false,
   post: () => Promise.resolve(undefined),
+  put: () => Promise.resolve(undefined),
+  patch: () => Promise.resolve(undefined),
   login: () => Promise.resolve(undefined),
   logout: () => Promise.resolve()
 });
 
 const CSRF_COOKIE = "csrftoken";
+
+interface AxiosConfig extends AxiosRequestConfig {
+  method: AxiosMethod;
+  url: string;
+}
 
 /**
  * Hardcoded endpoint because api.ts depends on this file.
@@ -87,13 +94,13 @@ export const AuthProvider: React.FC = props => {
     return user?.user?.is_editor ?? false;
   };
 
-  const post = <T extends {}>(endpoint: string, post_data: T, setCurUser: boolean = false) => {
-    const headers = user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {};
-    return axios
-      .post<UserAPIResponse>(getApiUrl(endpoint), post_data, {
-        headers: headers
-      })
-      .then(resp => {
+  const makeRequest = (config: AxiosConfig, setCurUser: boolean = false) => {
+    return axios({
+      ...config,
+      url: getApiUrl(config.url),
+      headers: user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {}
+    })
+      .then((resp: AxiosResponse<UserAPIResponse>) => {
         if (resp.data.success === undefined && resp.data.user === undefined) {
           // auth error
           throw ERRORS.REQUEST.NEEDS_AUTHENTICATION;
@@ -108,6 +115,30 @@ export const AuthProvider: React.FC = props => {
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
       });
+  };
+
+  const post = <T extends {}>(url: string, data: T, setCurUser: boolean = false) => {
+    return makeRequest({
+      method: 'post',
+      url,
+      data
+    }, setCurUser);
+  };
+
+  const put = <T extends {}>(url: string, data: T, setCurUser: boolean = false) => {
+    return makeRequest({
+      method: 'put',
+      url,
+      data
+    }, setCurUser);
+  };
+
+  const patch = <T extends {}>(url: string, data: T, setCurUser: boolean = false) => {
+    return makeRequest({
+      method: 'patch',
+      url,
+      data
+    }, setCurUser);
   };
 
   const login = (username: string, password: string) => {
@@ -158,6 +189,8 @@ export const AuthProvider: React.FC = props => {
         isAuthenticated,
         isEditor,
         post,
+        put,
+        patch,
         login,
         logout
       }}
