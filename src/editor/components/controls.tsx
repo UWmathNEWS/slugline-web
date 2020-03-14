@@ -8,6 +8,7 @@ import { toggleMark, isMarkActive, toggleInline } from "../helpers";
 import "./controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
+import PopoverWrapper from "../../shared/PopoverWrapper";
 
 interface ToggleMarkButtonProps {
   icon: string;
@@ -61,12 +62,13 @@ export const LinkButton: React.FC = () => {
         <FontAwesomeIcon icon="link" />
       </button>
       {ref.current && (
-        <LinkPopover
+        <PopoverWrapper
           target={ref.current}
-          href=""
           show={showPopover}
-          setHref={setHref}
-        />
+          setShow={setShowPopover}
+        >
+          <LinkPopover href="" setHref={setHref} />
+        </PopoverWrapper>
       )}
     </>
   );
@@ -101,12 +103,13 @@ export const InlineLatexButton: React.FC = () => {
         <FontAwesomeIcon icon="dollar-sign" />
       </button>
       {ref.current && (
-        <LatexPopover
+        <PopoverWrapper
           target={ref.current}
-          latex=""
           show={showPopover}
-          setLatex={setLatex}
-        />
+          setShow={setShowPopover}
+        >
+          <LatexPopover latex="" setLatex={setLatex} />
+        </PopoverWrapper>
       )}
     </>
   );

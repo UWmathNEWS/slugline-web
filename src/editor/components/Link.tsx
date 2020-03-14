@@ -3,6 +3,7 @@ import { RenderElementProps, useEditor, ReactEditor } from "slate-react";
 import { LinkElement } from "../types";
 import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
+import PopoverWrapper from "../../shared/PopoverWrapper";
 
 const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
   const element = props.element as LinkElement;
@@ -39,12 +40,9 @@ const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
         {props.children}
       </a>
       {ref.current && (
-        <LinkPopover
-          href={element.href}
-          setHref={setHref}
-          show={show}
-          target={ref.current}
-        />
+        <PopoverWrapper show={show} target={ref.current} setShow={setShow}>
+          <LinkPopover href={element.href} setHref={setHref} />
+        </PopoverWrapper>
       )}
     </span>
   );
