@@ -25,6 +25,7 @@ const Auth = createContext<AuthContext>({
   post: () => Promise.resolve(undefined),
   put: () => Promise.resolve(undefined),
   patch: () => Promise.resolve(undefined),
+  delete: () => Promise.resolve(undefined),
   login: () => Promise.resolve(undefined),
   logout: () => Promise.resolve()
 });
@@ -105,10 +106,10 @@ export const AuthProvider: React.FC = props => {
           // auth error
           throw ERRORS.REQUEST.NEEDS_AUTHENTICATION;
         }
-        if (!resp.data.success || resp.data.user === undefined) {
+        if (!resp.data.success) {
           throw resp.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
         }
-        if (setCurUser) {
+        if (setCurUser && resp.data.user) {
           dispatchUser({type: 'post', user: resp.data.user});
         }
         return resp.data.user;
@@ -139,6 +140,13 @@ export const AuthProvider: React.FC = props => {
       url,
       data
     }, setCurUser);
+  };
+
+  const del = (url: string) => {
+    return makeRequest({
+      method: 'delete',
+      url
+    }, false);
   };
 
   const login = (username: string, password: string) => {
@@ -191,6 +199,7 @@ export const AuthProvider: React.FC = props => {
         post,
         put,
         patch,
+        delete: del,
         login,
         logout
       }}

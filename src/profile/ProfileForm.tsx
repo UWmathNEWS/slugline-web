@@ -7,7 +7,8 @@ import ERRORS from "../shared/errors";
 import { getApiUrl } from "../api/api";
 
 interface ChangedUser {
-  username?: string
+  username?: string;
+  name?: string;
   first_name?: string;
   last_name?: string;
   email?: string;
@@ -130,19 +131,21 @@ const ProfileForm: React.FC<{
         window.clearTimeout(checkUsernameRef.current);
 
         if (value.length > 0 && value.length <= 150) {
+          dispatch({
+            type: 'set data',
+            data: { username: value }
+          });
           checkUsernameRef.current = window.setTimeout(() => {
             axios.get<{ success: boolean }>(getApiUrl(`users/${value}/query`))
               .then(resp => {
                 if (resp.data.success) {
                   dispatch({
-                    type: 'set data',
-                    data: { username: value },
+                    type: 'set error',
                     errors: { username: [] }
                   });
                 } else {
                   dispatch({
-                    type: 'set data',
-                    data: { username: "" },
+                    type: 'set error',
                     errors: { username: ["USER.USERNAME.ALREADY_EXISTS"] }
                   });
                 }
@@ -151,7 +154,7 @@ const ProfileForm: React.FC<{
         } else {
           dispatch({
             type: 'set data',
-            data: { username: "" },
+            data: { username: value.slice(0, 150) },
             errors: { username: value.length > 150 ? ["USER.USERNAME.TOO_LONG"] : [] }
           });
         }
@@ -185,6 +188,7 @@ const ProfileForm: React.FC<{
         dispatch({
           type: 'set data',
           data: {
+            name: value,
             first_name: names.slice(0, -1).join(" "),
             last_name: names[names.length - 1]
           }
@@ -193,6 +197,7 @@ const ProfileForm: React.FC<{
         dispatch({
           type: 'set data',
           data: {
+            name: value,
             first_name: names[0],
             last_name: ""
           }
@@ -264,7 +269,7 @@ const ProfileForm: React.FC<{
 
     dispatch({ type: 'is loading' });
 
-    (user === undefined ?
+    return (user === undefined ?
       auth.put<ChangedUser>(
         "createuser",
         state.changedUser,
@@ -307,6 +312,7 @@ const ProfileForm: React.FC<{
               <Form.Control
                 name="username"
                 required
+                value={state.changedUser.username ?? ""}
                 onChange={onChange}
                 isValid={(state.changedUser.username?.length ?? 0) > 0 && state.errors.username?.length === 0}
                 isInvalid={state.errors.username && state.errors.username.length > 0} />
@@ -328,7 +334,7 @@ const ProfileForm: React.FC<{
             name="email"
             required
             placeholder="example@example.com"
-            defaultValue={user ? user.email : ""}
+            value={state.changedUser.email ?? user?.email ?? ""}
             onChange={onChange}
             isValid={(state.changedUser.email?.length ?? 0) > 0}
             isInvalid={state.errors.email && state.errors.email.length > 0} />
@@ -346,7 +352,9 @@ const ProfileForm: React.FC<{
           <Form.Control
             name="name"
             placeholder="e.g. Johnny Appleseed"
-            defaultValue={user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}` : ""}
+            value={state.changedUser.name ?? (user ?
+              `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}` :
+              "")}
             onChange={onChange}
             isValid={'first_name' in state.changedUser} />
         </Col>
@@ -358,7 +366,7 @@ const ProfileForm: React.FC<{
           <Form.Control
             name="writer_name"
             placeholder="e.g. Grower of Apples"
-            defaultValue={user ? user.writer_name : ""}
+            value={state.changedUser.writer_name ?? user?.writer_name ?? ""}
             onChange={onChange}
             isValid={(state.changedUser.writer_name?.length ?? 0) > 0}
             isInvalid={state.errors.writer_name && state.errors.writer_name.length > 0}/>

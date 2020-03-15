@@ -54,6 +54,7 @@ export interface AuthContext {
   post: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
   put: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
   patch: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
+  delete: (endpoint: string) => Promise<User | undefined>;
   login: (username: string, password: string) => Promise<User | undefined>;
   logout: () => Promise<void>;
 }
