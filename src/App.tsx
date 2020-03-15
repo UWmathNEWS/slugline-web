@@ -10,7 +10,6 @@ import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
 import Dash from "./dash/Dash";
 import { initLibrary } from "./shared/icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 initLibrary();
 

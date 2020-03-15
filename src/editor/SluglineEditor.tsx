@@ -1,18 +1,17 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState } from "react";
 
-import { Node, createEditor, Element, Range, Editor } from "slate";
+import { Node, Range } from "slate";
 import {
   Slate,
   Editable,
   withReact,
   RenderLeafProps,
-  RenderElementProps,
-  ReactEditor
+  RenderElementProps
 } from "slate-react";
 
 import { Leaf } from "./components/Leaf";
 import * as EditorHelpers from "./helpers";
-import { Mark, SluglineElement, ElementType } from "./types";
+import { SluglineElement, ElementType } from "./types";
 
 import "./SluglineEditor.scss";
 import Link from "./components/Link";

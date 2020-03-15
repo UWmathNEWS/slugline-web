@@ -1,8 +1,7 @@
-import { Editor, Transforms, Element, Range, Node, Text } from "slate";
+import { Editor, Transforms, Range, Text } from "slate";
 import isHotkey from "is-hotkey";
 
-import { Mark, ElementType, LinkElement, SluglineElement } from "./types";
-import { Transform } from "stream";
+import { Mark, SluglineElement } from "./types";
 
 export function isMarkActive(editor: Editor, mark: Mark): boolean {
   const marks = Editor.marks(editor);

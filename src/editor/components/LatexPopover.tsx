@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Overlay, Form, Button } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 
 interface LatexPopoverProps {
   setLatex: (latex: string) => void;
