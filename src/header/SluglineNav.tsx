@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import "./SluglineNav.scss";
 import { useAuth } from "../auth/AuthProvider";
-import { useToast } from "../shared/ToastContext";
+import { useToast } from "../shared/contexts/ToastContext";
 
 const LoginLogoutLink = () => {
   const auth = useAuth();

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Alert, Form, Button } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
 import { useHistory } from "react-router-dom";
-import { useToast } from "../shared/ToastContext";
+import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";
 
 const Login: React.FC = () => {
