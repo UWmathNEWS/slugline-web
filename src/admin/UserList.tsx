@@ -206,7 +206,7 @@ const UserList = () => {
           onClick={() => {
             editUserRef.current.submit().then(() => {
               dispatch({ type: 'submit edit user' });
-            });
+            }, () => {});
           }}
         >
           {isLoading ? "Saving..." : "Save"}
@@ -239,7 +239,7 @@ const UserList = () => {
           onClick={() => {
             createUserRef.current.submit().then(() => {
               dispatch({ type: 'submit create user' });
-            });
+            }, () => {});
           }}
         >
           {isLoading ? "Saving..." : "Save"}

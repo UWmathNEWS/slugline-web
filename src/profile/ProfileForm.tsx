@@ -127,7 +127,7 @@ const ProfileForm: React.FC<{
   });
 
   const onChange = (evt: React.FormEvent<HTMLInputElement>) => {
-    const { name, value, checked } = evt.currentTarget;
+    const { name, value } = evt.currentTarget;
     switch (name) {
     case "username": {
       if (user === undefined) {
@@ -219,7 +219,7 @@ const ProfileForm: React.FC<{
     case "is_editor":
       dispatch({
         type: 'set data',
-        data: { is_editor: checked }
+        data: { is_editor: value === "true" }
       });
       break;
     case "cur_password":
@@ -262,13 +262,14 @@ const ProfileForm: React.FC<{
   const onSubmit = (evt?: React.FormEvent<HTMLFormElement>) => {
     evt?.preventDefault();
 
-    if (Object.values(state.changedUser).every(p => !p)) {
-      return;
+    if ((Object.keys(state.changedUser) as Array<keyof ChangedUser>).every((k) =>
+        state.changedUser[k] === undefined || (k == 'is_editor' && state.changedUser[k] == user?.is_editor))) {
+      return Promise.resolve();
     }
 
     if (Object.values(state.errors).flat().length) {
       dispatch({ type: 'set general error', errors: [ERRORS.FORMS.NOT_YET_VALID] });
-      return;
+      return Promise.reject();
     }
 
     dispatch({ type: 'is loading' });
@@ -384,14 +385,22 @@ const ProfileForm: React.FC<{
 
       {auth.isEditor() &&
       <Form.Group as={Row} controlId="profileIsEditor">
-        <Form.Label column sm={2}>Editor privileges</Form.Label>
+        <Form.Label column sm={2}>Role</Form.Label>
         <Col sm={10}>
-          <Form.Check
+          {/* NOTE: The custom attribute hasn't landed yet; it's here for future-compat. In the meantime, we add a
+              custom class instead. */}
+          <Form.Control
+            as="select"
             name="is_editor"
-            aria-label="Editor privileges"
             onChange={onChange}
-            checked={state.changedUser.is_editor}
-            disabled={auth.user?.username === user?.username && !user?.is_staff} />
+            value={state.changedUser.is_editor?.toString()}
+            disabled={auth.user?.username === user?.username && !user?.is_staff}
+            className="custom-select"
+            custom
+          >
+            <option value="false">Contributor</option>
+            <option value="true">Editor</option>
+          </Form.Control>
         </Col>
       </Form.Group>}
 
@@ -418,7 +427,7 @@ const ProfileForm: React.FC<{
       <Form.Group as={Row} controlId="profileNewPassword">
         <Form.Label column sm={2}>
           New password
-          <OverlayTrigger trigger="hover" placement="right" overlay={password_info}>
+          <OverlayTrigger placement="right" overlay={password_info}>
             <span>(i)</span>
           </OverlayTrigger>
         </Form.Label>
@@ -452,7 +461,7 @@ const ProfileForm: React.FC<{
                     variant={showPassword ? "primary" : "outline-secondary"}
                     onClick={() => { setShowPassword(s => !s) }}
                   >
-                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
+                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                   </Button>
                 </InputGroup.Append>
               </InputGroup>
