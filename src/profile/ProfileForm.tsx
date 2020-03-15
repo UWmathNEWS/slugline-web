@@ -1,6 +1,10 @@
 import axios from "axios";
-import React, { forwardRef, useImperativeHandle, useReducer, useRef } from "react";
-import { Button, Form, Row, Col, Alert, OverlayTrigger, Popover } from "react-bootstrap";
+import React, { forwardRef, useImperativeHandle, useReducer, useRef, useState } from "react";
+import { Button, Form, Row, Col, Alert, OverlayTrigger, Popover, InputGroup } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import nanoid from "nanoid";
+
 import { User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
@@ -112,7 +116,7 @@ const ProfileForm: React.FC<{
 ) => {
   const auth = useAuth();
   const checkUsernameRef = useRef<number>();
-
+  const [showPassword, setShowPassword] = useState(false);
   const [state, dispatch] = useReducer(profileReducer, {
     changedUser: auth.isEditor() ? { is_editor: user?.is_editor ?? false } : {},
     errors: {},
@@ -395,8 +399,8 @@ const ProfileForm: React.FC<{
 
       {auth.user === user &&
       <Form.Group as={Row} controlId="profileCurPassword">
-        <Form.Label column sm={3}>Current password</Form.Label>
-        <Col sm={9}>
+        <Form.Label column sm={2}>Current password</Form.Label>
+        <Col sm={10}>
           <Form.Control
             type="password"
             name="cur_password"
@@ -412,24 +416,57 @@ const ProfileForm: React.FC<{
       </Form.Group>}
 
       <Form.Group as={Row} controlId="profileNewPassword">
-        <Form.Label column sm={3}>
+        <Form.Label column sm={2}>
           New password
           <OverlayTrigger trigger="hover" placement="right" overlay={password_info}>
             <span>(i)</span>
           </OverlayTrigger>
         </Form.Label>
-        <Col sm={9}>
-          <Form.Control
-            type="password"
-            name="password"
-            onChange={onChange}
-            isInvalid={state.errors.password && state.errors.password.length > 0}
-            value={state.changedUser?.password ?? ''} />
-          <Form.Control.Feedback type="invalid">
-            <ul>
-              {state.errors.password?.map((msg) => <li key={msg}>{ERRORS[msg]}</li>)}
-            </ul>
-          </Form.Control.Feedback>
+        <Col sm={10}>
+          <Form.Row>
+            <Col sm="auto">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  dispatch({
+                    type: 'set data',
+                    data: { password: nanoid() },
+                    errors: { password: [] }
+                  });
+                  setShowPassword(true);
+                }}
+              >
+                Generate
+              </Button>
+            </Col>
+            <Col>
+              <InputGroup>
+                <Form.Control
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  onChange={onChange}
+                  isInvalid={state.errors.password && state.errors.password.length > 0}
+                  value={state.changedUser?.password ?? ''} />
+                <InputGroup.Append>
+                  <Button
+                    variant={showPassword ? "primary" : "outline-secondary"}
+                    onClick={() => { setShowPassword(s => !s) }}
+                  >
+                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
+                  </Button>
+                </InputGroup.Append>
+              </InputGroup>
+              <Form.Control
+                type="hidden"
+                isInvalid={state.errors.password && state.errors.password.length > 0}
+                value={state.changedUser?.password} />
+              <Form.Control.Feedback type="invalid">
+                <ul>
+                  {state.errors.password?.map((msg) => <li key={msg}>{ERRORS[msg]}</li>)}
+                </ul>
+              </Form.Control.Feedback>
+            </Col>
+          </Form.Row>
         </Col>
       </Form.Group>
 
