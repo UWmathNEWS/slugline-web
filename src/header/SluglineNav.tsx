@@ -2,47 +2,62 @@ import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-import "./SluglineNav.scss";
 import { useAuth } from "../auth/AuthProvider";
+
+import "./SluglineNav.scss";
+
+interface NavLinkProps {
+  to: string;
+  onClick?: () => void;
+  text: string;
+}
+
+// React Router's links and Bootstrap's navbar links don't play together too nicely,
+// so try and mash them together here
+const NavLink: React.FC<NavLinkProps> = props => {
+  const { text, ...rest } = props;
+  return (
+    <Nav.Item>
+      <Link {...rest} className="nav-link">
+        <h4>{props.text}</h4>
+      </Link>
+    </Nav.Item>
+  );
+};
 
 const SluglineNav = () => {
   const auth = useAuth();
 
   return (
-    <Navbar variant="dark" expand="lg" className="blackbox">
-      <Navbar.Toggle aria-controls="slugline-nav" />
-      <Navbar.Collapse id="slugline-nav">
-        <Nav className="w-100" justify>
-          <Nav.Item>
-            <Link to="/" className="nav-link">
-              <h4>Home</h4>
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/issues" className="nav-link">
-              <h4>Issues</h4>
-            </Link>
-          </Nav.Item>
-          {auth.isAuthenticated() && (
-            <Nav.Item>
-              <Link to="/dash" className="nav-link">
-                <h4>Dash</h4>
-              </Link>
-            </Nav.Item>
-          )}
-          <Nav.Item>
+    <Navbar bg="primary" expand="lg">
+      <div className="container" id="navContainer">
+        <Navbar.Brand href="/">
+          <span className="mathnews-logo" />
+        </Navbar.Brand>
+        <Navbar.Toggle
+          className="custom-toggler"
+          aria-controls="slugline-nav"
+        />
+        <Navbar.Collapse id="slugline-nav">
+          <Nav className="mr-auto">
+            <NavLink to="/" text="Home" />
+            <NavLink to="/issues" text="Issues" />
+            {auth.isAuthenticated() && <NavLink to="/dash" text="Dash" />}
             {auth.isAuthenticated() ? (
-              <Link to="/" onClick={() => auth.logout()} className="nav-link">
-                <h4>Logout</h4>
-              </Link>
+              <NavLink
+                to="/"
+                text="Logout"
+                onClick={() => {
+                  alert("logout");
+                  auth.logout();
+                }}
+              />
             ) : (
-              <Link to="/login" className="nav-link">
-                <h4>Login</h4>
-              </Link>
+              <NavLink to="/login" text="Login" />
             )}
-          </Nav.Item>
-        </Nav>
-      </Navbar.Collapse>
+          </Nav>
+        </Navbar.Collapse>
+      </div>
     </Navbar>
   );
 };
