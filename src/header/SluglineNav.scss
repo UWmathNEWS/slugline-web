@@ -1,6 +1,9 @@
-.nav-link > h4 {
-  margin-bottom: 0;
-  font-weight: normal;
+.nav-link {
+  margin: 0 10px;
+  & > h4 {
+    margin-bottom: 0;
+    font-weight: normal;
+  }
 }
 
 #navContainer {
