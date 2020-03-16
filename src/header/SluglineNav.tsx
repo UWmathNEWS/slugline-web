@@ -48,7 +48,6 @@ const SluglineNav = () => {
                 to="/"
                 text="Logout"
                 onClick={() => {
-                  alert("logout");
                   auth.logout();
                 }}
               />
