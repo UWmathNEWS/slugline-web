@@ -1,4 +1,4 @@
-import { ToastMessage, useToast } from "../contexts/ToastContext";
+import { useToast } from "../contexts/ToastContext";
 import { Toast } from "react-bootstrap";
 import React from "react";
 
@@ -13,43 +13,15 @@ const ToastContainer = () => {
     }}>
       {toast.toasts.map((msg, i) => {
         const onClose = () => {
-          toast.setToasts((_prevToasts: ToastMessage[]) => {
-            const prevToasts = _prevToasts.slice();
-            // We can heuristically search only previous entries since the toasts list should only be pushed to
-            for (let j = Math.min(i, prevToasts.length - 1); j >= 0; --j) {
-              if (prevToasts[j].id === msg.id) {
-                prevToasts[j].show = false;
-                return prevToasts;
-              }
-            }
-            // if that doesn't work, perform the forwards search I guess
-            for (let k = i + 1; k < prevToasts.length; ++k) {
-              if (prevToasts[k].id === msg.id) {
-                prevToasts[k].show = false;
-                break;
-              }
-            }
-            return prevToasts;
+          toast.setToastsHeuristically(i, m => m.id === msg.id, (prevToasts, index) => {
+            prevToasts[index].show = false;
           });
           setTimeout(() => {
             // same as above
-            toast.setToasts((_prevToasts: ToastMessage[]) => {
-              const prevToasts = _prevToasts.slice();
-              for (let j = Math.min(i, prevToasts.length - 1); j >= 0; --j) {
-                if (prevToasts[j].id === msg.id) {
-                  prevToasts.splice(j, 1);
-                  return prevToasts;
-                }
-              }
-              for (let k = i + 1; k < prevToasts.length; ++k) {
-                if (prevToasts[k].id === msg.id) {
-                  prevToasts.splice(k, 1);
-                  break;
-                }
-              }
-              return prevToasts;
+            toast.setToastsHeuristically(i, m => m.id === msg.id, (prevToasts, index) => {
+              prevToasts.splice(index, 1);
             });
-          }, 200);
+          }, 500);
         };
         return (
           <Toast
@@ -61,7 +33,7 @@ const ToastContainer = () => {
             autohide={msg.delay !== undefined}>
 
             {msg.title && <Toast.Header>
-                <strong className="mr-auto">{msg.title}</strong>
+              <strong className="mr-auto">{msg.title}</strong>
             </Toast.Header>}
             <Toast.Body>
               {msg.body}
