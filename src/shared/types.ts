@@ -29,20 +29,27 @@ export interface User {
   writer_name: string;
 }
 
-export interface UserAPIError {
+export interface APIError {
   detail?: string[];
+  [key: string]: string[] | undefined;
+}
+
+export interface APIResponse<T, U extends APIError> {
+  success: boolean;
+  data?: T;
+  error?: U | string;
+}
+
+export interface UserAPIError extends APIError {
   user?: string[];
   username?: string[];
   email?: string[];
   password?: string[];
   writer_name?: string[];
-  [key: string]: string[] | undefined;
 }
 
-export interface UserAPIResponse {
-  success: boolean;
+export interface UserAPIResponse extends APIResponse<User, UserAPIError> {
   user?: User;
-  error?: UserAPIError | string;
 }
 
 export interface AuthContext {
