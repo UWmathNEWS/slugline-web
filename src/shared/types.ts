@@ -25,7 +25,45 @@ export interface User {
   last_name: string;
   email: string;
   is_staff: boolean;
+  is_editor: boolean;
   writer_name: string;
+}
+
+export interface APIError {
+  detail?: string[];
+  [key: string]: string[] | undefined;
+}
+
+export interface APIResponse<T, U extends APIError> {
+  success: boolean;
+  data?: T;
+  error?: U | string;
+}
+
+export interface UserAPIError extends APIError {
+  user?: string[];
+  username?: string[];
+  email?: string[];
+  password?: string[];
+  writer_name?: string[];
+}
+
+export interface UserAPIResponse extends APIResponse<User, UserAPIError> {
+  user?: User;
+}
+
+export interface AuthContext {
+  user: User | null;
+  csrfToken: string | null;
+  check: (force?: boolean) => Promise<void> | undefined;
+  isAuthenticated: () => boolean;
+  isEditor: () => boolean;
+  post: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
+  put: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
+  patch: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
+  delete: (endpoint: string) => Promise<User | undefined>;
+  login: (username: string, password: string) => Promise<User | undefined>;
+  logout: () => Promise<void>;
 }
 
 export interface AuthResponse {
