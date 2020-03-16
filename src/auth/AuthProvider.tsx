@@ -79,16 +79,15 @@ export const AuthProvider: React.FC = props => {
     return state;
   }, {
     user: storedUser !== null ? JSON.parse(storedUser) : null,
-    csrfToken: null
+    csrfToken: null // null is a sentinel value here so we know the page was just loaded
   });
 
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
       const promise = (force ? axios.get<AuthResponse>(getApiUrl("auth/")) : initialPromise)
-      // const promise = axios.get<AuthResponse>(getApiUrl("auth/"))
         .then(resp => {
-          if (resp.data.user && user.user === null) {
+          if (resp.data.user && user.csrfToken === null) {
             dispatchUser({ type: 'login', user: resp.data.user });
           } else if (resp.data.user === undefined) {
             dispatchUser({ type: 'logout' });
