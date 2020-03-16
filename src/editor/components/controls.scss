@@ -2,7 +2,7 @@
   height: 30px;
   width: 30px;
   font-size: 18px;
-  border: 1px solid black;
+  border: none;
   background: none;
   border-radius: 5px;
   margin: 2.5px;
@@ -13,6 +13,10 @@
     height: 100%;
     max-width: 100%;
     width: auto;
+
+    & > path {
+      fill: #4f4f4f;
+    }
   }
 
   &.active,
