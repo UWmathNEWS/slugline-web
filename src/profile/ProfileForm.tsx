@@ -140,7 +140,7 @@ const ProfileForm: React.FC<{
             data: { username: value }
           });
           checkUsernameRef.current = window.setTimeout(() => {
-            axios.get<{ success: boolean }>(getApiUrl(`users/${value}/query`))
+            axios.get<{ success: boolean }>(getApiUrl(`users/${value}/query/`))
               .then(resp => {
                 if (resp.data.success) {
                   dispatch({
@@ -275,14 +275,14 @@ const ProfileForm: React.FC<{
     dispatch({ type: 'is loading' });
 
     return (user === undefined ?
-      auth.put<ChangedUser>(
-        "createuser",
+      auth.post<ChangedUser>(
+        "users/",
         state.changedUser,
       ) :
       auth.patch<ChangedUser>(
         user === auth.user ?
-          "user/update" :
-          `users/${user?.username}/update`,
+          "me/" :
+          `users/${user?.username}/`,
         state.changedUser,
         user === auth.user
       )

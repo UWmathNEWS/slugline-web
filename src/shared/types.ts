@@ -34,11 +34,22 @@ export interface APIError {
   [key: string]: string[] | undefined;
 }
 
-export interface APIResponse<T, U extends APIError> {
+export interface APIResponse<T, U extends APIError = APIError> {
   success: boolean;
   data?: T;
   error?: U | string;
 }
+
+interface _PaginatedAPIResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+export type PaginatedAPIResponse<T, U extends APIError = APIError> =
+  { success: true, data: _PaginatedAPIResponse<T> } |
+  { success: false, error?: U | string };
 
 export interface UserAPIError extends APIError {
   user?: string[];
@@ -64,9 +75,4 @@ export interface AuthContext {
   delete: (endpoint: string) => Promise<User | undefined>;
   login: (username: string, password: string) => Promise<User | undefined>;
   logout: () => Promise<void>;
-}
-
-export interface AuthResponse {
-  user?: User;
-  is_authenticated: boolean;
 }
