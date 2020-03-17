@@ -39,7 +39,7 @@ interface AxiosConfig extends AxiosRequestConfig {
  * Hardcoded endpoint because api.ts depends on this file.
  * Check here if endpoint changes and stuff breaks.
  */
-const initialPromise = axios.get<UserAPIResponse>("/api/user/");
+const initialPromise = axios.get<UserAPIResponse>("/api/me/");
 
 const CSRF_COOKIE = "csrftoken";
 const USER_LOCALSTORAGE_KEY = "slugline-user";
@@ -85,7 +85,7 @@ export const AuthProvider: React.FC = props => {
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
-      const promise = (force ? axios.get<UserAPIResponse>(getApiUrl("user/")) : initialPromise)
+      const promise = (force ? axios.get<UserAPIResponse>(getApiUrl("me/")) : initialPromise)
         .then(resp => {
           if (resp.data.user && user.csrfToken === null) {
             dispatchUser({ type: 'login', user: resp.data.user });

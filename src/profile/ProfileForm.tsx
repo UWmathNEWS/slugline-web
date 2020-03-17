@@ -281,7 +281,7 @@ const ProfileForm: React.FC<{
       ) :
       auth.patch<ChangedUser>(
         user === auth.user ?
-          "user/" :
+          "me/" :
           `users/${user?.username}/`,
         state.changedUser,
         user === auth.user
