@@ -10,7 +10,7 @@ import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
 
 const getUserList = (): Promise<User[]> => {
-  return axios.get<User[]>(getApiUrl("allusers"))
+  return axios.get<User[]>(getApiUrl("users/"))
     .then(resp => resp.data)
 };
 
@@ -121,7 +121,7 @@ const UserList = () => {
   };
 
   const deleteUser = (username: string) => {
-    auth.delete(`users/${username}/delete`)
+    auth.delete(`users/${username}/`)
       .then(() => {
         alert(`Successfully deleted user ${username}`);
         dispatch({ type: 'submit edit user' });
