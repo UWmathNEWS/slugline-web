@@ -65,8 +65,3 @@ export interface AuthContext {
   login: (username: string, password: string) => Promise<User | undefined>;
   logout: () => Promise<void>;
 }
-
-export interface AuthResponse {
-  user?: User;
-  is_authenticated: boolean;
-}

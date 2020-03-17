@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useReducer, useRef } from "react";
 import Cookie from "js-cookie";
 
-import { User, UserAPIResponse, AuthContext, AuthResponse } from "../shared/types";
+import { User, UserAPIResponse, AuthContext } from "../shared/types";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, Method as AxiosMethod } from "axios";
 import { getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
@@ -39,7 +39,7 @@ interface AxiosConfig extends AxiosRequestConfig {
  * Hardcoded endpoint because api.ts depends on this file.
  * Check here if endpoint changes and stuff breaks.
  */
-const initialPromise = axios.get<AuthResponse>("/api/auth/");
+const initialPromise = axios.get<UserAPIResponse>("/api/user/");
 
 const CSRF_COOKIE = "csrftoken";
 const USER_LOCALSTORAGE_KEY = "slugline-user";
@@ -85,11 +85,11 @@ export const AuthProvider: React.FC = props => {
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
-      const promise = (force ? axios.get<AuthResponse>(getApiUrl("auth/")) : initialPromise)
+      const promise = (force ? axios.get<UserAPIResponse>(getApiUrl("user/")) : initialPromise)
         .then(resp => {
           if (resp.data.user && user.csrfToken === null) {
             dispatchUser({ type: 'login', user: resp.data.user });
-          } else if (resp.data.user === undefined) {
+          } else if (resp.data.success === false) {
             dispatchUser({ type: 'logout' });
           }
           isWaiting.current = false;
