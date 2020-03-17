@@ -2,7 +2,7 @@ import React, { useEffect, useReducer, useRef, useState } from "react";
 import axios from "axios";
 import { getApiUrl } from "../api/api";
 import { InputGroup, Form, Table, Modal, Button } from "react-bootstrap";
-import { User, UserAPIError } from "../shared/types";
+import { User, PaginatedAPIResponse } from "../shared/types";
 import ProfileForm from "../profile/ProfileForm";
 
 import "./UserList.scss";
@@ -10,8 +10,13 @@ import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
 
 const getUserList = (): Promise<User[]> => {
-  return axios.get<User[]>(getApiUrl("users/"))
-    .then(resp => resp.data)
+  return axios.get<PaginatedAPIResponse<User>>(getApiUrl("users/"))
+    .then(resp => {
+      if (resp.data.success)
+        return resp.data.data.results;
+      else
+        throw resp.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
+    })
 };
 
 interface State {
