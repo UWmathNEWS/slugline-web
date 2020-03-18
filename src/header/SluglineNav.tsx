@@ -18,8 +18,8 @@ const NavLink: React.FC<NavLinkProps> = props => {
   const { text, ...rest } = props;
   return (
     <Nav.Item>
-      <Link {...rest} className="nav-link">
-        <h4>{props.text}</h4>
+      <Link {...rest} className="nav-link h4">
+        {props.text}
       </Link>
     </Nav.Item>
   );

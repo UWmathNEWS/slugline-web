@@ -1,11 +1,11 @@
 @import "src/slugline.scss";
 
-.nav-link {
+a.nav-link {
   margin: 0 $spacer;
-  & > h4 {
-    margin-bottom: 0;
-    font-weight: normal;
-  }
+  margin-bottom: 0;
+  font-weight: normal;
+  color: black !important;
+  text-transform: uppercase;
 }
 
 // some manual spacing to get the navbar to line up with the content
