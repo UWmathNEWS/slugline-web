@@ -1,5 +1,6 @@
+@import "src/slugline.scss";
 .editor-header {
-  margin-bottom: 1em;
+  margin-bottom: $spacer;
 }
 
 input.editor-header-input {
@@ -30,5 +31,5 @@ input.editor-header-input {
 
 div.editor-body {
   height: 70vh;
-  padding: 10px;
+  padding: $spacer map-get($map: $spacers, $key: 1);
 }

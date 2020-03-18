@@ -1,5 +1,7 @@
+@import "src/slugline.scss";
+
 .editor-controls {
-  padding: 5px;
+  padding: map-get($map: $spacers, $key: 1);
   border-bottom: none;
   display: flex;
 }
@@ -7,5 +9,5 @@
 div.editor-separator {
   width: 1px;
   background: black;
-  margin: 2.5px;
+  margin: map-get($map: $spacers, $key: 1) / 2;
 }

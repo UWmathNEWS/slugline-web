@@ -30,7 +30,7 @@ const SluglineNav = () => {
 
   return (
     <Navbar bg="primary" expand="lg">
-      <div className="container" id="navContainer">
+      <div className="container nav-container">
         <Navbar.Brand href="/">
           <span className="mathnews-logo" />
         </Navbar.Brand>

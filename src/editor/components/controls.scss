@@ -1,3 +1,5 @@
+@import "src/slugline.scss";
+
 .editor-control {
   height: 30px;
   width: 30px;
@@ -5,7 +7,7 @@
   border: none;
   background: none;
   border-radius: 5px;
-  margin: 2.5px;
+  margin: map-get($map: $spacers, $key: 1) / 2;
 
   & > svg {
     display: block;
@@ -15,7 +17,7 @@
     width: auto;
 
     & > path {
-      fill: #4f4f4f;
+      fill: $gray-700;
     }
   }
 
@@ -30,7 +32,7 @@
 }
 
 .control-popover {
-  padding: 10px;
+  padding: $spacer;
   background: white;
   border: 1px solid black;
   border-radius: 5px;
