@@ -7,7 +7,7 @@
   border: none;
   background: none;
   border-radius: 5px;
-  margin: map-get($map: $spacers, $key: 1) / 2;
+  margin: spacing(1) / 2;
 
   & > svg {
     display: block;

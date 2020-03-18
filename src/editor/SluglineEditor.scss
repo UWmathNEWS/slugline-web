@@ -31,5 +31,5 @@ input.editor-header-input {
 
 div.editor-body {
   height: 70vh;
-  padding: $spacer map-get($map: $spacers, $key: 1);
+  padding: spacing(3) spacing(1);
 }
