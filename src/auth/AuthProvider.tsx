@@ -43,7 +43,7 @@ export const AuthProvider: React.FC = props => {
   };
 
   const isAuthenticated = () => {
-    return user !== undefined;
+    return user !== null;
   };
 
   useEffect(() => {
