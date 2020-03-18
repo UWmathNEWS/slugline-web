@@ -3,8 +3,50 @@ import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthProvider";
+import { useToast } from "../shared/contexts/ToastContext";
 
 import "./SluglineNav.scss";
+
+const LoginLogoutLink = () => {
+  const auth = useAuth();
+  const toast = useToast();
+
+  return (
+    <Nav.Item>
+      {auth.isAuthenticated() ? (
+        <NavLink
+          to="/"
+          text="Logout"
+          onClick={() => {
+            auth.logout().then(
+              () => {
+                toast.addToasts([
+                  {
+                    id: Math.random.toString(),
+                    body: "Logout successful!",
+                    delay: 3000
+                  }
+                ]);
+              },
+              (errors: string[]) => {
+                toast.addToasts(
+                  errors.map(e => ({
+                    id: Math.random.toString(),
+                    title: "Logout error",
+                    body: e,
+                    delay: 3000
+                  }))
+                );
+              }
+            );
+          }}
+        />
+      ) : (
+        <NavLink to="/login" text="Login" />
+      )}
+    </Nav.Item>
+  );
+};
 
 interface NavLinkProps {
   to: string;
@@ -39,21 +81,13 @@ const SluglineNav = () => {
           aria-controls="slugline-nav"
         />
         <Navbar.Collapse id="slugline-nav">
-          <Nav className="mr-auto">
-            <NavLink to="/" text="Home" />
-            <NavLink to="/issues" text="Issues" />
-            {auth.isAuthenticated() && <NavLink to="/dash" text="Dash" />}
-            {auth.isAuthenticated() ? (
-              <NavLink
-                to="/"
-                text="Logout"
-                onClick={() => {
-                  auth.logout();
-                }}
-              />
-            ) : (
-              <NavLink to="/login" text="Login" />
-            )}
+          <Nav>
+            <NavLink text="Home" to="/" />
+            <NavLink text="Issues" to="/issues" />
+            {auth.isAuthenticated() && <NavLink text="Dash" to="/dash" />}
+            {auth.isAuthenticated() && <NavLink text="Profile" to="/profile" />}
+            {auth.isEditor() && <NavLink text="admin" to="/admin" />}
+            <LoginLogoutLink />
           </Nav>
         </Navbar.Collapse>
       </div>

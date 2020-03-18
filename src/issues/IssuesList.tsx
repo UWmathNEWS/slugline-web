@@ -46,7 +46,7 @@ const IssuesList = () => {
   const [volumes, setVolumes] = useState<Issue[][]>([]);
 
   useEffect(() => {
-    if (!issues) {
+    if (issues === undefined || issues.length === 0) {
       return;
     }
     let vols: Issue[][] = [[]];
