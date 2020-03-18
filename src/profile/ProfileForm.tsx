@@ -36,7 +36,7 @@ type ProfileAction =
   { type: 'is checking' } |
   { type: 'done checking' } |
   { type: 'done loading success' } |
-  { type: 'done loading error', errors: UserAPIError | string | string[] } |
+  { type: 'done loading error', errors: UserAPIError | string } |
   { type: 'set error', errors: UserAPIError } |
   { type: 'set general error', errors: string[] } |
   { type: 'set success message', message: string } |
@@ -64,10 +64,9 @@ const profileReducer = (state: ProfileState, action: ProfileAction): ProfileStat
       // definitely a authentication error; this is the only time we'd throw a string
       // TODO: insert login flow
       return { ...state, isLoading: false, isChecking: false, };
-    } else if (Array.isArray(action.errors)) {
-      return { ...state, isLoading: false, isChecking: false, generalErrors: action.errors };
     } else {
-      return { ...state, isLoading: false, isChecking: false, generalErrors: [], errors: action.errors };
+      const { detail, ...errors } = action.errors;
+      return { ...state, isLoading: false, isChecking: false, generalErrors: detail ?? [], errors };
     }
   case 'set error':
     return {
@@ -289,7 +288,7 @@ const ProfileForm: React.FC<{
     )
       .then(() => {
         dispatch({ type: 'done loading success' });
-      }, (err: UserAPIError | string | string[]) => {
+      }, (err: UserAPIError | string) => {
         dispatch({ type: 'done loading error', errors: err });
       });
   };

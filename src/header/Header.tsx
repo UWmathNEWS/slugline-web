@@ -11,7 +11,7 @@ const headerDateOpts = {
 };
 
 const Header = () => {
-  const latestIssue = useLatestIssue();
+  const [latestIssue,] = useLatestIssue();
 
   return (
     <React.Fragment>

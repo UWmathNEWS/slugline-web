@@ -87,7 +87,7 @@ export const AuthProvider: React.FC = props => {
       isWaiting.current = true;
       const promise = (force ? axios.get<UserAPIResponse>(getApiUrl("me/")) : initialPromise)
         .then(resp => {
-          if (resp.data.user && user.csrfToken === null) {
+          if (resp.data.success && resp.data.user && user.csrfToken === null) {
             dispatchUser({ type: 'login', user: resp.data.user });
           } else if (resp.data.success === false) {
             dispatchUser({ type: 'logout' });
@@ -117,19 +117,19 @@ export const AuthProvider: React.FC = props => {
       headers: user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {}
     })
       .then((resp: AxiosResponse<UserAPIResponse>) => {
-        if (resp.data.success === undefined && resp.data.user === undefined) {
+        if (resp.status === 401 || resp.status === 403) {
           // auth error
           throw ERRORS.REQUEST.NEEDS_AUTHENTICATION;
         }
         if (!resp.data.success) {
-          throw resp.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
+          throw resp.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
         }
         if (setCurUser && resp.data.user) {
-          dispatchUser({type: 'post', user: resp.data.user});
+          dispatchUser({ type: 'post', user: resp.data.user });
         }
         return resp.data.user;
       }, (err: AxiosError) => {
-        throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
+        throw err.response?.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
       });
   };
 
