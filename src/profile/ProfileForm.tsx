@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
 
-import { User, UserAPIError } from "../shared/types"
+import { APIResponse, User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
 import { getApiUrl } from "../api/api";
@@ -139,7 +139,7 @@ const ProfileForm: React.FC<{
             data: { username: value }
           });
           checkUsernameRef.current = window.setTimeout(() => {
-            axios.get<{ success: boolean }>(getApiUrl(`users/${value}/query/`))
+            axios.get<APIResponse<undefined>>(getApiUrl(`users/${value}/query/`))
               .then(resp => {
                 if (resp.data.success) {
                   dispatch({

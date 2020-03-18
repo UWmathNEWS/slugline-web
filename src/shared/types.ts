@@ -71,11 +71,7 @@ export interface UserAPIError extends APIError {
   writer_name?: string[];
 }
 
-interface UserAPIResponseSuccess extends APIResponseSuccess<User> {
-  user?: User;
-}
-
-export type UserAPIResponse = APIResponse<User,  UserAPIError, UserAPIResponseSuccess>
+export type UserAPIResponse = APIResponse<User, UserAPIError, Required<APIResponseSuccess<User>>>
 
 export interface AuthContext {
   user: User | null;

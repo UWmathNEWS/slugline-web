@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useReducer, useRef } from "react";
 import Cookie from "js-cookie";
 
-import { User, UserAPIResponse, AuthContext } from "../shared/types";
+import { User, UserAPIResponse, AuthContext, APIResponse } from "../shared/types";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, Method as AxiosMethod } from "axios";
 import { getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
@@ -87,8 +87,8 @@ export const AuthProvider: React.FC = props => {
       isWaiting.current = true;
       const promise = (force ? axios.get<UserAPIResponse>(getApiUrl("me/")) : initialPromise)
         .then(resp => {
-          if (resp.data.success && resp.data.user && user.csrfToken === null) {
-            dispatchUser({ type: 'login', user: resp.data.user });
+          if (resp.data.success && user.csrfToken === null) {
+            dispatchUser({ type: 'login', user: resp.data.data });
           } else if (resp.data.success === false) {
             dispatchUser({ type: 'logout' });
           }
@@ -124,10 +124,10 @@ export const AuthProvider: React.FC = props => {
         if (!resp.data.success) {
           throw resp.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
         }
-        if (setCurUser && resp.data.user) {
-          dispatchUser({ type: 'post', user: resp.data.user });
+        if (setCurUser) {
+          dispatchUser({ type: 'post', user: resp.data.data });
         }
-        return resp.data.user;
+        return resp.data.data;
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
       });
@@ -171,12 +171,14 @@ export const AuthProvider: React.FC = props => {
     };
     const headers = user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {};
     return axios
-      .post<User>(getApiUrl("login/"), body, {
+      .post<UserAPIResponse>(getApiUrl("login/"), body, {
         headers: headers
       })
       .then(resp => {
-        dispatchUser({ type: 'login', user: resp.data });
-        return resp.data;
+        if (resp.data.success) {
+          dispatchUser({ type: 'login', user: resp.data.data });
+          return resp.data.data;
+        }
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
       });
@@ -185,15 +187,17 @@ export const AuthProvider: React.FC = props => {
   const logout = () => {
     const headers = user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {};
     return axios
-      .post<User>(
+      .post<APIResponse<undefined>>(
         getApiUrl("logout/"),
         {},
         {
           headers: headers
         }
       )
-      .then(() => {
-        dispatchUser({ type: 'logout' });
+      .then(resp => {
+        if (resp.data.success) {
+          dispatchUser({ type: 'logout' });
+        }
       }, (err: AxiosError) => {
         throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
       });
