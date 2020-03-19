@@ -34,13 +34,26 @@ export interface APIError {
   [key: string]: string[] | undefined;
 }
 
-export interface APIResponse<T, U extends APIError = APIError> {
-  success: boolean;
+export interface APIResponseSuccess<T> {
+  success: true;
   data?: T;
-  error?: U | string;
 }
 
-interface _PaginatedAPIResponse<T> {
+export interface APIResponseFailure<T extends APIError> {
+  success: false;
+  error?: T;
+}
+
+export type APIResponse<
+  T,
+  U extends APIError = APIError,
+  S extends APIResponseSuccess<T> = APIResponseSuccess<T>,
+  F extends APIResponseFailure<U> = APIResponseFailure<U>
+> = S | F;
+
+export type APIResponseHook<T, U extends APIError = APIError> = [T | undefined, U | undefined]
+
+export interface Pagination<T> {
   count: number;
   next: string | null;
   previous: string | null;
@@ -48,8 +61,7 @@ interface _PaginatedAPIResponse<T> {
 }
 
 export type PaginatedAPIResponse<T, U extends APIError = APIError> =
-  { success: true, data: _PaginatedAPIResponse<T> } |
-  { success: false, error?: U | string };
+  APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
 
 export interface UserAPIError extends APIError {
   user?: string[];
@@ -59,9 +71,7 @@ export interface UserAPIError extends APIError {
   writer_name?: string[];
 }
 
-export interface UserAPIResponse extends APIResponse<User, UserAPIError> {
-  user?: User;
-}
+export type UserAPIResponse = APIResponse<User, UserAPIError, Required<APIResponseSuccess<User>>>
 
 export interface AuthContext {
   user: User | null;

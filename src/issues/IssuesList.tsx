@@ -42,17 +42,17 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
 };
 
 const IssuesList = () => {
-  const issues = useAllIssues();
+  const [issues, issuesErrors] = useAllIssues();
   const [volumes, setVolumes] = useState<Issue[][]>([]);
 
   useEffect(() => {
-    if (issues === undefined || issues.length === 0) {
+    if (issues?.results === undefined || issues?.results.length === 0) {
       return;
     }
     let vols: Issue[][] = [[]];
-    let volumeNum = issues[0].volume_num;
+    let volumeNum = issues.results[0].volume_num;
     // split the issues into groups by volume num
-    issues.forEach(issue => {
+    issues.results.forEach(issue => {
       if (issue.volume_num !== volumeNum) {
         vols.push([]);
       }
