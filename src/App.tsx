@@ -4,7 +4,6 @@ import { Router, Switch, Route } from "react-router-dom";
 import { Toast } from "react-bootstrap";
 import { createBrowserHistory } from "history";
 
-import Header from "./header/Header";
 import IssuesList from "./issues/IssuesList";
 import IssuePage from "./issues/IssuePage";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
@@ -16,18 +15,19 @@ import AdminPanel from "./admin/Admin";
 import { ToastProvider } from "./shared/contexts/ToastContext";
 import ToastContainer from "./shared/components/ToastContainer";
 import { initLibrary } from "./shared/icons";
+import SluglineNav from "./header/SluglineNav";
 
 initLibrary();
 
 const history = createBrowserHistory();
 
-const protectedRoutes = ['/dash', '/profile', '/admin'];
+const protectedRoutes = ["/dash", "/profile", "/admin"];
 
 const App: React.FC = () => {
   const auth = useAuth();
 
   React.useEffect(() => {
-    history.listen((loc) => {
+    history.listen(loc => {
       if (protectedRoutes.includes(loc.pathname)) {
         auth.check(true);
       }
@@ -36,8 +36,8 @@ const App: React.FC = () => {
 
   return (
     <Router history={history}>
+      <SluglineNav />
       <div className="container">
-        <Header />
         <div>
           <Switch>
             <Route exact path="/">

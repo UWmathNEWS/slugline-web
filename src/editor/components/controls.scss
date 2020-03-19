@@ -1,11 +1,13 @@
+@import "src/slugline.scss";
+
 .editor-control {
   height: 30px;
   width: 30px;
   font-size: 18px;
-  border: 1px solid black;
+  border: none;
   background: none;
   border-radius: 5px;
-  margin: 2.5px;
+  margin: spacing(1) / 2;
 
   & > svg {
     display: block;
@@ -13,6 +15,10 @@
     height: 100%;
     max-width: 100%;
     width: auto;
+
+    & > path {
+      fill: $gray-700;
+    }
   }
 
   &.active,
@@ -26,7 +32,7 @@
 }
 
 .control-popover {
-  padding: 10px;
+  padding: $spacer;
   background: white;
   border: 1px solid black;
   border-radius: 5px;

@@ -1,13 +1,15 @@
-// TODO: Find some way to make this dynamic based on color of next issue?
-$theme-color: #ffffff;
-
-// Override body color
-$body-bg: $theme-color;
-
 // Use our custom fonts
 $font-family-sans-serif: Joanna Nova; //This is a misnomer, our body font is serif
 $headings-font-family: DIN Next;
 
-// Style links
+$primary: #f2c0d9;
+
+// Headers
+$headings-color: black;
+
+// Links
 $link-color: black;
-$link-hover-color: black;
+
+// Navbar variables
+$navbar-light-color: $primary;
+$navbar-brand-font-size: 2rem;

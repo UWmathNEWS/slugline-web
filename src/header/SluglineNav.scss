@@ -1,14 +1,33 @@
-@import "../slugline_vars";
+@import "src/slugline.scss";
 
-nav.blackbox {
-  background: black !important;
-  padding: 0.5em 0.5em;
+a.nav-link {
+  margin: 0 $spacer;
+  margin-bottom: 0;
+  font-weight: normal;
+  color: black !important;
+  text-transform: uppercase;
 }
 
-.nav-link {
-  text-decoration: none;
-  & h4 {
-    color: $theme-color;
-    margin-bottom: 0;
+// some manual spacing to get the navbar to line up with the content
+.container.nav-container {
+  padding-left: $spacer;
+  padding-right: $spacer;
+}
+
+// in the extra small breakpoint, the content has no padding at all
+@include media-breakpoint-down(xs) {
+  .container.nav-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.custom-toggler.navbar-toggler {
+  color: black;
+  border-color: black;
+
+  & > .navbar-toggler-icon {
+    //custom SVG image with the color we need
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='black' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
   }
 }

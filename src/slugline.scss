@@ -12,13 +12,13 @@
 
 @import "~bootstrap/scss/bootstrap.scss";
 
-// Common blackbox class
-.blackbox {
-  background: black;
-  color: $theme-color;
-  padding: 1rem 2rem;
-  margin-bottom: 1rem;
+// FUNCTIONS
+
+@function spacing($n) {
+  @return map-get($map: $spacers, $key: $n);
 }
+
+// RULES
 
 // Convenient class for mathnews logo
 .mathnews-logo::before {
@@ -38,9 +38,4 @@ h4,
 h5,
 h6 {
   text-transform: uppercase;
-}
-
-a {
-  font-family: Consolas;
-  text-decoration: underline;
 }
