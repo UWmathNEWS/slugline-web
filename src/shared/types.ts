@@ -1,12 +1,17 @@
+export enum ArticleType {
+  Wordpress = "wordpress",
+  Slate = "slate"
+}
+
 export interface Article {
   id: number;
   title: string;
   slug: string;
   sub_title: string;
   author: string;
-  content_html: string;
   is_article_of_issue: boolean;
   is_promo: boolean;
+  article_type: ArticleType;
   issue: number;
   user: number;
 }
@@ -51,17 +56,24 @@ export type APIResponse<
   F extends APIResponseFailure<U> = APIResponseFailure<U>
 > = S | F;
 
-export type APIResponseHook<T, U extends APIError = APIError> = [T | undefined, U | undefined]
+export type APIResponseHook<T, U extends APIError = APIError> = [
+  T | undefined,
+  U | undefined
+];
 
 export interface Pagination<T> {
   count: number;
+  page: number;
+  num_pages: number;
   next: string | null;
   previous: string | null;
   results: T[];
 }
 
-export type PaginatedAPIResponse<T, U extends APIError = APIError> =
-  APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
+export type PaginatedAPIResponse<
+  T,
+  U extends APIError = APIError
+> = APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
 
 export interface UserAPIError extends APIError {
   user?: string[];
@@ -71,7 +83,11 @@ export interface UserAPIError extends APIError {
   writer_name?: string[];
 }
 
-export type UserAPIResponse = APIResponse<User, UserAPIError, Required<APIResponseSuccess<User>>>
+export type UserAPIResponse = APIResponse<
+  User,
+  UserAPIError,
+  Required<APIResponseSuccess<User>>
+>;
 
 export interface AuthContext {
   user: User | null;
@@ -79,9 +95,21 @@ export interface AuthContext {
   check: (force?: boolean) => Promise<void> | undefined;
   isAuthenticated: () => boolean;
   isEditor: () => boolean;
-  post: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
-  put: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
-  patch: <T>(endpoint: string, data: T, setCurUser?: boolean) => Promise<User | undefined>;
+  post: <T>(
+    endpoint: string,
+    data: T,
+    setCurUser?: boolean
+  ) => Promise<User | undefined>;
+  put: <T>(
+    endpoint: string,
+    data: T,
+    setCurUser?: boolean
+  ) => Promise<User | undefined>;
+  patch: <T>(
+    endpoint: string,
+    data: T,
+    setCurUser?: boolean
+  ) => Promise<User | undefined>;
   delete: (endpoint: string) => Promise<User | undefined>;
   login: (username: string, password: string) => Promise<User | undefined>;
   logout: () => Promise<void>;
