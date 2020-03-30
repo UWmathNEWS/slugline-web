@@ -54,7 +54,7 @@ const useApiGetPaginated = <T, U extends APIError = APIError>(
     {
       next: resp?.next ? next : null,
       previous: resp?.previous ? previous : null,
-      resp: resp ?? null
+      page: resp ?? null
     },
     error
   ];

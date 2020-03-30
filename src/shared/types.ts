@@ -74,7 +74,7 @@ export type APIResponseHookPaginated<T, U extends APIError = APIError> = [
   {
     next: (() => void) | null;
     previous: (() => void) | null;
-    resp: Pagination<T> | null;
+    page: Pagination<T> | null;
   },
   U | undefined
 ];
