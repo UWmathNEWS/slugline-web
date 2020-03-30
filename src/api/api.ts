@@ -6,7 +6,8 @@ import {
   APIError,
   APIResponseHook,
   UserAPIError,
-  APIResponseHookPaginated
+  APIResponseHookPaginated,
+  Article
 } from "../shared/types";
 // import { useAuth } from "../auth/AuthProvider";
 import { useState, useEffect } from "react";
@@ -98,4 +99,8 @@ export const useUsersList = (): APIResponseHook<
   UserAPIError
 > => {
   return useApiGet<Pagination<User>, UserAPIError>("users/");
+};
+
+export const useUserArticles = (): APIResponseHookPaginated<Article> => {
+  return useApiGetPaginated<Article>("user_articles/");
 };
