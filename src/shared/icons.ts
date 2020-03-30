@@ -6,7 +6,9 @@ import {
   faStrikethrough,
   faCode,
   faLink,
-  faDollarSign
+  faDollarSign,
+  faChevronLeft,
+  faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 
 export const initLibrary = () => {
@@ -17,6 +19,8 @@ export const initLibrary = () => {
     faStrikethrough,
     faCode,
     faLink,
-    faDollarSign
+    faDollarSign,
+    faChevronLeft,
+    faChevronRight
   );
 };
