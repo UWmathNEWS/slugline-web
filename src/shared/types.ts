@@ -36,12 +36,12 @@ export interface APIError {
 
 export interface APIResponseSuccess<T> {
   success: true;
-  data?: T;
+  data: T;
 }
 
 export interface APIResponseFailure<T extends APIError> {
   success: false;
-  error?: T;
+  error: T;
 }
 
 export type APIResponse<

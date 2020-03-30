@@ -8,7 +8,7 @@ import nanoid from "nanoid";
 import { APIResponse, User, UserAPIError } from "../shared/types"
 import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
-import { getApiUrl } from "../api/api";
+import { apiGet, getApiUrl } from "../api/api";
 
 interface ChangedUser {
   username?: string;
@@ -139,6 +139,12 @@ const ProfileForm: React.FC<{
             data: { username: value }
           });
           checkUsernameRef.current = window.setTimeout(() => {
+            apiGet(`users/${value}/query`)
+              .then(() => {
+                dispatch({ type: 'set error', errors: { username: [] }});
+              }, (errors: UserAPIError) => {
+                dispatch({ type: 'set error', errors })
+              });
             axios.get<APIResponse<undefined>>(getApiUrl(`users/${value}/query/`))
               .then(resp => {
                 if (resp.data.success) {

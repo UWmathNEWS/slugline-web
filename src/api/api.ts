@@ -1,12 +1,24 @@
-import axios from "axios";
-import { Issue, User, Pagination, APIError, APIResponseHook, UserAPIError } from "../shared/types";
-// import { useAuth } from "../auth/AuthProvider";
+import axios, { AxiosError } from "axios";
+import { Issue, User, Pagination, APIError, APIResponseHook, UserAPIError, APIResponse } from "../shared/types";
 import { useState, useEffect } from "react";
+import ERRORS from "../shared/errors";
 
 const API_ROOT = "/api";
 
 export const getApiUrl = (url: string) => {
   return `${API_ROOT}/${url}`;
+};
+
+export const apiGet = <T extends any>(url: string): Promise<T | null> => {
+  return axios.get<APIResponse<T>>(getApiUrl(url))
+    .then((axiosResp) => {
+      if (axiosResp.data.success)
+        return axiosResp.data.data;
+      else
+        throw axiosResp.data.error;
+    }, (err: AxiosError) => {
+      throw err.response?.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
+    });
 };
 
 const useApiGet = <T, U extends APIError = APIError>(url: string): APIResponseHook<T, U> => {
