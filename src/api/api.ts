@@ -25,7 +25,7 @@ const useApiGet = <T, U extends APIError = APIError>(
   const [error, setError] = useState<U | undefined>(undefined);
 
   useEffect(() => {
-    axios.get(getApiUrl(url)).then(axiosResp => {
+    axios.get(url).then(axiosResp => {
       if (axiosResp.data.success) setResponse(axiosResp.data.data);
       else setError(axiosResp.data.error);
     });
@@ -83,24 +83,24 @@ const useApiGetPaginated = <T, U extends APIError = APIError>(
 // };
 
 export const useLatestIssue = (): APIResponseHook<Issue> => {
-  return useApiGet<Issue>("issues/latest/");
+  return useApiGet<Issue>(getApiUrl("issues/latest/"));
 };
 
 export const useAllIssues = (): APIResponseHook<Pagination<Issue>> => {
-  return useApiGet<Pagination<Issue>>("issues/");
+  return useApiGet<Pagination<Issue>>(getApiUrl("issues/"));
 };
 
 export const useIssue = (issueId?: number): APIResponseHook<Issue> => {
-  return useApiGet<Issue>(`issues/${issueId}`);
+  return useApiGet<Issue>(getApiUrl(`issues/${issueId}`));
 };
 
 export const useUsersList = (): APIResponseHook<
   Pagination<User>,
   UserAPIError
 > => {
-  return useApiGet<Pagination<User>, UserAPIError>("users/");
+  return useApiGet<Pagination<User>, UserAPIError>(getApiUrl("users/"));
 };
 
 export const useUserArticles = (): APIResponseHookPaginated<Article> => {
-  return useApiGetPaginated<Article>("user_articles/");
+  return useApiGetPaginated<Article>(getApiUrl("user_articles/"));
 };
