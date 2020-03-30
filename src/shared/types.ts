@@ -70,6 +70,15 @@ export interface Pagination<T> {
   results: T[];
 }
 
+export type APIResponseHookPaginated<T, U extends APIError = APIError> = [
+  {
+    next: (() => void) | null;
+    previous: (() => void) | null;
+    resp: Pagination<T> | null;
+  },
+  U | undefined
+];
+
 export type PaginatedAPIResponse<
   T,
   U extends APIError = APIError
