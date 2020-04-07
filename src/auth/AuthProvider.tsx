@@ -52,7 +52,7 @@ interface AxiosConfig extends AxiosRequestConfig {
   url: string;
 }
 
-const initialPromise = apiGet<User | null>("me/");
+const initialPromise = apiGet<User | null>(getApiUrl("me/"));
 
 const CSRF_COOKIE = "csrftoken";
 const USER_LOCALSTORAGE_KEY = "slugline-user";

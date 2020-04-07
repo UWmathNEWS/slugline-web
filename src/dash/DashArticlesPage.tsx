@@ -1,5 +1,5 @@
 import React from "react";
-import { useUserArticles } from "../api/api";
+import { useUserArticles } from "../api/hooks";
 import { Table, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -43,7 +43,7 @@ const DashArticlesPage: React.FC = () => {
           <th>Status</th>
           <th>Last Modified</th>
         </tr>
-        {resp.page?.results.map(article => (
+        {resp.page?.results.map((article) => (
           <tr>
             <td>{article.title}</td>
             <td>{article.author}</td>

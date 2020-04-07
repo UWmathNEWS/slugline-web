@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useIssue } from "../api/api";
+import { useIssue } from "../api/hooks";
 
 const IssuePage = () => {
   const { issue_id } = useParams();
