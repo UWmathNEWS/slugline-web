@@ -1,6 +1,6 @@
 export enum ArticleType {
   Wordpress = "wordpress",
-  Slate = "slate"
+  Slate = "slate",
 }
 
 export interface Article {
@@ -56,7 +56,7 @@ export type APIResponse<
   F extends APIResponseFailure<U> = APIResponseFailure<U>
 > = S | F;
 
-export type APIResponseHook<T, U extends APIError = APIError> = [
+export type APIGetHook<T, U extends APIError = APIError> = [
   T | undefined,
   U | undefined
 ];
@@ -70,7 +70,7 @@ export interface Pagination<T> {
   results: T[];
 }
 
-export type APIResponseHookPaginated<T, U extends APIError = APIError> = [
+export type APIGetHookPaginated<T, U extends APIError = APIError> = [
   {
     next: (() => void) | null;
     previous: (() => void) | null;
@@ -83,6 +83,17 @@ export type PaginatedAPIResponse<
   T,
   U extends APIError = APIError
 > = APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
+
+export enum RequestState {
+  NotStarted,
+  Started,
+  Complete,
+}
+
+export type APIPostHook<S, T, U extends APIError = APIError> = [
+  (body: S) => Promise<T>,
+  RequestState
+];
 
 export interface UserAPIError extends APIError {
   user?: string[];
