@@ -10,6 +10,7 @@ import {
   UserAPIError,
   Article,
   Pagination,
+  APIResponse,
 } from "../shared/types";
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthProvider";
@@ -72,11 +73,16 @@ const useApiPost = <S, T, U extends APIError = APIError>(
 
   const post = async (body: S): Promise<T> => {
     setState(RequestState.Started);
-    const resp = await axios.post<T>(url, body, {
+    const resp = await axios.post<APIResponse<T>>(url, body, {
       headers: headers,
     });
     setState(RequestState.Complete);
-    return resp.data;
+    if (resp.data.success) {
+      return resp.data.data
+    }
+    else {
+      throw resp.data
+    }
   };
 
   return [post, state];
@@ -103,5 +109,5 @@ export const useUserArticles = (): APIGetHookPaginated<Article> => {
 };
 
 export const useCreateArticle = () => {
-  return useApiPost<Article, Article>(getApiUrl("articles/"));
+  return useApiPost<void, Article>(getApiUrl("articles/"));
 };
