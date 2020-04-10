@@ -16,6 +16,10 @@ export interface Article {
   user: number;
 }
 
+export interface ArticleContent {
+  content_raw: string
+}
+
 export interface Issue {
   id: number;
   publish_date: string;
@@ -54,7 +58,7 @@ export type APIResponse<
   U extends APIError = APIError,
   S extends APIResponseSuccess<T> = APIResponseSuccess<T>,
   F extends APIResponseFailure<U> = APIResponseFailure<U>
-> = S | F;
+  > = S | F;
 
 export type APIGetHook<T, U extends APIError = APIError> = [
   T | undefined,
@@ -82,7 +86,7 @@ export type APIGetHookPaginated<T, U extends APIError = APIError> = [
 export type PaginatedAPIResponse<
   T,
   U extends APIError = APIError
-> = APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
+  > = APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
 
 export enum RequestState {
   NotStarted,

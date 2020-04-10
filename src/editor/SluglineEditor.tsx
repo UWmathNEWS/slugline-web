@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 import { Node, Range } from "slate";
 import {
@@ -18,6 +18,8 @@ import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
+import { useParams } from "react-router-dom";
+import { useArticle, useArticleContent } from "../api/hooks";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -35,17 +37,39 @@ const renderElement = (props: RenderElementProps) => {
   }
 };
 
+const EDITOR_STATE_EMPTY = [
+  {
+    children: [
+      {
+        text: ""
+      }
+    ]
+  }
+]
+
 const SluglineEditor = () => {
-  const editor = useMemo(() => withReact(createCustomEditor()), []);
-  const [value, setValue] = useState<Node[]>([
-    {
-      children: [
-        {
-          text: ""
-        }
-      ]
+  const { articleId } = useParams()
+  const id = parseInt(articleId || '')
+
+  const [articleResp, articleError] = useArticle(id)
+
+  useEffect(() => {
+    if (articleResp) {
+      setTitle(articleResp.title)
+      setSubtitle(articleResp.sub_title)
     }
-  ]);
+  }, [articleResp])
+
+  const [contentResp, contentError] = useArticleContent(id)
+
+  useEffect(() => {
+    if (contentResp && contentResp.content_raw !== '') {
+      setValue(JSON.parse(contentResp.content_raw))
+    }
+  }, [contentResp])
+
+  const editor = useMemo(() => withReact(createCustomEditor()), []);
+  const [value, setValue] = useState<Node[]>(EDITOR_STATE_EMPTY);
   const [selection, setSelection] = useState<Range | null>(editor.selection);
 
   const [title, setTitle] = useState<string>("");

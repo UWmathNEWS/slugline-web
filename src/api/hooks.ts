@@ -11,6 +11,7 @@ import {
   Article,
   Pagination,
   APIResponse,
+  ArticleContent,
 } from "../shared/types";
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthProvider";
@@ -111,3 +112,11 @@ export const useUserArticles = (): APIGetHookPaginated<Article> => {
 export const useCreateArticle = () => {
   return useApiPost<void, Article>(getApiUrl("articles/"));
 };
+
+export const useArticle = (id: number) => {
+  return useApiGet<Article>(getApiUrl(`articles/${id}/`))
+}
+
+export const useArticleContent = (id: number) => {
+  return useApiGet<ArticleContent>(getApiUrl(`article_content/${id}/`))
+}
