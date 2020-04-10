@@ -1,12 +1,14 @@
 import React from "react";
-import { useUserArticles } from "../api/hooks";
-import { Table, Spinner } from "react-bootstrap";
+import { useUserArticles, useCreateArticle } from "../api/hooks";
+import { Table, Spinner, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./DashArticlesPage.scss";
+import { Article } from "../shared/types";
 
 const DashArticlesPage: React.FC = () => {
-  const [resp, error] = useUserArticles();
+  const [resp, userArticlesError] = useUserArticles();
+  const [createArticle, createArticleState] = useCreateArticle()
 
   if (!resp) {
     return <Spinner animation="border" />;
@@ -14,6 +16,10 @@ const DashArticlesPage: React.FC = () => {
 
   return (
     <>
+      <h1>Articles</h1>
+      <Button onClick={async () => {
+        await createArticle()
+      }}>New Article</Button>
       <div className="table-header">
         <FontAwesomeIcon
           onClick={() => {
