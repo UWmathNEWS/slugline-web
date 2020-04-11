@@ -8,6 +8,9 @@ const Dash = () => {
 
   return (
     <Switch>
+      <Route path={`${match.path}/edit/:articleId`}>
+        <SluglineEditor />
+      </Route>
       <Route path={`${match.path}/`}>
         <DashArticlesPage />
       </Route>

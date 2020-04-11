@@ -11,7 +11,7 @@ import {
   Article,
   Pagination,
   APIResponse,
-  ArticleContent,
+  ArticleContent
 } from "../shared/types";
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthProvider";
@@ -24,7 +24,7 @@ const useApiGet = <T, U extends APIError = APIError>(
   const [error, setError] = useState<U | undefined>(undefined);
 
   useEffect(() => {
-    axios.get(url).then((axiosResp) => {
+    axios.get(url).then(axiosResp => {
       if (axiosResp.data.success) setResponse(axiosResp.data.data);
       else setError(axiosResp.data.error);
     });
@@ -54,9 +54,9 @@ const useApiGetPaginated = <T, U extends APIError = APIError>(
     {
       next: resp?.next ? next : null,
       previous: resp?.previous ? previous : null,
-      page: resp ?? null,
+      page: resp ?? null
     },
-    error,
+    error
   ];
 };
 
@@ -75,18 +75,45 @@ const useApiPost = <S, T, U extends APIError = APIError>(
   const post = async (body: S): Promise<T> => {
     setState(RequestState.Started);
     const resp = await axios.post<APIResponse<T>>(url, body, {
-      headers: headers,
+      headers: headers
     });
     setState(RequestState.Complete);
     if (resp.data.success) {
-      return resp.data.data
-    }
-    else {
-      throw resp.data
+      return resp.data.data;
+    } else {
+      throw resp.data;
     }
   };
 
   return [post, state];
+};
+
+const useApiPatch = <S, T, U extends APIError = APIError>(
+  url: string
+): APIPostHook<S, T, U> => {
+  const auth = useAuth();
+
+  const [state, setState] = useState<RequestState>(RequestState.NotStarted);
+
+  let headers: { [header: string]: string } = {};
+  if (auth.csrfToken) {
+    headers["X-CSRFToken"] = auth.csrfToken;
+  }
+
+  const patch = async (body: S): Promise<T> => {
+    setState(RequestState.Started);
+    const resp = await axios.patch<APIResponse<T>>(url, body, {
+      headers: headers
+    });
+    setState(RequestState.Complete);
+    if (resp.data.success) {
+      return resp.data.data;
+    } else {
+      throw resp.data;
+    }
+  };
+
+  return [patch, state];
 };
 
 export const useLatestIssue = (): APIGetHook<Issue> => {
@@ -114,9 +141,19 @@ export const useCreateArticle = () => {
 };
 
 export const useArticle = (id: number) => {
-  return useApiGet<Article>(getApiUrl(`articles/${id}/`))
-}
+  return useApiGet<Article>(getApiUrl(`articles/${id}/`));
+};
+
+export const useUpdateArticle = (id: number) => {
+  return useApiPatch<Partial<Article>, Article>(getApiUrl(`articles/${id}/`));
+};
 
 export const useArticleContent = (id: number) => {
-  return useApiGet<ArticleContent>(getApiUrl(`article_content/${id}/`))
-}
+  return useApiGet<ArticleContent>(getApiUrl(`article_content/${id}/`));
+};
+
+export const useUpdateArticleContent = (id: number) => {
+  return useApiPatch<ArticleContent, ArticleContent>(
+    getApiUrl(`article_content/${id}/`)
+  );
+};

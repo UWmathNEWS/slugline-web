@@ -19,7 +19,15 @@ import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
 import { useParams } from "react-router-dom";
-import { useArticle, useArticleContent } from "../api/hooks";
+import {
+  useArticle,
+  useArticleContent,
+  useUpdateArticle,
+  useUpdateArticleContent
+} from "../api/hooks";
+import { Col, Row } from "react-bootstrap";
+import { RequestState } from "../shared/types";
+import EditorInfo from "./EditorInfo";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -45,28 +53,31 @@ const EDITOR_STATE_EMPTY = [
       }
     ]
   }
-]
+];
+
+// One minute, i.e., 60 seconds * 1000 milliseconds
+const ARTICLE_SAVE_INTERVAL_MSECS = 10000;
 
 const SluglineEditor = () => {
-  const { articleId } = useParams()
-  const id = parseInt(articleId || '')
+  const { articleId } = useParams();
+  const id = parseInt(articleId || "");
 
-  const [articleResp, articleError] = useArticle(id)
+  const [articleResp, articleError] = useArticle(id);
 
   useEffect(() => {
     if (articleResp) {
-      setTitle(articleResp.title)
-      setSubtitle(articleResp.sub_title)
+      setTitle(articleResp.title);
+      setSubtitle(articleResp.sub_title);
     }
-  }, [articleResp])
+  }, [articleResp]);
 
-  const [contentResp, contentError] = useArticleContent(id)
+  const [contentResp, contentError] = useArticleContent(id);
 
   useEffect(() => {
-    if (contentResp && contentResp.content_raw !== '') {
-      setValue(JSON.parse(contentResp.content_raw))
+    if (contentResp && contentResp.content_raw !== "") {
+      setValue(JSON.parse(contentResp.content_raw));
     }
-  }, [contentResp])
+  }, [contentResp]);
 
   const editor = useMemo(() => withReact(createCustomEditor()), []);
   const [value, setValue] = useState<Node[]>(EDITOR_STATE_EMPTY);
@@ -74,6 +85,50 @@ const SluglineEditor = () => {
 
   const [title, setTitle] = useState<string>("");
   const [subtitle, setSubtitle] = useState<string>("");
+
+  const [lastSaveTime, setLastSaveTime] = useState<Date>(new Date());
+
+  const [updateArticle, updateArticleState] = useUpdateArticle(id);
+  const [
+    updateArticleContent,
+    updateArticleContentState
+  ] = useUpdateArticleContent(id);
+
+  const getEditorRequestState = () => {
+    if (
+      updateArticleState === RequestState.NotStarted &&
+      updateArticleContentState === RequestState.NotStarted
+    ) {
+      return RequestState.NotStarted;
+    } else if (
+      updateArticleState === RequestState.Complete &&
+      updateArticleContentState === RequestState.Complete
+    ) {
+      return RequestState.Complete;
+    } else {
+      return RequestState.Started;
+    }
+  };
+
+  const saveArticle = async () => {
+    const articlePromise = updateArticle({
+      title: title,
+      sub_title: subtitle
+    });
+    const articleContentPromise = updateArticleContent({
+      content_raw: JSON.stringify(value)
+    });
+    await Promise.all([articlePromise, articleContentPromise]);
+    setLastSaveTime(new Date());
+  };
+
+  useEffect(() => {
+    const id = setInterval(saveArticle, ARTICLE_SAVE_INTERVAL_MSECS);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [saveArticle]);
 
   return (
     <Slate value={value} onChange={setValue} editor={editor}>
@@ -97,23 +152,33 @@ const SluglineEditor = () => {
           }}
         ></input>
       </div>
-      <EditorControls />
-      <div className="editor-body">
-        <Editable
-          placeholder="Start your masterpiece..."
-          renderLeaf={renderLeaf}
-          renderElement={renderElement}
-          onKeyDown={(evt: React.KeyboardEvent) => {
-            EditorHelpers.keyDown(editor, evt);
-          }}
-          onBlur={() => {
-            setSelection(editor.selection);
-          }}
-          onFocus={() => {
-            editor.selection = selection;
-          }}
-        />
-      </div>
+      <Row>
+        <Col sm={9}>
+          <EditorControls />
+          <div className="editor-body">
+            <Editable
+              placeholder="Start your masterpiece..."
+              renderLeaf={renderLeaf}
+              renderElement={renderElement}
+              onKeyDown={(evt: React.KeyboardEvent) => {
+                EditorHelpers.keyDown(editor, evt);
+              }}
+              onBlur={() => {
+                setSelection(editor.selection);
+              }}
+              onFocus={() => {
+                editor.selection = selection;
+              }}
+            />
+          </div>
+        </Col>
+        <Col sm={3}>
+          <EditorInfo
+            editorRequestState={getEditorRequestState()}
+            lastSaveTime={lastSaveTime}
+          />
+        </Col>
+      </Row>
     </Slate>
   );
 };
