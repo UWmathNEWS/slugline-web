@@ -4,7 +4,24 @@ import { Table, Spinner, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./DashArticlesPage.scss";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
+import { Article, ArticleType } from "../shared/types";
+
+interface ArticleTitleProps {
+  article: Article;
+}
+
+const ArticleTitle: React.FC<ArticleTitleProps> = (
+  props: ArticleTitleProps
+) => {
+  if (props.article.article_type === ArticleType.Slate) {
+    return (
+      <Link to={`/dash/edit/${props.article.id}`}>{props.article.title}</Link>
+    );
+  } else {
+    return <p>{props.article.title}</p>;
+  }
+};
 
 const DashArticlesPage: React.FC = () => {
   const [resp, userArticlesError] = useUserArticles();
@@ -58,7 +75,9 @@ const DashArticlesPage: React.FC = () => {
         </tr>
         {resp.page?.results.map((article) => (
           <tr>
-            <td>{article.title}</td>
+            <td>
+              <ArticleTitle article={article} />
+            </td>
             <td>{article.author}</td>
             <td>{article.issue}</td>
             <td>NOT REAL</td>
