@@ -4,11 +4,13 @@ import { Table, Spinner, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./DashArticlesPage.scss";
-import { Article } from "../shared/types";
+import { useHistory } from "react-router-dom";
 
 const DashArticlesPage: React.FC = () => {
   const [resp, userArticlesError] = useUserArticles();
-  const [createArticle, createArticleState] = useCreateArticle()
+  const [createArticle, createArticleState] = useCreateArticle();
+
+  const history = useHistory();
 
   if (!resp) {
     return <Spinner animation="border" />;
@@ -17,9 +19,14 @@ const DashArticlesPage: React.FC = () => {
   return (
     <>
       <h1>Articles</h1>
-      <Button onClick={async () => {
-        await createArticle()
-      }}>New Article</Button>
+      <Button
+        onClick={async () => {
+          const article = await createArticle();
+          history.push(`/dash/edit/${article.id}`);
+        }}
+      >
+        New Article
+      </Button>
       <div className="table-header">
         <FontAwesomeIcon
           onClick={() => {
