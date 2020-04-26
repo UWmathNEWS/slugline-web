@@ -6,7 +6,7 @@ import {
   Editable,
   withReact,
   RenderLeafProps,
-  RenderElementProps
+  RenderElementProps,
 } from "slate-react";
 
 import { Leaf } from "./components/Leaf";
@@ -18,16 +18,7 @@ import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
-import { useParams } from "react-router-dom";
-import {
-  useArticle,
-  useArticleContent,
-  useUpdateArticle,
-  useUpdateArticleContent
-} from "../api/hooks";
-import { Col, Row } from "react-bootstrap";
-import { RequestState } from "../shared/types";
-import EditorInfo from "./EditorInfo";
+import { ArticleContent, Article } from "../shared/types";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -45,90 +36,44 @@ const renderElement = (props: RenderElementProps) => {
   }
 };
 
-const EDITOR_STATE_EMPTY = [
+const EDITOR_STATE_EMPTY: Node[] = [
   {
     children: [
       {
-        text: ""
-      }
-    ]
-  }
+        text: "",
+      },
+    ],
+  },
 ];
 
-// One minute, i.e., 60 seconds * 1000 milliseconds
-const ARTICLE_SAVE_INTERVAL_MSECS = 10000;
+interface SluglineEditorProps {
+  title?: string;
+  subtitle?: string;
+  content_raw?: Node[];
+  saveArticle: (title: string, subtitle: string) => void;
+  saveArticleContent: (content: Node[]) => void;
+}
 
-const SluglineEditor = () => {
-  const { articleId } = useParams();
-  const id = parseInt(articleId || "");
-
-  const [articleResp, articleError] = useArticle(id);
-
-  useEffect(() => {
-    if (articleResp) {
-      setTitle(articleResp.title);
-      setSubtitle(articleResp.sub_title);
-    }
-  }, [articleResp]);
-
-  const [contentResp, contentError] = useArticleContent(id);
-
-  useEffect(() => {
-    if (contentResp && contentResp.content_raw !== "") {
-      setValue(JSON.parse(contentResp.content_raw));
-    }
-  }, [contentResp]);
-
+const SluglineEditor: React.FC<SluglineEditorProps> = (
+  props: SluglineEditorProps
+) => {
   const editor = useMemo(() => withReact(createCustomEditor()), []);
-  const [value, setValue] = useState<Node[]>(EDITOR_STATE_EMPTY);
+
+  const [value, setValue] = useState<Node[]>(
+    props.content_raw || EDITOR_STATE_EMPTY
+  );
   const [selection, setSelection] = useState<Range | null>(editor.selection);
 
-  const [title, setTitle] = useState<string>("");
-  const [subtitle, setSubtitle] = useState<string>("");
-
-  const [lastSaveTime, setLastSaveTime] = useState<Date>(new Date());
-
-  const [updateArticle, updateArticleState] = useUpdateArticle(id);
-  const [
-    updateArticleContent,
-    updateArticleContentState
-  ] = useUpdateArticleContent(id);
-
-  const getEditorRequestState = () => {
-    if (
-      updateArticleState === RequestState.NotStarted &&
-      updateArticleContentState === RequestState.NotStarted
-    ) {
-      return RequestState.NotStarted;
-    } else if (
-      updateArticleState === RequestState.Complete &&
-      updateArticleContentState === RequestState.Complete
-    ) {
-      return RequestState.Complete;
-    } else {
-      return RequestState.Started;
-    }
-  };
-
-  const saveArticle = async () => {
-    const articlePromise = updateArticle({
-      title: title,
-      sub_title: subtitle
-    });
-    const articleContentPromise = updateArticleContent({
-      content_raw: JSON.stringify(value)
-    });
-    await Promise.all([articlePromise, articleContentPromise]);
-    setLastSaveTime(new Date());
-  };
+  const [title, setTitle] = useState<string>(props.title || "");
+  const [subtitle, setSubtitle] = useState<string>(props.subtitle || "");
 
   useEffect(() => {
-    const id = setInterval(saveArticle, ARTICLE_SAVE_INTERVAL_MSECS);
+    props.saveArticle(title, subtitle);
+  }, [title, subtitle]);
 
-    return () => {
-      clearInterval(id);
-    };
-  }, [saveArticle]);
+  useEffect(() => {
+    props.saveArticleContent(value);
+  }, [value]);
 
   return (
     <Slate value={value} onChange={setValue} editor={editor}>
@@ -138,7 +83,7 @@ const SluglineEditor = () => {
           type="text"
           placeholder="YOUR TITLE"
           value={title}
-          onChange={evt => {
+          onChange={(evt) => {
             setTitle(evt.currentTarget.value);
           }}
         ></input>
@@ -147,38 +92,28 @@ const SluglineEditor = () => {
           type="text"
           placeholder="YOUR SUBTITLE"
           value={subtitle}
-          onChange={evt => {
+          onChange={(evt) => {
             setSubtitle(evt.currentTarget.value);
           }}
         ></input>
       </div>
-      <Row>
-        <Col sm={9}>
-          <EditorControls />
-          <div className="editor-body">
-            <Editable
-              placeholder="Start your masterpiece..."
-              renderLeaf={renderLeaf}
-              renderElement={renderElement}
-              onKeyDown={(evt: React.KeyboardEvent) => {
-                EditorHelpers.keyDown(editor, evt);
-              }}
-              onBlur={() => {
-                setSelection(editor.selection);
-              }}
-              onFocus={() => {
-                editor.selection = selection;
-              }}
-            />
-          </div>
-        </Col>
-        <Col sm={3}>
-          <EditorInfo
-            editorRequestState={getEditorRequestState()}
-            lastSaveTime={lastSaveTime}
-          />
-        </Col>
-      </Row>
+      <EditorControls />
+      <div className="editor-body">
+        <Editable
+          placeholder="Start your masterpiece..."
+          renderLeaf={renderLeaf}
+          renderElement={renderElement}
+          onKeyDown={(evt: React.KeyboardEvent) => {
+            EditorHelpers.keyDown(editor, evt);
+          }}
+          onBlur={() => {
+            setSelection(editor.selection);
+          }}
+          onFocus={() => {
+            editor.selection = selection;
+          }}
+        />
+      </div>
     </Slate>
   );
 };

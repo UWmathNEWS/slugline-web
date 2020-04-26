@@ -2,6 +2,7 @@ import React from "react";
 import SluglineEditor from "../editor/SluglineEditor";
 import { useRouteMatch, Switch, Route } from "react-router-dom";
 import DashArticlesPage from "./DashArticlesPage";
+import EditorPage from "./EditorPage";
 
 const Dash = () => {
   const match = useRouteMatch();
@@ -9,7 +10,7 @@ const Dash = () => {
   return (
     <Switch>
       <Route path={`${match.path}/edit/:articleId`}>
-        <SluglineEditor />
+        <EditorPage />
       </Route>
       <Route path={`${match.path}/`}>
         <DashArticlesPage />
