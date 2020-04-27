@@ -46,10 +46,11 @@ const EditorPage: React.FC = () => {
   const [updateArticle, updateArticleState] = useUpdateArticle(id);
 
   const saveArticle = useDebouncedCallback(
-    async (title: string, subtitle: string) => {
+    async (title: string, subtitle: string, author: string) => {
       await updateArticle({
         title: title,
         sub_title: subtitle,
+        author: author,
       });
       setLastSaved(new Date());
     },

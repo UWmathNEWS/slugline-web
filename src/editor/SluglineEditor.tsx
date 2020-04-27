@@ -49,8 +49,9 @@ const EDITOR_STATE_EMPTY: Node[] = [
 interface SluglineEditorProps {
   title?: string;
   subtitle?: string;
+  author?: string;
   content_raw?: Node[];
-  saveArticle: (title: string, subtitle: string) => void;
+  saveArticle: (title: string, subtitle: string, author: string) => void;
   saveArticleContent: (content: Node[]) => void;
 }
 
@@ -66,10 +67,11 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
 
   const [title, setTitle] = useState<string>(props.title || "");
   const [subtitle, setSubtitle] = useState<string>(props.subtitle || "");
+  const [author, setAuthor] = useState<string>(props.author || "");
 
   useEffect(() => {
-    props.saveArticle(title, subtitle);
-  }, [title, subtitle]);
+    props.saveArticle(title, subtitle, author);
+  }, [title, subtitle, author]);
 
   useEffect(() => {
     props.saveArticleContent(value);
@@ -77,42 +79,55 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
 
   return (
     <Slate value={value} onChange={setValue} editor={editor}>
-      <div className="editor-header">
-        <input
-          className="editor-header-input title-input"
-          type="text"
-          placeholder="YOUR TITLE"
-          value={title}
-          onChange={(evt) => {
-            setTitle(evt.currentTarget.value);
-          }}
-        ></input>
-        <input
-          className="editor-header-input subtitle-input"
-          type="text"
-          placeholder="YOUR SUBTITLE"
-          value={subtitle}
-          onChange={(evt) => {
-            setSubtitle(evt.currentTarget.value);
-          }}
-        ></input>
-      </div>
-      <EditorControls />
-      <div className="editor-body">
-        <Editable
-          placeholder="Start your masterpiece..."
-          renderLeaf={renderLeaf}
-          renderElement={renderElement}
-          onKeyDown={(evt: React.KeyboardEvent) => {
-            EditorHelpers.keyDown(editor, evt);
-          }}
-          onBlur={() => {
-            setSelection(editor.selection);
-          }}
-          onFocus={() => {
-            editor.selection = selection;
-          }}
-        />
+      <div className="editor">
+        <div className="editor-header">
+          <input
+            className="editor-header-input title-input"
+            type="text"
+            placeholder="YOUR TITLE"
+            value={title}
+            onChange={(evt) => {
+              setTitle(evt.currentTarget.value);
+            }}
+          ></input>
+          <input
+            className="editor-header-input subtitle-input"
+            type="text"
+            placeholder="YOUR SUBTITLE"
+            value={subtitle}
+            onChange={(evt) => {
+              setSubtitle(evt.currentTarget.value);
+            }}
+          ></input>
+        </div>
+        <EditorControls />
+        <div className="editor-body">
+          <Editable
+            placeholder="Start your masterpiece..."
+            renderLeaf={renderLeaf}
+            renderElement={renderElement}
+            onKeyDown={(evt: React.KeyboardEvent) => {
+              EditorHelpers.keyDown(editor, evt);
+            }}
+            onBlur={() => {
+              setSelection(editor.selection);
+            }}
+            onFocus={() => {
+              editor.selection = selection;
+            }}
+          />
+        </div>
+        <div className="editor-footer">
+          <input
+            className="editor-header-input author-input"
+            type="text"
+            placeholder="YOUR AUTHOR NAME"
+            value={author}
+            onChange={(evt) => {
+              setAuthor(evt.currentTarget.value);
+            }}
+          ></input>
+        </div>
       </div>
     </Slate>
   );

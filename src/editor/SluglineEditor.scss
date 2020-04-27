@@ -1,5 +1,14 @@
 @import "src/slugline.scss";
-.editor-header {
+
+.editor {
+  height: 100vh;
+  padding: spacing(1);
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-header,
+.editor-footer {
   margin-bottom: $spacer;
 }
 
@@ -27,9 +36,16 @@ input.editor-header-input {
     font-style: italic;
     text-transform: uppercase;
   }
+
+  &.author-input {
+    font-size: 1.5em;
+    font-weight: bold;
+    font-family: Joanna Nova;
+  }
 }
 
 div.editor-body {
-  height: 70vh;
+  flex: 1 0;
   padding: spacing(3) spacing(1);
+  overflow: auto;
 }
