@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import {
   APIError,
   APIGetHook,
@@ -11,7 +11,7 @@ import {
   Article,
   Pagination,
   APIResponse,
-  ArticleContent
+  ArticleContent,
 } from "../shared/types";
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthProvider";
@@ -24,7 +24,7 @@ const useApiGet = <T, U extends APIError = APIError>(
   const [error, setError] = useState<U | undefined>(undefined);
 
   useEffect(() => {
-    axios.get(url).then(axiosResp => {
+    axios.get(url).then((axiosResp) => {
       if (axiosResp.data.success) setResponse(axiosResp.data.data);
       else setError(axiosResp.data.error);
     });
@@ -54,9 +54,9 @@ const useApiGetPaginated = <T, U extends APIError = APIError>(
     {
       next: resp?.next ? next : null,
       previous: resp?.previous ? previous : null,
-      page: resp ?? null
+      page: resp ?? null,
     },
-    error
+    error,
   ];
 };
 
@@ -75,7 +75,7 @@ const useApiPost = <S, T, U extends APIError = APIError>(
   const post = async (body: S): Promise<T> => {
     setState(RequestState.Started);
     const resp = await axios.post<APIResponse<T>>(url, body, {
-      headers: headers
+      headers: headers,
     });
     setState(RequestState.Complete);
     if (resp.data.success) {
@@ -103,7 +103,7 @@ const useApiPatch = <S, T, U extends APIError = APIError>(
   const patch = async (body: S): Promise<T> => {
     setState(RequestState.Started);
     const resp = await axios.patch<APIResponse<T>>(url, body, {
-      headers: headers
+      headers: headers,
     });
     setState(RequestState.Complete);
     if (resp.data.success) {

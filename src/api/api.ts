@@ -1,19 +1,6 @@
 import axios, { AxiosError } from "axios";
-import {
-  Issue,
-  User,
-  Pagination,
-  APIError,
-  APIGetHook,
-  UserAPIError,
-  APIResponse,
-  APIGetHookPaginated,
-  Article,
-  APIPostHook,
-  RequestState,
-} from "../shared/types";
+import { APIResponse } from "../shared/types";
 import ERRORS from "../shared/errors";
-import { useAuth } from "../auth/AuthProvider";
 
 export const API_ROOT = "/api";
 

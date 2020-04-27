@@ -305,7 +305,7 @@ const ProfileForm: React.FC<{
       (Object.keys(state.changedUser) as Array<keyof ChangedUser>).every(
         (k) =>
           state.changedUser[k] === undefined ||
-          (k == "is_editor" && state.changedUser[k] == user?.is_editor)
+          (k === "is_editor" && state.changedUser[k] === user?.is_editor)
       )
     ) {
       return Promise.resolve();

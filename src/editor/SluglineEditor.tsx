@@ -18,7 +18,6 @@ import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
-import { ArticleContent, Article } from "../shared/types";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -69,13 +68,15 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
   const [subtitle, setSubtitle] = useState<string>(props.subtitle || "");
   const [author, setAuthor] = useState<string>(props.author || "");
 
-  useEffect(() => {
-    props.saveArticle(title, subtitle, author);
-  }, [title, subtitle, author]);
+  const { saveArticle, saveArticleContent } = props;
 
   useEffect(() => {
-    props.saveArticleContent(value);
-  }, [value]);
+    saveArticle(title, subtitle, author);
+  }, [saveArticle, title, subtitle, author]);
+
+  useEffect(() => {
+    saveArticleContent(value);
+  }, [saveArticleContent, value]);
 
   return (
     <Slate value={value} onChange={setValue} editor={editor}>

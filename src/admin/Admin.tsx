@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../auth/AuthProvider";
-import Profile from "../profile/Profile";
+import React from "react";
 import UserList from "./UserList";
 
 const AdminPanel = () => {
-  const auth = useAuth();
-
-  return <>
-    <UserList/>
-  </>;
+  return (
+    <>
+      <UserList />
+    </>
+  );
 };
 
 export default AdminPanel;

@@ -24,8 +24,8 @@ const ArticleTitle: React.FC<ArticleTitleProps> = (
 };
 
 const DashArticlesPage: React.FC = () => {
-  const [resp, userArticlesError] = useUserArticles();
-  const [createArticle, createArticleState] = useCreateArticle();
+  const [resp, ,] = useUserArticles();
+  const [createArticle, ,] = useCreateArticle();
 
   const history = useHistory();
 

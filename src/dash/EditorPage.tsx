@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import SluglineEditor from "../editor/SluglineEditor";
 import { useParams } from "react-router-dom";
 import {
@@ -40,8 +40,8 @@ const EditorPage: React.FC = () => {
 
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
-  const [article, articleError] = useArticle(id);
-  const [articleContent, articleContentError] = useArticleContent(id);
+  const [article, ,] = useArticle(id);
+  const [articleContent, ,] = useArticleContent(id);
 
   const [updateArticle, updateArticleState] = useUpdateArticle(id);
 

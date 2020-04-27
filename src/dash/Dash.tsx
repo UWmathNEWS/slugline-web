@@ -1,5 +1,4 @@
 import React from "react";
-import SluglineEditor from "../editor/SluglineEditor";
 import { useRouteMatch, Switch, Route } from "react-router-dom";
 import DashArticlesPage from "./DashArticlesPage";
 import EditorPage from "./EditorPage";

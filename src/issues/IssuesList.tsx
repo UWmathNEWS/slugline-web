@@ -42,7 +42,7 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
 };
 
 const IssuesList = () => {
-  const [issues, issuesErrors] = useAllIssues();
+  const [issues, ,] = useAllIssues();
   const [volumes, setVolumes] = useState<Issue[][]>([]);
 
   useEffect(() => {
