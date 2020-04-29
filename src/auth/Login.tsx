@@ -32,8 +32,8 @@ const Login: React.FC = () => {
           body: `Logged in as ${user?.username}.`,
           delay: 3000
         }]);
-      }, (errors: string[]) => {
-        setErrors(errors);
+      }, (errors: APIError) => {
+        setErrors(errors.detail || []);
       });
   };
 
