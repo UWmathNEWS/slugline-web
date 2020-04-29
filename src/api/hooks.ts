@@ -13,7 +13,7 @@ import {
   APIResponse,
   ArticleContent,
 } from "../shared/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { getApiUrl } from "./api";
 
@@ -67,23 +67,25 @@ const useApiPost = <S, T, U extends APIError = APIError>(
 
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
 
-  let headers: { [header: string]: string } = {};
-  if (auth.csrfToken) {
-    headers["X-CSRFToken"] = auth.csrfToken;
-  }
-
-  const post = async (body: S): Promise<T> => {
-    setState(RequestState.Started);
-    const resp = await axios.post<APIResponse<T>>(url, body, {
-      headers: headers,
-    });
-    setState(RequestState.Complete);
-    if (resp.data.success) {
-      return resp.data.data;
-    } else {
-      throw resp.data;
-    }
-  };
+  const post = useCallback(
+    async (body: S): Promise<T> => {
+      let headers: { [header: string]: string } = {};
+      if (auth.csrfToken) {
+        headers["X-CSRFToken"] = auth.csrfToken;
+      }
+      setState(RequestState.Started);
+      const resp = await axios.post<APIResponse<T>>(url, body, {
+        headers: headers,
+      });
+      setState(RequestState.Complete);
+      if (resp.data.success) {
+        return resp.data.data;
+      } else {
+        throw resp.data;
+      }
+    },
+    [url, auth.csrfToken]
+  );
 
   return [post, state];
 };
@@ -95,23 +97,25 @@ const useApiPatch = <S, T, U extends APIError = APIError>(
 
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
 
-  let headers: { [header: string]: string } = {};
-  if (auth.csrfToken) {
-    headers["X-CSRFToken"] = auth.csrfToken;
-  }
-
-  const patch = async (body: S): Promise<T> => {
-    setState(RequestState.Started);
-    const resp = await axios.patch<APIResponse<T>>(url, body, {
-      headers: headers,
-    });
-    setState(RequestState.Complete);
-    if (resp.data.success) {
-      return resp.data.data;
-    } else {
-      throw resp.data;
-    }
-  };
+  const patch = useCallback(
+    async (body: S): Promise<T> => {
+      let headers: { [header: string]: string } = {};
+      if (auth.csrfToken) {
+        headers["X-CSRFToken"] = auth.csrfToken;
+      }
+      setState(RequestState.Started);
+      const resp = await axios.patch<APIResponse<T>>(url, body, {
+        headers: headers,
+      });
+      setState(RequestState.Complete);
+      if (resp.data.success) {
+        return resp.data.data;
+      } else {
+        throw resp.data;
+      }
+    },
+    [url, auth.csrfToken]
+  );
 
   return [patch, state];
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import SluglineEditor from "../editor/SluglineEditor";
 import { useParams } from "react-router-dom";
 import {
@@ -45,7 +45,7 @@ const EditorPage: React.FC = () => {
 
   const [updateArticle, updateArticleState] = useUpdateArticle(id);
 
-  const saveArticle = useDebouncedCallback(
+  const saveArticle = useCallback(
     async (title: string, subtitle: string, author: string) => {
       await updateArticle({
         title: title,
@@ -54,6 +54,11 @@ const EditorPage: React.FC = () => {
       });
       setLastSaved(new Date());
     },
+    [updateArticle, setLastSaved]
+  );
+
+  const saveArticleDebounced = useDebouncedCallback(
+    saveArticle,
     ARTICLE_SAVE_DELAY_MSECS
   );
 
@@ -62,13 +67,18 @@ const EditorPage: React.FC = () => {
     updateArticleContentState,
   ] = useUpdateArticleContent(id);
 
-  const saveArticleContent = useDebouncedCallback(
+  const saveArticleContent = useCallback(
     async (content_raw: Node[]) => {
       await updateArticleContent({
         content_raw: JSON.stringify(content_raw),
       });
       setLastSaved(new Date());
     },
+    [updateArticleContent, setLastSaved]
+  );
+
+  const saveArticleContentDebounced = useDebouncedCallback(
+    saveArticleContent,
     ARTICLE_SAVE_DELAY_MSECS
   );
 
@@ -88,8 +98,8 @@ const EditorPage: React.FC = () => {
           title={article.title}
           subtitle={article.sub_title}
           content_raw={editorContent}
-          saveArticle={saveArticle}
-          saveArticleContent={saveArticleContent}
+          saveArticle={saveArticleDebounced}
+          saveArticleContent={saveArticleContentDebounced}
         />
       </Col>
       <Col sm={3}>

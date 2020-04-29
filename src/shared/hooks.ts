@@ -1,35 +1,40 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
-export function useDebouncedCallback<A extends any[]>(
+// taken from https://stackoverflow.com/questions/56283920/how-to-debounce-a-callback-in-functional-component-using-hooks
+// with minor modifications
+export const useDebouncedCallback = <A extends any[]>(
   callback: (...args: A) => void | Promise<void>,
   wait: number
-) {
+) => {
   // track args & timeout handle between calls
   const argsRef = useRef<A>();
   const timeout = useRef<ReturnType<typeof setTimeout>>();
 
-  function cleanup() {
+  const cleanup = () => {
     if (timeout.current) {
       clearTimeout(timeout.current);
     }
-  }
+  };
 
   // make sure our timeout gets cleared if
   // our consuming component gets unmounted
   useEffect(() => cleanup, []);
 
-  return function debouncedCallback(...args: A) {
-    // capture latest args
-    argsRef.current = args;
+  return useCallback(
+    (...args: A) => {
+      // capture latest args
+      argsRef.current = args;
 
-    // clear debounce timer
-    cleanup();
+      // clear debounce timer
+      cleanup();
 
-    // start waiting again
-    timeout.current = setTimeout(() => {
-      if (argsRef.current) {
-        callback(...argsRef.current);
-      }
-    }, wait);
-  };
-}
+      // start waiting again
+      timeout.current = setTimeout(() => {
+        if (argsRef.current) {
+          callback(...argsRef.current);
+        }
+      }, wait);
+    },
+    [callback, wait]
+  );
+};
