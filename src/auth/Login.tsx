@@ -4,6 +4,7 @@ import { useAuth } from "./AuthProvider";
 import { useHistory } from "react-router-dom";
 import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";
+import { APIError } from "../shared/types";
 
 const Login: React.FC = () => {
   const auth = useAuth();
