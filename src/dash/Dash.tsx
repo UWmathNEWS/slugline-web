@@ -1,12 +1,20 @@
 import React from "react";
-import SluglineEditor from "../editor/SluglineEditor";
+import { useRouteMatch, Switch, Route } from "react-router-dom";
+import DashArticlesPage from "./DashArticlesPage";
+import EditorPage from "./EditorPage";
 
 const Dash = () => {
-  // just cram the article editor in here for now
+  const match = useRouteMatch();
+
   return (
-    <>
-      <SluglineEditor />
-    </>
+    <Switch>
+      <Route path={`${match.path}/edit/:articleId`}>
+        <EditorPage />
+      </Route>
+      <Route path={`${match.path}/`}>
+        <DashArticlesPage />
+      </Route>
+    </Switch>
   );
 };
 

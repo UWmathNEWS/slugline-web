@@ -1,8 +1,25 @@
-import React, { createContext, useState, useContext, useEffect, useReducer, useRef } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+} from "react";
 import Cookie from "js-cookie";
 
-import { User, UserAPIResponse, AuthContext, APIResponse } from "../shared/types";
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, Method as AxiosMethod } from "axios";
+import {
+  User,
+  UserAPIResponse,
+  AuthContext,
+  APIResponse,
+} from "../shared/types";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  Method as AxiosMethod,
+} from "axios";
 import { apiGet, getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
 
@@ -12,9 +29,9 @@ interface AuthState {
 }
 
 type AuthAction =
-  { type: 'post', user: User } |
-  { type: 'login', user: User } |
-  { type: 'logout' };
+  | { type: "post"; user: User }
+  | { type: "login"; user: User }
+  | { type: "logout" };
 
 const Auth = createContext<AuthContext>({
   user: null,
@@ -27,7 +44,7 @@ const Auth = createContext<AuthContext>({
   patch: () => Promise.resolve(undefined),
   delete: () => Promise.resolve(undefined),
   login: () => Promise.resolve(undefined),
-  logout: () => Promise.resolve()
+  logout: () => Promise.resolve(),
 });
 
 interface AxiosConfig extends AxiosRequestConfig {
@@ -35,63 +52,76 @@ interface AxiosConfig extends AxiosRequestConfig {
   url: string;
 }
 
-const initialPromise = apiGet<User | null>("me/");
+const initialPromise = apiGet<User | null>(getApiUrl("me/"));
 
 const CSRF_COOKIE = "csrftoken";
 const USER_LOCALSTORAGE_KEY = "slugline-user";
 
-export const AuthProvider: React.FC = props => {
+export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
-  const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(undefined);
+  const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(
+    undefined
+  );
   const isWaiting = useRef<boolean>(false);
-  const [user, dispatchUser] = useReducer((state: AuthState, action: AuthAction) => {
-    switch (action.type) {
-    case 'post':
-      if (action.user === null) {
-        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-      } else {
-        localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(action.user));
+  const [user, dispatchUser] = useReducer(
+    (state: AuthState, action: AuthAction) => {
+      switch (action.type) {
+        case "post":
+          if (action.user === null) {
+            localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+          } else {
+            localStorage.setItem(
+              USER_LOCALSTORAGE_KEY,
+              JSON.stringify(action.user)
+            );
+          }
+          return {
+            user: action.user,
+            csrfToken: state.csrfToken,
+          };
+        case "login":
+          if (action.user === null) {
+            localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+          } else {
+            localStorage.setItem(
+              USER_LOCALSTORAGE_KEY,
+              JSON.stringify(action.user)
+            );
+          }
+          return {
+            user: action.user,
+            csrfToken: Cookie.get(CSRF_COOKIE) || null,
+          };
+        case "logout":
+          return {
+            user: null,
+            csrfToken: Cookie.get(CSRF_COOKIE) || null,
+          };
       }
-      return {
-        user: action.user,
-        csrfToken: state.csrfToken
-      };
-    case 'login':
-      if (action.user === null) {
-        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-      } else {
-        localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(action.user));
-      }
-      return {
-        user: action.user,
-        csrfToken: Cookie.get(CSRF_COOKIE) || null
-      };
-    case 'logout':
-      return {
-        user: null,
-        csrfToken: Cookie.get(CSRF_COOKIE) || null
-      };
+      return state;
+    },
+    {
+      user: storedUser !== null ? JSON.parse(storedUser) : null,
+      csrfToken: null, // null is a sentinel value here so we know the page was just loaded
     }
-    return state;
-  }, {
-    user: storedUser !== null ? JSON.parse(storedUser) : null,
-    csrfToken: null // null is a sentinel value here so we know the page was just loaded
-  });
+  );
 
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
-      const promise = (force ? apiGet<User | null>("me/") : initialPromise)
-        .then((data: User | null) => {
-          if (user.csrfToken === null) {
-            if (data) {
-              dispatchUser({ type: 'login', user: data });
-            } else {
-              dispatchUser({ type: 'logout' });
-            }
+      const promise = (force
+        ? apiGet<User | null>(getApiUrl("me/"))
+        : initialPromise
+      ).then((data: User | null) => {
+        if (user.csrfToken === null) {
+          if (data) {
+            dispatchUser({ type: "login", user: data });
+          } else {
+            dispatchUser({ type: "logout" });
           }
-          isWaiting.current = false;
-        });
+        }
+        isWaiting.current = false;
+      });
       setReadyPromise(promise);
       return promise;
     }
@@ -110,9 +140,9 @@ export const AuthProvider: React.FC = props => {
     return axios({
       ...config,
       url: getApiUrl(config.url),
-      headers: user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {}
-    })
-      .then((resp: AxiosResponse<UserAPIResponse>) => {
+      headers: user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {},
+    }).then(
+      (resp: AxiosResponse<UserAPIResponse>) => {
         if (resp.status === 401 || resp.status === 403) {
           // auth error
           throw ERRORS.REQUEST.NEEDS_AUTHENTICATION;
@@ -121,63 +151,94 @@ export const AuthProvider: React.FC = props => {
           throw resp.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
         }
         if (setCurUser) {
-          dispatchUser({ type: 'post', user: resp.data.data });
+          dispatchUser({ type: "post", user: resp.data.data });
         }
         return resp.data.data;
-      }, (err: AxiosError) => {
-        throw err.response?.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
-      });
+      },
+      (err: AxiosError) => {
+        throw err.response?.data.error ?? {
+          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED],
+        };
+      }
+    );
   };
 
-  const post = <T extends {}>(url: string, data: T, setCurUser: boolean = false) => {
-    return makeRequest({
-      method: 'post',
-      url,
-      data
-    }, setCurUser);
+  const post = <T extends {}>(
+    url: string,
+    data: T,
+    setCurUser: boolean = false
+  ) => {
+    return makeRequest(
+      {
+        method: "post",
+        url,
+        data,
+      },
+      setCurUser
+    );
   };
 
-  const put = <T extends {}>(url: string, data: T, setCurUser: boolean = false) => {
-    return makeRequest({
-      method: 'put',
-      url,
-      data
-    }, setCurUser);
+  const put = <T extends {}>(
+    url: string,
+    data: T,
+    setCurUser: boolean = false
+  ) => {
+    return makeRequest(
+      {
+        method: "put",
+        url,
+        data,
+      },
+      setCurUser
+    );
   };
 
-  const patch = <T extends {}>(url: string, data: T, setCurUser: boolean = false) => {
-    return makeRequest({
-      method: 'patch',
-      url,
-      data
-    }, setCurUser);
+  const patch = <T extends {}>(
+    url: string,
+    data: T,
+    setCurUser: boolean = false
+  ) => {
+    return makeRequest(
+      {
+        method: "patch",
+        url,
+        data,
+      },
+      setCurUser
+    );
   };
 
   const del = (url: string) => {
-    return makeRequest({
-      method: 'delete',
-      url
-    }, false);
+    return makeRequest(
+      {
+        method: "delete",
+        url,
+      },
+      false
+    );
   };
 
   const login = (username: string, password: string) => {
     const body = {
       username: username,
-      password: password
+      password: password,
     };
     const headers = user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {};
     return axios
       .post<UserAPIResponse>(getApiUrl("login/"), body, {
-        headers: headers
+        headers: headers,
       })
-      .then(resp => {
-        if (resp.data.success) {
-          dispatchUser({ type: 'login', user: resp.data.data });
-          return resp.data.data;
+      .then(
+        (resp) => {
+          if (resp.data.success) {
+            dispatchUser({ type: "login", user: resp.data.data });
+            return resp.data.data;
+          }
+        },
+        (err: AxiosError) => {
+          throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
         }
-      }, (err: AxiosError) => {
-        throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
-      });
+      );
   };
 
   const logout = () => {
@@ -187,16 +248,19 @@ export const AuthProvider: React.FC = props => {
         getApiUrl("logout/"),
         {},
         {
-          headers: headers
+          headers: headers,
         }
       )
-      .then(resp => {
-        if (resp.data.success) {
-          dispatchUser({ type: 'logout' });
+      .then(
+        (resp) => {
+          if (resp.data.success) {
+            dispatchUser({ type: "logout" });
+          }
+        },
+        (err: AxiosError) => {
+          throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
         }
-      }, (err: AxiosError) => {
-        throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
-      });
+      );
   };
 
   useEffect(() => {
@@ -216,7 +280,7 @@ export const AuthProvider: React.FC = props => {
         patch,
         delete: del,
         login,
-        logout
+        logout,
       }}
     >
       {props.children}
