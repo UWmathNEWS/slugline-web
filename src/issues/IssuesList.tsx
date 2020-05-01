@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useAllIssues } from "../api/api";
+import { useAllIssues } from "../api/hooks";
 
 import "./IssuesList.scss";
 import { Link } from "react-router-dom";
@@ -17,12 +17,12 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
     <>
       <h5 className="blackbox">Volume {props.volume[0].volume_num}</h5>
       <div className="volume-issue-list d-flex overflow-auto">
-        {props.volume.map(issue => {
+        {props.volume.map((issue) => {
           return (
             <Link
               to={{
                 pathname: `/issues/${issue.id}`,
-                state: issue
+                state: issue,
               }}
               className="volume-issue flex-shrink-1"
               key={issue.id}
@@ -42,7 +42,7 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
 };
 
 const IssuesList = () => {
-  const [issues, issuesErrors] = useAllIssues();
+  const [issues, ,] = useAllIssues();
   const [volumes, setVolumes] = useState<Issue[][]>([]);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const IssuesList = () => {
     let vols: Issue[][] = [[]];
     let volumeNum = issues.results[0].volume_num;
     // split the issues into groups by volume num
-    issues.results.forEach(issue => {
+    issues.results.forEach((issue) => {
       if (issue.volume_num !== volumeNum) {
         vols.push([]);
       }
@@ -65,7 +65,7 @@ const IssuesList = () => {
   return (
     <>
       <h1>Issues</h1>
-      {volumes.map(volume => {
+      {volumes.map((volume) => {
         return <VolumeIssues volume={volume} />;
       })}
     </>

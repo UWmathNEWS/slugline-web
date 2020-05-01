@@ -1,7 +1,6 @@
 import React from "react";
 import "./slugline.scss";
 import { Router, Switch, Route } from "react-router-dom";
-import { Toast } from "react-bootstrap";
 import { createBrowserHistory } from "history";
 
 import IssuesList from "./issues/IssuesList";
@@ -27,7 +26,7 @@ const App: React.FC = () => {
   const auth = useAuth();
 
   React.useEffect(() => {
-    history.listen(loc => {
+    history.listen((loc) => {
       if (protectedRoutes.includes(loc.pathname)) {
         auth.check(true);
       }
