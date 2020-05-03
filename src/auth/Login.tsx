@@ -4,6 +4,7 @@ import { useAuth } from "./AuthProvider";
 import { useHistory } from "react-router-dom";
 import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";
+import { APIError } from "../shared/types";
 
 const Login: React.FC = () => {
   const auth = useAuth();
@@ -24,24 +25,32 @@ const Login: React.FC = () => {
 
   const onSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
-    auth.login(username, password)
-      .then(user => {
+    auth.login(username, password).then(
+      (user) => {
         history.push("/");
-        toast.addToasts([{
-          id: Math.random().toString(),
-          body: `Logged in as ${user?.username}.`,
-          delay: 3000
-        }]);
-      }, (errors: APIError) => {
+        toast.addToasts([
+          {
+            id: Math.random().toString(),
+            body: `Logged in as ${user?.username}.`,
+            delay: 3000,
+          },
+        ]);
+      },
+      (errors: APIError) => {
         setErrors(errors.detail || []);
-      });
+      }
+    );
   };
 
   return (
     <>
       <h1>LOGIN:</h1>
 
-      {errors.map(err => <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
+      {errors.map((err) => (
+        <Alert key={err} variant="danger">
+          {ERRORS[err]}
+        </Alert>
+      ))}
 
       <Form onSubmit={onSubmit}>
         <Form.Group controlId="loginUsername">
