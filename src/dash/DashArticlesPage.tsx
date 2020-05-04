@@ -11,7 +11,7 @@ interface ArticleTitleProps {
   article: Article;
 }
 
-const ArticleTitle: React.FC<ArticleTitleProps> = (
+export const ArticleTitle: React.FC<ArticleTitleProps> = (
   props: ArticleTitleProps
 ) => {
   if (props.article.article_type === ArticleType.Slate) {

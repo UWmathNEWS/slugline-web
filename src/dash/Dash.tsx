@@ -3,6 +3,7 @@ import { useRouteMatch, Switch, Route } from "react-router-dom";
 import DashArticlesPage from "./DashArticlesPage";
 import EditorPage from "./EditorPage";
 import DashIssuesPage from "./DashIssuesPage";
+import DashIssueDetail from "./DashIssueDetail";
 
 const Dash = () => {
   const match = useRouteMatch();
@@ -11,6 +12,9 @@ const Dash = () => {
     <Switch>
       <Route path={`${match.path}/edit/:articleId`}>
         <EditorPage />
+      </Route>
+      <Route path={`${match.path}/issues/:issueId`}>
+        <DashIssueDetail />
       </Route>
       <Route path={`${match.path}/issues/`}>
         <DashIssuesPage />

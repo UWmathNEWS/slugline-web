@@ -132,6 +132,12 @@ export const useIssue = (issueId?: number): APIGetHook<Issue> => {
   return useApiGet<Issue>(getApiUrl(`issues/${issueId}`));
 };
 
+export const useIssueArticles = (
+  issueId?: number
+): APIGetHookPaginated<Article> => {
+  return useApiGetPaginated<Article>(getApiUrl(`issues/${issueId}/articles/`));
+};
+
 export const useIssueList = (): APIGetHookPaginated<Issue> => {
   return useApiGetPaginated<Issue>(getApiUrl("issues/"));
 };
