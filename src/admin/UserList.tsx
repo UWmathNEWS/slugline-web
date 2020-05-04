@@ -1,13 +1,15 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import axios from "axios";
 import { getApiUrl } from "../api/api";
 import { InputGroup, Form, Table, Modal, Button } from "react-bootstrap";
+
 import { User, PaginatedAPIResponse } from "../shared/types";
 import ProfileForm from "../profile/ProfileForm";
 
 import "./UserList.scss";
 import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
+import RichTable, { Column } from "../shared/components/RichTable";
 
 const getUserList = (): Promise<User[]> => {
   return axios.get<PaginatedAPIResponse<User>>(getApiUrl("users/"))
@@ -44,6 +46,34 @@ const UserList = () => {
   const [createUserErrors, setCreateUserErrors] = useState(false);
   const editUserRef = useRef({ submit: () => Promise.resolve() });
   const createUserRef = useRef({ submit: () => Promise.resolve() });
+
+  const columns = useMemo<Column<User>[]>(
+    () => [
+      {
+        Header: "Username",
+        key: "username"
+      },
+      {
+        Header: "Name",
+        key: "name",
+        accessor: (user: User) => `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`
+      },
+      {
+        Header: "Writer Name",
+        key: "writer_name"
+      },
+      {
+        Header: "Email",
+        key: "email"
+      },
+      {
+        Header: "Role",
+        key: "role",
+        accessor: (user: User) => user.is_editor ? "Editor" : "Contributor"
+      }
+    ],
+    []
+  );
 
   const [state, dispatch] = useReducer((state: State, action: Action): State => {
     switch (action.type) {
@@ -142,6 +172,25 @@ const UserList = () => {
 
   return <div>
     <Button variant="secondary" onClick={() => { dispatch({ type: 'show create user', data: true }) }}>New User</Button>
+    {/* Example usage of RichTable */}
+    <RichTable<User>
+      columns={columns}
+      url="/api/users/"
+      pk="username"
+      paginated={true}
+      selectable={true}
+      actions={[
+        {
+          name: "Edit",
+          bulk: false,
+          triggers: ["click"],
+          call(_: any, data: User) {
+            dispatch({ type: 'set edit user', data });
+            return Promise.resolve();
+          }
+        }
+      ]}
+    />
     <InputGroup className="mb-3">
       <Form.Control placeholder="Search..." onChange={search} />
     </InputGroup>

@@ -17,7 +17,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { getApiUrl } from "./api";
 
-const useApiGet = <T, U extends APIError = APIError>(
+export const useApiGet = <T, U extends APIError = APIError>(
   url: string
 ): APIGetHook<T, U> => {
   const [response, setResponse] = useState<T | undefined>(undefined);
@@ -32,7 +32,7 @@ const useApiGet = <T, U extends APIError = APIError>(
   return [response, error];
 };
 
-const useApiGetPaginated = <T, U extends APIError = APIError>(
+export const useApiGetPaginated = <T, U extends APIError = APIError>(
   url: string
 ): APIGetHookPaginated<T, U> => {
   const [currentUrl, setCurrentUrl] = useState<string>(url);
@@ -60,7 +60,7 @@ const useApiGetPaginated = <T, U extends APIError = APIError>(
   ];
 };
 
-const useApiPost = <S, T, U extends APIError = APIError>(
+export const useApiPost = <S, T, U extends APIError = APIError>(
   url: string
 ): APIPostHook<S, T, U> => {
   const auth = useAuth();
@@ -90,7 +90,7 @@ const useApiPost = <S, T, U extends APIError = APIError>(
   return [post, state];
 };
 
-const useApiPatch = <S, T, U extends APIError = APIError>(
+export const useApiPatch = <S, T, U extends APIError = APIError>(
   url: string
 ): APIPostHook<S, T, U> => {
   const auth = useAuth();
