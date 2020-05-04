@@ -1,9 +1,9 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useIssue, useIssueArticles } from "../api/hooks";
+import { useIssue, useIssueArticles } from "../../api/hooks";
 import { Spinner, Table } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ArticleTitle } from "./DashArticlesPage";
+import { ArticleTitle } from "../articles/DashArticlesPage";
 
 const DashIssueDetail = () => {
   const { issueId } = useParams();

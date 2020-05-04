@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useIssueList } from "../api/hooks";
-import { Table } from "react-bootstrap";
+import { useIssueList } from "../../api/hooks";
+import { Table, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 const DashIssuesPage = () => {
@@ -10,6 +10,7 @@ const DashIssuesPage = () => {
   return (
     <>
       <h1>Issues</h1>
+      <Button color="primary">New Issue</Button>
       <div className="table-header">
         <FontAwesomeIcon
           onClick={() => {

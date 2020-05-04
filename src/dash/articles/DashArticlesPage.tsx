@@ -1,11 +1,11 @@
 import React from "react";
-import { useUserArticles, useCreateArticle } from "../api/hooks";
+import { useUserArticles, useCreateArticle } from "../../api/hooks";
 import { Table, Spinner, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./DashArticlesPage.scss";
 import { useHistory, Link } from "react-router-dom";
-import { Article, ArticleType } from "../shared/types";
+import { Article, ArticleType } from "../../shared/types";
 
 interface ArticleTitleProps {
   article: Article;

@@ -1,9 +1,9 @@
 import React from "react";
 import { useRouteMatch, Switch, Route } from "react-router-dom";
-import DashArticlesPage from "./DashArticlesPage";
+import DashArticlesPage from "./articles/DashArticlesPage";
 import EditorPage from "./EditorPage";
-import DashIssuesPage from "./DashIssuesPage";
-import DashIssueDetail from "./DashIssueDetail";
+import DashIssuesPage from "./issues/DashIssuesPage";
+import DashIssueDetail from "./issues/DashIssueDetail";
 
 const Dash = () => {
   const match = useRouteMatch();
