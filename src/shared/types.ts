@@ -40,7 +40,7 @@ export interface User {
 
 export interface APIError {
   detail?: string[];
-  [key: string]: string[] | undefined;
+  status_code: number;
 }
 
 export interface APIResponseSuccess<T> {
