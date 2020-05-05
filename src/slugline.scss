@@ -39,3 +39,10 @@ h5,
 h6 {
   text-transform: uppercase;
 }
+
+// Form styling
+input.form-control {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
