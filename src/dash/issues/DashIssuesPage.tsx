@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useIssueList, useCreateIssue } from "../../api/hooks";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import { useIssueList, useCreateIssue, useLatestIssue } from "../../api/hooks";
+import { Table, Button, Modal, Form, Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { useForm, ErrorMessage } from "react-hook-form";
 
@@ -109,6 +109,12 @@ const DashIssuesPage = () => {
 
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
+  const [latestIssue, ,] = useLatestIssue();
+
+  if (!latestIssue) {
+    return <Spinner animation="border" />;
+  }
+
   return (
     <>
       <h1>Issues</h1>
@@ -142,22 +148,29 @@ const DashIssuesPage = () => {
         />
       </div>
       <Table>
-        <tr>
-          <th>Issue</th>
-          <th>Published</th>
-          <th>PDF</th>
-        </tr>
-        {resp.page?.results.map((issue) => (
+        <thead>
           <tr>
-            <td>
-              <Link
-                to={`issues/${issue.id}`}
-              >{`v${issue.volume_num}i${issue.issue_num}`}</Link>
-            </td>
-            <td>{issue.publish_date !== undefined ? "Y" : "N"}</td>
-            <td>{issue.pdf || "N/A"}</td>
+            <th>Issue</th>
+            <th>Published</th>
+            <th>PDF</th>
           </tr>
-        ))}
+        </thead>
+        <tbody>
+          {resp.page?.results.map((issue) => (
+            <tr
+              key={issue.id}
+              className={issue.id === latestIssue.id ? "issue-latest" : ""}
+            >
+              <td>
+                <Link
+                  to={`issues/${issue.id}`}
+                >{`v${issue.volume_num}i${issue.issue_num}`}</Link>
+              </td>
+              <td>{issue.publish_date !== undefined ? "Y" : "N"}</td>
+              <td>{issue.pdf || "N/A"}</td>
+            </tr>
+          ))}
+        </tbody>
       </Table>
       <IssueCreateModal show={showCreateModal} setShow={setShowCreateModal} />
     </>

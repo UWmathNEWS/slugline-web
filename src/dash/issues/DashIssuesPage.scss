@@ -1,3 +1,5 @@
+@import "src/_slugline_vars.scss";
+
 #createIssueForm {
   & input {
     margin: 0 1ch;
@@ -10,4 +12,8 @@
 
 .issue-num-input {
   width: 4ch !important;
+}
+
+tr.issue-latest {
+  background-color: $primary;
 }
