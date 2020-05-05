@@ -1,15 +1,13 @@
-.create-issue-form {
-  display: flex;
-
+#createIssueForm {
   & input {
     margin: 0 1ch;
   }
+}
 
-  & .volume-num-input {
-    width: 5ch !important;
-  }
+.volume-num-input {
+  width: 5ch !important;
+}
 
-  & .issue-num-input {
-    width: 4ch !important;
-  }
+.issue-num-input {
+  width: 4ch !important;
 }

@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  useIssueList,
-  useCreateArticle,
-  useCreateIssue,
-} from "../../api/hooks";
-import { Table, Button, Modal, Form, Row, FormGroup } from "react-bootstrap";
+import { useIssueList, useCreateIssue } from "../../api/hooks";
+import { Table, Button, Modal, Form } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { useForm, ErrorMessage } from "react-hook-form";
 
 import "./DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import ERRORS from "../../shared/errors";
+import { FormRow } from "react-bootstrap/Form";
 
 interface IssueCreateModalProps {
   show: boolean;
@@ -26,15 +23,18 @@ interface IssueCreateFormVals {
 const IssueCreateModal: React.FC<IssueCreateModalProps> = (
   props: IssueCreateModalProps
 ) => {
-  const { triggerValidation, handleSubmit, register, errors } = useForm<
-    IssueCreateFormVals
-  >();
+  const { handleSubmit, register, errors } = useForm<IssueCreateFormVals>();
 
   const history = useHistory();
 
   const [createIssue, ,] = useCreateIssue();
 
   const [nonFieldErrors, setNonFieldErrors] = useState<string[]>([]);
+
+  const closeModal = () => {
+    setNonFieldErrors([]);
+    props.setShow(false);
+  };
 
   const onSubmit = async (vals: IssueCreateFormVals) => {
     const resp = await createIssue({
@@ -50,20 +50,11 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
   };
 
   return (
-    <Modal
-      show={props.show}
-      onHide={() => {
-        props.setShow(false);
-      }}
-    >
+    <Modal show={props.show} onHide={closeModal}>
       <Modal.Header closeButton>Create New Issue</Modal.Header>
       <Modal.Body>
-        <Form
-          id="createIssueForm"
-          className="create-issue-form"
-          onSubmit={handleSubmit(onSubmit)}
-          inline
-        >
+        <Form.Label>Issue Name:</Form.Label>
+        <Form id="createIssueForm" onSubmit={handleSubmit(onSubmit)} inline>
           <Form.Label>v</Form.Label>
           <Field
             name="volumeNum"
@@ -94,23 +85,18 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
             errors={errors}
             hideErrorMessage
           />
-          {nonFieldErrors?.map((error, idx) => (
-            <small key={idx} className="invalid-feedback d-block">
-              {error}
-            </small>
-          ))}
         </Form>
+        {nonFieldErrors?.map((error, idx) => (
+          <small key={idx} className="invalid-feedback d-block">
+            {ERRORS[error]}
+          </small>
+        ))}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" type="submit" form="createIssueForm">
           Create Issue
         </Button>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            props.setShow(false);
-          }}
-        >
+        <Button variant="secondary" onClick={closeModal}>
           Close
         </Button>
       </Modal.Footer>
