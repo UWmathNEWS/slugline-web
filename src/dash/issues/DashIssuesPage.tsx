@@ -8,11 +8,14 @@ import { useForm, ErrorMessage } from "react-hook-form";
 import "./DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import ERRORS from "../../shared/errors";
-import { FormRow } from "react-bootstrap/Form";
+import { Issue } from "../../shared/types";
+
+const ISSUES_PER_VOLUME = 6;
 
 interface IssueCreateModalProps {
   show: boolean;
   setShow: (show: boolean) => void;
+  latestIssue: Issue;
 }
 
 interface IssueCreateFormVals {
@@ -23,7 +26,15 @@ interface IssueCreateFormVals {
 const IssueCreateModal: React.FC<IssueCreateModalProps> = (
   props: IssueCreateModalProps
 ) => {
-  const { handleSubmit, register, errors } = useForm<IssueCreateFormVals>();
+  const { handleSubmit, register, errors } = useForm<IssueCreateFormVals>({
+    defaultValues: {
+      volumeNum:
+        props.latestIssue.issue_num <= ISSUES_PER_VOLUME
+          ? props.latestIssue.volume_num + 1
+          : props.latestIssue.volume_num,
+      issueNum: (props.latestIssue.issue_num + 1) % ISSUES_PER_VOLUME,
+    },
+  });
 
   const history = useHistory();
 
@@ -166,13 +177,17 @@ const DashIssuesPage = () => {
                   to={`issues/${issue.id}`}
                 >{`v${issue.volume_num}i${issue.issue_num}`}</Link>
               </td>
-              <td>{issue.publish_date !== undefined ? "Y" : "N"}</td>
+              <td>{issue.publish_date ? "Y" : "N"}</td>
               <td>{issue.pdf || "N/A"}</td>
             </tr>
           ))}
         </tbody>
       </Table>
-      <IssueCreateModal show={showCreateModal} setShow={setShowCreateModal} />
+      <IssueCreateModal
+        show={showCreateModal}
+        setShow={setShowCreateModal}
+        latestIssue={latestIssue}
+      />
     </>
   );
 };
