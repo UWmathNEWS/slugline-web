@@ -1,8 +1,14 @@
+// These variables have to be before the import because they'll break otherwise
+
+$primary: #f2c0d9;
+
 // Use our custom fonts
 $font-family-sans-serif: Joanna Nova; //This is a misnomer, our body font is serif
 $headings-font-family: DIN Next;
 
-$primary: #f2c0d9;
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
 
 // Headers
 $headings-color: black;
@@ -17,15 +23,11 @@ $navbar-brand-font-size: 2rem;
 // Forms
 $input-border-radius: 0;
 $input-border-width: 1px;
-$input-border-color: black;
+$input-border-color: $gray-600;
 $input-padding-x: 0.5rem;
 $input-focus-box-shadow: none;
 $input-focus-border-color: $primary;
 $enable-validation-icons: false;
-
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
 
 // FUNCTIONS
 @function spacing($n) {
