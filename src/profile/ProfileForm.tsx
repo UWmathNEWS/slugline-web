@@ -386,13 +386,11 @@ const ProfileForm: React.FC<{
               <Form.Control.Feedback>
                 Username is valid and is available.
               </Form.Control.Feedback>
-              <Form.Control.Feedback type="invalid">
-                <ul>
-                  {state.errors.username?.map((msg) => (
-                    <li key={msg}>{ERRORS[msg]}</li>
-                  ))}
-                </ul>
-              </Form.Control.Feedback>
+              <ul>
+                {state.errors.username?.map((msg) => (
+                  <li key={msg}>{ERRORS[msg]}</li>
+                ))}
+              </ul>
             </>
           )}
         </Col>

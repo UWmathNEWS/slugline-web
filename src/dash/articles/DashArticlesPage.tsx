@@ -38,8 +38,10 @@ const DashArticlesPage: React.FC = () => {
       <h1>Articles</h1>
       <Button
         onClick={async () => {
-          const article = await createArticle();
-          history.push(`/dash/edit/${article.id}`);
+          const resp = await createArticle();
+          if (resp.success === true) {
+            history.push(`/dash/edit/${resp.data.id}`);
+          }
         }}
       >
         New Article

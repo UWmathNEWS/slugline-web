@@ -11,6 +11,7 @@ import { useForm, ErrorMessage } from "react-hook-form";
 
 import "./DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
+import ERRORS from "../../shared/errors";
 
 interface IssueCreateModalProps {
   show: boolean;
@@ -31,14 +32,21 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 
   const history = useHistory();
 
-  const [createIssue, createIssueError] = useCreateIssue();
+  const [createIssue, ,] = useCreateIssue();
+
+  const [nonFieldErrors, setNonFieldErrors] = useState<string[]>([]);
 
   const onSubmit = async (vals: IssueCreateFormVals) => {
-    const newIssue = await createIssue({
+    const resp = await createIssue({
       issue_num: vals.issueNum,
       volume_num: vals.volumeNum,
     });
-    history.push(`issues/${newIssue.id}`);
+    if (resp.success) {
+      setNonFieldErrors([]);
+      history.push(`issues/${resp.data.id}`);
+    } else {
+      setNonFieldErrors(resp.error.non_field_errors || []);
+    }
   };
 
   return (
@@ -86,6 +94,11 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
             errors={errors}
             hideErrorMessage
           />
+          {nonFieldErrors?.map((error, idx) => (
+            <small key={idx} className="invalid-feedback d-block">
+              {error}
+            </small>
+          ))}
         </Form>
       </Modal.Body>
       <Modal.Footer>

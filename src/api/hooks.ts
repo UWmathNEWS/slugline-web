@@ -3,7 +3,7 @@ import {
   APIError,
   APIGetHook,
   APIGetHookPaginated,
-  APIPostHook,
+  APIMutateHook,
   RequestState,
   Issue,
   User,
@@ -12,6 +12,7 @@ import {
   Pagination,
   APIResponse,
   ArticleContent,
+  IssueAPIError,
 } from "../shared/types";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../auth/AuthProvider";
@@ -62,27 +63,24 @@ const useApiGetPaginated = <T, U extends APIError = APIError>(
 
 const useApiPost = <S, T, U extends APIError = APIError>(
   url: string
-): APIPostHook<S, T, U> => {
+): APIMutateHook<S, T, U> => {
   const auth = useAuth();
 
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
 
   const post = useCallback(
-    async (body: S): Promise<T> => {
+    async (body: S): Promise<APIResponse<T, U>> => {
       let headers: { [header: string]: string } = {};
       if (auth.csrfToken) {
         headers["X-CSRFToken"] = auth.csrfToken;
       }
       setState(RequestState.Started);
-      const resp = await axios.post<APIResponse<T>>(url, body, {
+      const resp = await axios.post<APIResponse<T, U>>(url, body, {
         headers: headers,
+        validateStatus: () => true,
       });
       setState(RequestState.Complete);
-      if (resp.data.success) {
-        return resp.data.data;
-      } else {
-        throw resp.data;
-      }
+      return resp.data;
     },
     [url, auth.csrfToken]
   );
@@ -92,27 +90,24 @@ const useApiPost = <S, T, U extends APIError = APIError>(
 
 const useApiPatch = <S, T, U extends APIError = APIError>(
   url: string
-): APIPostHook<S, T, U> => {
+): APIMutateHook<S, T, U> => {
   const auth = useAuth();
 
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
 
   const patch = useCallback(
-    async (body: S): Promise<T> => {
+    async (body: S): Promise<APIResponse<T, U>> => {
       let headers: { [header: string]: string } = {};
       if (auth.csrfToken) {
         headers["X-CSRFToken"] = auth.csrfToken;
       }
       setState(RequestState.Started);
-      const resp = await axios.patch<APIResponse<T>>(url, body, {
+      const resp = await axios.patch<APIResponse<T, U>>(url, body, {
         headers: headers,
+        validateStatus: () => true,
       });
       setState(RequestState.Complete);
-      if (resp.data.success) {
-        return resp.data.data;
-      } else {
-        throw resp.data;
-      }
+      return resp.data;
     },
     [url, auth.csrfToken]
   );
@@ -133,7 +128,7 @@ export const useIssue = (issueId?: number): APIGetHook<Issue> => {
 };
 
 export const useCreateIssue = () => {
-  return useApiPost<Issue, Issue>(getApiUrl("issues/"));
+  return useApiPost<Issue, Issue, IssueAPIError>(getApiUrl("issues/"));
 };
 
 export const useIssueArticles = (

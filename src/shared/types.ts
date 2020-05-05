@@ -94,8 +94,8 @@ export enum RequestState {
   Complete,
 }
 
-export type APIPostHook<S, T, U extends APIError = APIError> = [
-  (body: S) => Promise<T>,
+export type APIMutateHook<S, T, U extends APIError = APIError> = [
+  (body: S) => Promise<APIResponse<T, U>>,
   RequestState
 ];
 
@@ -112,6 +112,10 @@ export type UserAPIResponse = APIResponse<
   UserAPIError,
   Required<APIResponseSuccess<User>>
 >;
+
+export interface IssueAPIError extends APIError {
+  non_field_errors?: string[];
+}
 
 export interface AuthContext {
   user: User | null;
