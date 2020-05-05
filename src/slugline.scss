@@ -38,7 +38,8 @@ input.form-control {
   border-left: none;
   border-right: none;
 
-  &.is-invalid {
+  &.is-invalid,
+  &.is-valid {
     box-shadow: none !important;
   }
 }
