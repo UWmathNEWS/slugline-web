@@ -1,16 +1,126 @@
-import React from "react";
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useIssueList } from "../../api/hooks";
-import { Table, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import {
+  useIssueList,
+  useCreateArticle,
+  useCreateIssue,
+} from "../../api/hooks";
+import { Table, Button, Modal, Form, Row, FormGroup } from "react-bootstrap";
+import { Link, useHistory } from "react-router-dom";
+import { useForm, ErrorMessage } from "react-hook-form";
+
+import "./DashIssuesPage.scss";
+import Field from "../../shared/form/Field";
+
+interface IssueCreateModalProps {
+  show: boolean;
+  setShow: (show: boolean) => void;
+}
+
+interface IssueCreateFormVals {
+  issueNum: number;
+  volumeNum: number;
+}
+
+const IssueCreateModal: React.FC<IssueCreateModalProps> = (
+  props: IssueCreateModalProps
+) => {
+  const { triggerValidation, handleSubmit, register, errors } = useForm<
+    IssueCreateFormVals
+  >();
+
+  const history = useHistory();
+
+  const [createIssue, createIssueError] = useCreateIssue();
+
+  const onSubmit = async (vals: IssueCreateFormVals) => {
+    const newIssue = await createIssue({
+      issue_num: vals.issueNum,
+      volume_num: vals.volumeNum,
+    });
+    history.push(`issues/${newIssue.id}`);
+  };
+
+  return (
+    <Modal
+      show={props.show}
+      onHide={() => {
+        props.setShow(false);
+      }}
+    >
+      <Modal.Header closeButton>Create New Issue</Modal.Header>
+      <Modal.Body>
+        <Form
+          id="createIssueForm"
+          className="create-issue-form"
+          onSubmit={handleSubmit(onSubmit)}
+          inline
+        >
+          <Form.Label>v</Form.Label>
+          <Field
+            name="volumeNum"
+            className="volume-num-input"
+            type="text"
+            maxLength={3}
+            ref={register({
+              required: true,
+              pattern: /[0-9]{3}/,
+              min: 0,
+              maxLength: 3,
+            })}
+            errors={errors}
+            hideErrorMessage
+          />
+          <Form.Label>i</Form.Label>
+          <Field
+            name="issueNum"
+            className="issue-num-input"
+            type="text"
+            maxLength={1}
+            ref={register({
+              required: true,
+              pattern: /[0-9]{1}/,
+              min: 0,
+              maxLength: 1,
+            })}
+            errors={errors}
+            hideErrorMessage
+          />
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" type="submit" form="createIssueForm">
+          Create Issue
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            props.setShow(false);
+          }}
+        >
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
 
 const DashIssuesPage = () => {
   const [resp] = useIssueList();
 
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+
   return (
     <>
       <h1>Issues</h1>
-      <Button color="primary">New Issue</Button>
+      <Button
+        variant="primary"
+        onClick={() => {
+          setShowCreateModal(true);
+        }}
+      >
+        New Issue
+      </Button>
       <div className="table-header">
         <FontAwesomeIcon
           onClick={() => {
@@ -50,6 +160,7 @@ const DashIssuesPage = () => {
           </tr>
         ))}
       </Table>
+      <IssueCreateModal show={showCreateModal} setShow={setShowCreateModal} />
     </>
   );
 };

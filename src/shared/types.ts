@@ -21,11 +21,11 @@ export interface ArticleContent {
 }
 
 export interface Issue {
-  id: number;
+  id?: number;
   publish_date?: string;
   volume_num: number;
   issue_num: number;
-  pdf: string;
+  pdf?: string;
 }
 
 export interface User {
