@@ -4,14 +4,24 @@ import { useIssue, useIssueArticles } from "../../api/hooks";
 import { Spinner, Table } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArticleTitle } from "../articles/DashArticlesPage";
+import Error404 from "../../shared/errors/Error404";
+import { ErrorPage } from "../../shared/errors/ErrorPage";
 
 const DashIssueDetail = () => {
   const { issueId } = useParams();
 
   const id = parseInt(issueId || "");
 
-  const [issue] = useIssue(id);
-  const [resp] = useIssueArticles(id);
+  const [issue, issueError] = useIssue(id);
+  const [resp, issueArticlesError] = useIssueArticles(id);
+
+  if (issueError) {
+    return <ErrorPage error={issueError} />;
+  }
+
+  if (issueArticlesError) {
+    return <ErrorPage error={issueArticlesError} />;
+  }
 
   if (!issue) {
     return <Spinner animation="border" />;

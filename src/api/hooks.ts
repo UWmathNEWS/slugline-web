@@ -25,7 +25,7 @@ const useApiGet = <T, U extends APIError = APIError>(
   const [error, setError] = useState<U | undefined>(undefined);
 
   useEffect(() => {
-    axios.get(url).then((axiosResp) => {
+    axios.get(url, { validateStatus: () => true }).then((axiosResp) => {
       if (axiosResp.data.success) setResponse(axiosResp.data.data);
       else setError(axiosResp.data.error);
     });
