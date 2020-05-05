@@ -16,6 +16,8 @@ import ToastContainer from "./shared/components/ToastContainer";
 import { initLibrary } from "./shared/icons";
 import SluglineNav from "./header/SluglineNav";
 
+import "./slugline.scss";
+
 initLibrary();
 
 const history = createBrowserHistory();

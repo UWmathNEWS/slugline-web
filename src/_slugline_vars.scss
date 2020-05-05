@@ -21,3 +21,12 @@ $input-border-color: black;
 $input-focus-box-shadow: none;
 $input-focus-border-color: $primary;
 $enable-validation-icons: false;
+
+// FUNCTIONS
+@function spacing($n) {
+  @return map-get($map: $spacers, $key: $n);
+}
+
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
