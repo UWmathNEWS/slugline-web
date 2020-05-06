@@ -43,3 +43,15 @@ input.form-control {
     box-shadow: none !important;
   }
 }
+
+.input-group {
+  & > .input-group-append,
+  & > .input.group.prepend {
+    button {
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      border-radius: 0;
+    }
+  }
+}
