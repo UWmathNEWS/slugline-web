@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, FormEvent, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useIssueList, useCreateIssue, useLatestIssue } from "../../api/hooks";
 import { Table, Button, Modal, Form, Spinner } from "react-bootstrap";
@@ -77,6 +77,8 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
     }
   };
 
+  const issueFieldRef = useRef<HTMLInputElement>();
+
   return (
     <Modal show={props.show} onHide={closeModal}>
       <Modal.Header closeButton>Create New Issue</Modal.Header>
@@ -95,6 +97,11 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
               min: 0,
               maxLength: 3,
             })}
+            onChange={(e) => {
+              if (e.currentTarget.value.length === 3) {
+                issueFieldRef.current?.focus();
+              }
+            }}
             errors={errors}
             hideErrorMessage
           />
@@ -104,12 +111,16 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
             className="issue-code-input"
             type="text"
             maxLength={1}
-            ref={register({
-              required: true,
-              pattern: /[0-9A-Z]{1}/,
-              min: 0,
-              maxLength: 1,
-            })}
+            ref={(ref) => {
+              const inputRef = ref as HTMLInputElement;
+              issueFieldRef.current = inputRef;
+              register(inputRef, {
+                required: true,
+                pattern: /[0-9A-Z]{1}/,
+                min: 0,
+                maxLength: 1,
+              });
+            }}
             errors={errors}
             hideErrorMessage
           />
