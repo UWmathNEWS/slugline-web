@@ -30,9 +30,9 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
               <img
                 className="volume-issue-img mb-1"
                 src={IMG_DEFAULT}
-                alt={`Volume ${issue.volume_num} Issue ${issue.issue_num} cover`}
+                alt={`Volume ${issue.volume_num} Issue ${issue.issue_code} cover`}
               />
-              <h6 className="text-center">{`Issue ${issue.issue_num}`}</h6>
+              <h6 className="text-center">{`Issue ${issue.issue_code}`}</h6>
             </Link>
           );
         })}

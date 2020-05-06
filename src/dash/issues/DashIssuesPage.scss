@@ -1,0 +1,19 @@
+@import "src/slugline_vars";
+
+#createIssueForm {
+  & input {
+    margin: 0 1ch;
+  }
+}
+
+.volume-num-input {
+  width: 5ch !important;
+}
+
+.issue-code-input {
+  width: 4ch !important;
+}
+
+tr.issue-latest {
+  background-color: $primary;
+}

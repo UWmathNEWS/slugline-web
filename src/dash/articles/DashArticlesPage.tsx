@@ -1,17 +1,17 @@
 import React from "react";
-import { useUserArticles, useCreateArticle } from "../api/hooks";
+import { useUserArticles, useCreateArticle } from "../../api/hooks";
 import { Table, Spinner, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./DashArticlesPage.scss";
 import { useHistory, Link } from "react-router-dom";
-import { Article, ArticleType } from "../shared/types";
+import { Article, ArticleType } from "../../shared/types";
 
 interface ArticleTitleProps {
   article: Article;
 }
 
-const ArticleTitle: React.FC<ArticleTitleProps> = (
+export const ArticleTitle: React.FC<ArticleTitleProps> = (
   props: ArticleTitleProps
 ) => {
   if (props.article.article_type === ArticleType.Slate) {
@@ -38,8 +38,10 @@ const DashArticlesPage: React.FC = () => {
       <h1>Articles</h1>
       <Button
         onClick={async () => {
-          const article = await createArticle();
-          history.push(`/dash/edit/${article.id}`);
+          const resp = await createArticle();
+          if (resp.success === true) {
+            history.push(`/dash/edit/${resp.data.id}`);
+          }
         }}
       >
         New Article

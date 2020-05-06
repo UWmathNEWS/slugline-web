@@ -12,14 +12,6 @@
 
 @import "~bootstrap/scss/bootstrap.scss";
 
-// FUNCTIONS
-
-@function spacing($n) {
-  @return map-get($map: $spacers, $key: $n);
-}
-
-// RULES
-
 // Convenient class for mathnews logo
 .mathnews-logo::before {
   content: "math";
@@ -38,4 +30,28 @@ h4,
 h5,
 h6 {
   text-transform: uppercase;
+}
+
+// Form styling
+input.form-control {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+
+  &.is-invalid,
+  &.is-valid {
+    box-shadow: none !important;
+  }
+}
+
+.input-group {
+  & > .input-group-append,
+  & > .input.group.prepend {
+    button {
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      border-radius: 0;
+    }
+  }
 }
