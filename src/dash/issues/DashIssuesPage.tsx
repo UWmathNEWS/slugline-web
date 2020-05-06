@@ -72,7 +72,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
     });
     if (resp.success) {
       setNonFieldErrors([]);
-      history.push(`issues/${resp.data.id}`);
+      history.push(`/dash/issues/${resp.data.id}`);
     } else {
       setNonFieldErrors(resp.error.non_field_errors || []);
     }
