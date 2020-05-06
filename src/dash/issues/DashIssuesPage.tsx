@@ -7,7 +7,7 @@ import { useForm, DeepPartial } from "react-hook-form";
 
 import "./DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
-import ERRORS from "../../shared/errors";
+import NonFieldErrors from "../../shared/form/NonFieldErrors";
 import { Issue } from "../../shared/types";
 
 interface IssueCreateModalProps {
@@ -29,17 +29,16 @@ const predictNextIssue = (
   issueCode: string
 ): DeepPartial<IssueCreateFormVals> => {
   const issueNum = Number(issueCode);
-  if (issueNum !== NaN) {
-    return {
-      volumeNum: issueNum <= ISSUES_PER_VOLUME ? volumeNum + 1 : volumeNum,
-      issueCode: ((issueNum + 1) % ISSUES_PER_VOLUME).toString(),
-    };
-  }
-  // the issue code is a string, just punt on it
-  else {
+  if (isNaN(issueNum)) {
+    // the issue code is a string, just punt on it
     return {
       volumeNum: undefined,
       issueCode: undefined,
+    };
+  } else {
+    return {
+      volumeNum: issueNum <= ISSUES_PER_VOLUME ? volumeNum + 1 : volumeNum,
+      issueCode: ((issueNum + 1) % ISSUES_PER_VOLUME).toString(),
     };
   }
 };
