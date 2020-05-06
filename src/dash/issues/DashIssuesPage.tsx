@@ -115,11 +115,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
             hideErrorMessage
           />
         </Form>
-        {nonFieldErrors?.map((error, idx) => (
-          <small key={idx} className="invalid-feedback d-block">
-            {ERRORS[error]}
-          </small>
-        ))}
+        <NonFieldErrors errors={nonFieldErrors} />
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" type="submit" form="createIssueForm">
