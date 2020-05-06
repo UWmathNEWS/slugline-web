@@ -29,7 +29,7 @@ const DashIssueDetail = () => {
 
   return (
     <>
-      <h1>{`v${issue?.volume_num}i${issue?.issue_num}`}</h1>
+      <h1>{`v${issue?.volume_num}i${issue?.issue_code}`}</h1>
       <h3>Articles</h3>
       <div className="table-header">
         <FontAwesomeIcon

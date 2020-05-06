@@ -3,14 +3,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useIssueList, useCreateIssue, useLatestIssue } from "../../api/hooks";
 import { Table, Button, Modal, Form, Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
-import { useForm, ErrorMessage } from "react-hook-form";
+import { useForm, DeepPartial } from "react-hook-form";
 
 import "./DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import ERRORS from "../../shared/errors";
 import { Issue } from "../../shared/types";
-
-const ISSUES_PER_VOLUME = 6;
 
 interface IssueCreateModalProps {
   show: boolean;
@@ -19,21 +17,41 @@ interface IssueCreateModalProps {
 }
 
 interface IssueCreateFormVals {
-  issueNum: number;
+  issueCode: string;
   volumeNum: number;
 }
+
+const ISSUES_PER_VOLUME = 6;
+
+// Attempt to predict the next issue from the latest to prefill the new issue form
+const predictNextIssue = (
+  volumeNum: number,
+  issueCode: string
+): DeepPartial<IssueCreateFormVals> => {
+  const issueNum = Number(issueCode);
+  if (issueNum !== NaN) {
+    return {
+      volumeNum: issueNum <= ISSUES_PER_VOLUME ? volumeNum + 1 : volumeNum,
+      issueCode: ((issueNum + 1) % ISSUES_PER_VOLUME).toString(),
+    };
+  }
+  // the issue code is a string, just punt on it
+  else {
+    return {
+      volumeNum: undefined,
+      issueCode: undefined,
+    };
+  }
+};
 
 const IssueCreateModal: React.FC<IssueCreateModalProps> = (
   props: IssueCreateModalProps
 ) => {
   const { handleSubmit, register, errors } = useForm<IssueCreateFormVals>({
-    defaultValues: {
-      volumeNum:
-        props.latestIssue.issue_num <= ISSUES_PER_VOLUME
-          ? props.latestIssue.volume_num + 1
-          : props.latestIssue.volume_num,
-      issueNum: (props.latestIssue.issue_num + 1) % ISSUES_PER_VOLUME,
-    },
+    defaultValues: predictNextIssue(
+      props.latestIssue.volume_num,
+      props.latestIssue.issue_code
+    ),
   });
 
   const history = useHistory();
@@ -49,7 +67,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 
   const onSubmit = async (vals: IssueCreateFormVals) => {
     const resp = await createIssue({
-      issue_num: vals.issueNum,
+      issue_code: vals.issueCode,
       volume_num: vals.volumeNum,
     });
     if (resp.success) {
@@ -83,13 +101,13 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
           />
           <Form.Label>i</Form.Label>
           <Field
-            name="issueNum"
-            className="issue-num-input"
+            name="issueCode"
+            className="issue-code-input"
             type="text"
             maxLength={1}
             ref={register({
               required: true,
-              pattern: /[0-9]{1}/,
+              pattern: /[0-9A-Z]{1}/,
               min: 0,
               maxLength: 1,
             })}
@@ -174,8 +192,8 @@ const DashIssuesPage = () => {
             >
               <td>
                 <Link
-                  to={`issues/${issue.id}`}
-                >{`v${issue.volume_num}i${issue.issue_num}`}</Link>
+                  to={`/dash/issues/${issue.id}`}
+                >{`v${issue.volume_num}i${issue.issue_code}`}</Link>
               </td>
               <td>{issue.publish_date ? "Y" : "N"}</td>
               <td>{issue.pdf || "N/A"}</td>

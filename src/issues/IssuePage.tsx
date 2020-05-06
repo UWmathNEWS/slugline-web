@@ -7,7 +7,7 @@ const IssuePage = () => {
   const [issue, ,] = useIssue(Number(issue_id));
 
   if (issue) {
-    return <h1>{`Volume ${issue?.volume_num} Issue ${issue?.issue_num}`}</h1>;
+    return <h1>{`Volume ${issue?.volume_num} Issue ${issue?.issue_code}`}</h1>;
   } else {
     return <h1>LOADING...</h1>;
   }

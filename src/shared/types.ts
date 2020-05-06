@@ -24,7 +24,7 @@ export interface Issue {
   id?: number;
   publish_date?: string;
   volume_num: number;
-  issue_num: number;
+  issue_code: string;
   pdf?: string;
 }
 
