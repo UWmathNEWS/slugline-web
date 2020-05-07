@@ -1,3 +1,4 @@
+![CI](https://github.com/UWmathNEWS/slugline-web/workflows/CI/badge.svg)
 ## slugline-web
 The front-end component of `slugline`, mathNEWS's best and only React/Django based publishing website.
 
