@@ -138,24 +138,6 @@ const UserList = () => {
     showCreateUser: false
   });
 
-  const search = (evt: React.FormEvent<HTMLInputElement>) => {
-    // TODO: make better w/ memoization, etc
-    const { value } = evt.currentTarget;
-    if (value.length) {
-      dispatch({
-        type: 'filter users',
-        data: state.allUsers?.filter(user => {
-            return user.username.includes(value)
-              || user.email.includes(value)
-              || `${user.first_name} ${user.last_name}`.includes(value)
-              || user.writer_name.includes(value)
-          })
-      });
-    } else {
-      dispatch({ type: 'filter users', data: undefined });
-    }
-  };
-
   const deleteUser = (username: string) => {
     auth.delete(`users/${username}/`)
       .then(() => {
@@ -172,11 +154,18 @@ const UserList = () => {
   }, []);
 
   return <div>
-    <Button variant="secondary" onClick={() => { dispatch({ type: 'show create user', data: true }) }}>New User</Button>
-    {/* Example usage of RichTable */}
+    <h1>
+      Users{" "}
+      <Button
+        variant="secondary"
+        onClick={() => { dispatch({ type: 'show create user', data: true }) }}
+      >
+        New User
+      </Button>
+    </h1>
     <RichTable<User>
       columns={columns}
-      url="/api/users/"
+      url={getApiUrl("users/")}
       pk="username"
       paginated
       selectable
@@ -200,45 +189,6 @@ const UserList = () => {
         }
       ]}
     />
-    <InputGroup className="mb-3">
-      <Form.Control placeholder="Search..." onChange={search} />
-    </InputGroup>
-    <Table striped hover>
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Name</th>
-          <th>Writer Name</th>
-          <th>Email</th>
-          <th>Role</th>
-        </tr>
-      </thead>
-      <tbody>
-      {state.filteredUsers &&
-      (state.filteredUsers.length ?
-        state.filteredUsers.map(user => <tr key={user.username} onClick={() => {
-          dispatch({ type: 'set edit user', data: user });
-        }}>
-          <td>{user.username}</td>
-          <td>{`${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`}</td>
-          <td>{user.writer_name}</td>
-          <td>{user.email}</td>
-          <td>{user.is_editor ? "Editor" : "Contributor"}</td>
-        </tr>) :
-        <tr><td colSpan={5}>No results found.</td></tr>)}
-      {state.allUsers ?
-        state.allUsers.map(user => <tr key={user.username} onClick={() => {
-          dispatch({ type: 'set edit user', data: user });
-        }} className={state.filteredUsers ? 'd-none' : ''}>
-          <td>{user.username}</td>
-          <td>{`${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`}</td>
-          <td>{user.writer_name}</td>
-          <td>{user.email}</td>
-          <td>{user.is_editor ? "Editor" : "Contributor"}</td>
-        </tr>) :
-        <tr><td colSpan={5}>Loading...</td></tr>}
-      </tbody>
-    </Table>
     <Modal
       show={state.showEditUser}
       onHide={() => { dispatch({ type: 'show edit user', data: false }); }}
