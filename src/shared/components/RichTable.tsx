@@ -380,6 +380,30 @@ const useRichTable = <D extends object = {}>({
   }, [columns, selected, sortColumn, selectable, data.length]);
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
+    if (!data.length) {
+      return [
+        {
+          useRowProps() {
+            return { key: 0 };
+          },
+          data: {} as D,
+          cells: [{
+            useCellProps() {
+              return {
+                key: 0,
+                className: "RichTable_noRowsReturned text-center",
+                colspan: columns.length + (selectable ? 1 : 0)
+              }
+            },
+            render() {
+              return "No rows returned."
+            }
+          }],
+          isSelected: false,
+          setSelected() {}
+        }
+      ]
+    }
     return data.map((row, i) => {
       let props: PropsBag = { key: i };
 

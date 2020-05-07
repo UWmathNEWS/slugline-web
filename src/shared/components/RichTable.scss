@@ -59,5 +59,9 @@
   &_selectCheckbox .custom-checkbox {
     margin-right: -1 * spacing(4);
   }
+
+  &_noRowsReturned {
+    font-style: italic;
+  }
 }
 
