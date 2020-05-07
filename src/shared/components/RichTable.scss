@@ -4,6 +4,11 @@
   font-family: $headings-ff;
   margin: spacing(3) 0;
 
+  th, td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   thead th {
     text-transform: uppercase;
     padding-top: spacing(2);
@@ -21,6 +26,7 @@
   }
 
   &_table {
+    table-layout: fixed;
     margin-bottom: 0;
   }
 
@@ -44,6 +50,10 @@
 
   &_actions .btn {
     padding-left: 0;
+  }
+
+  &_selectCheckbox {
+    width: 2 * spacing(4);
   }
 
   &_selectCheckbox .custom-checkbox {

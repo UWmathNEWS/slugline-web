@@ -40,6 +40,7 @@ export type Accessor<D extends object> = (row: D) => any;
 export interface ColumnProps<D extends object = {}> {
   Header: string;
   sortable?: boolean;
+  width?: number;
   render?: (
     cell: any,
     row: D
@@ -297,7 +298,7 @@ const useRichTable = <D extends object = {}>({
       }
     };
 
-    let cells: RichTableCell[] = columns.map(({ Header, key, sortable }) => {
+    let cells: RichTableCell[] = columns.map(({ Header, key, sortable, width }) => {
       let props: PropsBag = { key };
 
       if (sortable) {
@@ -311,6 +312,12 @@ const useRichTable = <D extends object = {}>({
               setSortColumn(null);
             }
           }
+        };
+      }
+
+      if (width) {
+        props.style = {
+          width: `${width}%`
         };
       }
 
@@ -382,10 +389,11 @@ const useRichTable = <D extends object = {}>({
             ? accessor(row)
             : row[accessor]
           : row[key as keyof D];
+        let props: PropsBag = { key };
 
         return {
           useCellProps() {
-            return { key };
+            return props;
           },
           render() {
             return render ? render(cell, row) : cell;

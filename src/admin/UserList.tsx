@@ -52,20 +52,24 @@ const UserList = () => {
       {
         Header: "Username",
         key: "username",
-        sortable: true
+        sortable: true,
+        width: 15,
       },
       {
         Header: "Name",
         key: "name",
+        width: 20,
         accessor: (user: User) => `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`
       },
       {
         Header: "Writer Name",
-        key: "writer_name"
+        key: "writer_name",
+        width: 20,
       },
       {
         Header: "Email",
-        key: "email"
+        key: "email",
+        width: 25,
       },
       {
         Header: "Role",
