@@ -16,6 +16,10 @@
     border-bottom: none;
   }
 
+  tr:last-child td {
+    border-bottom: 1px solid $table-border-color;
+  }
+
   &_header {
     margin-bottom: spacing(1);
 
