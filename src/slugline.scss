@@ -31,3 +31,27 @@ h5,
 h6 {
   text-transform: uppercase;
 }
+
+// Form styling
+input.form-control {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+
+  &.is-invalid,
+  &.is-valid {
+    box-shadow: none !important;
+  }
+}
+
+.input-group {
+  & > .input-group-append,
+  & > .input.group.prepend {
+    button {
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      border-radius: 0;
+    }
+  }
+}

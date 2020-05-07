@@ -144,7 +144,9 @@ const ProfileForm: React.FC<{
   const [showPassword, setShowPassword] = useState(false);
   const [state, dispatch] = useReducer(profileReducer, {
     changedUser: auth.isEditor() ? { is_editor: user?.is_editor ?? false } : {},
-    errors: {},
+    errors: {
+      status_code: 0,
+    },
     generalErrors: [],
     successMessage: "",
     isLoading: false,
@@ -167,7 +169,10 @@ const ProfileForm: React.FC<{
             checkUsernameRef.current = window.setTimeout(() => {
               apiGet(getApiUrl(`users/${value}/query`)).then(
                 () => {
-                  dispatch({ type: "set error", errors: { username: [] } });
+                  dispatch({
+                    type: "set error",
+                    errors: { status_code: 0, username: [] },
+                  });
                 },
                 (errors: UserAPIError) => {
                   dispatch({ type: "set error", errors });
@@ -179,12 +184,15 @@ const ProfileForm: React.FC<{
                   if (resp.data.success) {
                     dispatch({
                       type: "set error",
-                      errors: { username: [] },
+                      errors: { status_code: 0, username: [] },
                     });
                   } else {
                     dispatch({
                       type: "set error",
-                      errors: { username: ["USER.USERNAME.ALREADY_EXISTS"] },
+                      errors: {
+                        status_code: 0,
+                        username: ["USER.USERNAME.ALREADY_EXISTS"],
+                      },
                     });
                   }
                 });
@@ -194,6 +202,7 @@ const ProfileForm: React.FC<{
               type: "set data",
               data: { username: value.slice(0, 150) },
               errors: {
+                status_code: 0,
                 username: value.length > 150 ? ["USER.USERNAME.TOO_LONG"] : [],
               },
             });
@@ -202,7 +211,7 @@ const ProfileForm: React.FC<{
         } else {
           dispatch({
             type: "set error",
-            errors: { email: ["USER.USERNAME.CANNOT_CHANGE"] },
+            errors: { status_code: 0, email: ["USER.USERNAME.CANNOT_CHANGE"] },
           });
           break;
         }
@@ -218,7 +227,7 @@ const ProfileForm: React.FC<{
         dispatch({
           type: "set data",
           data: { email: value },
-          errors: { email: newErrors },
+          errors: { status_code: 0, email: newErrors },
         });
         break;
       }
@@ -250,6 +259,7 @@ const ProfileForm: React.FC<{
           type: "set data",
           data: { writer_name: value },
           errors: {
+            status_code: 0,
             writer_name:
               value.length === 0 ? ["USER.REQUIRED.writer_name"] : [],
           },
@@ -265,7 +275,7 @@ const ProfileForm: React.FC<{
         dispatch({
           type: "set data",
           data: { cur_password: value },
-          errors: { user: [] },
+          errors: { status_code: 0, user: [] },
         });
         break;
       case "password": {
@@ -275,7 +285,7 @@ const ProfileForm: React.FC<{
           dispatch({
             type: "set data",
             data: { password: undefined },
-            errors: { password: [] },
+            errors: { status_code: 0, password: [] },
           });
           break;
         }
@@ -291,7 +301,7 @@ const ProfileForm: React.FC<{
         dispatch({
           type: "set data",
           data: { password: value },
-          errors: { password: newErrors },
+          errors: { status_code: 0, password: newErrors },
         });
         break;
       }
@@ -386,13 +396,11 @@ const ProfileForm: React.FC<{
               <Form.Control.Feedback>
                 Username is valid and is available.
               </Form.Control.Feedback>
-              <Form.Control.Feedback type="invalid">
-                <ul>
-                  {state.errors.username?.map((msg) => (
-                    <li key={msg}>{ERRORS[msg]}</li>
-                  ))}
-                </ul>
-              </Form.Control.Feedback>
+              <ul>
+                {state.errors.username?.map((msg) => (
+                  <li key={msg}>{ERRORS[msg]}</li>
+                ))}
+              </ul>
             </>
           )}
         </Col>
@@ -538,7 +546,7 @@ const ProfileForm: React.FC<{
                   dispatch({
                     type: "set data",
                     data: { password: nanoid() },
-                    errors: { password: [] },
+                    errors: { status_code: 0, password: [] },
                   });
                   setShowPassword(true);
                 }}

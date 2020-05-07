@@ -12,6 +12,7 @@ import { Node } from "slate";
 import { useDebouncedCallback } from "../shared/hooks";
 import EditorInfo from "../editor/EditorInfo";
 import { RequestState } from "../shared/types";
+import { ErrorPage } from "../shared/errors/ErrorPage";
 
 const getEditorRequestState = (
   articleState: RequestState,
@@ -40,8 +41,8 @@ const EditorPage: React.FC = () => {
 
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
-  const [article, ,] = useArticle(id);
-  const [articleContent, ,] = useArticleContent(id);
+  const [article, articleError] = useArticle(id);
+  const [articleContent, articleContentError] = useArticleContent(id);
 
   const [updateArticle, updateArticleState] = useUpdateArticle(id);
 
@@ -81,6 +82,14 @@ const EditorPage: React.FC = () => {
     saveArticleContent,
     ARTICLE_SAVE_DELAY_MSECS
   );
+
+  if (articleError) {
+    return <ErrorPage error={articleError} />;
+  }
+
+  if (articleContentError) {
+    return <ErrorPage error={articleContentError} />;
+  }
 
   if (!article || !articleContent) {
     return <Spinner animation="border" />;

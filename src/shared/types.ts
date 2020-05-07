@@ -17,15 +17,15 @@ export interface Article {
 }
 
 export interface ArticleContent {
-  content_raw: string
+  content_raw: string;
 }
 
 export interface Issue {
-  id: number;
-  publish_date: string;
+  id?: number;
+  publish_date?: string;
   volume_num: number;
-  issue_num: number;
-  pdf: string;
+  issue_code: string;
+  pdf?: string;
 }
 
 export interface User {
@@ -40,7 +40,7 @@ export interface User {
 
 export interface APIError {
   detail?: string[];
-  [key: string]: string[] | undefined;
+  status_code: number;
 }
 
 export interface APIResponseSuccess<T> {
@@ -58,7 +58,7 @@ export type APIResponse<
   U extends APIError = APIError,
   S extends APIResponseSuccess<T> = APIResponseSuccess<T>,
   F extends APIResponseFailure<U> = APIResponseFailure<U>
-  > = S | F;
+> = S | F;
 
 export type APIGetHook<T, U extends APIError = APIError> = [
   T | undefined,
@@ -86,7 +86,7 @@ export type APIGetHookPaginated<T, U extends APIError = APIError> = [
 export type PaginatedAPIResponse<
   T,
   U extends APIError = APIError
-  > = APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
+> = APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
 
 export enum RequestState {
   NotStarted,
@@ -94,8 +94,8 @@ export enum RequestState {
   Complete,
 }
 
-export type APIPostHook<S, T, U extends APIError = APIError> = [
-  (body: S) => Promise<T>,
+export type APIMutateHook<S, T, U extends APIError = APIError> = [
+  (body: S) => Promise<APIResponse<T, U>>,
   RequestState
 ];
 
@@ -112,6 +112,10 @@ export type UserAPIResponse = APIResponse<
   UserAPIError,
   Required<APIResponseSuccess<User>>
 >;
+
+export interface IssueAPIError extends APIError {
+  non_field_errors?: string[];
+}
 
 export interface AuthContext {
   user: User | null;

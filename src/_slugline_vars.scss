@@ -1,3 +1,7 @@
+// These variables have to be before the import because they'll break otherwise
+
+$primary: #f2c0d9;
+
 // Use our custom fonts
 $body-ff: "Joanna Nova", serif;
 $headings-ff: "DIN Next", sans-serif;
@@ -5,7 +9,9 @@ $headings-ff: "DIN Next", sans-serif;
 $font-family-sans-serif: $body-ff; //This is a misnomer, our body font is serif
 $headings-font-family: $headings-ff;
 
-$primary: #f2c0d9;
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
 
 // Headers
 $headings-color: black;
@@ -22,7 +28,8 @@ $input-border-radius: 0;
 $input-border-radius-lg: 0;
 $input-border-radius-sm: 0;
 $input-border-width: 1px;
-$input-border-color: black;
+$input-border-color: $gray-600;
+$input-padding-x: 0.5rem;
 $input-focus-box-shadow: none;
 $input-focus-border-color: $primary;
 $enable-validation-icons: false;
@@ -31,7 +38,3 @@ $enable-validation-icons: false;
 @function spacing($n) {
   @return map-get($map: $spacers, $key: $n);
 }
-
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
