@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import axios from "axios";
 import { getApiUrl } from "../api/api";
-import { InputGroup, Form, Table, Modal, Button } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 
 import { User, PaginatedAPIResponse } from "../shared/types";
 import ProfileForm from "../profile/ProfileForm";
@@ -70,7 +70,7 @@ const UserList = () => {
       {
         Header: "Role",
         key: "role",
-        accessor: (user: User) => user.is_editor ? "Editor" : "Contributor"
+        accessor: (user: User) => user.is_staff ? "Staff" : user.is_editor ? "Editor" : "Contributor"
       }
     ],
     []

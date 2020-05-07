@@ -139,7 +139,7 @@ export interface RichTableBag<D extends object = {}> {
 
 /**
  * Here, we define useRichTable, the main hook used to construct a rich table. It handles all data-related aspects; the
- * only way to interact with the data externally is through
+ * only way to interact with the data externally is through actions.
  */
 const useRichTable = <D extends object = {}>({
   columns,
@@ -147,33 +147,46 @@ const useRichTable = <D extends object = {}>({
   pk,
   paginated,
   actions = [],
-  searchable,
   selectable
 }: RichTableProps<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, _setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   // Trigger refreshes by toggling this state.
   // Named cuckoo because it reminds me of cuckoo hashing.
   const [cuckooLoad, setCuckoo] = useState(false);
 
+  const preSearchParams = useRef<{ page: number, sortColumn: [string, boolean] | null }>({
+    page: 1,
+    sortColumn: null
+  });
+  const setSearchQuery = (query: string) => {
+    if (!searchQuery) {
+      preSearchParams.current = {
+        page,
+        sortColumn
+      };
+    } else if (searchQuery && !query) {
+      setPage(preSearchParams.current.page);
+      setSortColumn(preSearchParams.current.sortColumn);
+    }
+    _setSearchQuery(query);
+  };
+
   const dataUrl = useMemo<string>(
     () => {
-      let queryBuilder: Array<[string, any]> = [["time", Date.now()]];
+      let queryBuilder: { [key: string]: string | number } = { time: Date.now() };
       if (paginated) {
-        queryBuilder.push(["page", page]);
+        queryBuilder.page = page;
       }
       if (searchQuery) {
-        queryBuilder.push(["search", window.encodeURIComponent(searchQuery)]);
+        queryBuilder.search = window.encodeURIComponent(searchQuery);
       }
       if (sortColumn !== null) {
-        queryBuilder.push([
-          "sort",
-          (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0])
-        ]);
+        queryBuilder.sort = (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0]);
       }
-      return `${url}${queryBuilder.length ? "?" : ""}${queryBuilder
+      return `${url}${Object.keys(queryBuilder).length ? "?" : ""}${Object.entries(queryBuilder)
         .map(q => q.join("="))
         .join("&")}`;
     },
@@ -188,6 +201,7 @@ const useRichTable = <D extends object = {}>({
       [],
     [paginated, rawData]
   );
+
   const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 0 : 0;
   const totalCount = paginated
     ? (rawData as Pagination<D>)?.count || 0
@@ -489,6 +503,7 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     setSearchQuery,
     executeAction,
   } = useRichTable(config);
+  const debouncer = useRef<number>(-1);
 
   return (
     <div className="RichTable">
@@ -500,9 +515,15 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
               placeholder="Search..."
               size="sm"
               className="RichTable_searchBox"
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                if (e.key === "Enter") {
-                  setSearchQuery(e.currentTarget.value);
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.currentTarget.value;
+                window.clearTimeout(debouncer.current);
+                if (value) {
+                  debouncer.current = window.setTimeout(() => {
+                    setSearchQuery(value);
+                  }, 500);
+                } else {
+                  setSearchQuery("");
                 }
               }}
             />
