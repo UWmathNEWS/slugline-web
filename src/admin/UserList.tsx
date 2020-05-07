@@ -51,7 +51,8 @@ const UserList = () => {
     () => [
       {
         Header: "Username",
-        key: "username"
+        key: "username",
+        sortable: true
       },
       {
         Header: "Name",
@@ -177,9 +178,17 @@ const UserList = () => {
       columns={columns}
       url="/api/users/"
       pk="username"
-      paginated={true}
-      selectable={true}
+      paginated
+      selectable
+      searchable
       actions={[
+        {
+          name: "New User",
+          call(_: any) {
+            dispatch({ type: 'show create user', data: true });
+            return Promise.resolve();
+          }
+        },
         {
           name: "Edit",
           bulk: false,

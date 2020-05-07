@@ -1,0 +1,30 @@
+.RichTable_search,
+.RichTable_actions,
+.RichTable_pagination,
+.RichTable_summary {
+  display: flex;
+  align-items: center;
+}
+
+.RichTable_cellHeader {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+}
+
+.RichTable_searchBox {
+  height: 100%;
+}
+
+.RichTable_header .btn {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.RichTable_actions .btn {
+  padding-left: 0;
+}
+
+.RichTable_table {
+  margin-bottom: 0;
+}
