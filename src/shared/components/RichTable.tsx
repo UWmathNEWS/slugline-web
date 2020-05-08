@@ -22,6 +22,7 @@ import { useApiGet } from "../../api/hooks";
 import { APIError, APIResponse, Pagination } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useToast } from "../contexts/ToastContext";
+import { useDebouncedCallback } from "../hooks";
 
 /**
  * RichTable describes a component that displays tabular data in an interactive manner. It defines two main exports:
@@ -553,7 +554,7 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     setSearchQuery,
     executeAction,
   } = bag;
-  const debouncer = useRef<number>(-1);
+  const [setSearchDebounced, setSearch] = useDebouncedCallback(setSearchQuery, 500);
   const { addToasts } = useToast();
 
   if (config.bagRef) {
@@ -572,13 +573,10 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
               className="RichTable_searchBox"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 const value = e.currentTarget.value;
-                window.clearTimeout(debouncer.current);
                 if (value) {
-                  debouncer.current = window.setTimeout(() => {
-                    setSearchQuery(value);
-                  }, 500);
+                  setSearchDebounced(value);
                 } else {
-                  setSearchQuery("");
+                  setSearch("");
                 }
               }}
             />

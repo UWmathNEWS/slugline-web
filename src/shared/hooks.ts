@@ -20,7 +20,7 @@ export const useDebouncedCallback = <A extends any[]>(
   // our consuming component gets unmounted
   useEffect(() => cleanup, []);
 
-  return useCallback(
+  const callbackWithDebounce = useCallback(
     (...args: A) => {
       // capture latest args
       argsRef.current = args;
@@ -37,4 +37,15 @@ export const useDebouncedCallback = <A extends any[]>(
     },
     [callback, wait]
   );
+
+  const callbackWithoutDebounce = useCallback(
+    (...args: A) => {
+      cleanup();
+
+      callback(...args);
+    },
+    [callback]
+  );
+
+  return [callbackWithDebounce, callbackWithoutDebounce];
 };
