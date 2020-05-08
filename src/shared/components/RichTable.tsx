@@ -37,16 +37,18 @@ import { useDebouncedCallback } from "../hooks";
  * First, we must introduce some basic types.
  */
 
+type ReactElement = React.ReactElement | React.ReactText | React.ReactFragment;
+
 export type Accessor<D extends object> = (row: D) => any;
 
 export interface ColumnProps<D extends object = {}> {
-  Header: string;
+  header: ReactElement;
   sortable?: boolean;
   width?: number;
   render?: (
     cell: any,
     row: D
-  ) => React.ReactElement | React.ReactText | React.ReactFragment;
+  ) => ReactElement;
 }
 
 export type Column<D extends object = {}> = ColumnProps<D> &
@@ -309,7 +311,7 @@ const useRichTable = <D extends object = {}>({
       }
     };
 
-    let cells: RichTableCell[] = columns.map(({ Header, key, sortable, width }) => {
+    let cells: RichTableCell[] = columns.map(({ header, key, sortable, width }) => {
       let props: PropsBag = { key };
 
       if (sortable) {
@@ -338,7 +340,7 @@ const useRichTable = <D extends object = {}>({
         },
         render() {
           return <span className="RichTable_cellHeader">
-            {Header}
+            {header}
             {sortable &&
             <FontAwesomeIcon
               icon={(sortColumn && sortColumn[0] === key)

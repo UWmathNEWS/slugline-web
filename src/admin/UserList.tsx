@@ -25,29 +25,29 @@ type Action =
 
 const columns: Column<User>[] = [
   {
-    Header: "Username",
+    header: "Username",
     key: "username",
     sortable: true,
     width: 15,
   },
   {
-    Header: "Name",
+    header: "Name",
     key: "name",
     width: 20,
     accessor: (user: User) => `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`
   },
   {
-    Header: "Writer Name",
+    header: "Writer Name",
     key: "writer_name",
     width: 20,
   },
   {
-    Header: "Email",
+    header: "Email",
     key: "email",
     width: 25,
   },
   {
-    Header: "Role",
+    header: "Role",
     key: "role",
     accessor: (user: User) => user.is_staff ? "Staff" : user.is_editor ? "Editor" : "Contributor"
   }
