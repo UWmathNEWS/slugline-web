@@ -8,7 +8,7 @@ import "./DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import NonFieldErrors from "../../shared/form/NonFieldErrors";
 import { Issue } from "../../shared/types";
-import RichTable, { Column } from "../../shared/components/RichTable";
+import { RichTable, Column } from "../../shared/components/RichTable";
 import { getApiUrl } from "../../api/api";
 
 interface IssueCreateModalProps {

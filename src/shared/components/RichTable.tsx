@@ -573,7 +573,7 @@ const useRichTable = <D extends object = {}>({
  * The RichTable component, on the other hand, is a ready-to-use table with pagination, sorting, and search natively
  * supported.
  */
-const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
+export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
   const bag = useRichTable(config);
   const {
     header,
@@ -722,5 +722,3 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     </div>
   );
 };
-
-export default RichTable;

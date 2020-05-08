@@ -8,7 +8,7 @@ import ProfileForm from "../profile/ProfileForm";
 import "./UserList.scss";
 import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
-import RichTable, { Column, RichTableBag } from "../shared/components/RichTable";
+import { RichTable, Column, RichTableBag } from "../shared/components/RichTable";
 
 interface State {
   allUsers: User[];

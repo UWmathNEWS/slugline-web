@@ -5,7 +5,7 @@ import { Button } from "react-bootstrap";
 import "./DashArticlesPage.scss";
 import { useHistory, Link } from "react-router-dom";
 import { Article, ArticleType } from "../../shared/types";
-import RichTable, { Column } from "../../shared/components/RichTable";
+import { RichTable, Column } from "../../shared/components/RichTable";
 import { getApiUrl } from "../../api/api";
 
 interface ArticleTitleProps {

@@ -4,7 +4,7 @@ import { useIssue, useIssueArticles } from "../../api/hooks";
 import { Spinner } from "react-bootstrap";
 import { ArticleTitle } from "../articles/DashArticlesPage";
 import { ErrorPage } from "../../shared/errors/ErrorPage";
-import RichTable, { Column } from "../../shared/components/RichTable";
+import { RichTable, Column } from "../../shared/components/RichTable";
 import { Article } from "../../shared/types";
 import { getApiUrl } from "../../api/api";
 
