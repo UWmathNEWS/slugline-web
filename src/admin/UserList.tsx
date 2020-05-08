@@ -169,10 +169,8 @@ const UserList = () => {
           Close without saving
         </Button>
         <Button variant="outline-danger" onClick={() => {
-          if (window.confirm(`You are deleting user ${state.currentUser?.username}. Are you sure you want to continue?`)) {
-            if (tableBagRef.current) {
-              tableBagRef.current.executeAction("Delete");
-            }
+          if (tableBagRef.current) {
+            tableBagRef.current.executeAction("Delete");
           }
         }}>Delete user</Button>
         <Button
