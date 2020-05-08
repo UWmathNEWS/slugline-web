@@ -23,6 +23,36 @@ type Action =
   { type: 'show edit user', data: boolean } |
   { type: 'show create user', data: boolean };
 
+const columns: Column<User>[] = [
+  {
+    Header: "Username",
+    key: "username",
+    sortable: true,
+    width: 15,
+  },
+  {
+    Header: "Name",
+    key: "name",
+    width: 20,
+    accessor: (user: User) => `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`
+  },
+  {
+    Header: "Writer Name",
+    key: "writer_name",
+    width: 20,
+  },
+  {
+    Header: "Email",
+    key: "email",
+    width: 25,
+  },
+  {
+    Header: "Role",
+    key: "role",
+    accessor: (user: User) => user.is_staff ? "Staff" : user.is_editor ? "Editor" : "Contributor"
+  }
+];
+
 const UserList = () => {
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -31,39 +61,6 @@ const UserList = () => {
   const tableBagRef = useRef<RichTableBag<User> | null>(null);
   const editUserRef = useRef({ submit: () => Promise.resolve() });
   const createUserRef = useRef({ submit: () => Promise.resolve() });
-
-  const columns = useMemo<Column<User>[]>(
-    () => [
-      {
-        Header: "Username",
-        key: "username",
-        sortable: true,
-        width: 15,
-      },
-      {
-        Header: "Name",
-        key: "name",
-        width: 20,
-        accessor: (user: User) => `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`
-      },
-      {
-        Header: "Writer Name",
-        key: "writer_name",
-        width: 20,
-      },
-      {
-        Header: "Email",
-        key: "email",
-        width: 25,
-      },
-      {
-        Header: "Role",
-        key: "role",
-        accessor: (user: User) => user.is_staff ? "Staff" : user.is_editor ? "Editor" : "Contributor"
-      }
-    ],
-    []
-  );
 
   const [state, dispatch] = useReducer((state: State, action: Action): State => {
     switch (action.type) {
