@@ -126,7 +126,7 @@ export interface RichTableHook<D extends object = {}> {
 }
 
 export interface RichTableProps<D extends object = {}> extends RichTableHook<D> {
-  className?: string | { [cls: string]: boolean };
+  className?: string;
   searchable?: boolean;
   ref?: React.Ref<Table & HTMLTableElement>;
   bagRef?: (instance: RichTableBag<D>) => void;
@@ -594,7 +594,7 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
   }
 
   return (
-    <div className="RichTable">
+    <div className={`RichTable ${config.className ?? ""}`}>
       <Row className="RichTable_header">
         {config.searchable && (
           <Col lg={3} className="RichTable_search">
