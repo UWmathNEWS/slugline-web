@@ -13,7 +13,7 @@ import {
   Table,
   Row,
   Col,
-  Button
+  Button, Spinner
 } from "react-bootstrap";
 import nanoid from "nanoid";
 import axios, { AxiosResponse, Method } from "axios";
@@ -393,6 +393,33 @@ const useRichTable = <D extends object = {}>({
   }, [columns, selected, sortColumn, selectable, data.length]);
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
+    // Loading state
+    if (rawData === undefined) {
+      return [
+        {
+          useRowProps() {
+            return { key: 0 };
+          },
+          data: {} as D,
+          cells: [{
+            useCellProps() {
+              return {
+                key: 0,
+                className: "RichTable_loading text-center",
+                colSpan: columns.length + (selectable ? 1 : 0)
+              }
+            },
+            render() {
+              return <Spinner animation="border" />
+            }
+          }],
+          isSelected: false,
+          setSelected() {}
+        }
+      ]
+    }
+
+    // No data state
     if (!data.length) {
       return [
         {
@@ -417,6 +444,8 @@ const useRichTable = <D extends object = {}>({
         }
       ]
     }
+
+    // Regular state
     return data.map((row, i) => {
       let props: PropsBag = { key: i };
 
@@ -495,6 +524,7 @@ const useRichTable = <D extends object = {}>({
     });
   }, [
     columns,
+    rawData,
     data,
     selected,
     selectable,

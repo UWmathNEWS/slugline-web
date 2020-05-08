@@ -1,7 +1,6 @@
 import React, { useState, FormEvent, useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useIssueList, useCreateIssue, useLatestIssue } from "../../api/hooks";
-import { Table, Button, Modal, Form, Spinner } from "react-bootstrap";
+import { Button, Modal, Form, Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { useForm, DeepPartial } from "react-hook-form";
 
@@ -9,6 +8,8 @@ import "./DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import NonFieldErrors from "../../shared/form/NonFieldErrors";
 import { Issue } from "../../shared/types";
+import RichTable, { Column } from "../../shared/components/RichTable";
+import { getApiUrl } from "../../api/api";
 
 interface IssueCreateModalProps {
   show: boolean;
@@ -42,6 +43,30 @@ const predictNextIssue = (
     };
   }
 };
+
+const columns: Column<Issue>[] = [
+  {
+    header: "Issue",
+    key: "id",
+    render(_: any, issue) {
+      return <Link to={`/dash/issues/${issue.id}`}>{`v${issue.volume_num}i${issue.issue_code}`}</Link>;
+    }
+  },
+  {
+    header: "Published",
+    key: "publish_date",
+    render(cell) {
+      return cell ? "Y" : "N"
+    }
+  },
+  {
+    header: "PDF",
+    key: "pdf",
+    render(cell) {
+      return cell || "N/A";
+    }
+  }
+];
 
 const IssueCreateModal: React.FC<IssueCreateModalProps> = (
   props: IssueCreateModalProps
@@ -93,7 +118,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
             maxLength={3}
             ref={register({
               required: true,
-              pattern: /[0-9]{3}/,
+              pattern: /[1-9]\d{0,2}/,
               min: 0,
               maxLength: 3,
             })}
@@ -116,7 +141,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
               issueFieldRef.current = inputRef;
               register(inputRef, {
                 required: true,
-                pattern: /[0-9A-Z]{1}/,
+                pattern: /[0-9A-Z]/,
                 min: 0,
                 maxLength: 1,
               });
@@ -140,8 +165,6 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 };
 
 const DashIssuesPage = () => {
-  const [resp] = useIssueList();
-
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
   const [latestIssue, ,] = useLatestIssue();
@@ -161,52 +184,13 @@ const DashIssuesPage = () => {
       >
         New Issue
       </Button>
-      <div className="table-header">
-        <FontAwesomeIcon
-          onClick={() => {
-            if (resp.previous) {
-              resp.previous();
-            }
-          }}
-          className="pagination-icon"
-          icon="chevron-left"
-        />
-        <span className="pagination-text">{`${resp.page?.page} / ${resp.page?.num_pages}`}</span>
-        <FontAwesomeIcon
-          onClick={() => {
-            if (resp.next) {
-              resp.next();
-            }
-          }}
-          className="pagination-icon"
-          icon="chevron-right"
-        />
-      </div>
-      <Table>
-        <thead>
-          <tr>
-            <th>Issue</th>
-            <th>Published</th>
-            <th>PDF</th>
-          </tr>
-        </thead>
-        <tbody>
-          {resp.page?.results.map((issue) => (
-            <tr
-              key={issue.id}
-              className={issue.id === latestIssue.id ? "issue-latest" : ""}
-            >
-              <td>
-                <Link
-                  to={`/dash/issues/${issue.id}`}
-                >{`v${issue.volume_num}i${issue.issue_code}`}</Link>
-              </td>
-              <td>{issue.publish_date ? "Y" : "N"}</td>
-              <td>{issue.pdf || "N/A"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <RichTable
+        columns={columns}
+        url={getApiUrl("issues/")}
+        pk="id"
+        paginated
+        searchable
+      />
       <IssueCreateModal
         show={showCreateModal}
         setShow={setShowCreateModal}
