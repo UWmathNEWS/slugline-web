@@ -1,25 +1,14 @@
-import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import axios from "axios";
+import React, { useMemo, useReducer, useRef, useState } from "react";
 import { getApiUrl } from "../api/api";
 import { Modal, Button } from "react-bootstrap";
 
-import { User, PaginatedAPIResponse } from "../shared/types";
+import { User } from "../shared/types";
 import ProfileForm from "../profile/ProfileForm";
 
 import "./UserList.scss";
 import { useAuth } from "../auth/AuthProvider";
 import ERRORS from "../shared/errors";
-import RichTable, { Column } from "../shared/components/RichTable";
-
-const getUserList = (): Promise<User[]> => {
-  return axios.get<PaginatedAPIResponse<User>>(getApiUrl("users/"))
-    .then(resp => {
-      if (resp.data.success)
-        return resp.data.data.results;
-      else
-        throw resp.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
-    })
-};
+import RichTable, { Column, RichTableBag } from "../shared/components/RichTable";
 
 interface State {
   allUsers: User[];
@@ -30,20 +19,16 @@ interface State {
 }
 
 type Action =
-  { type: 'get users' } |
-  { type: 'set users', data: User[] } |
-  { type: 'filter users', data: User[] | undefined } |
   { type: 'set edit user', data: User | undefined } |
   { type: 'show edit user', data: boolean } |
-  { type: 'submit edit user' } |
-  { type: 'show create user', data: boolean } |
-  { type: 'submit create user' };
+  { type: 'show create user', data: boolean };
 
 const UserList = () => {
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [editUserErrors, setEditUserErrors] = useState(false);
   const [createUserErrors, setCreateUserErrors] = useState(false);
+  const tableBagRef = useRef<RichTableBag<User> | null>(null);
   const editUserRef = useRef({ submit: () => Promise.resolve() });
   const createUserRef = useRef({ submit: () => Promise.resolve() });
 
@@ -82,22 +67,6 @@ const UserList = () => {
 
   const [state, dispatch] = useReducer((state: State, action: Action): State => {
     switch (action.type) {
-    case 'get users':
-      getUserList().then(users => dispatch({ type: 'set users', data: users }));
-      return {
-        ...state,
-        allUsers: []
-      };
-    case 'set users':
-      return {
-        ...state,
-        allUsers: action.data
-      };
-    case 'filter users':
-      return {
-        ...state,
-        filteredUsers: action.data
-      };
     case 'set edit user':
       return {
         ...state,
@@ -109,28 +78,10 @@ const UserList = () => {
         ...state,
         showEditUser: action.data
       };
-    case 'submit edit user':
-      getUserList().then(users => {
-        dispatch({
-          type: 'set edit user',
-          data: Object.values(users).find(u => u.username === state.currentUser?.username)
-        });
-        dispatch({ type: 'set users', data: users });
-      });
-      return {
-        ...state,
-        allUsers: []
-      };
     case 'show create user':
       return {
         ...state,
         showCreateUser: action.data
-      };
-    case 'submit create user':
-      getUserList().then(users => dispatch({ type: 'set users', data: users }));
-      return {
-        ...state,
-        allUsers: []
       };
     }
     return state;
@@ -141,21 +92,6 @@ const UserList = () => {
     showEditUser: false,
     showCreateUser: false
   });
-
-  const deleteUser = (username: string) => {
-    auth.delete(`users/${username}/`)
-      .then(() => {
-        alert(`Successfully deleted user ${username}`);
-        dispatch({ type: 'submit edit user' });
-        dispatch({ type: 'show edit user', data: false });
-      }, (err: string[] | string) => {
-        alert(typeof err === "string" ? ERRORS[err] : err.map(e => ERRORS[e]));
-      })
-  };
-
-  useEffect(() => {
-    getUserList().then(users => dispatch({ type: 'set users', data: users }));
-  }, []);
 
   return <div>
     <h1>
@@ -186,12 +122,35 @@ const UserList = () => {
           name: "Edit",
           bulk: false,
           triggers: ["click"],
-          call(_: any, data: User) {
-            dispatch({ type: 'set edit user', data });
-            return Promise.resolve();
+          call({ makeRequest }, data: User) {
+            return makeRequest<User>("get", data)
+              .then(user => {
+                dispatch({ type: 'set edit user', data: user });
+              });
+          }
+        },
+        {
+          name: "Delete",
+          bulk: false,
+          call({ makeRequest, executeAction }, data: User) {
+            if (window.confirm(`You are deleting user ${data.username}. Are you sure you want to continue?`)) {
+              return auth.delete(`users/${data.username}/`)
+                .then(() => {
+                  executeAction("refresh");
+                  alert(`Successfully deleted user ${data.username}`);
+                  dispatch({ type: 'show edit user', data: false });
+                }, (err: string[] | string) => {
+                  alert(typeof err === "string" ? ERRORS[err] : err.map(e => ERRORS[e]));
+                })
+            }
+
+            return Promise.reject();
           }
         }
       ]}
+      bagRef={(bag) => {
+        tableBagRef.current = bag;
+      }}
     />
     <Modal
       show={state.showEditUser}
@@ -213,8 +172,11 @@ const UserList = () => {
           Close without saving
         </Button>
         <Button variant="outline-danger" onClick={() => {
-          if (window.confirm(`You are deleting user ${state.currentUser?.username}. Are you sure you want to continue?`))
-            deleteUser(state.currentUser?.username ?? "");
+          if (window.confirm(`You are deleting user ${state.currentUser?.username}. Are you sure you want to continue?`)) {
+            if (tableBagRef.current) {
+              tableBagRef.current.executeAction("Delete");
+            }
+          }
         }}>Delete user</Button>
         <Button
           type="submit"
@@ -222,7 +184,13 @@ const UserList = () => {
           className="ml-auto"
           onClick={() => {
             editUserRef.current.submit().then(() => {
-              dispatch({ type: 'submit edit user' });
+              if (tableBagRef.current) {
+                tableBagRef.current.executeAction("refresh");
+                tableBagRef.current.makeRequest<User>("get", state.currentUser)
+                  .then(user => {
+                    dispatch({ type: 'set edit user', data: user });
+                  });
+              }
             }, () => {});
           }}
         >
@@ -255,7 +223,9 @@ const UserList = () => {
           className="ml-auto"
           onClick={() => {
             createUserRef.current.submit().then(() => {
-              dispatch({ type: 'submit create user' });
+              if (tableBagRef.current) {
+                tableBagRef.current.executeAction("refresh");
+              }
             }, () => {});
           }}
         >

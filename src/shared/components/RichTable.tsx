@@ -16,11 +16,12 @@ import {
   Button
 } from "react-bootstrap";
 import nanoid from "nanoid";
-import axios, { Method } from "axios";
+import axios, { AxiosResponse, Method } from "axios";
 
 import { useApiGet } from "../../api/hooks";
-import { APIError, Pagination } from "../types";
+import { APIError, APIResponse, Pagination } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useToast } from "../contexts/ToastContext";
 
 /**
  * RichTable describes a component that displays tabular data in an interactive manner. It defines two main exports:
@@ -112,15 +113,20 @@ export interface RichTableRow<D extends object> {
   setSelected: (s: boolean) => void;
 }
 
-export interface RichTableProps<D extends object = {}> {
+export interface RichTableHook<D extends object = {}> {
   columns: Column<D>[];
   url: string;
   pk: keyof D & string;
   paginated: boolean;
-  getFreshOnClick?: boolean;
   actions?: Action<D>[];
-  searchable?: boolean;
   selectable?: boolean;
+}
+
+export interface RichTableProps<D extends object = {}> extends RichTableHook<D> {
+  className?: string | { [cls: string]: boolean };
+  searchable?: boolean;
+  ref?: React.Ref<Table & HTMLTableElement>;
+  bagRef?: (instance: RichTableBag<D>) => void;
 }
 
 export interface RichTableBag<D extends object = {}> {
@@ -135,7 +141,7 @@ export interface RichTableBag<D extends object = {}> {
   setSearchQuery: (query: string) => void;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
-  makeRequest: (method: Method, row?: D, data?: any) => Promise<any>;
+  makeRequest: <T>(method: Method, row?: D, data?: any) => Promise<T>;
 }
 
 /**
@@ -149,7 +155,7 @@ const useRichTable = <D extends object = {}>({
   paginated,
   actions = [],
   selectable
-}: RichTableProps<D>): RichTableBag<D> => {
+}: RichTableHook<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
   const [searchQuery, _setSearchQuery] = useState("");
@@ -278,6 +284,10 @@ const useRichTable = <D extends object = {}>({
 
   const executeAction = useCallback(
     (name: string) => {
+      if (!(name in memoizedActions)) {
+        throw new Error(`Action ${name} does not exist or was improperly registered.`);
+      }
+
       if ("bulk" in memoizedActions[name] && filteredSelected.length) {
         return internalExecuteAction(name, filteredSelected);
       } else if (!("bulk" in memoizedActions[name])) {
@@ -392,7 +402,7 @@ const useRichTable = <D extends object = {}>({
               return {
                 key: 0,
                 className: "RichTable_noRowsReturned text-center",
-                colspan: columns.length + (selectable ? 1 : 0)
+                colSpan: columns.length + (selectable ? 1 : 0)
               }
             },
             render() {
@@ -489,16 +499,23 @@ const useRichTable = <D extends object = {}>({
     internalExecuteAction
   ]);
 
-  const makeRequest = (method: Method, row?: D, requestData?: any) => {
+  const makeRequest = <T extends any>(method: Method, row?: D, requestData?: any) => {
     let requestUrl = url;
     if (row !== null && row !== undefined) {
-      requestUrl = `${url}/${row[pk]}`;
+      requestUrl = `${url}${row[pk]}/`;
     }
 
     return axios(requestUrl, {
       method,
       data: requestData
-    });
+    })
+      .then(({ data }: AxiosResponse<APIResponse<T>>) => {
+        if (data.success) {
+          return data.data;
+        } else {
+          throw data.error;
+        }
+      });
   };
 
   const bag: RichTableBag<D> = {
@@ -524,6 +541,7 @@ const useRichTable = <D extends object = {}>({
  * supported.
  */
 const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
+  const bag = useRichTable(config);
   const {
     header,
     rows,
@@ -534,8 +552,13 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     totalCount,
     setSearchQuery,
     executeAction,
-  } = useRichTable(config);
+  } = bag;
   const debouncer = useRef<number>(-1);
+  const { addToasts } = useToast();
+
+  if (config.bagRef) {
+    config.bagRef(bag);
+  }
 
   return (
     <div className="RichTable">
@@ -569,7 +592,14 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
                 variant="link"
                 disabled={"bulk" in action && (selected.length === 0 || (!action.bulk && selected.length > 1))}
                 onClick={() => {
-                  executeAction(action.name);
+                  executeAction(action.name)
+                    .catch((e: any) => {
+                      addToasts([{
+                        id: `action-failed-${Date.now()}`,
+                        body: "Action failed to execute."
+                      }]);
+                      console.error(e);
+                    });
                 }}
               >
                 {action.displayName ?? action.name}
@@ -607,7 +637,7 @@ const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
           </Col>
         )}
       </Row>
-      <Table striped hover className="RichTable_table">
+      <Table striped hover className="RichTable_table" ref={config.ref}>
         <thead>
           <tr>
             {header.cells.map(cell => (

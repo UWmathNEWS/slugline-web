@@ -321,7 +321,7 @@ const ProfileForm: React.FC<{
       return Promise.resolve();
     }
 
-    if (Object.values(state.errors).flat().length) {
+    if (Object.values(state.errors).flat().length > 1) {
       dispatch({
         type: "set general error",
         errors: [ERRORS.FORMS.NOT_YET_VALID],
@@ -396,11 +396,13 @@ const ProfileForm: React.FC<{
               <Form.Control.Feedback>
                 Username is valid and is available.
               </Form.Control.Feedback>
-              <ul>
-                {state.errors.username?.map((msg) => (
-                  <li key={msg}>{ERRORS[msg]}</li>
-                ))}
-              </ul>
+              <Form.Control.Feedback type="invalid">
+                <ul>
+                  {state.errors.username?.map((msg) => (
+                    <li key={msg}>{ERRORS[msg]}</li>
+                  ))}
+                </ul>
+              </Form.Control.Feedback>
             </>
           )}
         </Col>
@@ -567,7 +569,7 @@ const ProfileForm: React.FC<{
                 />
                 <InputGroup.Append>
                   <Button
-                    variant={showPassword ? "primary" : "outline-secondary"}
+                    variant={showPassword ? "outline-primary" : "outline-secondary"}
                     onClick={() => {
                       setShowPassword((s) => !s);
                     }}
@@ -598,7 +600,7 @@ const ProfileForm: React.FC<{
       {renderFooter ? (
         renderFooter(
           state.isLoading,
-          state.isChecking || Object.values(state.errors).flat().length > 0
+          state.isChecking || Object.values(state.errors).flat().length > 1
         )
       ) : (
         <Button
@@ -606,7 +608,7 @@ const ProfileForm: React.FC<{
           disabled={
             state.isLoading ||
             state.isChecking ||
-            Object.values(state.errors).flat().length > 0
+            Object.values(state.errors).flat().length > 1
           }
         >
           {state.isLoading ? "Saving..." : "Save"}
