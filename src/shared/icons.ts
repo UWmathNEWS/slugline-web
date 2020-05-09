@@ -8,7 +8,10 @@ import {
   faLink,
   faDollarSign,
   faChevronLeft,
-  faChevronRight
+  faChevronRight,
+  faSort,
+  faCaretUp,
+  faCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
 
 export const initLibrary = () => {
@@ -21,6 +24,9 @@ export const initLibrary = () => {
     faLink,
     faDollarSign,
     faChevronLeft,
-    faChevronRight
+    faChevronRight,
+    faSort,
+    faCaretUp,
+    faCaretDown,
   );
 };

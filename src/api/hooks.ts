@@ -18,7 +18,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { getApiUrl } from "./api";
 
-const useApiGet = <T, U extends APIError = APIError>(
+export const useApiGet = <T, U extends APIError = APIError>(
   url: string
 ): APIGetHook<T, U> => {
   const [response, setResponse] = useState<T | undefined>(undefined);
@@ -33,7 +33,7 @@ const useApiGet = <T, U extends APIError = APIError>(
   return [response, error];
 };
 
-const useApiGetPaginated = <T, U extends APIError = APIError>(
+export const useApiGetPaginated = <T, U extends APIError = APIError>(
   url: string
 ): APIGetHookPaginated<T, U> => {
   const [currentUrl, setCurrentUrl] = useState<string>(url);
@@ -61,7 +61,7 @@ const useApiGetPaginated = <T, U extends APIError = APIError>(
   ];
 };
 
-const useApiPost = <S, T, U extends APIError = APIError>(
+export const useApiPost = <S, T, U extends APIError = APIError>(
   url: string
 ): APIMutateHook<S, T, U> => {
   const auth = useAuth();
@@ -88,7 +88,7 @@ const useApiPost = <S, T, U extends APIError = APIError>(
   return [post, state];
 };
 
-const useApiPatch = <S, T, U extends APIError = APIError>(
+export const useApiPatch = <S, T, U extends APIError = APIError>(
   url: string
 ): APIMutateHook<S, T, U> => {
   const auth = useAuth();
@@ -123,7 +123,7 @@ export const useAllIssues = (): APIGetHook<Pagination<Issue>> => {
   return useApiGet<Pagination<Issue>>(getApiUrl("issues/"));
 };
 
-export const useIssue = (issueId?: number): APIGetHook<Issue> => {
+export const useIssue = (issueId?: string): APIGetHook<Issue> => {
   return useApiGet<Issue>(getApiUrl(`issues/${issueId}`));
 };
 
@@ -132,7 +132,7 @@ export const useCreateIssue = () => {
 };
 
 export const useIssueArticles = (
-  issueId?: number
+  issueId?: string
 ): APIGetHookPaginated<Article> => {
   return useApiGetPaginated<Article>(getApiUrl(`issues/${issueId}/articles/`));
 };
@@ -141,8 +141,8 @@ export const useIssueList = (): APIGetHookPaginated<Issue> => {
   return useApiGetPaginated<Issue>(getApiUrl("issues/"));
 };
 
-export const useUsersList = (): APIGetHook<Pagination<User>, UserAPIError> => {
-  return useApiGet<Pagination<User>, UserAPIError>(getApiUrl("users/"));
+export const useUsersList = (): APIGetHookPaginated<User, UserAPIError> => {
+  return useApiGetPaginated<User, UserAPIError>(getApiUrl("users/"));
 };
 
 export const useUserArticles = (): APIGetHookPaginated<Article> => {

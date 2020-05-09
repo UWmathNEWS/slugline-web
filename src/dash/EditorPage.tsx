@@ -58,7 +58,7 @@ const EditorPage: React.FC = () => {
     [updateArticle, setLastSaved]
   );
 
-  const saveArticleDebounced = useDebouncedCallback(
+  const [saveArticleDebounced,] = useDebouncedCallback(
     saveArticle,
     ARTICLE_SAVE_DELAY_MSECS
   );
@@ -78,7 +78,7 @@ const EditorPage: React.FC = () => {
     [updateArticleContent, setLastSaved]
   );
 
-  const saveArticleContentDebounced = useDebouncedCallback(
+  const [saveArticleContentDebounced,] = useDebouncedCallback(
     saveArticleContent,
     ARTICLE_SAVE_DELAY_MSECS
   );

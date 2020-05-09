@@ -4,7 +4,7 @@ import { useIssue } from "../api/hooks";
 
 const IssuePage = () => {
   const { issue_id } = useParams();
-  const [issue, ,] = useIssue(Number(issue_id));
+  const [issue, ,] = useIssue(issue_id);
 
   if (issue) {
     return <h1>{`Volume ${issue?.volume_num} Issue ${issue?.issue_code}`}</h1>;

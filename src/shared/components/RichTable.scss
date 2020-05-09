@@ -1,0 +1,71 @@
+@import "src/slugline_vars";
+
+.RichTable {
+  font-family: $headings-ff;
+  margin: spacing(3) 0;
+
+  th, td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  thead th {
+    text-transform: uppercase;
+    padding-top: spacing(2);
+    padding-bottom: spacing(2);
+    border-bottom: none;
+  }
+
+  tr:last-child td {
+    border-bottom: 1px solid $table-border-color;
+  }
+
+  &_header {
+    margin-bottom: spacing(1);
+
+    .btn {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  &_table {
+    table-layout: fixed;
+    margin-bottom: 0;
+  }
+
+  &_search,
+  &_actions,
+  &_pagination,
+  &_summary {
+    display: flex;
+    align-items: center;
+  }
+
+  &_cellHeader {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+  }
+
+  &_searchBox {
+    height: 100%;
+  }
+
+  &_actions .btn {
+    padding-left: 0;
+  }
+
+  &_selectCheckbox {
+    width: 2 * spacing(4);
+  }
+
+  &_selectCheckbox .custom-checkbox {
+    margin-right: -1 * spacing(4);
+  }
+
+  &_noRowsReturned {
+    font-style: italic;
+  }
+}
+
