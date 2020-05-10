@@ -45,7 +45,6 @@ const validateUsernameAvailable = async (
 interface ProfileFormProps {
   user?: User;
   formId?: string;
-  context: FormContextValues<ProfileFormVals>;
   onSubmit?: (
     vals: ProfileFormVals,
     e?: React.BaseSyntheticEvent
@@ -53,7 +52,13 @@ interface ProfileFormProps {
   hideSubmit?: boolean;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
+interface ProfileConsumerFormProps extends ProfileFormProps {
+  context: FormContextValues<ProfileFormVals>;
+}
+
+export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
+  props: ProfileConsumerFormProps
+) => {
   const auth = useAuth();
 
   // react-hook-form caches default values when the first time you call useForm.
@@ -288,41 +293,41 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
             Generate
           </Button>
         </Col>
-        <Col sm={8}>
-          <InputGroup>
-            <Field
-              errors={props.context.errors}
-              type={showPassword ? "text" : "password"}
-              name="password"
-              ref={props.context.register({
-                minLength: {
-                  value: 8,
-                  message: "USER.PASSWORD.TOO_SHORT.8",
-                },
-                validate: (password?: string) => {
-                  // the pattern argument doesn't let us return an error if the value FAILS a regex,
-                  // so we'll do it ourselves
-                  if (password && /^\d*$/.test(password)) {
-                    return "USER.PASSWORD.ENTIRELY_NUMERIC";
-                  }
-                  if (props.context.getValues().cur_password && !password) {
-                    return "USER.PASSWORD.NEW_REQUIRED";
-                  }
-                },
-              })}
-            />
-            <Button
-              onClick={() => {
-                setShowPassword((show) => !show);
-              }}
-            >
-              {showPassword ? (
-                <FontAwesomeIcon icon={faEyeSlash} />
-              ) : (
-                <FontAwesomeIcon icon={faEye} />
-              )}
-            </Button>
-          </InputGroup>
+        <Col sm={7}>
+          <Field
+            errors={props.context.errors}
+            type={showPassword ? "text" : "password"}
+            name="password"
+            ref={props.context.register({
+              minLength: {
+                value: 8,
+                message: "USER.PASSWORD.TOO_SHORT.8",
+              },
+              validate: (password?: string) => {
+                // the pattern argument doesn't let us return an error if the value FAILS a regex,
+                // so we'll do it ourselves
+                if (password && /^\d*$/.test(password)) {
+                  return "USER.PASSWORD.ENTIRELY_NUMERIC";
+                }
+                if (props.context.getValues().cur_password && !password) {
+                  return "USER.PASSWORD.NEW_REQUIRED";
+                }
+              },
+            })}
+          />
+        </Col>
+        <Col sm={1}>
+          <Button
+            onClick={() => {
+              setShowPassword((show) => !show);
+            }}
+          >
+            {showPassword ? (
+              <FontAwesomeIcon icon={faEyeSlash} />
+            ) : (
+              <FontAwesomeIcon icon={faEye} />
+            )}
+          </Button>
         </Col>
       </Form.Group>
       {!props.hideSubmit && (
@@ -332,6 +337,11 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
       )}
     </Form>
   );
+};
+
+const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
+  const context = useProfileForm(props.user);
+  return <ProfileFormConsumer {...props} context={context} />;
 };
 
 export default ProfileForm;

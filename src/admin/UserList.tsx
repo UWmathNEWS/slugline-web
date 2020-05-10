@@ -1,9 +1,9 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { getApiUrl } from "../api/api";
 import { Modal, Button } from "react-bootstrap";
 
 import { User } from "../shared/types";
-import ProfileForm, { useProfileForm } from "../profile/ProfileForm";
+import { ProfileFormConsumer, useProfileForm } from "../profile/ProfileForm";
 
 import "./UserList.scss";
 import { useAuth } from "../auth/AuthProvider";
@@ -41,7 +41,7 @@ const UserEditModal: React.FC<UserEditModalProps> = (
         <Modal.Title>{props.user ? "Edit User" : "Create User"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <ProfileForm
+        <ProfileFormConsumer
           context={context}
           formId="editUserForm"
           user={props.user}
