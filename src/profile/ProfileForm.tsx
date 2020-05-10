@@ -299,7 +299,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             Generate
           </Button>
         </Col>
-        <Col sm={7}>
+        <Col sm={8}>
           <Field
             errors={props.context.errors}
             type={showPassword ? "text" : "password"}
@@ -320,20 +320,21 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                 }
               },
             })}
+            append={
+              <Button
+                variant={showPassword ? "outline-primary" : "outline-secondary"}
+                onClick={() => {
+                  setShowPassword((show) => !show);
+                }}
+              >
+                {showPassword ? (
+                  <FontAwesomeIcon icon={faEyeSlash} />
+                ) : (
+                  <FontAwesomeIcon icon={faEye} />
+                )}
+              </Button>
+            }
           />
-        </Col>
-        <Col sm={1}>
-          <Button
-            onClick={() => {
-              setShowPassword((show) => !show);
-            }}
-          >
-            {showPassword ? (
-              <FontAwesomeIcon icon={faEyeSlash} />
-            ) : (
-              <FontAwesomeIcon icon={faEye} />
-            )}
-          </Button>
         </Col>
       </Form.Group>
       {!props.hideSubmit && (
