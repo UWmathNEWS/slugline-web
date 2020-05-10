@@ -191,6 +191,10 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
             name="email"
             ref={props.context.register({
               required: "USER.REQUIRED.EMAIL",
+              maxLength: {
+                value: 254,
+                message: "USER.EMAIL.TOO_LONG.254",
+              },
               pattern: {
                 value: /\S+@\S+\.\S+/,
                 message: "USER.EMAIL.INVALID",

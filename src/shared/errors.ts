@@ -50,6 +50,9 @@ const errors = {
     },
     EMAIL: {
       INVALID: "Email must be valid.",
+      TOO_LONG: errorFactory(
+        (len) => `Your email must be less than ${len} characters long.`
+      ),
     },
     PASSWORD: {
       CURRENT_INCORRECT: "Current password incorrect.",
