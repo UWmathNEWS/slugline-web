@@ -121,7 +121,7 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
             type="text"
             name="username"
             disabled={props.user !== undefined}
-            validMessage={"This username is valid! Woo! Resounding applause!"}
+            validMessage={"This username is valid."}
             isValid={
               props.context.formState.dirtyFields.has("username") &&
               !props.context.errors["username"]
