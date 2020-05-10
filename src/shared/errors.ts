@@ -38,6 +38,16 @@ const errors = {
       CANNOT_CHANGE: "You cannot change your username after registration.",
       TOO_LONG: "Username is too long.",
     },
+    FIRST_NAME: {
+      TOO_LONG: errorFactory(
+        (len) => `Your first name must be less than ${len} characters long.`
+      ),
+    },
+    LAST_NAME: {
+      TOO_LONG: errorFactory(
+        (len) => `Your last name must be less than ${len} characters long.`
+      ),
+    },
     EMAIL: {
       INVALID: "Email must be valid.",
     },

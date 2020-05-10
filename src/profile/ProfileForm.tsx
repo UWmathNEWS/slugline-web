@@ -157,8 +157,8 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
             placeholder="First Name"
             ref={props.context.register({
               maxLength: {
-                value: 150,
-                message: "USER.USERNAME.TOO_LONG",
+                value: 30,
+                message: "USER.FIRST_NAME.TOO_LONG.30",
               },
               required: true,
             })}
@@ -173,7 +173,7 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
             ref={props.context.register({
               maxLength: {
                 value: 150,
-                message: "USER.USERNAME.TOO_LONG",
+                message: "USER.LAST_NAME.TOO_LONG.150",
               },
               required: true,
             })}
