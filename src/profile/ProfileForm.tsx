@@ -305,6 +305,9 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
                   if (password && /^\d*$/.test(password)) {
                     return "USER.PASSWORD.ENTIRELY_NUMERIC";
                   }
+                  if (props.context.getValues().cur_password && !password) {
+                    return "USER.PASSWORD.NEW_REQUIRED";
+                  }
                 },
               })}
             />
