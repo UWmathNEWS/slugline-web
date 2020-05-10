@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { User, APIResponse, AuthContext, UserAPIError } from "../shared/types";
+import { User, APIResponse, UserAPIError } from "../shared/types";
 import { Form, Row, Col, Button, InputGroup } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";
 
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { getApiUrl } from "../api/api";
 import { useAuth } from "../auth/AuthProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -59,8 +59,10 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
   // react-hook-form caches default values when the first time you call useForm.
   // So, we have to manually replicate the defaultValues behaviour by resetting the form values ourselves
   // whenever user changes
+  const { reset, register } = props.context;
+
   useEffect(() => {
-    props.context.reset({
+    reset({
       username: props.user?.username,
       first_name: props.user?.first_name,
       last_name: props.user?.last_name,
@@ -68,14 +70,14 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
       is_editor: props.user?.is_editor || false,
       writer_name: props.user?.writer_name,
     });
-  }, [props.user, props.context.reset]);
+  }, [props.user, reset]);
 
   // manually register the is_editor field since we handle it with a select
   useEffect(() => {
-    props.context.register({
+    register({
       name: "is_editor",
     });
-  }, []);
+  }, [register]);
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -96,7 +98,7 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
     } catch (err) {
       const apiErrors = err as UserAPIError;
       props.context.setError(
-        apiErrors.cur_password.map((error) => ({
+        apiErrors.cur_password?.map((error) => ({
           name: "cur_password",
           type: "server_error",
           message: error,
@@ -243,32 +245,32 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
       )}
       {(props.user !== undefined && !auth.user?.is_editor) ||
         (props.user?.username === auth.user?.username && (
-        <>
-          <h3>Change Password</h3>
-          <Form.Group as={Row} controlId="curPassword">
-            <Form.Label column sm={2}>
-              Current Password:
-            </Form.Label>
-            <Col sm={10}>
-              <Field
-                errors={props.context.errors}
-                type="password"
-                name="cur_password"
-                ref={props.context.register({
-                  validate: (password: string) => {
-                    if (
-                      props.user !== undefined &&
-                      props.context.getValues().password &&
-                      !props.context.getValues().cur_password
-                    ) {
-                      return "USER.PASSWORD.CURRENT_REQUIRED";
-                    }
-                  },
-                })}
-              />
-            </Col>
-          </Form.Group>
-        </>
+          <>
+            <h3>Change Password</h3>
+            <Form.Group as={Row} controlId="curPassword">
+              <Form.Label column sm={2}>
+                Current Password:
+              </Form.Label>
+              <Col sm={10}>
+                <Field
+                  errors={props.context.errors}
+                  type="password"
+                  name="cur_password"
+                  ref={props.context.register({
+                    validate: (password: string) => {
+                      if (
+                        props.user !== undefined &&
+                        props.context.getValues().password &&
+                        !props.context.getValues().cur_password
+                      ) {
+                        return "USER.PASSWORD.CURRENT_REQUIRED";
+                      }
+                    },
+                  })}
+                />
+              </Col>
+            </Form.Group>
+          </>
         ))}
       <Form.Group as={Form.Row} controlId="password">
         <Form.Label column sm={2}>
