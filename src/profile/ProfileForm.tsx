@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
 import { cleanFormData } from "../shared/form/util";
+import { useDebouncedCallback } from "../shared/hooks";
 
 export interface ProfileFormVals {
   username?: string;
@@ -25,8 +26,8 @@ export interface ProfileFormVals {
 
 export const useProfileForm = (user?: User) => {
   return useForm<ProfileFormVals>({
-    mode: "onBlur",
-    reValidateMode: "onBlur",
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 };
 
@@ -61,11 +62,11 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
 ) => {
   const auth = useAuth();
 
+  const { reset, register } = props.context;
+
   // react-hook-form caches default values when the first time you call useForm.
   // So, we have to manually replicate the defaultValues behaviour by resetting the form values ourselves
   // whenever user changes
-  const { reset, register } = props.context;
-
   useEffect(() => {
     reset({
       username: props.user?.username,
@@ -83,6 +84,11 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
       name: "is_editor",
     });
   }, [register]);
+
+  const [validateUserNameDebounced] = useDebouncedCallback(
+    validateUsernameAvailable,
+    250
+  );
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -144,7 +150,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                   // if we're editing a user the field is disabled anyway, don't validate
                   return;
                 }
-                if (!(await validateUsernameAvailable(username))) {
+                if (!(await validateUserNameDebounced(username))) {
                   return Promise.resolve("USER.USERNAME.ALREADY_EXISTS");
                 }
               },
