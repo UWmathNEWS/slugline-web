@@ -241,7 +241,8 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
           </Col>
         </Form.Group>
       )}
-      {props.user !== undefined && !auth.user?.is_editor && (
+      {(props.user !== undefined && !auth.user?.is_editor) ||
+        (props.user?.username === auth.user?.username && (
         <>
           <h3>Change Password</h3>
           <Form.Group as={Row} controlId="curPassword">
@@ -268,7 +269,7 @@ const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
             </Col>
           </Form.Group>
         </>
-      )}
+        ))}
       <Form.Group as={Form.Row} controlId="password">
         <Form.Label column sm={2}>
           New Password:
