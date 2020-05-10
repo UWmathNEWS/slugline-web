@@ -1,0 +1,13 @@
+// Use our custom fonts
+$body-ff: "Body Font", serif;
+$headings-ff: "Serif Font", sans-serif;
+
+@font-face {
+  font-family: "Body Font";
+  src: url("https://fonts.googleapis.com/css2?family=Tinos&display=swap");
+}
+
+@font-face {
+  font-family: "Headings Font";
+  src: url('https://fonts.googleapis.com/css2?family=Arimo&display=swap');
+}

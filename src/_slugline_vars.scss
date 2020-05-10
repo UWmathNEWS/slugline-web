@@ -2,9 +2,7 @@
 
 $primary: #f2c0d9;
 
-// Use our custom fonts
-$body-ff: "Joanna Nova", serif;
-$headings-ff: "DIN Next", sans-serif;
+@import "slugline_fonts";
 
 $font-family-sans-serif: $body-ff; //This is a misnomer, our body font is serif
 $headings-font-family: $headings-ff;
