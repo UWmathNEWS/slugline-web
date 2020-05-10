@@ -113,7 +113,14 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
           name: "cur_password",
           type: "server_error",
           message: error,
-        }))
+        })) || []
+      );
+      props.context.setError(
+        apiErrors.password?.map((error) => ({
+          name: "password",
+          type: "server_error",
+          message: error,
+        })) || []
       );
     }
 

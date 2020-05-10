@@ -103,7 +103,7 @@ export interface UserAPIError extends APIError {
   user?: string[];
   username?: string[];
   email?: string[];
-  cur_password: string[];
+  cur_password?: string[];
   password?: string[];
   writer_name?: string[];
 }
