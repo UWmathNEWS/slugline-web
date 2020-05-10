@@ -1,6 +1,6 @@
 ![CI](https://github.com/UWmathNEWS/slugline-web/workflows/CI/badge.svg)
 ## slugline-web
-The front-end component of `slugline`, mathNEWS's best and only React/Django based publishing website.
+The front-end component of `slugline`, math**NEWS**'s best and only React/Django based publishing website.
 
 ## Running
 - It's a standard create-react-app project, `npm run start` to run. 
