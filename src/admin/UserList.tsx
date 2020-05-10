@@ -63,7 +63,7 @@ const UserEditModal: React.FC<UserEditModalProps> = (
         </Button>
         <Button
           type="submit"
-          disabled={formState.isSubmitting}
+          disabled={formState.isSubmitting || !formState.isValid}
           form="editUserForm"
         >
           {formState.isSubmitting ? "Saving..." : "Save"}

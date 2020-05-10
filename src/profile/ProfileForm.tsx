@@ -331,7 +331,13 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
         </Col>
       </Form.Group>
       {!props.hideSubmit && (
-        <Button type="submit" disabled={props.context.formState.isSubmitting}>
+        <Button
+          type="submit"
+          disabled={
+            props.context.formState.isSubmitting ||
+            !props.context.formState.isValid
+          }
+        >
           {props.context.formState.isSubmitting ? "Saving..." : "Save"}
         </Button>
       )}
