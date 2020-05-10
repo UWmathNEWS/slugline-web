@@ -1,5 +1,10 @@
 import React from "react";
-import { Form, FormControl, FormControlProps } from "react-bootstrap";
+import {
+  Form,
+  FormControl,
+  FormControlProps,
+  InputGroup,
+} from "react-bootstrap";
 import { NestDataObject, FieldError, ErrorMessage } from "react-hook-form";
 import { BsPrefixProps, ReplaceProps } from "react-bootstrap/helpers";
 import ERRORS from "../errors";
@@ -13,6 +18,8 @@ interface FieldPropsExtra<T> {
   errors: NestDataObject<T, FieldError>;
   hideErrorMessage?: boolean;
   validMessage?: string;
+  prepend?: JSX.Element;
+  append?: JSX.Element;
 }
 
 // This abomination combines our props with the Form.Control props
@@ -22,17 +29,29 @@ type FieldProps<As extends React.ElementType = "input"> = FieldPropsExtra<any> &
 
 const Field = React.forwardRef<FormControlElement, FieldProps>(
   (props: FieldProps, forwardedRef) => {
-    const { innerRef, errors, hideErrorMessage, validMessage, ...rest } = props;
+    const {
+      innerRef,
+      errors,
+      hideErrorMessage,
+      validMessage,
+      prepend,
+      append,
+      ...rest
+    } = props;
     return (
       <>
-        <Form.Control
-          name={rest.name}
-          id={rest.id}
-          isInvalid={errors[rest.name || ""]}
-          isValid={!!validMessage && !errors[rest.name || ""]}
-          ref={forwardedRef as React.Ref<FormControl<React.ElementType<any>>>}
-          {...rest}
-        />
+        <InputGroup>
+          {prepend && <InputGroup.Prepend>{prepend}</InputGroup.Prepend>}
+          <Form.Control
+            name={rest.name}
+            id={rest.id}
+            isInvalid={errors[rest.name || ""]}
+            isValid={!!validMessage && !errors[rest.name || ""]}
+            ref={forwardedRef as React.Ref<FormControl<React.ElementType<any>>>}
+            {...rest}
+          />
+          {append && <InputGroup.Append>{append}</InputGroup.Append>}
+        </InputGroup>
         {!hideErrorMessage && (
           <ErrorMessage name={rest.name || ""} errors={errors}>
             {({ message }) =>
