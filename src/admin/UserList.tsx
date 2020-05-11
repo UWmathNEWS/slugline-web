@@ -77,7 +77,7 @@ const UserEditModal: React.FC<UserEditModalProps> = (
           context={context}
           formId="editUserForm"
           user={props.user}
-          onSubmit={async () => {
+          onSubmitSuccessful={() => {
             props.refreshTable();
             props.setShow(false);
           }}

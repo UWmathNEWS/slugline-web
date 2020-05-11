@@ -46,10 +46,11 @@ const validateUsernameAvailable = async (
 interface ProfileFormProps {
   user?: User;
   formId?: string;
-  onSubmit?: (
+  onSubmitSuccessful?: (vals: ProfileFormVals) => void | Promise<void>;
+  onSubmitFailed?: (
     vals: ProfileFormVals,
-    e?: React.BaseSyntheticEvent
-  ) => Promise<void>;
+    error: UserAPIError
+  ) => void | Promise<void>;
   hideSubmit?: boolean;
 }
 
@@ -106,6 +107,9 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
           editingMe
         );
       }
+      if (props.onSubmitSuccessful) {
+        await props.onSubmitSuccessful(vals);
+      }
     } catch (err) {
       const apiErrors = err as UserAPIError;
       props.context.setError(
@@ -122,10 +126,9 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
           message: error,
         })) || []
       );
-    }
-
-    if (props.onSubmit) {
-      await props.onSubmit(vals);
+      if (props.onSubmitFailed) {
+        await props.onSubmitFailed(vals, apiErrors);
+      }
     }
   };
 
