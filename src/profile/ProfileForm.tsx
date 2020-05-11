@@ -133,7 +133,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
     <Form id={props.formId} onSubmit={props.context.handleSubmit(submit)}>
       <Form.Group as={Row} controlId="username">
         <Form.Label column sm={2}>
-          Username:
+          Username
         </Form.Label>
         <Col sm={10}>
           <Field
@@ -167,7 +167,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
       </Form.Group>
       <Form.Group as={Row}>
         <Form.Label column sm={2}>
-          Name:
+          Name
         </Form.Label>
         <Col sm={5}>
           <Field
@@ -202,7 +202,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
       </Form.Group>
       <Form.Group as={Row} controlId="email">
         <Form.Label column sm={2}>
-          Email:
+          Email
         </Form.Label>
         <Col sm={10}>
           <Field
@@ -225,7 +225,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
       </Form.Group>
       <Form.Group as={Row} controlId="writerName">
         <Form.Label column sm={2}>
-          Writer Name:
+          Writer Name
         </Form.Label>
         <Col sm={10}>
           <Field
@@ -239,7 +239,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
       {auth.user?.is_editor && (
         <Form.Group as={Row} controlId="isEditor">
           <Form.Label column sm={2}>
-            Status:
+            Status
           </Form.Label>
           <Col sm={10}>
             <Form.Control
@@ -267,7 +267,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             <h3>Change Password</h3>
             <Form.Group as={Row} controlId="curPassword">
               <Form.Label column sm={2}>
-                Current Password:
+                Current Password
               </Form.Label>
               <Col sm={10}>
                 <Field
@@ -292,7 +292,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
         ))}
       <Form.Group as={Form.Row} controlId="password">
         <Form.Label column sm={2}>
-          New Password:
+          New Password
         </Form.Label>
         <Col sm={2}>
           <Button
