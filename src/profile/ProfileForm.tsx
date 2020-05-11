@@ -100,6 +100,8 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
     try {
       if (props.user === undefined) {
         await auth.post<ProfileFormVals>("users/", cleaned);
+        // refresh the form so we can add a new user
+        props.context.reset();
       } else {
         await auth.patch<ProfileFormVals>(
           editingMe ? "me/" : `users/${vals?.username}/`,

@@ -79,7 +79,6 @@ const UserEditModal: React.FC<UserEditModalProps> = (
           user={props.user}
           onSubmitSuccessful={() => {
             props.refreshTable();
-            props.setShow(false);
           }}
           hideSubmit
         />
