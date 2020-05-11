@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer, useRef } from "react";
 import { RouteProps, Route, Redirect, useHistory } from "react-router-dom";
-import { Alert } from "react-bootstrap";
+import { Alert, Spinner } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
 
 interface PrivateRouteProps extends RouteProps {
@@ -99,8 +99,10 @@ const PrivateRouteWrapper: React.FC<{
       }
     } else {
       return <>
-        {props.fallback ?? <h1>Loading...</h1>}
-        <div key="children" className="d-none">{props.children}</div>
+        {props.fallback ?? <Spinner animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>}
+        <div key="children" className="d-none" aria-hidden="true">{props.children}</div>
       </>;
     }
   } else {

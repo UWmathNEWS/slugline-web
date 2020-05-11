@@ -52,8 +52,6 @@ interface AxiosConfig extends AxiosRequestConfig {
   url: string;
 }
 
-const initialPromise = apiGet<User | null>(getApiUrl("me/"));
-
 const CSRF_COOKIE = "csrftoken";
 const USER_LOCALSTORAGE_KEY = "slugline-user";
 
@@ -109,9 +107,8 @@ export const AuthProvider: React.FC = (props) => {
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
-      const promise = (force
-        ? apiGet<User | null>(getApiUrl("me/"))
-        : initialPromise
+      const promise = (
+        apiGet<User | null>(getApiUrl("me/"))
       ).then((data: User | null) => {
         if (user.csrfToken === null) {
           if (data) {

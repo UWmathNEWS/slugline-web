@@ -1,7 +1,7 @@
 import React from "react";
 import "./slugline.scss";
 import { Router, Switch, Route } from "react-router-dom";
-import { createBrowserHistory } from "history";
+import { createBrowserHistory, History } from "history";
 
 import IssuesList from "./issues/IssuesList";
 import IssuePage from "./issues/IssuePage";
@@ -20,15 +20,20 @@ import "./slugline.scss";
 
 initLibrary();
 
-const history = createBrowserHistory();
+const browserHistory = createBrowserHistory();
 
 const protectedRoutes = ["/dash", "/profile", "/admin"];
 
-const App: React.FC = () => {
+interface AppProps {
+  history?: History;
+}
+
+const ContextlessApp: React.FC<AppProps> = ({ history }) => {
   const auth = useAuth();
+  const hist = history ?? browserHistory;
 
   React.useEffect(() => {
-    history.listen((loc) => {
+    hist.listen((loc) => {
       if (protectedRoutes.includes(loc.pathname)) {
         auth.check(true);
       }
@@ -36,7 +41,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <Router history={history}>
+    <Router history={hist}>
       <SluglineNav />
       <div className="container">
         <div>
@@ -69,10 +74,10 @@ const App: React.FC = () => {
   );
 };
 
-export default () => (
+export default ({ history }: AppProps) => (
   <AuthProvider>
     <ToastProvider>
-      <App />
+      <ContextlessApp history={history} />
       <ToastContainer />
     </ToastProvider>
   </AuthProvider>

@@ -73,7 +73,7 @@ const SluglineNav = () => {
   return (
     <Navbar bg="primary" expand="lg">
       <div className="container nav-container">
-        <Navbar.Brand href="/">
+        <Navbar.Brand as={Link} to="/" href="/">
           <span className="mathnews-logo" />
         </Navbar.Brand>
         <Navbar.Toggle
