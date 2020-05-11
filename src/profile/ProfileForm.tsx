@@ -27,8 +27,8 @@ export interface ProfileFormVals {
 
 export const useProfileForm = (user?: User) => {
   return useForm<ProfileFormVals>({
-    mode: "onChange",
-    reValidateMode: "onChange",
+    mode: "onBlur",
+    reValidateMode: "onBlur",
   });
 };
 
@@ -176,12 +176,15 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                 props.context.formState.dirtyFields.has("username") &&
                 !props.context.errors["username"]
               }
+              onChange={async () => {
+                await props.context.triggerValidation("username");
+              }}
               ref={props.context.register({
                 maxLength: {
                   value: 150,
                   message: "USER.USERNAME.TOO_LONG",
                 },
-                required: true,
+                required: "USER.REQUIRED.username",
                 validate: async (username: string) => {
                   if (props.user !== undefined) {
                     // if we're editing a user the field is disabled anyway, don't validate
@@ -210,7 +213,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                   value: 30,
                   message: "USER.FIRST_NAME.TOO_LONG.30",
                 },
-                required: true,
+                required: "USER.REQUIRED.first_name",
               })}
             />
           </Col>
@@ -262,7 +265,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
               type="text"
               name="writer_name"
               ref={props.context.register({
-                required: "USER.REQUIRED.name",
+                required: "USER.REQUIRED.writer_name",
               })}
             />
           </Col>
@@ -361,6 +364,9 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                   }
                 },
               })}
+              onChange={async () => {
+                await props.context.triggerValidation("password");
+              }}
               append={
                 <Button
                   variant={
