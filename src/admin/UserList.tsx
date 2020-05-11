@@ -14,6 +14,38 @@ import {
   RichTableBag,
 } from "../shared/components/RichTable";
 
+const columns: Column<User>[] = [
+  {
+    header: "Username",
+    key: "username",
+    sortable: true,
+    width: 15,
+  },
+  {
+    header: "Name",
+    key: "name",
+    width: 20,
+    accessor: (user: User) =>
+      `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
+  },
+  {
+    header: "Writer Name",
+    key: "writer_name",
+    width: 20,
+  },
+  {
+    header: "Email",
+    key: "email",
+    width: 25,
+  },
+  {
+    header: "Role",
+    key: "role",
+    accessor: (user: User) =>
+      user.is_staff ? "Staff" : user.is_editor ? "Editor" : "Contributor",
+  },
+];
+
 interface UserEditModalProps {
   user?: User;
   show: boolean;
@@ -72,38 +104,6 @@ const UserEditModal: React.FC<UserEditModalProps> = (
     </Modal>
   );
 };
-
-const columns: Column<User>[] = [
-  {
-    header: "Username",
-    key: "username",
-    sortable: true,
-    width: 15,
-  },
-  {
-    header: "Name",
-    key: "name",
-    width: 20,
-    accessor: (user: User) =>
-      `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
-  },
-  {
-    header: "Writer Name",
-    key: "writer_name",
-    width: 20,
-  },
-  {
-    header: "Email",
-    key: "email",
-    width: 25,
-  },
-  {
-    header: "Role",
-    key: "role",
-    accessor: (user: User) =>
-      user.is_staff ? "Staff" : user.is_editor ? "Editor" : "Contributor",
-  },
-];
 
 const UserList = () => {
   const auth = useAuth();
