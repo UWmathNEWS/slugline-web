@@ -195,7 +195,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                 value: 150,
                 message: "USER.LAST_NAME.TOO_LONG.150",
               },
-              required: true,
             })}
           />
         </Col>
@@ -210,7 +209,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             type="email"
             name="email"
             ref={props.context.register({
-              required: "USER.REQUIRED.EMAIL",
+              required: "USER.REQUIRED.email",
               maxLength: {
                 value: 254,
                 message: "USER.EMAIL.TOO_LONG.254",
@@ -232,14 +231,16 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             errors={props.context.errors}
             type="text"
             name="writer_name"
-            ref={props.context.register}
+            ref={props.context.register({
+              required: "USER.REQUIRED.name",
+            })}
           />
         </Col>
       </Form.Group>
-      {auth.user?.is_editor && (
+      {auth.isEditor() && (
         <Form.Group as={Row} controlId="isEditor">
           <Form.Label column sm={2}>
-            Status
+            Role
           </Form.Label>
           <Col sm={10}>
             <Form.Control
@@ -254,6 +255,8 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
               value={
                 props.context.getValues().is_editor ? "editor" : "contributor"
               }
+              className="custom-select"
+              custom
             >
               <option value="contributor">Contributor</option>
               <option value="editor">Editor</option>
@@ -297,6 +300,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
         <Col sm={2}>
           <Button
             className="w-100"
+            variant="secondary"
             onClick={() => {
               props.context.setValue("password", nanoid());
               // set the password visible so you can see what you get
