@@ -1,7 +1,8 @@
 import React, { useEffect, useReducer, useRef } from "react";
-import { RouteProps, Route, Redirect, useHistory } from "react-router-dom";
+import { RouteProps, Route, useHistory } from "react-router-dom";
 import { Alert, Spinner } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
+import Error404 from "../shared/errors/Error404";
 
 interface PrivateRouteProps extends RouteProps {
   admin?: boolean;
@@ -95,7 +96,7 @@ const PrivateRouteWrapper: React.FC<{
         authCheckCompleted.current = false;
         return <div key="children">{props.children}</div>;
       } else {
-        return <Redirect to="/login/" />;
+        return <Error404 />;
       }
     } else {
       return <>
