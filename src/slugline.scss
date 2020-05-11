@@ -16,12 +16,13 @@
 // Convenient class for mathnews logo
 .mathnews-logo::before {
   content: "math";
-  font-family: Body Font;
+  font-family: $body-ff;
 }
 
 .mathnews-logo::after {
   content: "NEWS";
-  font-family: Headings Font;
+  font-family: $headings-ff;
+  font-weight: bold;
 }
 
 h1,
