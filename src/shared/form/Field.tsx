@@ -51,23 +51,23 @@ const Field = React.forwardRef<FormControlElement, FieldProps>(
             {...rest}
           />
           {append && <InputGroup.Append>{append}</InputGroup.Append>}
+          {!hideErrorMessage && (
+            <ErrorMessage name={rest.name || ""} errors={errors}>
+              {({ message }) =>
+                typeof message === "string" ? (
+                  <small className="invalid-feedback">
+                    {ERRORS[message] || message}
+                  </small>
+                ) : (
+                  message
+                )
+              }
+            </ErrorMessage>
+          )}
+          {validMessage && !errors[rest.name || ""] && (
+            <small className="valid-feedback">{validMessage}</small>
+          )}
         </InputGroup>
-        {!hideErrorMessage && (
-          <ErrorMessage name={rest.name || ""} errors={errors}>
-            {({ message }) =>
-              typeof message === "string" ? (
-                <small className="invalid-feedback">
-                  {ERRORS[message] || message}
-                </small>
-              ) : (
-                message
-              )
-            }
-          </ErrorMessage>
-        )}
-        {validMessage && !errors[rest.name || ""] && (
-          <small className="valid-feedback">{validMessage}</small>
-        )}
       </>
     );
   }
