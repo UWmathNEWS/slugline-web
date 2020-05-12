@@ -3,6 +3,7 @@ import { RouteProps, Route, useHistory } from "react-router-dom";
 import { Alert, Spinner } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
 import Error404 from "../shared/errors/Error404";
+import { APIError } from "../shared/types";
 
 interface PrivateRouteProps extends RouteProps {
   admin?: boolean;
@@ -82,8 +83,8 @@ const PrivateRouteWrapper: React.FC<{
     dispatch({ type: 'is loading' });
     auth.check()?.then(() => {
       dispatch({ type: 'done loading' });
-    }, e => {
-      dispatch({ type: 'error', data: e });
+    }, (e: APIError) => {
+      dispatch({ type: 'error', data: Object.values(e).flat() });
     });
     authCheckCompleted.current = true;
 

@@ -7,7 +7,7 @@ import { render, fireEvent, getByText } from "@testing-library/react";
 import App from "../App";
 import { createMemoryHistory } from "history";
 import { act } from "react-dom/test-utils";
-import { testUser } from "../shared/test-utils";
+import { USER_LOCALSTORAGE_KEY, testUser } from "../shared/test-utils";
 
 describe("Integration test for main app component", () => {
   afterEach(() => {
@@ -46,7 +46,7 @@ describe("Integration test for main app component", () => {
   });
 
   it("has correct header when logged in", () => {
-    localStorage.setItem("slugline-user", JSON.stringify(testUser));
+    localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
     const { container, getByText: _getByText } = render(<App />);
 
     expect(
@@ -63,7 +63,7 @@ describe("Integration test for main app component", () => {
   });
 
   it("does auth check on switching to protected routes", () => {
-    localStorage.setItem("slugline-user", JSON.stringify(testUser));
+    localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
     const { getByText } = render(<App />);
 
     act(() => {
@@ -76,10 +76,10 @@ describe("Integration test for main app component", () => {
     expect(mockAxios.get).toHaveBeenLastCalledWith("/api/me/");
   });
 
-  it("redirects to login on protected routes",  () => {
+  it("integrates private routes",  () => {
     const history = createMemoryHistory();
-    history.push("/dash/");
-    const { getByRole } = render(<App history={history} />);
+    history.push("/dash");
+    const { getByRole, getByText } = render(<App history={history} />);
     expect(getByRole('status')).toHaveTextContent("Loading...");
 
     expect(mockAxios.get).toHaveBeenLastCalledWith("/api/me/");
@@ -88,22 +88,6 @@ describe("Integration test for main app component", () => {
       mockAxios.mockResponse({ data: { success: true, data: null } }, checkInfo);
     });
 
-    expect(getByRole('heading')).toHaveTextContent(/login/i);
+    expect(getByText("404")).toBeInTheDocument();
   });
-
-  it("redirects to login when on admin-only routes for logged-in non-admin users", () => {
-    const history = createMemoryHistory();
-    history.push("/admin/");
-    const { getByRole } = render(<App history={history} />);
-    expect(getByRole('status')).toHaveTextContent("Loading...");
-
-    expect(mockAxios.get).toHaveBeenLastCalledWith("/api/me/");
-    const checkInfo = mockAxios.lastReqGet();
-    act(() => {
-      mockAxios.mockResponse({ data: { success: true, data: testUser } }, checkInfo);
-    });
-
-    expect(getByRole('heading')).toHaveTextContent(/login/i);
-  });
-
 });

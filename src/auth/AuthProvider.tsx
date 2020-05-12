@@ -33,7 +33,7 @@ type AuthAction =
   | { type: "login"; user: User }
   | { type: "logout" };
 
-const Auth = createContext<AuthContext>({
+export const Auth = createContext<AuthContext>({
   user: null,
   csrfToken: null,
   check: () => undefined,
