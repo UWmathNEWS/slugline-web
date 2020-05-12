@@ -53,17 +53,6 @@ describe("getApi", () => {
     expect(data).toBeNull();
   });
 
-  it("handles unsuccessful responses with a successful status code", async () => {
-    mockAxios.mockResponse({ data: { success: false, error: 400 } });
-
-    try {
-      await resp;
-      expect("Error was not thrown by getApi").toBe(false);
-    } catch (e) {
-      expect(e).toBe(400);
-    }
-  });
-
   it("handles unsuccessful responses with a specific error message", async () => {
     mockAxios.mockError({
       code: 500,
