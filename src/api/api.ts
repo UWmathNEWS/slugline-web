@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { APIError, APIResponse } from "../shared/types";
+import { APIError, APIResponse, APIResponseFailure } from "../shared/types";
 import ERRORS from "../shared/errors";
 
 export const API_ROOT = "/api/";
@@ -15,8 +15,9 @@ export const apiGet = <T extends any>(url: string): Promise<T | null> => {
       if (axiosResp.data.success) return axiosResp.data.data;
       else throw axiosResp.data.error;
     },
-    (err: AxiosError<APIError>) => {
-      throw err.response?.data ?? {
+    (err: AxiosError<APIResponseFailure<APIError>>) => {
+      throw err.response?.data.error ?? {
+        status_code: err.code,
         detail: [ERRORS.REQUEST.DID_NOT_SUCCEED],
       };
     }

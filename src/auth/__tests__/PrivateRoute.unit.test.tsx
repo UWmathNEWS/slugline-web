@@ -189,7 +189,10 @@ describe("Unit test for PrivateRoute", () => {
         code: 500,
         response: {
           data: {
-            detail: ["Error thrown in testing"]
+            success: false,
+            error: {
+              detail: ["Error thrown in testing"]
+            }
           }
         }
       });
