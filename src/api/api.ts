@@ -13,7 +13,7 @@ export const apiGet = <T extends any>(url: string): Promise<T | null> => {
   return axios.get<APIResponse<T>>(getApiUrl(url)).then(
     (axiosResp) => {
       if (axiosResp.data.success) return axiosResp.data.data;
-      else throw axiosResp.data.error;
+      else return Promise.reject(axiosResp.data.error);
     },
     (err: AxiosError<APIResponseFailure<APIError>>) => {
       throw err.response?.data.error ?? {
