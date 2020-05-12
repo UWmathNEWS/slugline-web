@@ -222,7 +222,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
               errors={props.context.errors}
               type="text"
               name="last_name"
-              placeholder="Last Name"
+              placeholder="Last Name (optional)"
               ref={props.context.register({
                 maxLength: {
                   value: 150,
