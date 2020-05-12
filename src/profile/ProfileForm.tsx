@@ -167,7 +167,7 @@ const ProfileForm: React.FC<{
               data: { username: value },
             });
             checkUsernameRef.current = window.setTimeout(() => {
-              apiGet(getApiUrl(`users/${value}/query`)).then(
+              apiGet(`users/${value}/query`).then(
                 () => {
                   dispatch({
                     type: "set error",

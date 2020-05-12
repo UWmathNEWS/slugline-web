@@ -108,7 +108,7 @@ export const AuthProvider: React.FC = (props) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
       const promise = (
-        apiGet<User | null>(getApiUrl("me/"))
+        apiGet<User | null>("me/")
       ).then((data: User | null) => {
         if (user.csrfToken === null) {
           if (data) {
