@@ -330,60 +330,64 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
           <Form.Label column sm={2}>
             New Password
           </Form.Label>
-          <Col sm={2}>
-            <Button
-              className="w-100"
-              variant="secondary"
-              onClick={() => {
-                props.context.setValue("password", nanoid());
-                // set the password visible so you can see what you get
-                setShowPassword(true);
-              }}
-            >
-              Generate
-            </Button>
-          </Col>
-          <Col sm={8}>
-            <Field
-              errors={props.context.errors}
-              type={showPassword ? "text" : "password"}
-              name="password"
-              ref={props.context.register({
-                minLength: {
-                  value: 8,
-                  message: "USER.PASSWORD.TOO_SHORT.8",
-                },
-                validate: (password?: string) => {
-                  // the pattern argument doesn't let us return an error if the value FAILS a regex,
-                  // so we'll do it ourselves
-                  if (password && /^\d*$/.test(password)) {
-                    return "USER.PASSWORD.ENTIRELY_NUMERIC";
-                  }
-                  if (props.context.getValues().cur_password && !password) {
-                    return "USER.PASSWORD.NEW_REQUIRED";
-                  }
-                },
-              })}
-              onChange={async () => {
-                await props.context.triggerValidation("password");
-              }}
-              append={
+          <Col sm={10}>
+            <Form.Row>
+              <Col sm="auto">
                 <Button
-                  variant={
-                    showPassword ? "outline-primary" : "outline-secondary"
-                  }
+                  className="w-100"
+                  variant="secondary"
                   onClick={() => {
-                    setShowPassword((show) => !show);
+                    props.context.setValue("password", nanoid());
+                    // set the password visible so you can see what you get
+                    setShowPassword(true);
                   }}
                 >
-                  {showPassword ? (
-                    <FontAwesomeIcon icon={faEyeSlash} />
-                  ) : (
-                    <FontAwesomeIcon icon={faEye} />
-                  )}
+                  Generate
                 </Button>
-              }
-            />
+              </Col>
+              <Col>
+                <Field
+                  errors={props.context.errors}
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  ref={props.context.register({
+                    minLength: {
+                      value: 8,
+                      message: "USER.PASSWORD.TOO_SHORT.8",
+                    },
+                    validate: (password?: string) => {
+                      // the pattern argument doesn't let us return an error if the value FAILS a regex,
+                      // so we'll do it ourselves
+                      if (password && /^\d*$/.test(password)) {
+                        return "USER.PASSWORD.ENTIRELY_NUMERIC";
+                      }
+                      if (props.context.getValues().cur_password && !password) {
+                        return "USER.PASSWORD.NEW_REQUIRED";
+                      }
+                    },
+                  })}
+                  onChange={async () => {
+                    await props.context.triggerValidation("password");
+                  }}
+                  append={
+                    <Button
+                      variant={
+                        showPassword ? "outline-primary" : "outline-secondary"
+                      }
+                      onClick={() => {
+                        setShowPassword((show) => !show);
+                      }}
+                    >
+                      {showPassword ? (
+                        <FontAwesomeIcon icon={faEyeSlash} />
+                      ) : (
+                        <FontAwesomeIcon icon={faEye} />
+                      )}
+                    </Button>
+                  }
+                />
+              </Col>
+            </Form.Row>
           </Col>
         </Form.Group>
         <NonFieldErrors errors={generalErrors || []} />
