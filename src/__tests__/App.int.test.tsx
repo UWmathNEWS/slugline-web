@@ -15,7 +15,7 @@ describe("Integration test for main app component", () => {
     localStorage.clear();
   });
 
-  it("renders without crashing", () => {
+  it("renders without crashing (sanity check)", () => {
     const div = document.createElement("div");
     ReactDOM.render(<App />, div);
   });
@@ -68,12 +68,17 @@ describe("Integration test for main app component", () => {
 
     act(() => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
+      fireEvent.click(getByText(/profile/i));
     });
-
-    fireEvent.click(getByText(/profile/i));
 
     expect(mockAxios.get).toHaveBeenCalledTimes(2);
     expect(mockAxios.get).toHaveBeenLastCalledWith("/api/me/");
+
+    act(() => {
+      mockAxios.mockResponse({ data: { success: true, data: testUser } });
+    });
+
+    expect(getByText(/your profile/i)).toBeInTheDocument();
   });
 
   it("integrates private routes",  () => {

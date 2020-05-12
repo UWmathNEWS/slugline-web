@@ -22,7 +22,7 @@ describe("Unit test for PrivateRoute", () => {
     localStorage.clear();
   });
 
-  it("does an auth check", () => {
+  it("does an auth check (sanity check)", () => {
     const check = jest.fn(() => mockAxios.get("/api/me/"));
     const { getByRole } = render(<Auth.Provider
       value={{
