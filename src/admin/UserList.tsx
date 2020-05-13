@@ -168,7 +168,7 @@ const UserList = () => {
                   }
                 }).then(
                   () => {
-                    executeAction("_refresh");
+                    executeAction("_refresh").then();
                     alert(`Successfully deleted user ${data.username}`);
                   },
                   (err: string[] | string) => {

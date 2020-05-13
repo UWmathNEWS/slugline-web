@@ -129,6 +129,7 @@ export interface RichTableBag<D extends object = {}> {
   setPage: (page: number) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  count: number;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
   makeRequest: <T>(method: Method, row?: D, config?: AxiosRequestConfig) => Promise<T>;
@@ -210,9 +211,11 @@ const useRichTable = <D extends object = {}>({
   }, [rawData]);
 
   const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 0 : 0;
+
   const totalCount = paginated
     ? (rawData as Pagination<D>)?.count || 0
     : data.length;
+  const count = page < numPages || page === 1 ? data.length : (totalCount - data.length) / (numPages - 1);
 
   const selectAllRef = useRef<HTMLInputElement & FormCheck>(null);
   const [selected, setSelected] = useState<boolean[]>([]);
@@ -570,6 +573,7 @@ const useRichTable = <D extends object = {}>({
     page,
     numPages,
     setPage,
+    count,
     totalCount,
     searchQuery,
     setSearchQuery,
@@ -592,6 +596,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     selected,
     page,
     numPages,
+    count,
     totalCount,
     setSearchQuery,
     executeAction,
@@ -616,8 +621,8 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
           />
         </Button>
         <span className="RichTable_paginationText">
-                {page} / {numPages}
-              </span>
+          {page} / {numPages}
+        </span>
         <Button variant="link" disabled={page >= numPages}>
           <FontAwesomeIcon
             icon="chevron-right"
@@ -642,10 +647,10 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
               placeholder="Search..."
               size="sm"
               className="RichTable_searchBox"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                 const value = e.currentTarget.value;
                 if (value) {
-                  setSearchDebounced(value);
+                  await setSearchDebounced(value);
                 } else {
                   setSearch("");
                 }
@@ -698,7 +703,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
       </Table>
       <Row className="RichTable_footer">
         <Col lg={3} className="d-none d-lg-flex RichTable_summary">
-          Total count: {totalCount}
+          {totalCount && (page - 1) * count + 1}&ndash;{page < numPages ? page * count : totalCount} of {totalCount}
         </Col>
         {config.paginated && <Pagination />}
       </Row>
