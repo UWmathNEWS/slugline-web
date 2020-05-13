@@ -10,7 +10,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
-import { cleanFormData } from "../shared/form/util";
+import { cleanFormData, setServerErrors } from "../shared/form/util";
 import { useDebouncedCallback } from "../shared/hooks";
 import NonFieldErrors from "../shared/form/NonFieldErrors";
 
@@ -147,25 +147,12 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
         await props.onSubmitSuccessful(vals);
       }
     } catch (err) {
-      const apiErrors = err as UserAPIError;
-      props.context.setError(
-        apiErrors.cur_password?.map((error) => ({
-          name: "cur_password",
-          type: "server_error",
-          message: error,
-        })) || []
-      );
-      props.context.setError(
-        apiErrors.password?.map((error) => ({
-          name: "password",
-          type: "server_error",
-          message: error,
-        })) || []
-      );
+      const apiError = err as UserAPIError;
+      setServerErrors(props.context, apiError);
       setSuccessMessage(undefined);
-      setGeneralErrors(apiErrors.detail);
+      setGeneralErrors(apiError.detail);
       if (props.onSubmitFailed) {
-        await props.onSubmitFailed(vals, apiErrors);
+        await props.onSubmitFailed(vals, apiError);
       }
     }
   };
