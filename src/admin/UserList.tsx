@@ -94,6 +94,7 @@ const UserEditModal: React.FC<UserEditModalProps> = (
         </Button>
         <Button
           type="submit"
+          className="ml-auto"
           disabled={formState.isSubmitting || !formState.isValid}
           form="editUserForm"
         >
