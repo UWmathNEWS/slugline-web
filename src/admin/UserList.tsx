@@ -156,7 +156,7 @@ const UserList = () => {
           {
             name: "Delete",
             bulk: false,
-            call({ makeRequest, executeAction }, data: User) {
+            call({ makeRequest, executeAction, rows, page, numPages }, data: User) {
               if (
                 window.confirm(
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
@@ -168,7 +168,11 @@ const UserList = () => {
                   }
                 }).then(
                   () => {
-                    executeAction("_refresh").then();
+                    if (page < numPages || page === 1) {
+                      executeAction("_refresh").then();
+                    } else if (rows.length === 1) {
+                      executeAction("_previous").then();
+                    }
                     alert(`Successfully deleted user ${data.username}`);
                   },
                   (err: string[] | string) => {
