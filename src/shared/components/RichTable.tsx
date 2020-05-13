@@ -257,8 +257,12 @@ const useRichTable = <D extends object = {}>({
     [actions]
   );
 
-  const internalExecuteAction = useCallback(
-    (name: string, rows: D[]) => {
+  const internalExecuteAction = useRef<(name: string, rows: D[]) => Promise<any>>(
+    () => Promise.resolve()
+  );
+
+  useEffect(() => {
+    internalExecuteAction.current = (name: string, rows: D[]) => {
       const action = memoizedActions[name];
 
       if ("bulk" in action) {
@@ -276,11 +280,8 @@ const useRichTable = <D extends object = {}>({
       } else {
         return action.call(bag);
       }
-    },
-    // We can ignore the warning about bag being a missing dependency -- although this technically depends on
-    // it, both depend on data and so will refresh appropriately.
-    [data, memoizedActions]
-  );
+    };
+  });
 
   const executeAction = useCallback(
     (name: string) => {
@@ -289,14 +290,14 @@ const useRichTable = <D extends object = {}>({
       }
 
       if ("bulk" in memoizedActions[name] && filteredSelected.length) {
-        return internalExecuteAction(name, filteredSelected);
+        return internalExecuteAction.current(name, filteredSelected);
       } else if (!("bulk" in memoizedActions[name])) {
-        return internalExecuteAction(name, []);
+        return internalExecuteAction.current(name, []);
       }
 
       return Promise.resolve();
     },
-    [filteredSelected, memoizedActions, internalExecuteAction]
+    [filteredSelected, memoizedActions]
   );
 
   const header = useMemo<RichTableRow<{}>>(() => {
@@ -473,7 +474,7 @@ const useRichTable = <D extends object = {}>({
               ?.classList.contains("RichTable_selectCheckbox")
           ) {
             clickActions.forEach(action => {
-              internalExecuteAction(action.name, [row]);
+              internalExecuteAction.current(action.name, [row]);
             });
           }
         };
@@ -527,7 +528,6 @@ const useRichTable = <D extends object = {}>({
     selected,
     selectable,
     clickActions,
-    internalExecuteAction
   ]);
 
   const makeRequest = <T extends any>(method: Method, row?: D, requestData?: any) => {
