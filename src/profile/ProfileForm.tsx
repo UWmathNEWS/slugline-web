@@ -77,7 +77,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   // So, we have to manually replicate the defaultValues behaviour by resetting the form values ourselves
   // whenever user changes
   useEffect(() => {
-    console.log("RESET");
     reset({
       username: props.user?.username,
       first_name: props.user?.first_name,
