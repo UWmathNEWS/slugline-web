@@ -247,7 +247,6 @@ describe("useApiPost", () => {
     });
 
     beforeEach(() => {
-      console.log("------------------");
       result = renderHook(() => h.useApiPost("test"), { wrapper: AuthProvider }).result;
       const [post] = result.current;
 

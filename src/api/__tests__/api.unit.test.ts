@@ -2,6 +2,7 @@ import "core-js";
 import mockAxios from "jest-mock-axios";
 import { API_ROOT, getApiUrl, apiGet } from "../api";
 import ERRORS from "../../shared/errors";
+import { makeTestError } from "../../shared/test-utils";
 
 describe("getApiUrl", () => {
   it("returns root endpoint on empty string", () => {
@@ -54,37 +55,18 @@ describe("getApi", () => {
   });
 
   it("handles unsuccessful responses with a specific error message", async () => {
-    mockAxios.mockError({
-      code: 500,
-      response: {
-        data: {
-          success: false,
-          error: {
-            status_code: 500,
-            detail: ["Error thrown in testing"]
-          }
-        }
-      }
-    });
+    mockAxios.mockError(makeTestError(500, "Error thrown in testing"));
 
     try {
       await resp;
       expect("Error was not thrown by getApi").toBe(false);
     } catch (e) {
-      expect(e).toEqual({
-        status_code: 500,
-        detail: ["Error thrown in testing"]
-      });
+      expect(e).toEqual("Error thrown in testing");
     }
   });
 
   it("handles unsuccessful responses without a specific error message", async () => {
-    mockAxios.mockError({
-      code: 500,
-      response: {
-        data: "SERVER-SIDE ERROR"
-      }
-    });
+    mockAxios.mockError(makeTestError(500, null));
 
     try {
       await resp;
