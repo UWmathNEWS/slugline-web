@@ -367,3 +367,148 @@ describe("useApiPost", () => {
     });
   });
 });
+
+describe("useApiPatch", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
+  it("returns a callback and does not immediately call axios.patch (sanity check)", () => {
+    const { result } = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider });
+
+    const [patch, state] = result.current;
+
+    expect(typeof patch).toBe("function");
+    expect(patch.length).toBe(1);
+    expect(state).toBe(RequestState.NotStarted);
+    expect(mockAxios.patch).not.toHaveBeenCalled();
+  });
+
+  describe("calling the returned callback", () => {
+    let result: any;
+    let dataPromise: any;
+
+    beforeAll(() => {
+      window.document.cookie = `${CSRF_COOKIE}=csrf`;
+    });
+
+    beforeEach(() => {
+      result = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider }).result;
+      const [patch] = result.current;
+
+      act(() => {
+        mockAxios.mockResponse({
+          data: { success: true, data: testUser }
+        });
+      });
+
+      act(() => {
+        dataPromise = patch("test patch");
+      });
+    });
+
+    afterEach(() => {
+      mockAxios.reset();
+      localStorage.clear();
+    });
+
+    afterAll(() => {
+      delete window.document.cookie;
+    });
+
+    it("calls axios.patch", () => {
+      expect(mockAxios.patch).toHaveBeenCalled();
+
+      const patchReq = mockAxios.lastReqGet();
+
+      expect(patchReq.url).toBe("test");
+      expect(patchReq.data).toBe("test patch");
+    });
+
+    it("sends a CSRF token along with the request", () => {
+      expect(mockAxios.lastReqGet().config.headers).toEqual({
+        "X-CSRFToken": "csrf"
+      });
+    });
+
+    it("returns correct state and response data", async () => {
+      const data = { success: "true", data: "data" };
+      let [, state] = result.current;
+
+      expect(state).toBe(RequestState.Started);
+
+      act(() => {
+        mockAxios.mockResponse({ data });
+      });
+
+      await act(async () => {
+        const respData = await dataPromise;
+        [, state] = result.current;
+
+        expect(state).toBe(RequestState.Complete);
+        expect(respData).toBe(data);
+      });
+    });
+  });
+
+  it("returns an error on an unsuccessful response", async () => {
+    const { result } = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider });
+    act(() => {
+      mockAxios.mockResponse({
+        data: { success: true, data: testUser }
+      });
+    });
+
+    const [patch] = result.current;
+    let dataPromise: any;
+
+    act(() => {
+      dataPromise = patch("test data");
+    });
+
+    act(() => {
+      mockAxios.mockError(makeTestError(500, "Error thrown in testing"));
+    });
+
+    await act(async () => {
+      try {
+        await dataPromise;
+        expect("Error was not thrown by useApiPatch").toBe(false);
+      } catch (e) {
+        expect(e).toBe("Error thrown in testing");
+      }
+    });
+  });
+
+  it("returns a generic error message on an unsuccessful response without a specific error message", async () => {
+    const { result } = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider });
+    act(() => {
+      mockAxios.mockResponse({
+        data: { success: true, data: testUser }
+      });
+    });
+
+    const [patch] = result.current;
+    let dataPromise: any;
+
+    act(() => {
+      dataPromise = patch("test data");
+    });
+
+    act(() => {
+      mockAxios.mockError(makeTestError(500, null));
+    });
+
+    await act(async () => {
+      try {
+        await dataPromise;
+        expect("Error was not thrown by useApiPatch").toBe(false);
+      } catch (e) {
+        expect(e).toEqual({
+          status_code: 500,
+          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
+        });
+      }
+    });
+  });
+});
