@@ -326,7 +326,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                   className="w-100"
                   variant="secondary"
                   onClick={() => {
-                    props.context.setValue("password", nanoid());
+                    props.context.setValue("password", nanoid(), true);
                     // set the password visible so you can see what you get
                     setShowPassword(true);
                   }}
