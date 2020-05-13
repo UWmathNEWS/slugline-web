@@ -77,6 +77,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   // So, we have to manually replicate the defaultValues behaviour by resetting the form values ourselves
   // whenever user changes
   useEffect(() => {
+    console.log("RESET");
     reset({
       username: props.user?.username,
       first_name: props.user?.first_name,
@@ -93,6 +94,11 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
       name: "is_editor",
     });
   }, [register]);
+
+  // we need a new password if we're creating a new user
+  const newPasswordRequired = props.user === undefined;
+  const passwordConfirmRequired =
+    newPasswordRequired || props.context.getValues().password;
 
   const [validateUserNameDebounced] = useDebouncedCallback(
     validateUsernameAvailable,
@@ -297,35 +303,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             </Col>
           </Form.Group>
         )}
-        {(props.user !== undefined && !auth.user?.is_editor) ||
-          (props.user?.username === auth.user?.username && (
-            <>
-              <h3>Change Password</h3>
-              <Form.Group as={Row} controlId="curPassword">
-                <Form.Label column sm={2}>
-                  Current Password
-                </Form.Label>
-                <Col sm={10}>
-                  <Field
-                    errors={props.context.errors}
-                    type="password"
-                    name="cur_password"
-                    ref={props.context.register({
-                      validate: (password: string) => {
-                        if (
-                          props.user !== undefined &&
-                          props.context.getValues().password &&
-                          !props.context.getValues().cur_password
-                        ) {
-                          return "USER.PASSWORD.CURRENT_REQUIRED";
-                        }
-                      },
-                    })}
-                  />
-                </Col>
-              </Form.Group>
-            </>
-          ))}
         <Form.Group as={Form.Row} controlId="password">
           <Form.Label column sm={2}>
             New Password
@@ -355,14 +332,14 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                       value: 8,
                       message: "USER.PASSWORD.TOO_SHORT.8",
                     },
+                    required: newPasswordRequired
+                      ? "USER.PASSWORD.NEW_REQUIRED"
+                      : undefined,
                     validate: (password?: string) => {
                       // the pattern argument doesn't let us return an error if the value FAILS a regex,
                       // so we'll do it ourselves
                       if (password && /^\d*$/.test(password)) {
                         return "USER.PASSWORD.ENTIRELY_NUMERIC";
-                      }
-                      if (props.context.getValues().cur_password && !password) {
-                        return "USER.PASSWORD.NEW_REQUIRED";
                       }
                     },
                   })}
@@ -390,6 +367,24 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             </Form.Row>
           </Col>
         </Form.Group>
+        {passwordConfirmRequired && (
+          <>
+            <hr />
+            <Form.Group>
+              <Form.Label>Confirm with your password to save:</Form.Label>
+              <Field
+                errors={props.context.errors}
+                type="password"
+                name="cur_password"
+                ref={props.context.register({
+                  required: passwordConfirmRequired
+                    ? "USER.PASSWORD.CURRENT_REQUIRED"
+                    : undefined,
+                })}
+              />
+            </Form.Group>
+          </>
+        )}
         <NonFieldErrors errors={generalErrors || []} />
         {!props.hideSubmit && (
           <Button

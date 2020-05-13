@@ -56,8 +56,7 @@ const errors = {
     },
     PASSWORD: {
       CURRENT_INCORRECT: "Current password incorrect.",
-      CURRENT_REQUIRED:
-        "Please enter your old password to change your password.",
+      CURRENT_REQUIRED: "Please enter your password to confirm.",
       NEW_REQUIRED: "Please enter a new password",
       TOO_SHORT: errorFactory(
         (len) => `Password must be at least ${len} characters long.`
