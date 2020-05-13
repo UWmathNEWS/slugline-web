@@ -1,3 +1,4 @@
+import "mutationobserver-shim"
 import "@testing-library/jest-dom/extend-expect";
 
 // https://stackoverflow.com/a/32911774
