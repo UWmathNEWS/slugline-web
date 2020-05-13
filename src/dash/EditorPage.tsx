@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import SluglineEditor from "../editor/SluglineEditor";
 import { useParams } from "react-router-dom";
 import {
@@ -58,7 +58,7 @@ const EditorPage: React.FC = () => {
     [updateArticle, setLastSaved]
   );
 
-  const [saveArticleDebounced,] = useDebouncedCallback(
+  const [saveArticleDebounced] = useDebouncedCallback(
     saveArticle,
     ARTICLE_SAVE_DELAY_MSECS
   );
@@ -78,7 +78,7 @@ const EditorPage: React.FC = () => {
     [updateArticleContent, setLastSaved]
   );
 
-  const [saveArticleContentDebounced,] = useDebouncedCallback(
+  const [saveArticleContentDebounced] = useDebouncedCallback(
     saveArticleContent,
     ARTICLE_SAVE_DELAY_MSECS
   );

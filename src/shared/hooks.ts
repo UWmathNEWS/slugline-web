@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback } from "react";
 
 // taken from https://stackoverflow.com/questions/56283920/how-to-debounce-a-callback-in-functional-component-using-hooks
 // with minor modifications
-export const useDebouncedCallback = <A extends any[]>(
-  callback: (...args: A) => void | Promise<void>,
+export const useDebouncedCallback = <A extends any[], R>(
+  callback: (...args: A) => R | Promise<R>,
   wait: number
 ) => {
   // track args & timeout handle between calls
@@ -22,18 +22,20 @@ export const useDebouncedCallback = <A extends any[]>(
 
   const callbackWithDebounce = useCallback(
     (...args: A) => {
-      // capture latest args
-      argsRef.current = args;
+      return new Promise<R>((resolve) => {
+        // capture latest args
+        argsRef.current = args;
 
-      // clear debounce timer
-      cleanup();
+        // clear debounce timer
+        cleanup();
 
-      // start waiting again
-      timeout.current = setTimeout(() => {
-        if (argsRef.current) {
-          callback(...argsRef.current);
-        }
-      }, wait);
+        // start waiting again
+        timeout.current = setTimeout(() => {
+          if (argsRef.current) {
+            resolve(callback(...argsRef.current));
+          }
+        }, wait);
+      });
     },
     [callback, wait]
   );
@@ -42,7 +44,7 @@ export const useDebouncedCallback = <A extends any[]>(
     (...args: A) => {
       cleanup();
 
-      callback(...args);
+      return callback(...args);
     },
     [callback]
   );
