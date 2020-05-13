@@ -10,7 +10,7 @@ export const getApiUrl = (url: string) => {
 };
 
 export const apiGet = <T extends any>(url: string): Promise<T | null> => {
-  return axios.get<APIResponse<T>>(getApiUrl(url)).then(
+  return axios.get<APIResponse<T>>(url).then(
     (axiosResp) => {
       if (axiosResp.data.success) return axiosResp.data.data;
       else return Promise.reject(axiosResp.data.error);

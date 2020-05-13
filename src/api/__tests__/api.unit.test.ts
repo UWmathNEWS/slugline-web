@@ -37,7 +37,7 @@ describe("getApi", () => {
   });
 
   it("handles responses (sanity check)", () => {
-    expect(mockAxios.get).toHaveBeenCalledWith(getApiUrl("test/"));
+    expect(mockAxios.get).toHaveBeenCalledWith("test/");
   });
 
   it("handles successful responses", async () => {
