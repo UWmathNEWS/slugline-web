@@ -1,25 +1,12 @@
 import "./RichTable.scss";
 
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useRef,
-  useCallback
-} from "react";
-import {
-  FormControl,
-  FormCheck,
-  Table,
-  Row,
-  Col,
-  Button, Spinner
-} from "react-bootstrap";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button, Col, FormCheck, FormControl, Row, Spinner, Table } from "react-bootstrap";
 import nanoid from "nanoid";
 import axios, { AxiosResponse, Method } from "axios";
 
 import { useApiGet } from "../../api/hooks";
-import { APIError, APIResponse, Pagination } from "../types";
+import { APIError, APIResponse, Pagination, RequestState } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useToast } from "../contexts/ToastContext";
 import { useDebouncedCallback } from "../hooks";
@@ -160,6 +147,7 @@ const useRichTable = <D extends object = {}>({
   selectable
 }: RichTableHook<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
+  const [requestState, setRequestState] = useState<RequestState>(RequestState.NotStarted);
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
   const [searchQuery, _setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -204,6 +192,11 @@ const useRichTable = <D extends object = {}>({
     // refreshing without changing other state.
     [url, paginated, sortColumn, searchQuery, page, cuckooLoad]
   );
+
+  useEffect(() => {
+    setRequestState(RequestState.Started);
+  }, [dataUrl]);
+
   const [rawData, error] = useApiGet<Pagination<D> | D[]>(dataUrl);
   const data = useMemo<D[]>(
     () =>
@@ -211,6 +204,10 @@ const useRichTable = <D extends object = {}>({
       [],
     [paginated, rawData]
   );
+
+  useEffect(() => {
+    setRequestState(RequestState.Complete);
+  }, [rawData]);
 
   const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 0 : 0;
   const totalCount = paginated
@@ -394,7 +391,8 @@ const useRichTable = <D extends object = {}>({
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
-    if (rawData === undefined) {
+    // TODO: Use a linear loader on the same number of rows as the previous state to reduce layout thrashing
+    if (requestState !== RequestState.Complete) {
       return [
         {
           useRowProps() {
@@ -524,7 +522,7 @@ const useRichTable = <D extends object = {}>({
     });
   }, [
     columns,
-    rawData,
+    requestState,
     data,
     selected,
     selectable,
