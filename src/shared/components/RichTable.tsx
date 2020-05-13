@@ -248,12 +248,26 @@ const useRichTable = <D extends object = {}>({
           return Promise.resolve();
         }
       },
+      _previous: {
+        name: "_previous",
+        call() {
+          setPage(page => page > 1 ? page - 1 : 1);
+          return Promise.resolve();
+        }
+      },
+      _next: {
+        name: "_next",
+        call() {
+          setPage(page => page < numPages ? page + 1 : numPages);
+          return Promise.resolve();
+        }
+      },
       ...actions.reduce(
         (acc, action) => ({ ...acc, [action.name]: action }),
         {}
       )
     }),
-    [actions]
+    [actions, numPages]
   );
 
   const internalExecuteAction = useRef<(name: string, rows: D[]) => Promise<any>>(
@@ -577,7 +591,6 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     rows,
     selected,
     page,
-    setPage,
     numPages,
     totalCount,
     setSearchQuery,
@@ -597,10 +610,8 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
           <FontAwesomeIcon
             icon="chevron-left"
             className="RichTable_paginationIcon"
-            onClick={() => {
-              if (page > 1) {
-                setPage(page - 1);
-              }
+            onClick={async () => {
+              await executeAction("_previous");
             }}
           />
         </Button>
@@ -611,16 +622,14 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
           <FontAwesomeIcon
             icon="chevron-right"
             className="RichTable_paginationIcon"
-            onClick={() => {
-              if (page < numPages) {
-                setPage(page + 1);
-              }
+            onClick={async () => {
+              await executeAction("_next");
             }}
           />
         </Button>
       </Col>
     ),
-    [page, setPage, numPages]
+    [page, numPages, executeAction]
   );
 
   return (
