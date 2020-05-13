@@ -20,3 +20,13 @@ export const testAdmin = {
   is_editor: true,
   writer_name: "ytsest ecaftsetcm"
 };
+
+export const makeTestError = (code: number, error: any) => ({
+  code,
+  response: {
+    data: {
+      success: false,
+      error
+    }
+  }
+});
