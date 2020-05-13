@@ -162,9 +162,13 @@ const UserList = () => {
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
                 )
               ) {
-                return auth.delete(`users/${data.username}/`).then(
+                return makeRequest<User>("delete", data, {
+                  headers: {
+                    "X-CSRFToken": auth.csrfToken
+                  }
+                }).then(
                   () => {
-                    executeAction("refresh");
+                    executeAction("_refresh");
                     alert(`Successfully deleted user ${data.username}`);
                   },
                   (err: string[] | string) => {
@@ -190,7 +194,7 @@ const UserList = () => {
         show={showEditModal}
         setShow={setShowEditModal}
         refreshTable={() => {
-          tableBagRef.current?.executeAction("refresh");
+          tableBagRef.current?.executeAction("_refresh");
         }}
       />
     </div>

@@ -3,7 +3,7 @@ import "./RichTable.scss";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Col, FormCheck, FormControl, Row, Spinner, Table } from "react-bootstrap";
 import nanoid from "nanoid";
-import axios, { AxiosResponse, Method } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
 import { useApiGet } from "../../api/hooks";
 import { APIError, APIResponse, Pagination, RequestState } from "../types";
@@ -131,7 +131,7 @@ export interface RichTableBag<D extends object = {}> {
   setSearchQuery: (query: string) => void;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
-  makeRequest: <T>(method: Method, row?: D, data?: any) => Promise<T>;
+  makeRequest: <T>(method: Method, row?: D, config?: AxiosRequestConfig) => Promise<T>;
 }
 
 /**
@@ -241,9 +241,8 @@ const useRichTable = <D extends object = {}>({
 
   const memoizedActions = useMemo<{ [key: string]: Action<D> }>(
     () => ({
-      refresh: {
-        name: "refresh",
-        displayName: "Refresh",
+      _refresh: {
+        name: "_refresh",
         call() {
           setCuckoo(cuckoo => !cuckoo);
           return Promise.resolve();
@@ -530,7 +529,7 @@ const useRichTable = <D extends object = {}>({
     clickActions,
   ]);
 
-  const makeRequest = <T extends any>(method: Method, row?: D, requestData?: any) => {
+  const makeRequest = <T extends any>(method: Method, row?: D, config?: AxiosRequestConfig) => {
     let requestUrl = url;
     if (row !== null && row !== undefined) {
       requestUrl = `${url}${row[pk]}/`;
@@ -538,7 +537,7 @@ const useRichTable = <D extends object = {}>({
 
     return axios(requestUrl, {
       method,
-      data: requestData
+      ...config
     })
       .then(({ data }: AxiosResponse<APIResponse<T>>) => {
         if (data.success) {
