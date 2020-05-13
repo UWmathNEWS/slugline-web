@@ -26,10 +26,37 @@ export interface ProfileFormVals {
 }
 
 export const useProfileForm = (user?: User) => {
-  return useForm<ProfileFormVals>({
+  const context = useForm<ProfileFormVals>({
     mode: "onBlur",
     reValidateMode: "onBlur",
+    defaultValues: {
+      username: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      is_editor: false,
+      writer_name: "",
+      cur_password: "",
+      password: "",
+    },
   });
+
+  const { reset } = context;
+
+  useEffect(() => {
+    reset({
+      username: user?.username,
+      first_name: user?.first_name,
+      last_name: user?.last_name,
+      email: user?.email,
+      is_editor: user?.is_editor || false,
+      writer_name: user?.writer_name,
+      cur_password: "",
+      password: "",
+    });
+  }, [user, reset]);
+
+  return context;
 };
 
 const validateUsernameAvailable = async (
@@ -64,7 +91,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
 ) => {
   const auth = useAuth();
 
-  const { reset, register } = props.context;
+  const { register } = props.context;
 
   const [successMessage, setSuccessMessage] = useState<string | undefined>(
     undefined
@@ -72,20 +99,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   const [generalErrors, setGeneralErrors] = useState<string[] | undefined>(
     undefined
   );
-
-  // react-hook-form caches default values when the first time you call useForm.
-  // So, we have to manually replicate the defaultValues behaviour by resetting the form values ourselves
-  // whenever user changes
-  useEffect(() => {
-    reset({
-      username: props.user?.username,
-      first_name: props.user?.first_name,
-      last_name: props.user?.last_name,
-      email: props.user?.email,
-      is_editor: props.user?.is_editor || false,
-      writer_name: props.user?.writer_name,
-    });
-  }, [props.user, reset]);
 
   // manually register the is_editor field since we handle it with a select
   useEffect(() => {
