@@ -393,6 +393,9 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                     ? "USER.PASSWORD.CURRENT_REQUIRED"
                     : undefined,
                 })}
+                onChange={() => {
+                  props.context.triggerValidation("cur_password");
+                }}
               />
             </Form.Group>
           </>
