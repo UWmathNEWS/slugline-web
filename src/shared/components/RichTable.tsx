@@ -593,6 +593,39 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     config.bagRef(bag);
   }
 
+  const Pagination = useMemo(() =>
+    () => (
+      <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
+        <Button variant="link" disabled={page <= 1}>
+          <FontAwesomeIcon
+            icon="chevron-left"
+            className="RichTable_paginationIcon"
+            onClick={() => {
+              if (page > 1) {
+                setPage(page - 1);
+              }
+            }}
+          />
+        </Button>
+        <span className="RichTable_paginationText">
+                {page} / {numPages}
+              </span>
+        <Button variant="link" disabled={page >= numPages}>
+          <FontAwesomeIcon
+            icon="chevron-right"
+            className="RichTable_paginationIcon"
+            onClick={() => {
+              if (page < numPages) {
+                setPage(page + 1);
+              }
+            }}
+          />
+        </Button>
+      </Col>
+    ),
+    [page, setPage, numPages]
+  );
+
   return (
     <div className={`RichTable ${config.className ?? ""}`}>
       <Row className="RichTable_header">
@@ -637,35 +670,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
             )}
           </Col>
         }
-        {config.paginated && (
-          <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-left"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page > 1) {
-                    setPage(page - 1);
-                  }
-                }}
-              />
-            </Button>
-            <span className="RichTable_paginationText">
-              {page} / {numPages}
-            </span>
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-right"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page < numPages) {
-                    setPage(page + 1);
-                  }
-                }}
-              />
-            </Button>
-          </Col>
-        )}
+        {config.paginated && <Pagination />}
       </Row>
       <Table striped hover className="RichTable_table" ref={config.ref}>
         <thead>
@@ -689,35 +694,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
         <Col lg={3} className="d-none d-lg-flex RichTable_summary">
           Total count: {totalCount}
         </Col>
-        {config.paginated && (
-          <Col lg={3} className="ml-lg-auto text-sm-center text-lg-right">
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-left"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page > 1) {
-                    setPage(page - 1);
-                  }
-                }}
-              />
-            </Button>
-            <span className="RichTable_paginationText">
-              {page} / {numPages}
-            </span>
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-right"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page < numPages) {
-                    setPage(page + 1);
-                  }
-                }}
-              />
-            </Button>
-          </Col>
-        )}
+        {config.paginated && <Pagination />}
       </Row>
     </div>
   );
