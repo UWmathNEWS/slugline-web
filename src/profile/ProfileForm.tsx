@@ -109,8 +109,11 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
 
   // we need a new password if we're creating a new user
   const newPasswordRequired = props.user === undefined;
+  // require confirm if we're creating a new editor or changing password/role
   const passwordConfirmRequired =
-    newPasswordRequired || props.context.getValues().password;
+    (newPasswordRequired && props.context.getValues().is_editor) ||
+    props.context.getValues().password ||
+    props.context.getValues().is_editor !== props.user?.is_editor;
 
   const [validateUserNameDebounced] = useDebouncedCallback(
     validateUsernameAvailable,
