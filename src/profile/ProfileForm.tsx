@@ -182,6 +182,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
           {successMessage}
         </Alert>
       )}
+      <NonFieldErrors errors={generalErrors || []} />
       <Form id={props.formId} onSubmit={props.context.handleSubmit(submit)}>
         <Form.Group as={Row} controlId="username">
           <Form.Label column sm={2}>
@@ -404,7 +405,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             </Form.Group>
           </>
         )}
-        <NonFieldErrors errors={generalErrors || []} />
         {!props.hideSubmit && (
           <Button
             type="submit"
