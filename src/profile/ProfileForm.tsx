@@ -142,6 +142,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
         setSuccessMessage(`User ${vals.username} saved successfully.`);
       }
       setGeneralErrors(undefined);
+      setShowPassword(false);
       if (props.onSubmitSuccessful) {
         await props.onSubmitSuccessful(vals);
       }
