@@ -76,7 +76,10 @@ export const useApiPost = <S, T, U extends APIError = APIError>(
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
 
   // We need to use a ref to store the CSRF token; useCallback does not refresh when auth changes.
-  csrfToken.current = auth.csrfToken;
+  // TODO in AuthProvider's integration test: Test that the ref updates when the token changes in a session
+  useEffect(() => {
+    csrfToken.current = auth.csrfToken;
+  }, [auth.csrfToken]);
 
   const post = useCallback(
     async (body: S): Promise<APIResponse<T, U>> => {
@@ -113,7 +116,9 @@ export const useApiPatch = <S, T, U extends APIError = APIError>(
 
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
 
-  csrfToken.current = auth.csrfToken;
+  useEffect(() => {
+    csrfToken.current = auth.csrfToken;
+  }, [auth.csrfToken]);
 
   const patch = useCallback(
     async (body: S): Promise<APIResponse<T, U>> => {
