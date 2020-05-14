@@ -1,5 +1,5 @@
-import React, { useState, FormEvent, useRef } from "react";
-import { useIssueList, useCreateIssue, useLatestIssue } from "../../api/hooks";
+import React, { useState, useRef } from "react";
+import { useCreateIssue, useLatestIssue } from "../../api/hooks";
 import { Button, Modal, Form, Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { useForm, DeepPartial } from "react-hook-form";
@@ -49,23 +49,27 @@ const columns: Column<Issue>[] = [
     header: "Issue",
     key: "id",
     render(_: any, issue) {
-      return <Link to={`/dash/issues/${issue.id}`}>{`v${issue.volume_num}i${issue.issue_code}`}</Link>;
-    }
+      return (
+        <Link
+          to={`/dash/issues/${issue.id}`}
+        >{`v${issue.volume_num}i${issue.issue_code}`}</Link>
+      );
+    },
   },
   {
     header: "Published",
     key: "publish_date",
     render(cell) {
-      return cell ? "Y" : "N"
-    }
+      return cell ? "Y" : "N";
+    },
   },
   {
     header: "PDF",
     key: "pdf",
     render(cell) {
       return cell || "N/A";
-    }
-  }
+    },
+  },
 ];
 
 const IssueCreateModal: React.FC<IssueCreateModalProps> = (

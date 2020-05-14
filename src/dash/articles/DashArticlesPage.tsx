@@ -1,5 +1,5 @@
 import React from "react";
-import { useUserArticles, useCreateArticle } from "../../api/hooks";
+import { useCreateArticle } from "../../api/hooks";
 import { Button } from "react-bootstrap";
 
 import "./DashArticlesPage.scss";
@@ -30,26 +30,26 @@ const columns: Column<Article>[] = [
     key: "title",
     render(_: any, article) {
       return <ArticleTitle article={article} />;
-    }
+    },
   },
   {
     header: "Author",
-    key: "author"
+    key: "author",
   },
   {
     header: "Issue",
-    key: "issue"
+    key: "issue",
   },
   {
     header: "Status",
     key: "status",
-    accessor: () => "NOT IMPLEMENTED YET"
+    accessor: () => "NOT IMPLEMENTED YET",
   },
   {
     header: "Last Modified",
     key: "date_modified",
-    accessor: () => "NOT IMPLEMENTED YET"
-  }
+    accessor: () => "NOT IMPLEMENTED YET",
+  },
 ];
 
 const DashArticlesPage: React.FC = () => {
@@ -67,11 +67,7 @@ const DashArticlesPage: React.FC = () => {
   return (
     <>
       <h1>Articles</h1>
-      <Button
-        onClick={createNewArticle}
-      >
-        New Article
-      </Button>
+      <Button onClick={createNewArticle}>New Article</Button>
       <RichTable<Article>
         columns={columns}
         url={getApiUrl("user_articles/")}
@@ -82,8 +78,8 @@ const DashArticlesPage: React.FC = () => {
         actions={[
           {
             name: "New Article",
-            call: createNewArticle
-          }
+            call: createNewArticle,
+          },
         ]}
       />
     </>

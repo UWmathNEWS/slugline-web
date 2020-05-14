@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useIssue, useIssueArticles } from "../../api/hooks";
+import { useIssue } from "../../api/hooks";
 import { Spinner } from "react-bootstrap";
 import { ArticleTitle } from "../articles/DashArticlesPage";
 import { ErrorPage } from "../../shared/errors/ErrorPage";
@@ -13,13 +13,13 @@ const columns: Column<Article>[] = [
     header: "Title",
     key: "title",
     render(_: any, article) {
-      return <ArticleTitle article={article}/>;
-    }
+      return <ArticleTitle article={article} />;
+    },
   },
   {
     header: "Author",
-    key: "author"
-  }
+    key: "author",
+  },
 ];
 
 const DashIssueDetail = () => {

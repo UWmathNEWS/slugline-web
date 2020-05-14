@@ -1,33 +1,21 @@
+import React, { useEffect, useState } from "react";
+import { User, APIResponse, UserAPIError } from "../shared/types";
+import { Form, Row, Col, Button, Alert } from "react-bootstrap";
+import { FormContextValues, useForm } from "react-hook-form";
+import Field from "../shared/form/Field";
+
 import axios from "axios";
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import {
-  Button,
-  Form,
-  Row,
-  Col,
-  Alert,
-  OverlayTrigger,
-  Popover,
-  InputGroup,
-} from "react-bootstrap";
+import { getApiUrl } from "../api/api";
+import { useAuth } from "../auth/AuthProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
+import { cleanFormData, setServerErrors } from "../shared/form/util";
+import { useDebouncedCallback } from "../shared/hooks";
+import NonFieldErrors from "../shared/form/NonFieldErrors";
 
-import { APIResponse, User, UserAPIError } from "../shared/types";
-import { useAuth } from "../auth/AuthProvider";
-import ERRORS from "../shared/errors";
-import { apiGet, getApiUrl } from "../api/api";
-
-interface ChangedUser {
+export interface ProfileFormVals {
   username?: string;
-  name?: string;
   first_name?: string;
   last_name?: string;
   email?: string;
@@ -37,585 +25,393 @@ interface ChangedUser {
   password?: string;
 }
 
-interface ProfileState {
-  errors: UserAPIError;
-  generalErrors: string[];
-  successMessage: string;
-  isLoading: boolean;
-  isChecking: boolean;
-  changedUser: ChangedUser;
-}
-
-type ProfileAction =
-  | { type: "is loading" }
-  | { type: "is checking" }
-  | { type: "done checking" }
-  | { type: "done loading success" }
-  | { type: "done loading error"; errors: UserAPIError | string }
-  | { type: "set error"; errors: UserAPIError }
-  | { type: "set general error"; errors: string[] }
-  | { type: "set success message"; message: string }
-  | { type: "set data"; data: ChangedUser; errors?: UserAPIError };
-
-const profileReducer = (
-  state: ProfileState,
-  action: ProfileAction
-): ProfileState => {
-  switch (action.type) {
-    case "is loading":
-      return { ...state, isLoading: true };
-    case "is checking":
-      return { ...state, isChecking: true };
-    case "done checking":
-      return { ...state, isChecking: false };
-    case "done loading success":
-      return {
-        ...state,
-        isLoading: false,
-        isChecking: false,
-        generalErrors: [],
-        successMessage: "Profile successfully saved!",
-        changedUser:
-          "is_editor" in state.changedUser
-            ? { is_editor: state.changedUser.is_editor }
-            : {},
-      };
-    case "done loading error":
-      if (typeof action.errors === "string") {
-        // definitely a authentication error; this is the only time we'd throw a string
-        // TODO: insert login flow
-        return { ...state, isLoading: false, isChecking: false };
-      } else {
-        const { detail, ...errors } = action.errors;
-        return {
-          ...state,
-          isLoading: false,
-          isChecking: false,
-          generalErrors: detail ?? [],
-          errors,
-        };
-      }
-    case "set error":
-      return {
-        ...state,
-        errors: { ...state.errors, ...action.errors },
-      };
-    case "set general error":
-      return {
-        ...state,
-        generalErrors: state.generalErrors.concat(action.errors),
-      };
-    case "set success message":
-      return {
-        ...state,
-        successMessage: action.message,
-      };
-    case "set data":
-      return {
-        ...state,
-        isChecking: false,
-        changedUser: { ...state.changedUser, ...action.data },
-        errors: { ...state.errors, ...action.errors },
-      };
-  }
-  return state;
-};
-
-const password_info = (
-  <Popover id="password_info">
-    <Popover.Title>Password requirements</Popover.Title>
-    <Popover.Content>
-      Passwords must:
-      <ul>
-        <li>Be at least 8 characters long</li>
-        <li>Contain at least one letter or symbol</li>
-        <li>Not contain the username, name, writer name or email</li>
-      </ul>
-    </Popover.Content>
-  </Popover>
-);
-
-const ProfileForm: React.FC<{
-  user?: User;
-  renderFooter?: (isLoading: boolean, hasErrors: boolean) => React.ReactNode;
-}> = ({ user, renderFooter }, ref: React.RefObject<unknown>) => {
-  const auth = useAuth();
-  const checkUsernameRef = useRef<number>();
-  const [showPassword, setShowPassword] = useState(false);
-  const [state, dispatch] = useReducer(profileReducer, {
-    changedUser: auth.isEditor() ? { is_editor: user?.is_editor ?? false } : {},
-    errors: {
-      status_code: 0,
+export const useProfileForm = (user?: User) => {
+  const context = useForm<ProfileFormVals>({
+    mode: "onBlur",
+    reValidateMode: "onBlur",
+    defaultValues: {
+      username: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      is_editor: false,
+      writer_name: "",
+      cur_password: "",
+      password: "",
     },
-    generalErrors: [],
-    successMessage: "",
-    isLoading: false,
-    isChecking: false,
   });
 
-  const onChange = (evt: React.FormEvent<HTMLInputElement>) => {
-    const { name, value } = evt.currentTarget;
-    switch (name) {
-      case "username": {
-        if (user === undefined) {
-          dispatch({ type: "is checking" });
-          window.clearTimeout(checkUsernameRef.current);
+  const { reset } = context;
 
-          if (value.length > 0 && value.length <= 150) {
-            dispatch({
-              type: "set data",
-              data: { username: value },
-            });
-            checkUsernameRef.current = window.setTimeout(() => {
-              apiGet(getApiUrl(`users/${value}/query`)).then(
-                () => {
-                  dispatch({
-                    type: "set error",
-                    errors: { status_code: 0, username: [] },
-                  });
-                },
-                (errors: UserAPIError) => {
-                  dispatch({ type: "set error", errors });
-                }
-              );
-              axios
-                .get<APIResponse<undefined>>(getApiUrl(`users/${value}/query/`))
-                .then((resp) => {
-                  if (resp.data.success) {
-                    dispatch({
-                      type: "set error",
-                      errors: { status_code: 0, username: [] },
-                    });
-                  } else {
-                    dispatch({
-                      type: "set error",
-                      errors: {
-                        status_code: 0,
-                        username: ["USER.USERNAME.ALREADY_EXISTS"],
-                      },
-                    });
-                  }
-                });
-            }, 200);
-          } else {
-            dispatch({
-              type: "set data",
-              data: { username: value.slice(0, 150) },
-              errors: {
-                status_code: 0,
-                username: value.length > 150 ? ["USER.USERNAME.TOO_LONG"] : [],
-              },
-            });
-          }
-          break;
-        } else {
-          dispatch({
-            type: "set error",
-            errors: { status_code: 0, email: ["USER.USERNAME.CANNOT_CHANGE"] },
-          });
-          break;
-        }
+  useEffect(() => {
+    reset({
+      username: user?.username,
+      first_name: user?.first_name,
+      last_name: user?.last_name,
+      email: user?.email,
+      is_editor: user?.is_editor || false,
+      writer_name: user?.writer_name,
+      cur_password: "",
+      password: "",
+    });
+  }, [user, reset]);
+
+  return context;
+};
+
+const validateUsernameAvailable = async (
+  username: string
+): Promise<boolean> => {
+  const resp = await axios.get<APIResponse<void>>(
+    getApiUrl(`users/${username}/query/`),
+    {
+      validateStatus: () => true,
+    }
+  );
+  return resp.data.success;
+};
+
+interface ProfileFormProps {
+  user?: User;
+  formId?: string;
+  onSubmitSuccessful?: (vals: ProfileFormVals) => void | Promise<void>;
+  onSubmitFailed?: (
+    vals: ProfileFormVals,
+    error: UserAPIError
+  ) => void | Promise<void>;
+  hideSubmit?: boolean;
+}
+
+interface ProfileConsumerFormProps extends ProfileFormProps {
+  context: FormContextValues<ProfileFormVals>;
+}
+
+export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
+  props: ProfileConsumerFormProps
+) => {
+  const auth = useAuth();
+
+  const { register } = props.context;
+
+  const [successMessage, setSuccessMessage] = useState<string | undefined>(
+    undefined
+  );
+  const [generalErrors, setGeneralErrors] = useState<string[] | undefined>(
+    undefined
+  );
+
+  // manually register the is_editor field since we handle it with a select
+  useEffect(() => {
+    register({
+      name: "is_editor",
+    });
+  }, [register]);
+
+  // we need a new password if we're creating a new user
+  const newPasswordRequired = props.user === undefined;
+  // require confirm if we're creating a new editor or changing password/role
+  const passwordConfirmRequired =
+    (newPasswordRequired && props.context.getValues().is_editor) ||
+    (props.user &&
+      (props.context.getValues().password ||
+        props.context.getValues().is_editor !== props.user?.is_editor));
+
+  const [validateUserNameDebounced] = useDebouncedCallback(
+    validateUsernameAvailable,
+    250
+  );
+
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const submit = async (vals: ProfileFormVals) => {
+    const cleaned = cleanFormData(vals);
+
+    const editingMe = props.user?.username === auth.user?.username;
+    try {
+      if (props.user === undefined) {
+        await auth.post<ProfileFormVals>("users/", cleaned);
+        setSuccessMessage(`User ${vals.username} created successfully.`);
+        // refresh the form so we can add a new user
+        props.context.reset();
+      } else {
+        await auth.patch<ProfileFormVals>(
+          editingMe ? "me/" : `users/${vals?.username}/`,
+          cleaned,
+          editingMe
+        );
+        setSuccessMessage(`User ${vals.username} saved successfully.`);
       }
-      case "email": {
-        // check validity
-        let newErrors: string[] = [];
-
-        if (!/^\S+@\S+(\.[a-z]+)+$/.test(value)) {
-          newErrors.push("USER.EMAIL.INVALID");
-        }
-
-        dispatch({
-          type: "set data",
-          data: { email: value },
-          errors: { status_code: 0, email: newErrors },
-        });
-        break;
+      setGeneralErrors(undefined);
+      setShowPassword(false);
+      if (props.onSubmitSuccessful) {
+        await props.onSubmitSuccessful(vals);
       }
-      case "name": {
-        const names = value.split(" ");
-        if (names.length > 1) {
-          dispatch({
-            type: "set data",
-            data: {
-              name: value,
-              first_name: names.slice(0, -1).join(" "),
-              last_name: names[names.length - 1],
-            },
-          });
-        } else {
-          dispatch({
-            type: "set data",
-            data: {
-              name: value,
-              first_name: names[0],
-              last_name: "",
-            },
-          });
-        }
-        break;
-      }
-      case "writer_name":
-        dispatch({
-          type: "set data",
-          data: { writer_name: value },
-          errors: {
-            status_code: 0,
-            writer_name:
-              value.length === 0 ? ["USER.REQUIRED.writer_name"] : [],
-          },
-        });
-        break;
-      case "is_editor":
-        dispatch({
-          type: "set data",
-          data: { is_editor: value === "true" },
-        });
-        break;
-      case "cur_password":
-        dispatch({
-          type: "set data",
-          data: { cur_password: value },
-          errors: { status_code: 0, user: [] },
-        });
-        break;
-      case "password": {
-        let newErrors: string[] = [];
-
-        if (value.length === 0) {
-          dispatch({
-            type: "set data",
-            data: { password: undefined },
-            errors: { status_code: 0, password: [] },
-          });
-          break;
-        }
-
-        if (value.length < 8) {
-          newErrors.push("USER.PASSWORD.TOO_SHORT.8");
-        }
-
-        if (/^\d*$/.test(value)) {
-          newErrors.push("USER.PASSWORD.ENTIRELY_NUMERIC");
-        }
-
-        dispatch({
-          type: "set data",
-          data: { password: value },
-          errors: { status_code: 0, password: newErrors },
-        });
-        break;
+    } catch (err) {
+      const apiError = err as UserAPIError;
+      setServerErrors(props.context, apiError);
+      setSuccessMessage(undefined);
+      setGeneralErrors(apiError.detail);
+      if (props.onSubmitFailed) {
+        await props.onSubmitFailed(vals, apiError);
       }
     }
   };
-
-  const onSubmit = (evt?: React.FormEvent<HTMLFormElement>) => {
-    evt?.preventDefault();
-
-    if (
-      (Object.keys(state.changedUser) as Array<keyof ChangedUser>).every(
-        (k) =>
-          state.changedUser[k] === undefined ||
-          (k === "is_editor" && state.changedUser[k] === user?.is_editor)
-      )
-    ) {
-      return Promise.resolve();
-    }
-
-    if (Object.values(state.errors).flat().length > 1) {
-      dispatch({
-        type: "set general error",
-        errors: [ERRORS.FORMS.NOT_YET_VALID],
-      });
-      return Promise.reject();
-    }
-
-    dispatch({ type: "is loading" });
-
-    return (user === undefined
-      ? auth.post<ChangedUser>("users/", state.changedUser)
-      : auth.patch<ChangedUser>(
-          user === auth.user ? "me/" : `users/${user?.username}/`,
-          state.changedUser,
-          user === auth.user
-        )
-    ).then(
-      () => {
-        dispatch({ type: "done loading success" });
-      },
-      (err: UserAPIError | string) => {
-        dispatch({ type: "done loading error", errors: err });
-      }
-    );
-  };
-
-  useImperativeHandle(ref, () => ({
-    submit: onSubmit,
-  }));
 
   return (
-    <Form noValidate onSubmit={onSubmit}>
-      {state.generalErrors.length > 0 &&
-        state.generalErrors.map((err) => (
-          <Alert key={err} variant="danger">
-            {ERRORS[err]}
-          </Alert>
-        ))}
-
-      {state.successMessage.length > 0 && (
+    <>
+      {successMessage && (
         <Alert
           variant="success"
-          onClose={() => dispatch({ type: "set success message", message: "" })}
           dismissible
+          onClose={() => {
+            setSuccessMessage(undefined);
+          }}
         >
-          {state.successMessage}
+          {successMessage}
         </Alert>
       )}
-
-      <Form.Group as={Row} controlId="profileUsername">
-        <Form.Label column sm={2}>
-          Username
-        </Form.Label>
-        <Col sm={10}>
-          {user !== undefined ? (
-            <Form.Control readOnly defaultValue={user?.username} />
-          ) : (
-            <>
-              <Form.Control
-                name="username"
-                required
-                value={state.changedUser.username ?? ""}
-                onChange={onChange}
-                isValid={
-                  (state.changedUser.username?.length ?? 0) > 0 &&
-                  state.errors.username?.length === 0
-                }
-                isInvalid={
-                  state.errors.username && state.errors.username.length > 0
-                }
-              />
-              <Form.Control.Feedback>
-                Username is valid and is available.
-              </Form.Control.Feedback>
-              <Form.Control.Feedback type="invalid">
-                <ul>
-                  {state.errors.username?.map((msg) => (
-                    <li key={msg}>{ERRORS[msg]}</li>
-                  ))}
-                </ul>
-              </Form.Control.Feedback>
-            </>
-          )}
-        </Col>
-      </Form.Group>
-
-      <Form.Group as={Row} controlId="profileEmail">
-        <Form.Label column sm={2}>
-          Email
-        </Form.Label>
-        <Col sm={10}>
-          <Form.Control
-            type="email"
-            name="email"
-            required
-            placeholder="example@example.com"
-            value={state.changedUser.email ?? user?.email ?? ""}
-            onChange={onChange}
-            isValid={(state.changedUser.email?.length ?? 0) > 0}
-            isInvalid={state.errors.email && state.errors.email.length > 0}
-          />
-          <Form.Control.Feedback type="invalid">
-            <ul>
-              {state.errors.email?.map((msg) => (
-                <li key={msg}>{ERRORS[msg]}</li>
-              ))}
-            </ul>
-          </Form.Control.Feedback>
-        </Col>
-      </Form.Group>
-
-      <Form.Group as={Row} controlId="profileFirstLastName">
-        <Form.Label column sm={2}>
-          Name
-        </Form.Label>
-        <Col sm={10}>
-          <Form.Control
-            name="name"
-            placeholder="e.g. Johnny Appleseed"
-            value={
-              state.changedUser.name ??
-              (user
-                ? `${user.first_name}${
-                    user.last_name ? ` ${user.last_name}` : ""
-                  }`
-                : "")
-            }
-            onChange={onChange}
-            isValid={"first_name" in state.changedUser}
-          />
-        </Col>
-      </Form.Group>
-
-      <Form.Group as={Row} controlId="profileWriterName">
-        <Form.Label column sm={2}>
-          Writer name
-        </Form.Label>
-        <Col sm={10}>
-          <Form.Control
-            name="writer_name"
-            placeholder="e.g. Grower of Apples"
-            value={state.changedUser.writer_name ?? user?.writer_name ?? ""}
-            onChange={onChange}
-            isValid={(state.changedUser.writer_name?.length ?? 0) > 0}
-            isInvalid={
-              state.errors.writer_name && state.errors.writer_name.length > 0
-            }
-          />
-          <Form.Control.Feedback type="invalid">
-            <ul>
-              {state.errors.writer_name?.map((msg) => (
-                <li key={msg}>{ERRORS[msg]}</li>
-              ))}
-            </ul>
-          </Form.Control.Feedback>
-        </Col>
-      </Form.Group>
-
-      {auth.isEditor() && (
-        <Form.Group as={Row} controlId="profileIsEditor">
+      <NonFieldErrors errors={generalErrors || []} />
+      <Form id={props.formId} onSubmit={props.context.handleSubmit(submit)}>
+        <Form.Group as={Row} controlId="username">
           <Form.Label column sm={2}>
-            Role
+            Username
           </Form.Label>
           <Col sm={10}>
-            {/* NOTE: The custom attribute hasn't landed yet; it's here for future-compat. In the meantime, we add a
-              custom class instead. */}
-            <Form.Control
-              as="select"
-              name="is_editor"
-              onChange={onChange}
-              value={state.changedUser.is_editor?.toString()}
-              disabled={
-                auth.user?.username === user?.username && !user?.is_staff
+            <Field
+              errors={props.context.errors}
+              type="text"
+              name="username"
+              disabled={props.user !== undefined}
+              validMessage={"This username is valid."}
+              isValid={
+                props.context.formState.dirtyFields.has("username") &&
+                !props.context.errors["username"]
               }
-              className="custom-select"
-              custom
-            >
-              <option value="false">Contributor</option>
-              <option value="true">Editor</option>
-            </Form.Control>
+              onChange={async () => {
+                await props.context.triggerValidation("username");
+              }}
+              ref={props.context.register({
+                maxLength: {
+                  value: 150,
+                  message: "USER.USERNAME.TOO_LONG",
+                },
+                required: "USER.REQUIRED.username",
+                validate: async (username: string) => {
+                  if (props.user !== undefined) {
+                    // if we're editing a user the field is disabled anyway, don't validate
+                    return;
+                  }
+                  if (!(await validateUserNameDebounced(username))) {
+                    return Promise.resolve("USER.USERNAME.ALREADY_EXISTS");
+                  }
+                },
+              })}
+            />
           </Col>
         </Form.Group>
-      )}
-
-      <h3>Change password</h3>
-
-      {auth.user === user && (
-        <Form.Group as={Row} controlId="profileCurPassword">
+        <Form.Group as={Row}>
           <Form.Label column sm={2}>
-            Current password
+            Name
+          </Form.Label>
+          <Col sm={5}>
+            <Field
+              errors={props.context.errors}
+              type="text"
+              name="first_name"
+              placeholder="First Name"
+              ref={props.context.register({
+                maxLength: {
+                  value: 30,
+                  message: "USER.FIRST_NAME.TOO_LONG.30",
+                },
+                required: "USER.REQUIRED.first_name",
+              })}
+            />
+          </Col>
+          <Col sm={5}>
+            <Field
+              errors={props.context.errors}
+              type="text"
+              name="last_name"
+              placeholder="Last Name (optional)"
+              ref={props.context.register({
+                maxLength: {
+                  value: 150,
+                  message: "USER.LAST_NAME.TOO_LONG.150",
+                },
+              })}
+            />
+          </Col>
+        </Form.Group>
+        <Form.Group as={Row} controlId="email">
+          <Form.Label column sm={2}>
+            Email
           </Form.Label>
           <Col sm={10}>
-            <Form.Control
-              type="password"
-              name="cur_password"
-              onChange={onChange}
-              isInvalid={state.errors.user && state.errors.user.length > 0}
-              value={state.changedUser?.cur_password ?? ""}
+            <Field
+              errors={props.context.errors}
+              type="email"
+              name="email"
+              ref={props.context.register({
+                required: "USER.REQUIRED.email",
+                maxLength: {
+                  value: 254,
+                  message: "USER.EMAIL.TOO_LONG.254",
+                },
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: "USER.EMAIL.INVALID",
+                },
+              })}
             />
-            <Form.Control.Feedback type="invalid">
-              <ul>
-                {state.errors.user?.map((msg) => (
-                  <li key={msg}>{ERRORS[msg]}</li>
-                ))}
-              </ul>
-            </Form.Control.Feedback>
           </Col>
         </Form.Group>
-      )}
-
-      <Form.Group as={Row} controlId="profileNewPassword">
-        <Form.Label column sm={2}>
-          New password
-          <OverlayTrigger placement="right" overlay={password_info}>
-            <span>(i)</span>
-          </OverlayTrigger>
-        </Form.Label>
-        <Col sm={10}>
-          <Form.Row>
-            <Col sm="auto">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  dispatch({
-                    type: "set data",
-                    data: { password: nanoid() },
-                    errors: { status_code: 0, password: [] },
-                  });
-                  setShowPassword(true);
+        <Form.Group as={Row} controlId="writerName">
+          <Form.Label column sm={2}>
+            Writer Name
+          </Form.Label>
+          <Col sm={10}>
+            <Field
+              errors={props.context.errors}
+              type="text"
+              name="writer_name"
+              ref={props.context.register({
+                required: "USER.REQUIRED.writer_name",
+              })}
+            />
+          </Col>
+        </Form.Group>
+        {auth.isEditor() && (
+          <Form.Group as={Row} controlId="isEditor">
+            <Form.Label column sm={2}>
+              Role
+            </Form.Label>
+            <Col sm={10}>
+              <Form.Control
+                as="select"
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  if (e.currentTarget.value === "editor") {
+                    props.context.setValue("is_editor", true);
+                  } else if (e.currentTarget.value === "contributor") {
+                    props.context.setValue("is_editor", false);
+                  }
                 }}
+                value={
+                  props.context.getValues().is_editor ? "editor" : "contributor"
+                }
+                className="custom-select"
+                custom
               >
-                Generate
-              </Button>
+                <option value="contributor">Contributor</option>
+                <option value="editor">Editor</option>
+              </Form.Control>
             </Col>
-            <Col>
-              <InputGroup>
-                <Form.Control
+          </Form.Group>
+        )}
+        <Form.Group as={Form.Row} controlId="password">
+          <Form.Label column sm={2}>
+            New Password
+          </Form.Label>
+          <Col sm={10}>
+            <Form.Row>
+              <Col sm="auto">
+                <Button
+                  className="w-100"
+                  variant="secondary"
+                  onClick={() => {
+                    props.context.setValue("password", nanoid(), true);
+                    // set the password visible so you can see what you get
+                    setShowPassword(true);
+                  }}
+                >
+                  Generate
+                </Button>
+              </Col>
+              <Col>
+                <Field
+                  errors={props.context.errors}
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  onChange={onChange}
-                  isInvalid={
-                    state.errors.password && state.errors.password.length > 0
+                  ref={props.context.register({
+                    minLength: {
+                      value: 8,
+                      message: "USER.PASSWORD.TOO_SHORT.8",
+                    },
+                    required: newPasswordRequired
+                      ? "USER.PASSWORD.NEW_REQUIRED"
+                      : undefined,
+                    validate: (password?: string) => {
+                      // the pattern argument doesn't let us return an error if the value FAILS a regex,
+                      // so we'll do it ourselves
+                      if (password && /^\d*$/.test(password)) {
+                        return "USER.PASSWORD.ENTIRELY_NUMERIC";
+                      }
+                    },
+                  })}
+                  onChange={async () => {
+                    await props.context.triggerValidation("password");
+                  }}
+                  append={
+                    <Button
+                      variant={
+                        showPassword ? "outline-primary" : "outline-secondary"
+                      }
+                      onClick={() => {
+                        setShowPassword((show) => !show);
+                      }}
+                    >
+                      {showPassword ? (
+                        <FontAwesomeIcon icon={faEyeSlash} />
+                      ) : (
+                        <FontAwesomeIcon icon={faEye} />
+                      )}
+                    </Button>
                   }
-                  value={state.changedUser?.password ?? ""}
                 />
-                <InputGroup.Append>
-                  <Button
-                    variant={showPassword ? "outline-primary" : "outline-secondary"}
-                    onClick={() => {
-                      setShowPassword((s) => !s);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-                  </Button>
-                </InputGroup.Append>
-              </InputGroup>
-              <Form.Control
-                type="hidden"
-                isInvalid={
-                  state.errors.password && state.errors.password.length > 0
-                }
-                value={state.changedUser?.password}
+              </Col>
+            </Form.Row>
+          </Col>
+        </Form.Group>
+        {passwordConfirmRequired && (
+          <>
+            <hr />
+            <Form.Group>
+              <Form.Label>Confirm with your password to save:</Form.Label>
+              <Field
+                errors={props.context.errors}
+                type="password"
+                name="cur_password"
+                ref={props.context.register({
+                  required: passwordConfirmRequired
+                    ? "USER.PASSWORD.CURRENT_REQUIRED"
+                    : undefined,
+                })}
+                onChange={() => {
+                  props.context.triggerValidation("cur_password");
+                }}
               />
-              <Form.Control.Feedback type="invalid">
-                <ul>
-                  {state.errors.password?.map((msg) => (
-                    <li key={msg}>{ERRORS[msg]}</li>
-                  ))}
-                </ul>
-              </Form.Control.Feedback>
-            </Col>
-          </Form.Row>
-        </Col>
-      </Form.Group>
-
-      {renderFooter ? (
-        renderFooter(
-          state.isLoading,
-          state.isChecking || Object.values(state.errors).flat().length > 1
-        )
-      ) : (
-        <Button
-          type="submit"
-          disabled={
-            state.isLoading ||
-            state.isChecking ||
-            Object.values(state.errors).flat().length > 1
-          }
-        >
-          {state.isLoading ? "Saving..." : "Save"}
-        </Button>
-      )}
-    </Form>
+            </Form.Group>
+          </>
+        )}
+        {!props.hideSubmit && (
+          <Button
+            type="submit"
+            disabled={
+              props.context.formState.isSubmitting ||
+              !props.context.formState.isValid
+            }
+          >
+            {props.context.formState.isSubmitting ? "Saving..." : "Save"}
+          </Button>
+        )}
+      </Form>
+    </>
   );
 };
 
-export default forwardRef(ProfileForm);
+const ProfileForm: React.FC<ProfileFormProps> = (props: ProfileFormProps) => {
+  const context = useProfileForm(props.user);
+  return <ProfileFormConsumer {...props} context={context} />;
+};
+
+export default ProfileForm;
