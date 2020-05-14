@@ -35,8 +35,8 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: npm ci
+      #if: steps.cache.outputs.cache-hit != 'true'
+      run: npm install --no-save
 
     - name: Run tests
       run: npm test
