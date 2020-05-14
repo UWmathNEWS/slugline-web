@@ -24,14 +24,14 @@ const columns: Column<User>[] = [
   {
     header: "Name",
     key: "name",
-    width: 20,
+    width: 15,
     accessor: (user: User) =>
       `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
   },
   {
     header: "Writer Name",
     key: "writer_name",
-    width: 20,
+    width: 25,
   },
   {
     header: "Email",

@@ -6,7 +6,9 @@
 
   th, td {
     overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
   }
 
   thead th {
@@ -37,6 +39,10 @@
   &_table {
     table-layout: fixed;
     margin-bottom: 0;
+
+    @include media-breakpoint-down(sm) {
+      width: auto;
+    }
   }
 
   &_search,
@@ -62,6 +68,7 @@
   }
 
   &_selectCheckbox {
+    min-width: 1.33 * spacing(4);
     width: 2 * spacing(4);
   }
 

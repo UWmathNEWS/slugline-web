@@ -355,16 +355,16 @@ const useRichTable = <D extends object = {}>({
         render() {
           return <span className="RichTable_cellHeader">
             {header}
-            {sortable &&
-            <FontAwesomeIcon
-              icon={(sortColumn && sortColumn[0] === key)
-                ? (sortColumn[1]
-                  ? "caret-up"
-                  : "caret-down")
-                : "sort"}
-              className="ml-auto"
-            />
-            }
+            {sortable && <>&nbsp;
+              <FontAwesomeIcon
+                icon={(sortColumn && sortColumn[0] === key)
+                  ? (sortColumn[1]
+                    ? "caret-up"
+                    : "caret-down")
+                  : "sort"}
+                className="ml-auto"
+              />
+            </>}
           </span>;
         }
       };
@@ -722,7 +722,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
         }
         {config.paginated && <Pagination />}
       </Row>
-      <Table striped hover className="RichTable_table" ref={config.ref}>
+      <Table striped hover responsive className="RichTable_table" ref={config.ref}>
         <thead>
           <tr>
             {header.cells.map(cell => (
