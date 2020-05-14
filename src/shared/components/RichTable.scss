@@ -22,6 +22,11 @@
 
   &_header {
     margin-bottom: spacing(1);
+  }
+
+  &_header,
+  &_footer {
+    min-height: 2rem;
 
     .btn {
       padding-top: 0;

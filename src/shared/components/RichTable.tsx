@@ -1,7 +1,7 @@
 import "./RichTable.scss";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, Col, FormCheck, FormControl, Row, Spinner, Table } from "react-bootstrap";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Button, Col, Form, FormCheck, FormControl, Row, Spinner, Table } from "react-bootstrap";
 import nanoid from "nanoid";
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
@@ -217,7 +217,7 @@ const useRichTable = <D extends object = {}>({
     : data.length;
   const count = page < numPages || page === 1 ? data.length : (totalCount - data.length) / (numPages - 1);
 
-  const selectAllRef = useRef<HTMLInputElement & FormCheck>(null);
+  const selectAllRef = useRef<FormCheck & HTMLInputElement>(null);
   const [selected, setSelected] = useState<boolean[]>([]);
   const [filteredSelected, setFilteredSelected] = useState<D[]>([]);
 
@@ -596,6 +596,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     selected,
     page,
     numPages,
+    setPage,
     count,
     totalCount,
     setSearchQuery,
@@ -608,8 +609,44 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     config.bagRef(bag);
   }
 
-  const Pagination = useMemo(() =>
-    () => (
+  const Pagination = () => {
+    const [displayPageSelector, setDisplayPageSelector] = useState(false);
+    const pageSelectorRef = useRef<FormControl & HTMLInputElement>(null);
+    const pageSelectorId = useRef(`RichTable_pageSelector_${Math.random()}`);
+
+    useLayoutEffect(() => {
+      if (displayPageSelector) {
+        pageSelectorRef.current?.focus();
+      }
+    }, [displayPageSelector]);
+
+    if (displayPageSelector) {
+      return (
+        <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
+          <Form.Group className="mb-0 text-center text-lg-right" controlId={pageSelectorId.current}>
+            <Form.Label sm={2} className="d-inline mb-0">Go to page</Form.Label>
+            <FormControl
+              defaultValue={page.toString()}
+              onKeyDown={({ key, currentTarget }: React.KeyboardEvent<HTMLInputElement>) => {
+                if (key === "Enter") {
+                  const requestedPage = Math.max(1, Math.min(parseInt(currentTarget.value), numPages)) || page;
+                  setPage(requestedPage);
+                  setDisplayPageSelector(false);
+                } else if (key === "Escape") {
+                  setDisplayPageSelector(false);
+                }
+              }}
+              onBlur={() => { setDisplayPageSelector(false) }}
+              size="sm"
+              className="d-inline w-25"
+              ref={pageSelectorRef}
+            />
+          </Form.Group>
+        </Col>
+      )
+    }
+
+    return (
       <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
         <Button variant="link" disabled={page <= 1}>
           <FontAwesomeIcon
@@ -621,7 +658,10 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
           />
         </Button>
         <span className="RichTable_paginationText">
-          {page} / {numPages}
+          <span
+            className="form-control d-inline-block d-lg-inline w-auto mb-1"
+            onClick={() => { setDisplayPageSelector(true) }}
+          >{page}</span> / {numPages}
         </span>
         <Button variant="link" disabled={page >= numPages}>
           <FontAwesomeIcon
@@ -633,9 +673,8 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
           />
         </Button>
       </Col>
-    ),
-    [page, numPages, executeAction]
-  );
+    );
+  };
 
   return (
     <div className={`RichTable ${config.className ?? ""}`}>
