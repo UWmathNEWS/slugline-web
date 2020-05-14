@@ -37,6 +37,9 @@ jobs:
     # Runs a single command using the runners shell
     - name: Install dependencies
       run: npm ci
+    
+    - name: Check type errors
+      run: npx tsc --noEmit
 
     - name: Run tests
       run: npm test
