@@ -1,7 +1,10 @@
 import React, { useEffect, useReducer, useRef } from "react";
-import { RouteProps, Route, Redirect, useHistory } from "react-router-dom";
-import { Alert } from "react-bootstrap";
+import { RouteProps, Route, useHistory } from "react-router-dom";
+import { Alert, Spinner } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
+import Error404 from "../shared/errors/Error404";
+import { APIError } from "../shared/types";
+import ERRORS from "../shared/errors";
 
 interface PrivateRouteProps extends RouteProps {
   admin?: boolean;
@@ -81,8 +84,8 @@ const PrivateRouteWrapper: React.FC<{
     dispatch({ type: 'is loading' });
     auth.check()?.then(() => {
       dispatch({ type: 'done loading' });
-    }, e => {
-      dispatch({ type: 'error', data: e });
+    }, (e: APIError) => {
+      dispatch({ type: 'error', data: Object.values(e).flat() });
     });
     authCheckCompleted.current = true;
 
@@ -95,17 +98,19 @@ const PrivateRouteWrapper: React.FC<{
         authCheckCompleted.current = false;
         return <div key="children">{props.children}</div>;
       } else {
-        return <Redirect to="/login/" />;
+        return <Error404 />;
       }
     } else {
       return <>
-        {props.fallback ?? <h1>Loading...</h1>}
-        <div key="children" className="d-none">{props.children}</div>
+        {props.fallback ?? <Spinner animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>}
+        <div key="children" className="d-none" aria-hidden="true">{props.children}</div>
       </>;
     }
   } else {
     return <>
-      {state.errors.map(err => <Alert key={err} variant="danger">{err}</Alert>)}
+      {state.errors.map(err => <Alert key={err} variant="danger">{ERRORS[err] || err}</Alert>)}
     </>;
   }
 };

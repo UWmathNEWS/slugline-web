@@ -1,21 +1,23 @@
 import axios, { AxiosError } from "axios";
-import { APIResponse } from "../shared/types";
+import { APIError, APIResponse, APIResponseFailure } from "../shared/types";
 import ERRORS from "../shared/errors";
 
-export const API_ROOT = "/api";
+export const API_ROOT = "/api/";
 
 export const getApiUrl = (url: string) => {
-  return `${API_ROOT}/${url}`;
+  if (!url) return API_ROOT;
+  return `${API_ROOT}${url.split("/").filter(p => !!p).join("/")}/`;
 };
 
 export const apiGet = <T extends any>(url: string): Promise<T | null> => {
   return axios.get<APIResponse<T>>(url).then(
     (axiosResp) => {
       if (axiosResp.data.success) return axiosResp.data.data;
-      else throw axiosResp.data.error;
+      else return Promise.reject(axiosResp.data.error);
     },
-    (err: AxiosError) => {
+    (err: AxiosError<APIResponseFailure<APIError>>) => {
       throw err.response?.data.error ?? {
+        status_code: err.code,
         detail: [ERRORS.REQUEST.DID_NOT_SUCCEED],
       };
     }

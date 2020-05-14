@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import {
   APIError,
   APIGetHook,
@@ -11,12 +11,14 @@ import {
   Article,
   Pagination,
   APIResponse,
+  APIResponseSuccess,
   ArticleContent,
   IssueAPIError,
 } from "../shared/types";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { getApiUrl } from "./api";
+import ERRORS from "../shared/errors";
 
 export const useApiGet = <T, U extends APIError = APIError>(
   url: string
@@ -25,9 +27,13 @@ export const useApiGet = <T, U extends APIError = APIError>(
   const [error, setError] = useState<U | undefined>(undefined);
 
   useEffect(() => {
-    axios.get(url, { validateStatus: () => true }).then((axiosResp) => {
-      if (axiosResp.data.success) setResponse(axiosResp.data.data);
-      else setError(axiosResp.data.error);
+    axios.get(url).then((axiosResp: AxiosResponse<APIResponseSuccess<T>>) => {
+      setResponse(axiosResp.data.data);
+    }, (axiosErr) => {
+      setError(axiosErr.response?.data.error ?? {
+        status_code: axiosErr.code,
+        detail: [ERRORS.REQUEST.DID_NOT_SUCCEED],
+      });
     });
   }, [url]);
   return [response, error];
@@ -65,24 +71,38 @@ export const useApiPost = <S, T, U extends APIError = APIError>(
   url: string
 ): APIMutateHook<S, T, U> => {
   const auth = useAuth();
+  const csrfToken = useRef<string | null>(auth.csrfToken);
 
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
+
+  // We need to use a ref to store the CSRF token; useCallback does not refresh when auth changes.
+  // TODO in AuthProvider's integration test: Test that the ref updates when the token changes in a session
+  useEffect(() => {
+    csrfToken.current = auth.csrfToken;
+  }, [auth.csrfToken]);
 
   const post = useCallback(
     async (body: S): Promise<APIResponse<T, U>> => {
       let headers: { [header: string]: string } = {};
-      if (auth.csrfToken) {
-        headers["X-CSRFToken"] = auth.csrfToken;
+      if (csrfToken.current) {
+        headers["X-CSRFToken"] = csrfToken.current;
       }
       setState(RequestState.Started);
-      const resp = await axios.post<APIResponse<T, U>>(url, body, {
-        headers: headers,
-        validateStatus: () => true,
-      });
-      setState(RequestState.Complete);
-      return resp.data;
+      try {
+        const resp = await axios.post<APIResponse<T, U>>(url, body, {
+          headers: headers
+        });
+        setState(RequestState.Complete);
+        return resp.data;
+      } catch (axiosErr) {
+        setState(RequestState.Complete);
+        throw axiosErr.response?.data.error ?? {
+          status_code: axiosErr.code,
+          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
+        };
+      }
     },
-    [url, auth.csrfToken]
+    [url]
   );
 
   return [post, state];
@@ -92,24 +112,36 @@ export const useApiPatch = <S, T, U extends APIError = APIError>(
   url: string
 ): APIMutateHook<S, T, U> => {
   const auth = useAuth();
+  const csrfToken = useRef<string | null>(auth.csrfToken);
 
   const [state, setState] = useState<RequestState>(RequestState.NotStarted);
+
+  useEffect(() => {
+    csrfToken.current = auth.csrfToken;
+  }, [auth.csrfToken]);
 
   const patch = useCallback(
     async (body: S): Promise<APIResponse<T, U>> => {
       let headers: { [header: string]: string } = {};
-      if (auth.csrfToken) {
-        headers["X-CSRFToken"] = auth.csrfToken;
+      if (csrfToken.current) {
+        headers["X-CSRFToken"] = csrfToken.current;
       }
       setState(RequestState.Started);
-      const resp = await axios.patch<APIResponse<T, U>>(url, body, {
-        headers: headers,
-        validateStatus: () => true,
-      });
-      setState(RequestState.Complete);
-      return resp.data;
+      try {
+        const resp = await axios.patch<APIResponse<T, U>>(url, body, {
+          headers: headers
+        });
+        setState(RequestState.Complete);
+        return resp.data;
+      } catch (axiosErr) {
+        setState(RequestState.Complete);
+        throw axiosErr.response?.data.error ?? {
+          status_code: axiosErr.code,
+          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
+        };
+      }
     },
-    [url, auth.csrfToken]
+    [url]
   );
 
   return [patch, state];

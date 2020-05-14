@@ -12,6 +12,7 @@ const errorFactory = (templ: (...prop: string[]) => string) =>
   );
 
 const errors = {
+  __TESTING: "Error thrown in testing.",
   REQUEST: {
     DID_NOT_SUCCEED: "Request did not succeed.",
     NEEDS_AUTHENTICATION: "Request requires authentication.",
@@ -32,7 +33,9 @@ const errors = {
     COULD_NOT_UPDATE: "Could not update profile.",
     COULD_NOT_DELETE: "Could not delete user.",
     INSUFFICIENT_PRIVILEGES: "Not enough privileges to change field.",
-    REQUIRED: errorFactory((attr) => `Must provide a ${attr}.`),
+    REQUIRED: errorFactory((attr) =>
+      `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`
+    ),
     USERNAME: {
       ALREADY_EXISTS: "Username already exists.",
       CANNOT_CHANGE: "You cannot change your username after registration.",
