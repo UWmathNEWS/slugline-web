@@ -4,7 +4,6 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
-// @ts-ignore
 const render = (Component: typeof App) =>
   ReactDOM.render(<Component />, document.getElementById("root"));
 
@@ -15,6 +14,9 @@ serviceWorker.unregister();
 
 render(App);
 
+// TypeScript complains that `hot` doesn't exist on module.
+// Rather than installing a types package, we choose to ignore it, since it's literally only here
+// that TypeScript complains.
 // @ts-ignore
 if (module.hot) {
   // @ts-ignore
