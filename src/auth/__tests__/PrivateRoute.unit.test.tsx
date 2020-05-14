@@ -8,6 +8,7 @@ import { USER_LOCALSTORAGE_KEY, testUser, testAdmin } from "../../shared/test-ut
 import mockAxios from "jest-mock-axios";
 import PrivateRoute from "../PrivateRoute";
 import { Auth, AuthProvider } from "../AuthProvider";
+import ERRORS from "../../shared/errors";
 
 describe("Unit test for PrivateRoute", () => {
   let history: History;
@@ -191,13 +192,13 @@ describe("Unit test for PrivateRoute", () => {
           data: {
             success: false,
             error: {
-              detail: ["Error thrown in testing"]
+              detail: ["__TESTING"]
             }
           }
         }
       });
     });
 
-    expect(getByText("Error thrown in testing")).toBeInTheDocument();
+    expect(getByText(ERRORS.__TESTING)).toBeInTheDocument();
   });
 });

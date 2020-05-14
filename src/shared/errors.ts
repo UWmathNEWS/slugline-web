@@ -12,6 +12,7 @@ const errorFactory = (templ: (...prop: string[]) => string) =>
   );
 
 const errors = {
+  __TESTING: "Error thrown in testing.",
   REQUEST: {
     DID_NOT_SUCCEED: "Request did not succeed.",
     NEEDS_AUTHENTICATION: "Request requires authentication.",

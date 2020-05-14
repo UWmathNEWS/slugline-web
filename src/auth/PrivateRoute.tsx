@@ -4,6 +4,7 @@ import { Alert, Spinner } from "react-bootstrap";
 import { useAuth } from "./AuthProvider";
 import Error404 from "../shared/errors/Error404";
 import { APIError } from "../shared/types";
+import ERRORS from "../shared/errors";
 
 interface PrivateRouteProps extends RouteProps {
   admin?: boolean;
@@ -109,7 +110,7 @@ const PrivateRouteWrapper: React.FC<{
     }
   } else {
     return <>
-      {state.errors.map(err => <Alert key={err} variant="danger">{err}</Alert>)}
+      {state.errors.map(err => <Alert key={err} variant="danger">{ERRORS[err] || err}</Alert>)}
     </>;
   }
 };

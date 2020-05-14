@@ -55,13 +55,13 @@ describe("getApi", () => {
   });
 
   it("handles unsuccessful responses with a specific error message", async () => {
-    mockAxios.mockError(makeTestError(500, "Error thrown in testing"));
+    mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
 
     try {
       await resp;
       expect("Error was not thrown by getApi").toBe(false);
     } catch (e) {
-      expect(e).toEqual("Error thrown in testing");
+      expect(e).toEqual(ERRORS.__TESTING);
     }
   });
 

@@ -55,13 +55,13 @@ describe("useApiGet", () => {
     const { result } = renderHook(() => h.useApiGet("test"));
 
     act(() => {
-      mockAxios.mockError(makeTestError(500, "Error thrown in testing"));
+      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
     });
 
     const [resp, err] = result.current;
 
     expect(resp).toBeUndefined();
-    expect(err).toBe("Error thrown in testing");
+    expect(err).toBe(ERRORS.__TESTING);
   });
 
   it("returns a generic error message on an unsuccessful response without a specific error message", async () => {
@@ -213,12 +213,12 @@ describe("useApiGetPaginated", () => {
     const { result } = renderHook(() => h.useApiGetPaginated("test"));
 
     act(() => {
-      mockAxios.mockError(makeTestError(500, "Error thrown in testing"));
+      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
     });
 
     const [, err] = result.current;
 
-    expect(err).not.toBeUndefined();
+    expect(err).toBe(ERRORS.__TESTING);
   });
 });
 
@@ -321,7 +321,7 @@ describe("useApiPost", () => {
     });
 
     act(() => {
-      mockAxios.mockError(makeTestError(500, "Error thrown in testing"));
+      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
     });
 
     await act(async () => {
@@ -329,7 +329,7 @@ describe("useApiPost", () => {
         await dataPromise;
         expect("Error was not thrown by useApiPost").toBe(false);
       } catch (e) {
-        expect(e).toBe("Error thrown in testing");
+        expect(e).toBe(ERRORS.__TESTING);
       }
     });
   });
@@ -466,7 +466,7 @@ describe("useApiPatch", () => {
     });
 
     act(() => {
-      mockAxios.mockError(makeTestError(500, "Error thrown in testing"));
+      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
     });
 
     await act(async () => {
@@ -474,7 +474,7 @@ describe("useApiPatch", () => {
         await dataPromise;
         expect("Error was not thrown by useApiPatch").toBe(false);
       } catch (e) {
-        expect(e).toBe("Error thrown in testing");
+        expect(e).toBe(ERRORS.__TESTING);
       }
     });
   });
