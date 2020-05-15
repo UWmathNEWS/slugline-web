@@ -26,17 +26,18 @@ jobs:
     - name: Cache node modules
       uses: actions/cache@v1
       env:
-        cache-name: cache-node-modules-v1
+        cache-name: cache-node-modules
       with:
         path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
-        key:  ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        key:  ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-node-
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
     # Runs a single command using the runners shell
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: npm install --no-save
+      run: npm install
 
     - name: Run tests
       run: npm test
