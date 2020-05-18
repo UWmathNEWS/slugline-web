@@ -19,17 +19,5 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-#   # Taken from GitHub actions documentation, with minor modifications
-#   - name: Cache node modules
-#     uses: actions/cache@v1
-#     env:
-#       cache-name: security
-#     with:
-#       path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
-#       key:  ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-#       restore-keys: |
-#         ${{ runner.os }}-${{ env.cache-name }}-
-#         ${{ runner.os }}-
-
     - name: Check for security vulnerabilities
       run: npm audit --audit-level=moderate
