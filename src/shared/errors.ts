@@ -56,7 +56,7 @@ const errorFactory = (templ: (...prop: string[]) => string) =>
 let errors = {
   __TESTING: "Error thrown in testing.",
   __TEST: {
-    __NESTED: "",
+    __NESTED: "$",
     __FUNC: errorFactory(a => a),
   },
   REQUEST: {

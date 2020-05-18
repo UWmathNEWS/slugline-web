@@ -10,11 +10,11 @@ const NonFieldErrors: React.FC<NonFieldErrorsProps> = (
 ) => {
   return (
     <>
-      {props.errors?.map((error) => (
+      {props.errors?.map(error => (
         <small key={error} className="invalid-feedback d-block">
-          {ERRORS[error] || error}
+          {ERRORS[error]}
         </small>
-      ))}{" "}
+      ))}
     </>
   );
 };

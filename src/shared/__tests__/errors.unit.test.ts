@@ -3,12 +3,12 @@ import ERRORS from "../errors";
 describe("ERRORS", () => {
   it("returns valid errors requested via dot queries", () => {
     const err = ERRORS.__TEST.__NESTED;
-    expect(err).toBe("");
+    expect(err).toBe("$");
   });
 
   it("returns valid errors requested via array queries", () => {
     const err = ERRORS["__TEST.__NESTED"];
-    expect(err).toBe("");
+    expect(err).toBe("$");
   });
 
   it("returns cached error messages correctly", () => {
