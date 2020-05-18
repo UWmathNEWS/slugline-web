@@ -8,11 +8,8 @@ on:
   pull_request:
     branches: [ master ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-16.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -24,13 +21,12 @@ jobs:
     - name: Cache node modules
       uses: actions/cache@v1
       env:
-        cache-name: cache-node-modules
+        cache-name: build
       with:
         path: ~/node_modules
-        key:  ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        key:  ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
+          ${{ runner.os }}-${{ env.cache-name }}-
           ${{ runner.os }}-
 
     - name: Install dependencies

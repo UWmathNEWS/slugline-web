@@ -10,11 +10,8 @@ on:
   pull_request:
     branches: [ master ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   security:
-    # The type of runner that the job will run on
     runs-on: ubuntu-16.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -22,19 +19,17 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    # Taken from GitHub actions documentation, with minor modifications
-    - name: Cache node modules
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
-        key:  ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
-
+#   # Taken from GitHub actions documentation, with minor modifications
+#   - name: Cache node modules
+#     uses: actions/cache@v1
+#     env:
+#       cache-name: security
+#     with:
+#       path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+#       key:  ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+#       restore-keys: |
+#         ${{ runner.os }}-${{ env.cache-name }}-
+#         ${{ runner.os }}-
 
     - name: Check for security vulnerabilities
       run: npm audit --audit-level=moderate
