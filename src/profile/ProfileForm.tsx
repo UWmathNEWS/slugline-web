@@ -299,7 +299,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                 value={
                   props.context.getValues().is_editor ? "editor" : "contributor"
                 }
-                className="custom-select"
                 custom
               >
                 <option value="contributor">Contributor</option>
