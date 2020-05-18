@@ -29,6 +29,7 @@ export const useProfileForm = (user?: User) => {
   const context = useForm<ProfileFormVals>({
     mode: "onBlur",
     reValidateMode: "onBlur",
+    validateCriteriaMode: "all",
     defaultValues: {
       username: "",
       first_name: "",
@@ -201,7 +202,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                     // if we're editing a user the field is disabled anyway, don't validate
                     return;
                   }
-                  if (!(await validateUserNameDebounced(username))) {
+                  if (username.length && !(await validateUserNameDebounced(username))) {
                     return Promise.resolve("USER.USERNAME.ALREADY_EXISTS");
                   }
                 },
