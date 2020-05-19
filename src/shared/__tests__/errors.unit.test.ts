@@ -83,10 +83,10 @@ describe("ERRORS", () => {
     }
   });
 
-  describe("USER.REQUIRED", () => {
+  describe("REQUIRED", () => {
     it("uses correct a/an form", () => {
-      expect(ERRORS.USER.REQUIRED.email).toMatch(/\ban\b/);
-      expect(ERRORS.USER.REQUIRED.password).toMatch(/\ba\b/);
+      expect(ERRORS.REQUIRED.email).toMatch(/\ban\b/);
+      expect(ERRORS.REQUIRED.password).toMatch(/\ba\b/);
     })
   });
 });

@@ -73,15 +73,19 @@ let errors = {
   ISSUE: {
     ALREADY_EXISTS: "This issue already exists.",
   },
+  REQUIRED: errorFactory((attr) =>
+    `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`
+  ),
   USER: {
     DOES_NOT_EXIST: "User does not exist.",
     COULD_NOT_CREATE: "Could not create user.",
     COULD_NOT_UPDATE: "Could not update profile.",
     COULD_NOT_DELETE: "Could not delete user.",
     INSUFFICIENT_PRIVILEGES: "Not enough privileges to change field.",
-    REQUIRED: errorFactory((attr) =>
-      `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`
-    ),
+    REQUIRED: errorFactory((attr) => {
+      console.warn("Using ERRORS.USER.REQUIRED is deprecated. Use ERRORS.REQUIRED instead.");
+      return `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`;
+    }),
     USERNAME: {
       ALREADY_EXISTS: "Username already exists.",
       CANNOT_CHANGE: "You cannot change your username after registration.",
