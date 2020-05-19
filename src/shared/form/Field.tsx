@@ -27,10 +27,9 @@ interface FieldPropsExtra<T> {
 type FieldProps<As extends React.ElementType = "input"> = FieldPropsExtra<any> &
   Omit<ReplaceProps<As, BsPrefixProps<As> & FormControlProps>, "ref">;
 
-const Field = React.forwardRef<FormControlElement, FieldProps>(
+const Field = React.forwardRef<FormControl & HTMLInputElement, FieldProps>(
   (props: FieldProps, forwardedRef) => {
     const {
-      innerRef,
       errors,
       hideErrorMessage,
       validMessage,
@@ -47,21 +46,32 @@ const Field = React.forwardRef<FormControlElement, FieldProps>(
             id={rest.id}
             isInvalid={errors[rest.name || ""]}
             isValid={!!validMessage && !errors[rest.name || ""]}
-            ref={forwardedRef as React.Ref<FormControl<React.ElementType<any>>>}
+            ref={forwardedRef}
             {...rest}
           />
           {append && <InputGroup.Append>{append}</InputGroup.Append>}
           {!hideErrorMessage && (
             <ErrorMessage name={rest.name || ""} errors={errors}>
-              {({ message }) =>
-                typeof message === "string" ? (
+              {({ message, messages }) => {
+                if (messages) {
+                  return Object.values(messages).map(msg =>
+                    typeof msg === "string" ? (
+                      <small key={msg} className="invalid-feedback d-block">
+                        {ERRORS[msg]}
+                      </small>
+                    ) : (
+                      msg
+                    )
+                  );
+                }
+                return typeof message === "string" ? (
                   <small className="invalid-feedback">
-                    {ERRORS[message] || message}
+                    {ERRORS[message]}
                   </small>
                 ) : (
                   message
                 )
-              }
+              }}
             </ErrorMessage>
           )}
           {validMessage && !errors[rest.name || ""] && (
