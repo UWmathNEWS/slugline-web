@@ -32,6 +32,9 @@ jobs:
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
       run: npm install --no-audit --no-fund
+    
+    - name: Check type errors
+      run: npx tsc --noEmit
 
     - name: Run tests
       run: npm test
