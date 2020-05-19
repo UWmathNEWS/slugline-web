@@ -410,7 +410,7 @@ const useRichTable = <D extends object = {}>({
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
     if (requestState !== RequestState.Complete) {
-      return new Array(data.length || 1).fill(0)
+      return new Array(data.length || 1).fill(null)
         .map((_, i): RichTableRow<D> => ({
           useRowProps() {
             return { key: i };
@@ -428,7 +428,7 @@ const useRichTable = <D extends object = {}>({
                 return "";
               }
             },
-            ...columns.map(({ key }): RichTableCell => ({
+            ...columns.map(({ key }, j): RichTableCell => ({
               useCellProps() {
                 return {
                   key,
@@ -436,7 +436,7 @@ const useRichTable = <D extends object = {}>({
                 }
               },
               render() {
-                return <Loader style="linear" />;
+                return <Loader style="linear" hideFromScreenreaders={i > 0 || j > 0} />;
               }
             }))
           ],
