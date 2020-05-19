@@ -1,9 +1,51 @@
+interface ErrorsProxy {
+  [key: string]: string | any;
+}
+
+const errorsProxyFactory = (errors: { [key: string]: any }): ErrorsProxy => {
+  let proxiedErrors: ErrorsProxy = {};
+  let memo: ErrorsProxy = {};
+
+  for (const key in errors) {
+    if (typeof errors[key] === "string" || errors[key].__typeof__ === "proxy")
+      proxiedErrors[key] = errors[key];
+    else
+      proxiedErrors[key] = errorsProxyFactory(errors[key]);
+  }
+
+  return new Proxy(proxiedErrors, {
+    get(_, prop: string) {
+      if (prop === "__typeof__") return "proxy";
+      if (prop.includes(" ")) return prop;
+      if (prop in memo) return memo[prop];
+
+      const parts = prop.split(".");
+
+      const res = parts.reduce<ErrorsProxy | string>((acc, key, index) => {
+        if (typeof acc !== "string" && key in acc) return acc[key];
+        else
+          throw new ReferenceError(
+            `Error ${parts.slice(0, index + 1).join(".")} does not exist.`
+          );
+      }, proxiedErrors);
+
+      if (typeof res === "string") memo[prop] = res;
+
+      return res;
+    },
+    set(_, prop, value) {
+      throw new Error("Cannot assign to errors.");
+    },
+  });
+};
+
 const errorFactory = (templ: (...prop: string[]) => string) =>
   new Proxy(
     {},
     {
       get(_, prop: string) {
-        return templ(...prop.replace("_", " ").split(","));
+        if (prop === "__typeof__") return "proxy";
+        return templ(...prop.replace(/_/g, " ").split(","));
       },
       has(_, prop) {
         return true;
@@ -11,8 +53,12 @@ const errorFactory = (templ: (...prop: string[]) => string) =>
     }
   );
 
-const errors = {
+let errors = {
   __TESTING: "Error thrown in testing.",
+  __TEST: {
+    __NESTED: "$",
+    __FUNC: errorFactory(a => a),
+  },
   REQUEST: {
     DID_NOT_SUCCEED: "Request did not succeed.",
     NEEDS_AUTHENTICATION: "Request requires authentication.",
@@ -27,15 +73,19 @@ const errors = {
   ISSUE: {
     ALREADY_EXISTS: "This issue already exists.",
   },
+  REQUIRED: errorFactory((attr) =>
+    `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`
+  ),
   USER: {
     DOES_NOT_EXIST: "User does not exist.",
     COULD_NOT_CREATE: "Could not create user.",
     COULD_NOT_UPDATE: "Could not update profile.",
     COULD_NOT_DELETE: "Could not delete user.",
     INSUFFICIENT_PRIVILEGES: "Not enough privileges to change field.",
-    REQUIRED: errorFactory((attr) =>
-      `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`
-    ),
+    REQUIRED: errorFactory((attr) => {
+      console.warn("Using ERRORS.USER.REQUIRED is deprecated. Use ERRORS.REQUIRED instead.");
+      return `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`;
+    }),
     USERNAME: {
       ALREADY_EXISTS: "Username already exists.",
       CANNOT_CHANGE: "You cannot change your username after registration.",
@@ -74,37 +124,7 @@ const errors = {
   },
 };
 
-interface ErrorsProxy {
-  [key: string]: string | any;
-}
 
-const errorsFactory = (): ErrorsProxy => {
-  let memo: ErrorsProxy = {};
-
-  return new Proxy(errors, {
-    get(_, prop: string) {
-      if (prop.includes(" ")) return prop;
-      if (prop in memo) return memo[prop];
-
-      const parts = prop.split(".");
-      const res = parts.reduce<ErrorsProxy | string>((acc, key, index) => {
-        if (typeof acc !== "string" && key in acc) return acc[key];
-        else
-          throw new ReferenceError(
-            `Error ${parts.slice(0, index + 1).join(".")} does not exist.`
-          );
-      }, errors);
-
-      if (typeof res === "string") memo[prop] = res;
-
-      return res;
-    },
-    set(_, prop, value) {
-      throw new Error("Cannot assign to errors.");
-    },
-  });
-};
-
-const ERRORS = errorsFactory();
+const ERRORS = errorsProxyFactory(errors);
 
 export default ERRORS;
