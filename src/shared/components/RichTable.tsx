@@ -1,7 +1,7 @@
 import "./RichTable.scss";
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Button, Col, Form, FormCheck, FormControl, Row, Spinner, Table } from "react-bootstrap";
+import { Button, Col, Form, FormCheck, FormControl, Row, Table } from "react-bootstrap";
 import nanoid from "nanoid";
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
@@ -10,6 +10,7 @@ import { APIError, APIResponse, Pagination, RequestState } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useToast } from "../contexts/ToastContext";
 import { useDebouncedCallback } from "../hooks";
+import Loader from "./Loader";
 
 /**
  * RichTable describes a component that displays tabular data in an interactive manner. It defines two main exports:
@@ -408,30 +409,40 @@ const useRichTable = <D extends object = {}>({
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
-    // TODO: Use a linear loader on the same number of rows as the previous state to reduce layout thrashing
     if (requestState !== RequestState.Complete) {
-      return [
-        {
+      return new Array(data.length || 1).fill(0)
+        .map((_, i): RichTableRow<D> => ({
           useRowProps() {
-            return { key: 0 };
+            return { key: i };
           },
           data: {} as D,
-          cells: [{
-            useCellProps() {
-              return {
-                key: 0,
-                className: "RichTable_loading text-center",
-                colSpan: columns.length + (selectable ? 1 : 0)
+          cells: [
+            {
+              useCellProps() {
+                return {
+                  key: 0,
+                  className: "RichTable_selectCheckbox RichTable_loading"
+                }
+              },
+              render() {
+                return "";
               }
             },
-            render() {
-              return <Spinner animation="border" />
-            }
-          }],
+            ...columns.map(({ key }): RichTableCell => ({
+              useCellProps() {
+                return {
+                  key,
+                  className: "RichTable_loading"
+                }
+              },
+              render() {
+                return <Loader style="linear" />;
+              }
+            }))
+          ],
           isSelected: false,
           setSelected() {}
-        }
-      ]
+        }));
     }
 
     // No data state
