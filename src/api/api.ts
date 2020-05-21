@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { APIResponse, APIError, Issue, Article } from "../shared/types";
+import { ToastBody } from "react-bootstrap";
 
 export const API_ROOT = "/api/";
 
@@ -13,9 +14,13 @@ const axiosRequest = async (config: RequestConfig) => {
   return await axios({ ...baseConfig, ...config });
 };
 
+type APIListFn<TResp, TError extends APIError = APIError> = () => Promise<
+  APIResponse<TResp, TError>
+>;
+
 export const listFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
-) => {
+): APIListFn<TResp, TError> => {
   return async () => {
     const config: RequestConfig = {
       url: endpoint,
@@ -28,9 +33,13 @@ export const listFactory = <TResp, TError extends APIError = APIError>(
   };
 };
 
+type APIGetFn<TResp, TError extends APIError = APIError> = (
+  id: string
+) => Promise<APIResponse<TResp, TError>>;
+
 export const getFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
-) => {
+): APIGetFn<TResp, TError> => {
   return async (id: string) => {
     const config: RequestConfig = {
       url: `${endpoint}${id}/`,
@@ -43,13 +52,18 @@ export const getFactory = <TResp, TError extends APIError = APIError>(
   };
 };
 
+type APIPostFn<TResp, TError extends APIError = APIError, TBody = TResp> = (
+  body: TBody,
+  csrf: string
+) => Promise<APIResponse<TResp, TError>>;
+
 export const postFactory = <
   TResp,
   TError extends APIError = APIError,
   TBody = TResp
 >(
   endpoint: string
-) => {
+): APIPostFn<TResp, TError, TBody> => {
   return async (body: TBody, csrf: string) => {
     const config: AxiosRequestConfig = {
       url: endpoint,
@@ -66,13 +80,19 @@ export const postFactory = <
   };
 };
 
+type APIPatchFn<TResp, TError extends APIError = APIError, TBody = TResp> = (
+  id: string,
+  body: Partial<TBody>,
+  csrf: string
+) => Promise<APIResponse<TResp, TError>>;
+
 export const patchFactory = <
   TResp,
   TError extends APIError = APIError,
   TBody = TResp
 >(
   endpoint: string
-) => {
+): APIPatchFn<TResp, TError, TBody> => {
   return async (id: string, body: Partial<TBody>, csrf: string) => {
     const config: AxiosRequestConfig = {
       url: `${endpoint}${id}/`,
@@ -89,9 +109,14 @@ export const patchFactory = <
   };
 };
 
+type APIDeleteFn<TResp, TError extends APIError = APIError> = (
+  id: string,
+  csrf: string
+) => Promise<APIResponse<TResp, TError>>;
+
 export const deleteFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
-) => {
+): APIDeleteFn<TResp, TError> => {
   return async (id: string, csrf: string) => {
     const config: AxiosRequestConfig = {
       url: `${endpoint}${id}/`,
