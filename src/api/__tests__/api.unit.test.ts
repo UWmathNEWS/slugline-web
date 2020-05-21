@@ -1,81 +1,277 @@
 import "core-js";
 import mockAxios from "jest-mock-axios";
-import { API_ROOT, getApiUrl, apiGet } from "../api";
-import ERRORS from "../../shared/errors";
-import { makeTestError } from "../../shared/test-utils";
+import {
+  getFactory,
+  listFactory,
+  postFactory,
+  patchFactory,
+  deleteFactory,
+  endpointFactory,
+} from "../api";
+import {
+  APIResponse,
+  APIResponseSuccess,
+  APIResponseFailure,
+  APIError,
+} from "../../shared/types";
 
-describe("getApiUrl", () => {
-  it("returns root endpoint on empty string", () => {
-    expect(getApiUrl("")).toBe(API_ROOT);
+const mockBody = {
+  data: "bingo bango bongo",
+};
+
+const mockCsrf = "bingobangobongo";
+
+const mockResponse: APIResponseSuccess<string> = {
+  success: true,
+  data: "bingo bango bongo",
+};
+
+const mockError: APIResponseFailure<APIError> = {
+  success: false,
+  error: {
+    detail: ["bingo bango bongo"],
+    status_code: 500,
+  },
+};
+
+describe("listFactory", () => {
+  it("handles successful list requests", async () => {
+    const list = listFactory("bingo/");
+    const resp = list();
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    expect(await resp).toEqual(mockResponse);
   });
 
-  it("returns correct endpoint on an endpoint", () => {
-    expect(getApiUrl("test/")).toBe(API_ROOT + "test/");
-  });
-
-  it("removes extraneous slashes", () => {
-    expect(getApiUrl("/test/")).toBe(API_ROOT + "test/");
-    expect(getApiUrl("test//")).toBe(API_ROOT + "test/");
-    expect(getApiUrl("test//test/")).toBe(API_ROOT + "test/test/");
-    expect(getApiUrl("/test///test//")).toBe(API_ROOT + "test/test/");
-  });
-
-  it("always appends a trailing slash", () => {
-    expect(getApiUrl("test")).toBe(API_ROOT + "test/");
+  it("handles unsuccessful list requests", async () => {
+    const list = listFactory("bingo/");
+    const resp = list();
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: mockError,
+      }
+    );
+    expect(await resp).toEqual(mockError);
   });
 });
 
-describe("getApi", () => {
-  let resp: Promise<any>;
-
-  beforeEach(() => {
-    resp = apiGet("test/")
+describe("getFactory", () => {
+  it("handles successful GET requests", async () => {
+    const get = getFactory("bingo/");
+    const resp = get("15");
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/15/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    expect(await resp).toEqual(mockResponse);
   });
 
-  afterEach(() => {
-    mockAxios.reset();
+  it("handles unsuccessful GET requests", async () => {
+    const get = getFactory("bingo/");
+    const resp = get("15");
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/15/",
+      },
+      {
+        data: mockError,
+      }
+    );
+    expect(await resp).toEqual(mockError);
+  });
+});
+
+describe("postFactory", () => {
+  it("handles successful POST requests", async () => {
+    const post = postFactory<typeof mockBody>("bingo/");
+    const resp = post(mockBody, mockCsrf);
+    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
+      mockCsrf
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "POST",
+        url: "bingo/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    expect(await resp).toEqual(mockResponse);
   });
 
-  it("handles responses (sanity check)", () => {
-    expect(mockAxios.get).toHaveBeenCalledWith("test/");
+  it("handles unsuccessful POST requests", async () => {
+    const post = postFactory<typeof mockBody>("bingo/");
+    const resp = post(mockBody, mockCsrf);
+    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
+      mockCsrf
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "POST",
+        url: "bingo/",
+      },
+      {
+        data: mockError,
+      }
+    );
+    expect(await resp).toEqual(mockError);
+  });
+});
+
+describe("patchFactory", () => {
+  it("handles successful PATCH requests", async () => {
+    const patch = patchFactory<typeof mockBody>("bingo/");
+    const resp = patch("15", mockBody, mockCsrf);
+    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
+      mockCsrf
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "PATCH",
+        url: "bingo/15/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    expect(await resp).toEqual(mockResponse);
   });
 
-  it("handles successful responses", async () => {
-    mockAxios.mockResponse({ data: { success: true, data: 1000 } });
-    const data = await resp;
-
-    expect(data).toBe(1000);
+  it("handles unsuccessful PATCH requests", async () => {
+    const patch = patchFactory<typeof mockBody>("bingo/");
+    const resp = patch("15", mockBody, mockCsrf);
+    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
+      mockCsrf
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "PATCH",
+        url: "bingo/15/",
+      },
+      {
+        data: mockError,
+      }
+    );
+    expect(await resp).toEqual(mockError);
   });
+});
 
-  it("handles successful null responses", async () => {
-    mockAxios.mockResponse({ data: { success: true, data: null } });
-    const data = await resp;
-
-    expect(data).toBeNull();
+describe("deleteFactory", () => {
+  it("handles successful DELETE requests", async () => {
+    const deleteFn = deleteFactory("bingo/");
+    const resp = deleteFn("15", mockCsrf);
+    expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
+      mockCsrf
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "DELETE",
+        url: "bingo/15/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    expect(await resp).toEqual(mockResponse);
   });
-
-  it("handles unsuccessful responses with a specific error message", async () => {
-    mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
-
-    try {
-      await resp;
-      expect("Error was not thrown by getApi").toBe(false);
-    } catch (e) {
-      expect(e).toEqual(ERRORS.__TESTING);
-    }
+  it("handles unsuccessful DELETE requests", async () => {
+    const deleteFn = deleteFactory("bingo/");
+    const resp = deleteFn("15", mockCsrf);
+    expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
+      mockCsrf
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "DELETE",
+        url: "bingo/15/",
+      },
+      {
+        data: mockError,
+      }
+    );
+    expect(await resp).toEqual(mockError);
   });
+});
 
-  it("handles unsuccessful responses without a specific error message", async () => {
-    mockAxios.mockError(makeTestError(500, null));
-
-    try {
-      await resp;
-      expect("Error was not thrown by getApi").toBe(false);
-    } catch (e) {
-      expect(e).toEqual({
-        status_code: 500,
-        detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
-      });
-    }
+describe("endpointFactory", () => {
+  it("generates all HTTP methods", async () => {
+    const endpoint = endpointFactory("bingo/");
+    const listResp = endpoint.list();
+    const getResp = endpoint.get("15");
+    const postResp = endpoint.post(mockBody, mockCsrf);
+    const patchResp = endpoint.patch("15", mockBody, mockCsrf);
+    const deleteResp = endpoint.delete("15", mockCsrf);
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/15/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "POST",
+        url: "bingo/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "PATCH",
+        url: "bingo/15/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "DELETE",
+        url: "bingo/15/",
+      },
+      {
+        data: mockResponse,
+      }
+    );
+    expect(await listResp).toEqual(mockResponse);
+    expect(await getResp).toEqual(mockResponse);
+    expect(await postResp).toEqual(mockResponse);
+    expect(await patchResp).toEqual(mockResponse);
+    expect(await deleteResp).toEqual(mockResponse);
   });
 });
