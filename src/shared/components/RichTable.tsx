@@ -134,6 +134,7 @@ export interface RichTableBag<D extends object = {}> {
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
   makeRequest: <T>(method: Method, row?: D, config?: AxiosRequestConfig) => Promise<T>;
+  requestState: RequestState;
 }
 
 /**
@@ -208,8 +209,11 @@ const useRichTable = <D extends object = {}>({
   );
 
   useEffect(() => {
-    setRequestState(RequestState.Complete);
-  }, [rawData]);
+    // Prevent table showing no data on initial load
+    if (rawData !== undefined || error !== undefined) {
+      setRequestState(RequestState.Complete);
+    }
+  }, [rawData, error]);
 
   const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 0 : 0;
 
@@ -445,8 +449,8 @@ const useRichTable = <D extends object = {}>({
         }));
     }
 
-    // No data state
-    if (!data.length) {
+    // No data or error state
+    if (!data.length || error !== undefined) {
       return [
         {
           useRowProps() {
@@ -462,7 +466,8 @@ const useRichTable = <D extends object = {}>({
               }
             },
             render() {
-              return "No rows returned."
+              // TODO: more descriptive error messages?
+              return error !== undefined ? `An error occurred: Error ${error.status_code}` : "No rows returned."
             }
           }],
           isSelected: false,
@@ -589,7 +594,8 @@ const useRichTable = <D extends object = {}>({
     searchQuery,
     setSearchQuery,
     executeAction,
-    makeRequest
+    makeRequest,
+    requestState,
   };
 
   return bag;
@@ -612,6 +618,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     totalCount,
     setSearchQuery,
     executeAction,
+    requestState,
   } = bag;
   const [setSearchDebounced, setSearch] = useDebouncedCallback(setSearchQuery, 500);
   const { addToasts } = useToast();
@@ -659,7 +666,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
 
     return (
       <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
-        <Button variant="link" disabled={page <= 1}>
+        <Button variant="link" disabled={page <= 1 || requestState !== RequestState.Complete}>
           <FontAwesomeIcon
             icon="chevron-left"
             className="RichTable_paginationIcon"
@@ -671,10 +678,10 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
         <span className="RichTable_paginationText">
           <span
             className="form-control d-inline-block d-lg-inline w-auto mb-1"
-            onClick={() => { setDisplayPageSelector(true) }}
+            onClick={() => { requestState === RequestState.Complete && setDisplayPageSelector(true) }}
           >{page}</span> / {numPages}
         </span>
-        <Button variant="link" disabled={page >= numPages}>
+        <Button variant="link" disabled={page >= numPages || requestState !== RequestState.Complete}>
           <FontAwesomeIcon
             icon="chevron-right"
             className="RichTable_paginationIcon"
