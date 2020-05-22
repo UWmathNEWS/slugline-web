@@ -30,7 +30,7 @@ export interface UnsafeRequestArgs {
   csrf: string;
 }
 
-export const listFactory = <TResp, TError extends APIError = APIError>(
+export const getFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
 ) => {
   return async () => {
@@ -49,7 +49,7 @@ export interface APIGetArgs {
   id: string;
 }
 
-export const getFactory = <TResp, TError extends APIError = APIError>(
+export const retrieveFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
 ) => {
   return async (args: APIGetArgs) => {
@@ -68,7 +68,7 @@ export interface APIPostArgs<TBody> extends UnsafeRequestArgs {
   body: TBody;
 }
 
-export const postFactory = <
+export const createFactory = <
   TResp,
   TError extends APIError = APIError,
   TBody = TResp
@@ -150,22 +150,22 @@ export const endpointFactory = <T, TError extends APIError = APIError>(
   endpoint: string
 ) => {
   return {
-    list: listFactory<T, TError>(endpoint),
     get: getFactory<T, TError>(endpoint),
-    post: postFactory<T, TError>(endpoint),
+    retrieve: retrieveFactory<T, TError>(endpoint),
+    create: createFactory<T, TError>(endpoint),
     patch: patchFactory<T, TError>(endpoint),
     delete: deleteFactory<T, TError>(endpoint),
   };
 };
 
 const api = {
-  me: listFactory<User | null>("me/"),
-  login: postFactory<
+  me: getFactory<User | null>("me/"),
+  login: createFactory<
     User,
     UserAPIError,
     { username: string; password: string }
   >("login/"),
-  logout: postFactory<void, APIError, void>("logout/"),
+  logout: createFactory<void, APIError, void>("logout/"),
   issues: endpointFactory<Issue>("issues/"),
   articles: endpointFactory<Article>("articles/"),
 };

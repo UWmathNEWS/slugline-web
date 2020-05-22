@@ -1,9 +1,9 @@
 import "core-js";
 import mockAxios from "jest-mock-axios";
 import {
+  retrieveFactory,
   getFactory,
-  listFactory,
-  postFactory,
+  createFactory,
   patchFactory,
   deleteFactory,
   endpointFactory,
@@ -22,7 +22,7 @@ import {
 
 describe("listFactory", () => {
   it("handles successful list requests", async () => {
-    const list = listFactory("bingo/");
+    const list = getFactory("bingo/");
     const resp = list();
     mockAxios.mockResponseFor(
       {
@@ -37,7 +37,7 @@ describe("listFactory", () => {
   });
 
   it("handles unsuccessful list requests", async () => {
-    const list = listFactory("bingo/");
+    const list = getFactory("bingo/");
     const resp = list();
     mockAxios.mockResponseFor(
       {
@@ -54,7 +54,7 @@ describe("listFactory", () => {
 
 describe("getFactory", () => {
   it("handles successful GET requests", async () => {
-    const get = getFactory("bingo/");
+    const get = retrieveFactory("bingo/");
     const resp = get({ id: "15" });
     mockAxios.mockResponseFor(
       {
@@ -69,7 +69,7 @@ describe("getFactory", () => {
   });
 
   it("handles unsuccessful GET requests", async () => {
-    const get = getFactory("bingo/");
+    const get = retrieveFactory("bingo/");
     const resp = get({ id: "15" });
     mockAxios.mockResponseFor(
       {
@@ -86,7 +86,7 @@ describe("getFactory", () => {
 
 describe("postFactory", () => {
   it("handles successful POST requests", async () => {
-    const post = postFactory<typeof MOCK_BODY>("bingo/");
+    const post = createFactory<typeof MOCK_BODY>("bingo/");
     const resp = post({ body: MOCK_BODY, csrf: MOCK_CSRF });
     expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
@@ -105,7 +105,7 @@ describe("postFactory", () => {
   });
 
   it("handles unsuccessful POST requests", async () => {
-    const post = postFactory<typeof MOCK_BODY>("bingo/");
+    const post = createFactory<typeof MOCK_BODY>("bingo/");
     const resp = post({ body: MOCK_BODY, csrf: MOCK_CSRF });
     expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
@@ -204,9 +204,9 @@ describe("deleteFactory", () => {
 describe("endpointFactory", () => {
   it("generates all HTTP methods", async () => {
     const endpoint = endpointFactory("bingo/");
-    const listResp = endpoint.list();
-    const getResp = endpoint.get({ id: "15" });
-    const postResp = endpoint.post({ body: MOCK_BODY, csrf: MOCK_CSRF });
+    const getResp = endpoint.get();
+    const retrieveResp = endpoint.retrieve({ id: "15" });
+    const createResp = endpoint.create({ body: MOCK_BODY, csrf: MOCK_CSRF });
     const patchResp = endpoint.patch({
       id: "15",
       body: MOCK_BODY,
@@ -258,9 +258,9 @@ describe("endpointFactory", () => {
         data: MOCK_RESPONSE,
       }
     );
-    expect(await listResp).toEqual(MOCK_RESPONSE);
     expect(await getResp).toEqual(MOCK_RESPONSE);
-    expect(await postResp).toEqual(MOCK_RESPONSE);
+    expect(await retrieveResp).toEqual(MOCK_RESPONSE);
+    expect(await createResp).toEqual(MOCK_RESPONSE);
     expect(await patchResp).toEqual(MOCK_RESPONSE);
     expect(await deleteResp).toEqual(MOCK_RESPONSE);
   });
