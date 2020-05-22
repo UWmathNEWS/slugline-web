@@ -1,5 +1,12 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { APIResponse, APIError, Issue, Article } from "../shared/types";
+import {
+  APIResponse,
+  APIError,
+  Issue,
+  Article,
+  User,
+  UserAPIError,
+} from "../shared/types";
 
 export const API_ROOT = "/api/";
 
@@ -152,6 +159,13 @@ export const endpointFactory = <T, TError extends APIError = APIError>(
 };
 
 const api = {
+  me: listFactory<User | null>("me/"),
+  login: postFactory<
+    User,
+    UserAPIError,
+    { username: string; password: string }
+  >("login/"),
+  logout: postFactory<void, APIError, void>("logout/"),
   issues: endpointFactory<Issue>("issues/"),
   articles: endpointFactory<Article>("articles/"),
 };
