@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Form,
   FormControl,
   FormControlProps,
   InputGroup,
@@ -43,7 +42,7 @@ const Field = React.forwardRef<FormControl & FormControlElement, FieldProps>(
       <>
         <InputGroup>
           {prepend && <InputGroup.Prepend>{prepend}</InputGroup.Prepend>}
-          <Form.Control
+          <FormControl
             name={name}
             isInvalid={errors[name]}
             isValid={!!validMessage && !errors[name]}
