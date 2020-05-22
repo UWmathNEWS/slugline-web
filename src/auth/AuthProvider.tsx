@@ -70,7 +70,7 @@ export const AuthProvider: React.FC = (props) => {
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise === undefined)) {
       isWaiting.current = true;
-      const promise = api.me().then((resp) => {
+      const promise = api.me.get().then((resp) => {
         if (user.csrfToken === null) {
           if (resp.success && resp.data) {
             dispatchUser({ type: "login", user: resp.data });
