@@ -133,7 +133,7 @@ export const useAPILazyCSRF = <
         return resp;
       });
     },
-    [fn]
+    [fn, auth]
   );
 
   return [

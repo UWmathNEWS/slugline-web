@@ -10,8 +10,10 @@ import {
   CSRF_COOKIE,
   MOCK_CSRF,
   MOCK_BODY,
+  testUser,
 } from "../../shared/test-utils";
 import { AuthProvider } from "../../auth/AuthProvider";
+import { APIResponse } from "../../shared/types";
 
 describe("useAPI", () => {
   afterEach(() => {
@@ -175,8 +177,12 @@ describe("useAPILazy", () => {
 });
 
 describe("useAPILazyCSRF", () => {
-  beforeEach(() => {
-    document.cookie = `${CSRF_COOKIE}=${MOCK_CSRF}`;
+  beforeAll(() => {
+    window.document.cookie = `${CSRF_COOKIE}=${MOCK_CSRF}`;
+  });
+
+  afterEach(() => {
+    mockAxios.reset();
   });
 
   it("doesn't make the request immediately", () => {
@@ -185,13 +191,30 @@ describe("useAPILazyCSRF", () => {
       wrapper: AuthProvider,
     });
 
-    expect(mockAxios.lastReqGet()).toBeUndefined();
+    // The auth provider will make a get request on its own so we need to dodge that here
+    expect(mockAxios.getReqMatching({ method: "PATCH" })).toBeUndefined();
   });
 
   it("executes the request with a CSRF token", async () => {
     const patch = patchFactory<string>("bingo/");
     const { result } = renderHook(() => useAPILazyCSRF(patch), {
       wrapper: AuthProvider,
+    });
+
+    // get the AuthProvider to trigger first
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "me/",
+        },
+        {
+          data: {
+            success: true,
+            data: testUser,
+          },
+        }
+      );
     });
 
     let [exec, info] = result.current;
@@ -202,7 +225,7 @@ describe("useAPILazyCSRF", () => {
         id: "15",
       });
 
-      const req = mockAxios.lastReqGet();
+      const req = mockAxios.getReqMatching({ method: "PATCH" });
       expect(req.url).toEqual("bingo/15/");
       expect(req.data).toEqual("bingo bango bongo");
       expect(req.config.headers["X-CSRFToken"]).toEqual(MOCK_CSRF);
@@ -218,7 +241,9 @@ describe("useAPILazyCSRF", () => {
     let [exec, info] = result.current;
     expect(info.state).toBe(RequestState.NotStarted);
 
-    act(() => {
+    let resp: Promise<APIResponse<string>>;
+
+    await act(async () => {
       exec({ id: "15", body: "bingo bango bongo" });
     });
 
@@ -237,6 +262,7 @@ describe("useAPILazyCSRF", () => {
       );
     });
 
+    [exec, info] = result.current;
     expect(info.state).toBe(RequestState.Complete);
   });
 });
