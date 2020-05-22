@@ -1,6 +1,6 @@
 import { APIResponse, APIError } from "../shared/types";
 import { useState, useEffect, useCallback } from "react";
-import { UnsafeRequestArgs } from "./api";
+import { UnsafeRequestArgs, RequestArgs } from "./api";
 import { useAuth } from "../auth/AuthProvider";
 
 export enum RequestState {
@@ -68,7 +68,11 @@ type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
  * success/failure can be determined at the call site.
  * @param fn An async function taking an object extending `SafeRequestArgs` and returning an `APIResponse<TResp, TError>`.
  */
-export const useAPILazy = <TResp, TArgs, TError extends APIError = APIError>(
+export const useAPILazy = <
+  TResp,
+  TArgs extends RequestArgs,
+  TError extends APIError = APIError
+>(
   fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
 ): UseAPILazyHook<TResp, TArgs> => {
   const [requestState, setRequestState] = useState<RequestState>(

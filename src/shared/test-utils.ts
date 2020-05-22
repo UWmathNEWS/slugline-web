@@ -51,3 +51,8 @@ export const MOCK_ERROR: APIResponseFailure<APIError> = {
     status_code: 500,
   },
 };
+
+export const MOCK_PARAMS = {
+  p: "p",
+  q: 15,
+};

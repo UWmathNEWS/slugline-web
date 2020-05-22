@@ -18,6 +18,7 @@ import {
   MOCK_ERROR,
   MOCK_BODY,
   MOCK_CSRF,
+  MOCK_PARAMS,
 } from "../../shared/test-utils";
 
 describe("listFactory", () => {
@@ -50,6 +51,14 @@ describe("listFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
+  it("sends URL params", async () => {
+    const getFn = getFactory("bingo/");
+    getFn({
+      params: MOCK_PARAMS,
+    });
+
+    expect(mockAxios.lastReqGet().config.params).toEqual(MOCK_PARAMS);
+  });
 });
 
 describe("getFactory", () => {
@@ -81,6 +90,15 @@ describe("getFactory", () => {
       }
     );
     expect(await resp).toEqual(MOCK_ERROR);
+  });
+  it("sends URL params", async () => {
+    const retreiveFn = retrieveFactory("bingo/");
+    retreiveFn({
+      id: "15",
+      params: MOCK_PARAMS,
+    });
+
+    expect(mockAxios.lastReqGet().config.params).toEqual(MOCK_PARAMS);
   });
 });
 
@@ -122,6 +140,16 @@ describe("postFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
+  it("sends URL params", async () => {
+    const createFn = createFactory("bingo/");
+    createFn({
+      body: MOCK_BODY,
+      csrf: MOCK_CSRF,
+      params: MOCK_PARAMS,
+    });
+
+    expect(mockAxios.lastReqGet().config.params).toEqual(MOCK_PARAMS);
+  });
 });
 
 describe("patchFactory", () => {
@@ -162,6 +190,17 @@ describe("patchFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
+  it("sends URL params", async () => {
+    const patchFn = patchFactory("bingo/");
+    patchFn({
+      id: "15",
+      body: MOCK_BODY,
+      csrf: MOCK_CSRF,
+      params: MOCK_PARAMS,
+    });
+
+    expect(mockAxios.lastReqGet().config.params).toEqual(MOCK_PARAMS);
+  });
 });
 
 describe("deleteFactory", () => {
@@ -198,6 +237,16 @@ describe("deleteFactory", () => {
       }
     );
     expect(await resp).toEqual(MOCK_ERROR);
+  });
+  it("sends URL params", async () => {
+    const deleteFn = deleteFactory("bingo/");
+    deleteFn({
+      id: "15",
+      csrf: MOCK_CSRF,
+      params: MOCK_PARAMS,
+    });
+
+    expect(mockAxios.lastReqGet().config.params).toEqual(MOCK_PARAMS);
   });
 });
 

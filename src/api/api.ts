@@ -21,22 +21,30 @@ const axiosRequest = async (config: RequestConfig) => {
 };
 
 /**
+ * Default arguments for all requests
+ */
+export interface RequestArgs {
+  params?: { [key: string]: string | number };
+}
+
+/**
  * Any API call that needs a CSRF token, i.e., "unsafe" methods like POST, DELETE, etc.,
  * should have an args object that extends this interface.
  * This allows `useAPILazyCSRF` to automatically handle the token.
  * @see useAPILazyCSRF
  */
-export interface UnsafeRequestArgs {
+export interface UnsafeRequestArgs extends RequestArgs {
   csrf: string;
 }
 
 export const getFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
 ) => {
-  return async () => {
+  return async (args?: RequestArgs) => {
     const config: RequestConfig = {
       url: endpoint,
       method: "GET",
+      params: args?.params || undefined,
     };
     const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
       config
@@ -45,7 +53,7 @@ export const getFactory = <TResp, TError extends APIError = APIError>(
   };
 };
 
-export interface APIGetArgs {
+export interface APIGetArgs extends RequestArgs {
   id: string;
 }
 
@@ -56,6 +64,7 @@ export const retrieveFactory = <TResp, TError extends APIError = APIError>(
     const config: RequestConfig = {
       url: `${endpoint}${args.id}/`,
       method: "GET",
+      params: args.params || undefined,
     };
     const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
       config
@@ -79,6 +88,7 @@ export const createFactory = <
     const config: AxiosRequestConfig = {
       url: endpoint,
       method: "POST",
+      params: args.params || undefined,
       data: args.body,
       headers: {
         "X-CSRFToken": args.csrf,
@@ -107,6 +117,7 @@ export const patchFactory = <
     const config: AxiosRequestConfig = {
       url: `${endpoint}${args.id}/`,
       method: "PATCH",
+      params: args.params || undefined,
       data: args.body,
       headers: {
         "X-CSRFToken": args.csrf,
@@ -130,6 +141,7 @@ export const deleteFactory = <TResp, TError extends APIError = APIError>(
     const config: AxiosRequestConfig = {
       url: `${endpoint}${args.id}/`,
       method: "DELETE",
+      params: args.params || undefined,
       headers: {
         "X-CSRFToken": args.csrf,
       },
