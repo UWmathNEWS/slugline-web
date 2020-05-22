@@ -1,26 +1,18 @@
-@font-face {
-  font-family: "DIN Next";
-  src: url("./fonts/din_next.woff") format("woff");
-}
-
-@font-face {
-  font-family: "Joanna Nova";
-  src: url("./fonts/joanna_nova.woff") format("woff");
-}
-
 @import "slugline_vars";
+@import "slugline_fonts";
 
 @import "~bootstrap/scss/bootstrap.scss";
 
 // Convenient class for mathnews logo
 .mathnews-logo::before {
   content: "math";
-  font-family: Joanna Nova;
+  font-family: $body-ff;
 }
 
 .mathnews-logo::after {
   content: "NEWS";
-  font-family: DIN Next;
+  font-family: $headings-ff;
+  font-weight: bold;
 }
 
 h1,
