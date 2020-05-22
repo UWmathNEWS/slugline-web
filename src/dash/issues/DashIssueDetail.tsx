@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { useIssue } from "../../api/hooks";
 import { Spinner } from "react-bootstrap";
 import { ArticleTitle } from "../articles/DashArticlesPage";
 import { ErrorPage } from "../../shared/errors/ErrorPage";
 import { RichTable, Column } from "../../shared/components/RichTable";
 import { Article } from "../../shared/types";
-import { getApiUrl } from "../../api/api";
+import api, { API_ROOT } from "../../api/api";
+import { useAPI } from "../../api/hooks";
 
 const columns: Column<Article>[] = [
   {
@@ -23,11 +23,13 @@ const columns: Column<Article>[] = [
 ];
 
 const DashIssueDetail = () => {
-  const { issueId } = useParams();
+  const { id } = useParams();
 
-  const id = issueId || "";
-
-  const [issue, issueError] = useIssue(id);
+  const [issue, issueError] = useAPI(
+    useCallback(() => {
+      return api.issues.retrieve({ id: id || "" });
+    }, [id])
+  );
 
   if (issueError) {
     return <ErrorPage error={issueError} />;
@@ -43,7 +45,7 @@ const DashIssueDetail = () => {
       <h3>Articles</h3>
       <RichTable<Article>
         columns={columns}
-        url={getApiUrl(`issues/${id}/`)}
+        url={`${API_ROOT}issues/${id}/`}
         pk="id"
         paginated
         selectable

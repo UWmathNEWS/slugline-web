@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { useCreateIssue, useLatestIssue } from "../../api/hooks";
 import { Button, Modal, Form, Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { useForm, DeepPartial } from "react-hook-form";
@@ -9,7 +8,8 @@ import Field from "../../shared/form/Field";
 import NonFieldErrors from "../../shared/form/NonFieldErrors";
 import { Issue } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
-import { getApiUrl } from "../../api/api";
+import { useAPILazyCSRF, useAPI } from "../../api/hooks";
+import api, { API_ROOT } from "../../api/api";
 
 interface IssueCreateModalProps {
   show: boolean;
@@ -84,7 +84,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 
   const history = useHistory();
 
-  const [createIssue, ,] = useCreateIssue();
+  const [createIssue, ,] = useAPILazyCSRF(api.issues.create);
 
   const [nonFieldErrors, setNonFieldErrors] = useState<string[]>([]);
 
@@ -95,8 +95,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 
   const onSubmit = async (vals: IssueCreateFormVals) => {
     const resp = await createIssue({
-      issue_code: vals.issueCode,
-      volume_num: vals.volumeNum,
+      body: { issue_code: vals.issueCode, volume_num: vals.volumeNum },
     });
     if (resp.success) {
       setNonFieldErrors([]);
@@ -171,7 +170,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 const DashIssuesPage = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
-  const [latestIssue, ,] = useLatestIssue();
+  const [latestIssue, ,] = useAPI(api.issues.latest);
 
   if (!latestIssue) {
     return <Spinner animation="border" />;
@@ -190,7 +189,7 @@ const DashIssuesPage = () => {
       </Button>
       <RichTable
         columns={columns}
-        url={getApiUrl("issues/")}
+        url={`${API_ROOT}issues/`}
         pk="id"
         paginated
         searchable

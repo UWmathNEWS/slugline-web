@@ -6,7 +6,10 @@ import {
   Article,
   User,
   UserAPIError,
+  IssueAPIError,
+  Pagination,
 } from "../shared/types";
+import { ProfileFormVals } from "../profile/ProfileForm";
 
 export const API_ROOT = "/api/";
 
@@ -170,16 +173,69 @@ export const endpointFactory = <T, TError extends APIError = APIError>(
   };
 };
 
+interface UserQueryArgs extends RequestArgs {
+  username: string;
+}
+
+const usernameQuery = async (
+  args: UserQueryArgs
+): Promise<APIResponse<void, APIError>> => {
+  const config: RequestConfig = {
+    url: `users/${args.username}/query/`,
+    method: "GET",
+    params: args.params,
+  };
+  const resp = await axiosRequest(config);
+  return resp.data;
+};
+
+interface PatchMeArgs extends UnsafeRequestArgs {
+  body: ProfileFormVals;
+}
+
+const patchMe = async (
+  args: PatchMeArgs
+): Promise<APIResponse<User, UserAPIError>> => {
+  const config: RequestConfig = {
+    url: "me/",
+    method: "PATCH",
+    data: args.body,
+    params: args.params,
+    headers: {
+      "X-CSRFToken": args.csrf,
+    },
+  };
+  const resp = await axiosRequest(config);
+  return resp.data;
+};
+
 const api = {
-  me: getFactory<User | null>("me/"),
+  me: {
+    get: getFactory<User | null>("me/"),
+    patch: patchMe,
+  },
   login: createFactory<
     User,
     UserAPIError,
     { username: string; password: string }
   >("login/"),
   logout: createFactory<void, APIError, void>("logout/"),
-  issues: endpointFactory<Issue>("issues/"),
-  articles: endpointFactory<Article>("articles/"),
+  issues: {
+    ...endpointFactory<Issue>("issues/"),
+    get: getFactory<Pagination<Issue>>("issues/"),
+    create: createFactory<Issue, IssueAPIError, Issue>("issues/"),
+    latest: getFactory<Issue, APIError>("issues/latest/"),
+  },
+  articles: {
+    ...endpointFactory<Article>("articles/"),
+    create: createFactory<Article, APIError, void>("articles/"),
+  },
+  users: {
+    ...endpointFactory<User>("users/"),
+    query: usernameQuery,
+    create: createFactory<User, UserAPIError, ProfileFormVals>("users/"),
+    patch: patchFactory<User, UserAPIError, ProfileFormVals>("users/"),
+  },
 };
 
 export default api;

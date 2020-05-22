@@ -117,7 +117,7 @@ export const useAPILazyCSRF = <
   TError extends APIError = APIError
 >(
   fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
-): UseAPILazyCSRFHook<TResp, TArgs> => {
+): UseAPILazyCSRFHook<TResp, TArgs, TError> => {
   const [requestState, setRequestState] = useState<RequestState>(
     RequestState.NotStarted
   );

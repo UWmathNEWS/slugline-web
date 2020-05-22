@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import { getApiUrl } from "../api/api";
 import { Modal, Button } from "react-bootstrap";
 
 import { User } from "../shared/types";
@@ -13,6 +12,7 @@ import {
   Column,
   RichTableBag,
 } from "../shared/components/RichTable";
+import api, { API_ROOT } from "../api/api";
 
 const columns: Column<User>[] = [
   {
@@ -128,7 +128,7 @@ const UserList = () => {
       </h1>
       <RichTable<User>
         columns={columns}
-        url={getApiUrl("users/")}
+        url={`${API_ROOT}users/`}
         pk="username"
         paginated
         selectable
@@ -162,19 +162,21 @@ const UserList = () => {
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
                 )
               ) {
-                return auth.delete(`users/${data.username}/`).then(
-                  () => {
-                    executeAction("refresh");
-                    alert(`Successfully deleted user ${data.username}`);
-                  },
-                  (err: string[] | string) => {
-                    alert(
-                      typeof err === "string"
-                        ? ERRORS[err]
-                        : err.map((e) => ERRORS[e])
-                    );
-                  }
-                );
+                return api.users
+                  .delete({ id: data.username, csrf: auth.csrfToken || "" })
+                  .then(
+                    () => {
+                      executeAction("refresh");
+                      alert(`Successfully deleted user ${data.username}`);
+                    },
+                    (err: string[] | string) => {
+                      alert(
+                        typeof err === "string"
+                          ? ERRORS[err]
+                          : err.map((e) => ERRORS[e])
+                      );
+                    }
+                  );
               }
 
               return Promise.reject();
