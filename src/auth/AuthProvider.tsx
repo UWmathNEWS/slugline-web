@@ -95,9 +95,7 @@ export const authReducer = (state: AuthState, action: AuthAction) => {
 
 export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
-  const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(
-    undefined
-  );
+  const readyPromise = useRef<Promise<void> | undefined>(undefined);
   const isWaiting = useRef<boolean>(false);
   const [user, dispatchUser] = useReducer(
     authReducer,
@@ -108,7 +106,7 @@ export const AuthProvider: React.FC = (props) => {
   );
 
   const check = (force: boolean = false) => {
-    if (!isWaiting.current && (force || readyPromise === undefined)) {
+    if (!isWaiting.current && (force || readyPromise.current === undefined)) {
       isWaiting.current = true;
       const promise = (
         apiGet<User | null>(getApiUrl("me/"))
@@ -122,10 +120,10 @@ export const AuthProvider: React.FC = (props) => {
         }
         isWaiting.current = false;
       });
-      setReadyPromise(promise);
+      readyPromise.current = promise;
       return promise;
     }
-    return readyPromise;
+    return readyPromise.current;
   };
 
   const isAuthenticated = () => {

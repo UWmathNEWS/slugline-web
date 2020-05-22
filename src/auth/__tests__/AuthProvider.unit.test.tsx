@@ -227,13 +227,26 @@ describe("AuthProvider", () => {
       });
 
       auth = result.current;
-
-      // TODO: wrapping in an act call shouldn't be needed once we fix #7
-      act(() => {
-        auth.check(true);
-      });
+      auth.check(true);
 
       expect(mockAxios.get).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not change AuthProvider internal state until promise is resolved", () => {
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: null } });
+      });
+
+      auth = result.current;
+      auth.check(true);
+
+      expect(auth).toBe(result.current);
+
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: null } });
+      });
+
+      expect(auth).not.toBe(result.current);
     });
 
     it("updates the user if they logged in between checks", () => {
@@ -242,10 +255,7 @@ describe("AuthProvider", () => {
       });
 
       auth = result.current;
-
-      act(() => {
-        auth.check(true);
-      });
+      auth.check(true);
 
       act(() => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
@@ -261,10 +271,7 @@ describe("AuthProvider", () => {
       });
 
       auth = result.current;
-
-      act(() => {
-        auth.check(true);
-      });
+      auth.check(true);
 
       act(() => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
@@ -277,9 +284,7 @@ describe("AuthProvider", () => {
     it("handles unsuccessful requests by throwing an error", async () => {
       let checkPromise: Promise<any>;
 
-      act(() => {
-        checkPromise = auth.check(true)!; // if the force flag is true then check must return a promise
-      });
+      checkPromise = auth.check(true)!; // if the force flag is true then check must return a promise
 
       act(() => {
         mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
@@ -323,9 +328,7 @@ describe("AuthProvider", () => {
       auth = result.current;
       expect(auth.isEditor()).toBe(false);
 
-      act(() => {
-        auth.check(true);
-      });
+      auth.check(true);
 
       act(() => {
         mockAxios.mockResponse({ data: { success: true, data: testAdmin } });
@@ -373,11 +376,7 @@ describe("AuthProvider", () => {
     });
 
     it("handles unsuccessful requests by throwing an error", async () => {
-      let loginPromise: Promise<any>;
-
-      act(() => {
-        loginPromise = auth.login("test", "test");
-      });
+      let loginPromise = auth.login("test", "test");
 
       act(() => {
         mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
@@ -425,11 +424,7 @@ describe("AuthProvider", () => {
     });
 
     it("handles unsuccessful requests by throwing an error", async () => {
-      let logoutPromise: Promise<any>;
-
-      act(() => {
-        logoutPromise = auth.logout();
-      });
+      let logoutPromise = auth.logout();
 
       act(() => {
         mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));

@@ -24,7 +24,7 @@ type PrivateRouteAction =
 /**
  * Wrapper for components inside a PrivateRoute. Handles authentication-related business.
  *
- * **This component depends on React handling  in a deterministic manner. If stuff breaks
+ * **This component depends on React handling state changes/lifecycle hooks in a deterministic manner. If stuff breaks
  * when changing routes or reloading pages, check here first.**
  *
  * The reason we created a wrapper component instead of handling authentication inside PrivateRoute is due to how
