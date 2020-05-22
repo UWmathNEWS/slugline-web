@@ -8,6 +8,7 @@ import {
   UserAPIError,
   IssueAPIError,
   Pagination,
+  ArticleContent,
 } from "../shared/types";
 import { ProfileFormVals } from "../profile/ProfileForm";
 
@@ -23,11 +24,15 @@ const axiosRequest = async (config: RequestConfig) => {
   return await axios({ ...baseConfig, ...config });
 };
 
+export interface QueryParams {
+  [key: string]: string | number;
+}
+
 /**
  * Default arguments for all requests
  */
 export interface RequestArgs {
-  params?: { [key: string]: string | number };
+  params?: QueryParams;
 }
 
 /**
@@ -229,6 +234,12 @@ const api = {
   articles: {
     ...endpointFactory<Article>("articles/"),
     create: createFactory<Article, APIError, void>("articles/"),
+  },
+  articleContent: {
+    retrieve: retrieveFactory<ArticleContent>("article_content/"),
+    patch: patchFactory<ArticleContent, APIError, ArticleContent>(
+      "article_content/"
+    ),
   },
   users: {
     ...endpointFactory<User>("users/"),

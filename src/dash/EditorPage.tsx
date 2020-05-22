@@ -1,18 +1,13 @@
 import React, { useState, useCallback } from "react";
 import SluglineEditor from "../editor/SluglineEditor";
 import { useParams } from "react-router-dom";
-import {
-  useArticle,
-  useArticleContent,
-  useUpdateArticleContent,
-  useUpdateArticle,
-} from "../api/hooks";
+import { useAPI, useAPILazyCSRF, RequestState } from "../api/hooks";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { Node } from "slate";
 import { useDebouncedCallback } from "../shared/hooks";
 import EditorInfo from "../editor/EditorInfo";
-import { RequestState } from "../shared/types";
 import { ErrorPage } from "../shared/errors/ErrorPage";
+import api from "../api/api";
 
 const getEditorRequestState = (
   articleState: RequestState,
@@ -29,7 +24,7 @@ const getEditorRequestState = (
   ) {
     return RequestState.Complete;
   } else {
-    return RequestState.Started;
+    return RequestState.Running;
   }
 };
 
@@ -37,21 +32,32 @@ const ARTICLE_SAVE_DELAY_MSECS = 10000;
 
 const EditorPage: React.FC = () => {
   const { articleId } = useParams();
-  const id = parseInt(articleId || "");
 
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
-  const [article, articleError] = useArticle(id);
-  const [articleContent, articleContentError] = useArticleContent(id);
+  const [article, articleError] = useAPI(
+    useCallback(() => {
+      return api.articles.retrieve({ id: articleId || "" });
+    }, [articleId])
+  );
 
-  const [updateArticle, updateArticleState] = useUpdateArticle(id);
+  const [articleContent, articleContentError] = useAPI(
+    useCallback(() => {
+      return api.articleContent.retrieve({ id: articleId || "" });
+    }, [articleId])
+  );
+
+  const [updateArticle, updateArticleInfo] = useAPILazyCSRF(api.articles.patch);
 
   const saveArticle = useCallback(
     async (title: string, subtitle: string, author: string) => {
       await updateArticle({
-        title: title,
-        sub_title: subtitle,
-        author: author,
+        id: articleId || "",
+        body: {
+          title: title,
+          sub_title: subtitle,
+          author: author,
+        },
       });
       setLastSaved(new Date());
     },
@@ -63,15 +69,17 @@ const EditorPage: React.FC = () => {
     ARTICLE_SAVE_DELAY_MSECS
   );
 
-  const [
-    updateArticleContent,
-    updateArticleContentState,
-  ] = useUpdateArticleContent(id);
+  const [updateArticleContent, updateArticleContentInfo] = useAPILazyCSRF(
+    api.articleContent.patch
+  );
 
   const saveArticleContent = useCallback(
     async (content_raw: Node[]) => {
       await updateArticleContent({
-        content_raw: JSON.stringify(content_raw),
+        id: articleId || "",
+        body: {
+          content_raw: JSON.stringify(content_raw),
+        },
       });
       setLastSaved(new Date());
     },
@@ -115,8 +123,8 @@ const EditorPage: React.FC = () => {
         <EditorInfo
           lastSaveTime={lastSaved}
           editorRequestState={getEditorRequestState(
-            updateArticleState,
-            updateArticleContentState
+            updateArticleInfo.state,
+            updateArticleContentInfo.state
           )}
         />
       </Col>
