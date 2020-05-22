@@ -1,17 +1,13 @@
 import React, {
-  createContext,
-  useState,
   useContext,
   useEffect,
   useReducer,
   useRef,
 } from "react";
-import Cookie from "js-cookie";
 
 import {
   User,
   UserAPIResponse,
-  AuthContext,
   APIResponse,
 } from "../shared/types";
 import axios, {
@@ -22,76 +18,12 @@ import axios, {
 } from "axios";
 import { apiGet, getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
-
-interface AuthState {
-  user: User | null;
-  csrfToken: string | null;
-}
-
-type AuthAction =
-  | { type: "post"; user: User }
-  | { type: "login"; user: User }
-  | { type: "logout" };
-
-export const Auth = createContext<AuthContext>({
-  user: null,
-  csrfToken: null,
-  check: () => undefined,
-  isAuthenticated: () => false,
-  isEditor: () => false,
-  post: () => Promise.resolve(undefined),
-  put: () => Promise.resolve(undefined),
-  patch: () => Promise.resolve(undefined),
-  delete: () => Promise.resolve(undefined),
-  login: () => Promise.resolve(undefined),
-  logout: () => Promise.resolve(),
-});
+import { authReducer, USER_LOCALSTORAGE_KEY, Auth } from "./Auth";
 
 interface AxiosConfig extends AxiosRequestConfig {
   method: AxiosMethod;
   url: string;
 }
-
-const CSRF_COOKIE = "csrftoken";
-const USER_LOCALSTORAGE_KEY = "slugline-user";
-
-export const authReducer = (state: AuthState, action: AuthAction) => {
-  switch (action.type) {
-    case "post":
-      if (action.user === null) {
-        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-      } else {
-        localStorage.setItem(
-          USER_LOCALSTORAGE_KEY,
-          JSON.stringify(action.user)
-        );
-      }
-      return {
-        user: action.user,
-        csrfToken: state.csrfToken,
-      };
-    case "login":
-      if (action.user === null) {
-        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-      } else {
-        localStorage.setItem(
-          USER_LOCALSTORAGE_KEY,
-          JSON.stringify(action.user)
-        );
-      }
-      return {
-        user: action.user,
-        csrfToken: Cookie.get(CSRF_COOKIE) || null,
-      };
-    case "logout":
-      localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-      return {
-        user: null,
-        csrfToken: Cookie.get(CSRF_COOKIE) || null,
-      };
-  }
-  return state;
-};
 
 export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);

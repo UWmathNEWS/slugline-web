@@ -3,7 +3,8 @@ import mockAxios from "jest-mock-axios";
 import * as h from "../hooks";
 import { renderHook, act } from "@testing-library/react-hooks";
 import { RequestState } from "../../shared/types";
-import { CSRF_COOKIE, testUser, makeTestError } from "../../shared/test-utils";
+import { CSRF_COOKIE } from "../../auth/Auth";
+import { testUser, makeTestError } from "../../shared/test-utils";
 
 import { AuthProvider } from "../../auth/AuthProvider";
 import ERRORS from "../../shared/errors";

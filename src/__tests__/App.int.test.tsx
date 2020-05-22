@@ -7,7 +7,8 @@ import { render, fireEvent, getByText } from "@testing-library/react";
 import App from "../App";
 import { createMemoryHistory } from "history";
 import { act } from "react-dom/test-utils";
-import { USER_LOCALSTORAGE_KEY, testUser } from "../shared/test-utils";
+import { USER_LOCALSTORAGE_KEY } from "../auth/Auth";
+import { testUser } from "../shared/test-utils";
 
 describe("Integration test for main app component", () => {
   afterEach(() => {

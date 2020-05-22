@@ -1,124 +1,15 @@
 import React from "react";
-import { Auth, AuthProvider, authReducer, useAuth } from "../AuthProvider";
+import { CSRF_COOKIE } from "../Auth";
+import { AuthProvider, useAuth } from "../AuthProvider";
 import { render } from "@testing-library/react";
 import { HookResult, renderHook, act } from "@testing-library/react-hooks";
 import mockAxios from "jest-mock-axios";
-import { CSRF_COOKIE, makeTestError, testAdmin, testUser, USER_LOCALSTORAGE_KEY } from "../../shared/test-utils";
+import { makeTestError, testAdmin, testUser } from "../../shared/test-utils";
 import ERRORS from "../../shared/errors";
-import { User, AuthContext } from "../../shared/types";
+import { AuthContext } from "../../shared/types";
 
-describe("authReducer", () => {
-  let authState: { user: User | null, csrfToken: string | null; };
-
-  beforeAll(() => {
-    window.document.cookie = `${CSRF_COOKIE}=csrf`;
-  });
-
-  beforeEach(() => {
-    authState = {
-      user: null,
-      csrfToken: null
-    };
-  });
-
-  afterEach(() => {
-    localStorage.clear();
-  });
-
-  afterAll(() => {
-    delete window.document.cookie;
-  });
-
-  describe("action:post", () => {
-    it("returns the passed-in user", () => {
-      const { user } = authReducer(authState, {
-        type: "post",
-        user: testUser,
-      });
-
-      expect(user).toEqual(testUser);
-    });
-
-    it("does not update the CSRF token", () => {
-      authState.csrfToken = "abcd";
-      const { csrfToken } = authReducer(authState, {
-        type: "post",
-        user: testUser,
-      });
-
-      expect(csrfToken).toBe("abcd");
-    });
-
-    it("updates the user in localStorage", () => {
-      localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
-      authReducer(authState, {
-        type: "post",
-        user: testAdmin,
-      });
-
-      expect(JSON.parse(localStorage.getItem(USER_LOCALSTORAGE_KEY) || "")).not.toEqual(testUser);
-    });
-  });
-
-  describe("action:login", () => {
-    it("returns the passed-in user", () => {
-      const { user } = authReducer(authState, {
-        type: "login",
-        user: testUser,
-      });
-
-      expect(user).toEqual(testUser);
-    });
-
-    it("updates the CSRF token", () => {
-      authState.csrfToken = "abcd";
-      const { csrfToken } = authReducer(authState, {
-        type: "login",
-        user: testUser,
-      });
-
-      expect(csrfToken).toBe("csrf");
-    });
-
-    it("updates the user in localStorage", () => {
-      localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
-      authReducer(authState, {
-        type: "login",
-        user: testAdmin,
-      });
-
-      expect(JSON.parse(localStorage.getItem(USER_LOCALSTORAGE_KEY) || "")).not.toEqual(testUser);
-    });
-  });
-
-  describe("action:logout", () => {
-    it("clears the user", () => {
-      const { user } = authReducer(authState, {
-        type: "logout",
-      });
-
-      expect(user).toBeNull();
-    });
-
-    it("updates the CSRF token", () => {
-      authState.csrfToken = "abcd";
-      const { csrfToken } = authReducer(authState, {
-        type: "logout",
-      });
-
-      expect(csrfToken).toBe("csrf");
-    });
-
-    it("removes the user in localStorage", () => {
-      localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
-      authReducer(authState, {
-        type: "logout",
-      });
-
-      expect(localStorage.getItem(USER_LOCALSTORAGE_KEY)).toBeNull();
-    });
-  });
-});
+// for spies
+import * as _a from "../Auth";
 
 describe("AuthProvider", () => {
   let result: HookResult<AuthContext>;
@@ -364,15 +255,17 @@ describe("AuthProvider", () => {
       });
     });
 
-    it("logs in the user with the provided data", () => {
+    it("sends the login action to authReducer", () => {
+      const spy = jest.spyOn(_a, "authReducer");
+
       auth.login("test", "test");
 
       act(() => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
-      auth = result.current;
-      expect(auth.user).toEqual(testUser);
+      expect(spy.mock.calls[0][1].type).toBe("login");
+      spy.mockRestore();
     });
 
     it("handles unsuccessful requests by throwing an error", async () => {
@@ -412,15 +305,17 @@ describe("AuthProvider", () => {
       });
     });
 
-    it("logs out the user", () => {
+    it("sends the logout action to authReducer", () => {
+      const spy = jest.spyOn(_a, "authReducer");
+
       auth.logout();
 
       act(() => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
-      auth = result.current;
-      expect(auth.user).toBeNull();
+      expect(spy.mock.calls[0][1].type).toBe("logout");
+      spy.mockRestore();
     });
 
     it("handles unsuccessful requests by throwing an error", async () => {

@@ -1,6 +1,3 @@
-export const CSRF_COOKIE = "csrftoken";
-export const USER_LOCALSTORAGE_KEY = "slugline-user";
-
 export const testUser = {
   username: "test",
   first_name: "test",
