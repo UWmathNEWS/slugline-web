@@ -13,6 +13,12 @@ const axiosRequest = async (config: RequestConfig) => {
   return await axios({ ...baseConfig, ...config });
 };
 
+/**
+ * Any API call that needs a CSRF token, i.e., "unsafe" methods like POST, DELETE, etc.,
+ * should have an args object that extends this interface.
+ * This allows `useAPILazyCSRF` to automatically handle the token.
+ * @see useAPILazyCSRF
+ */
 export interface UnsafeRequestArgs {
   csrf: string;
 }

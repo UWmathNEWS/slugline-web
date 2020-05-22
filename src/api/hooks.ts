@@ -1,204 +1,143 @@
-import axios, { AxiosResponse } from "axios";
-import {
-  APIError,
-  APIGetHook,
-  APIGetHookPaginated,
-  APIMutateHook,
-  RequestState,
-  Issue,
-  User,
-  UserAPIError,
-  Article,
-  Pagination,
-  APIResponse,
-  APIResponseSuccess,
-  ArticleContent,
-  IssueAPIError,
-} from "../shared/types";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useAuth } from "../auth/AuthProvider";
-import { getApiUrl } from "./api";
+import { APIResponse, APIError } from "../shared/types";
+import { useState, useEffect, useCallback } from "react";
 import ERRORS from "../shared/errors";
+import { UnsafeRequestArgs } from "./api";
+import { useAuth } from "../auth/AuthProvider";
 
-export const useApiGet = <T, U extends APIError = APIError>(
-  url: string
-): APIGetHook<T, U> => {
-  const [response, setResponse] = useState<T | undefined>(undefined);
-  const [error, setError] = useState<U | undefined>(undefined);
+export enum RequestState {
+  /** The request has never been triggered. */
+  NotStarted,
+  /** The request is currently in-progress and waiting for a response. */
+  Running,
+  /** The request is complete and has received a successful response. */
+  Complete,
+}
+
+export interface RequestInfo {
+  state: RequestState;
+}
+
+type UseAPIHook<TResp, TError extends APIError = APIError> = [
+  TResp | undefined,
+  TError | undefined,
+  RequestInfo
+];
+
+/**
+ * Wrap a promise-based API call so that it runs immediately when the component is mounted.
+ * @param fn A parameter-less async function returning an `APIResponse<TResp, TError>`. If you need this function to vary based on props,
+ * wrap it in a parameter-less `useCallback` that captures the props and pass that instead.
+ */
+export const useApi = <TResp, TError extends APIError = APIError>(
+  fn: () => Promise<APIResponse<TResp, TError>>
+): UseAPIHook<TResp, TError> => {
+  const [requestState, setRequestState] = useState<RequestState>(
+    RequestState.NotStarted
+  );
+
+  const [data, setData] = useState<TResp | undefined>(undefined);
+  const [error, setError] = useState<TError | undefined>(undefined);
 
   useEffect(() => {
-    axios.get(url).then((axiosResp: AxiosResponse<APIResponseSuccess<T>>) => {
-      setResponse(axiosResp.data.data);
-    }, (axiosErr) => {
-      setError(axiosErr.response?.data.error ?? {
-        status_code: axiosErr.code,
-        detail: [ERRORS.REQUEST.DID_NOT_SUCCEED],
-      });
+    setRequestState(RequestState.Running);
+    fn().then((resp) => {
+      if (resp.success) {
+        setData(resp.data);
+      } else {
+        setError(resp.error);
+      }
+      setRequestState(RequestState.Complete);
     });
-  }, [url]);
-  return [response, error];
-};
-
-export const useApiGetPaginated = <T, U extends APIError = APIError>(
-  url: string
-): APIGetHookPaginated<T, U> => {
-  const [currentUrl, setCurrentUrl] = useState<string>(url);
-  const [resp, error] = useApiGet<Pagination<T>, U>(currentUrl);
-
-  const next = () => {
-    if (resp?.next) {
-      setCurrentUrl(resp.next);
-    }
-  };
-
-  const previous = () => {
-    if (resp?.previous) {
-      setCurrentUrl(resp.previous);
-    }
-  };
+  }, [fn]);
 
   return [
-    {
-      next: resp?.next ? next : null,
-      previous: resp?.previous ? previous : null,
-      page: resp ?? null,
-    },
+    data,
     error,
+    {
+      state: requestState,
+    },
   ];
 };
 
-export const useApiPost = <S, T, U extends APIError = APIError>(
-  url: string
-): APIMutateHook<S, T, U> => {
-  const auth = useAuth();
-  const csrfToken = useRef<string | null>(auth.csrfToken);
+type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
+  (args: TArgs) => Promise<APIResponse<TResp, TError>>,
+  RequestInfo
+];
 
-  const [state, setState] = useState<RequestState>(RequestState.NotStarted);
+/**
+ * Wrap a promise-based API call and return a callback to execute it. The callback returns an `APIResponse` so
+ * success/failure can be determined at the call site.
+ * @param fn An async function taking an object extending `SafeRequestArgs` and returning an `APIResponse<TResp, TError>`.
+ */
+export const useApiLazy = <TResp, TArgs, TError extends APIError = APIError>(
+  fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
+): UseAPILazyHook<TResp, TArgs> => {
+  const [requestState, setRequestState] = useState<RequestState>(
+    RequestState.NotStarted
+  );
 
-  // We need to use a ref to store the CSRF token; useCallback does not refresh when auth changes.
-  // TODO in AuthProvider's integration test: Test that the ref updates when the token changes in a session
-  useEffect(() => {
-    csrfToken.current = auth.csrfToken;
-  }, [auth.csrfToken]);
-
-  const post = useCallback(
-    async (body: S): Promise<APIResponse<T, U>> => {
-      let headers: { [header: string]: string } = {};
-      if (csrfToken.current) {
-        headers["X-CSRFToken"] = csrfToken.current;
-      }
-      setState(RequestState.Started);
-      try {
-        const resp = await axios.post<APIResponse<T, U>>(url, body, {
-          headers: headers
-        });
-        setState(RequestState.Complete);
-        return resp.data;
-      } catch (axiosErr) {
-        setState(RequestState.Complete);
-        throw axiosErr.response?.data.error ?? {
-          status_code: axiosErr.code,
-          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
-        };
-      }
+  const exec = useCallback(
+    (args: TArgs) => {
+      setRequestState(RequestState.Running);
+      return fn(args).then((resp) => {
+        setRequestState(RequestState.Complete);
+        return resp;
+      });
     },
-    [url]
+    [fn]
   );
 
-  return [post, state];
-};
-
-export const useApiPatch = <S, T, U extends APIError = APIError>(
-  url: string
-): APIMutateHook<S, T, U> => {
-  const auth = useAuth();
-  const csrfToken = useRef<string | null>(auth.csrfToken);
-
-  const [state, setState] = useState<RequestState>(RequestState.NotStarted);
-
-  useEffect(() => {
-    csrfToken.current = auth.csrfToken;
-  }, [auth.csrfToken]);
-
-  const patch = useCallback(
-    async (body: S): Promise<APIResponse<T, U>> => {
-      let headers: { [header: string]: string } = {};
-      if (csrfToken.current) {
-        headers["X-CSRFToken"] = csrfToken.current;
-      }
-      setState(RequestState.Started);
-      try {
-        const resp = await axios.patch<APIResponse<T, U>>(url, body, {
-          headers: headers
-        });
-        setState(RequestState.Complete);
-        return resp.data;
-      } catch (axiosErr) {
-        setState(RequestState.Complete);
-        throw axiosErr.response?.data.error ?? {
-          status_code: axiosErr.code,
-          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
-        };
-      }
+  return [
+    exec,
+    {
+      state: requestState,
     },
-    [url]
+  ];
+};
+
+type UseAPILazyCSRFHook<
+  TResp,
+  TArgs extends UnsafeRequestArgs,
+  TError extends APIError = APIError
+> = [(args: TArgs) => Promise<APIResponse<TResp, TError>>, RequestInfo];
+
+/**
+ * A variant of useAPILazy that handles the CSRF token automatically.
+ * @see useApiLazy
+ */
+export const useApiLazyCSRF = <
+  TResp,
+  TArgs extends UnsafeRequestArgs,
+  TError extends APIError = APIError
+>(
+  fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
+): UseAPILazyCSRFHook<TResp, TArgs> => {
+  const [requestState, setRequestState] = useState<RequestState>(
+    RequestState.NotStarted
   );
 
-  return [patch, state];
-};
+  const auth = useAuth();
 
-export const useLatestIssue = (): APIGetHook<Issue> => {
-  return useApiGet<Issue>(getApiUrl("issues/latest/"));
-};
-
-export const useAllIssues = (): APIGetHook<Pagination<Issue>> => {
-  return useApiGet<Pagination<Issue>>(getApiUrl("issues/"));
-};
-
-export const useIssue = (issueId?: string): APIGetHook<Issue> => {
-  return useApiGet<Issue>(getApiUrl(`issues/${issueId}`));
-};
-
-export const useCreateIssue = () => {
-  return useApiPost<Issue, Issue, IssueAPIError>(getApiUrl("issues/"));
-};
-
-export const useIssueArticles = (
-  issueId?: string
-): APIGetHookPaginated<Article> => {
-  return useApiGetPaginated<Article>(getApiUrl(`issues/${issueId}/articles/`));
-};
-
-export const useIssueList = (): APIGetHookPaginated<Issue> => {
-  return useApiGetPaginated<Issue>(getApiUrl("issues/"));
-};
-
-export const useUsersList = (): APIGetHookPaginated<User, UserAPIError> => {
-  return useApiGetPaginated<User, UserAPIError>(getApiUrl("users/"));
-};
-
-export const useUserArticles = (): APIGetHookPaginated<Article> => {
-  return useApiGetPaginated<Article>(getApiUrl("user_articles/"));
-};
-
-export const useCreateArticle = () => {
-  return useApiPost<void, Article>(getApiUrl("articles/"));
-};
-
-export const useArticle = (id: number) => {
-  return useApiGet<Article>(getApiUrl(`articles/${id}/`));
-};
-
-export const useUpdateArticle = (id: number) => {
-  return useApiPatch<Partial<Article>, Article>(getApiUrl(`articles/${id}/`));
-};
-
-export const useArticleContent = (id: number) => {
-  return useApiGet<ArticleContent>(getApiUrl(`article_content/${id}/`));
-};
-
-export const useUpdateArticleContent = (id: number) => {
-  return useApiPatch<ArticleContent, ArticleContent>(
-    getApiUrl(`article_content/${id}/`)
+  const exec = useCallback(
+    (args: Omit<TArgs, "csrf">) => {
+      setRequestState(RequestState.Running);
+      const argsWithCsrf = {
+        ...args,
+        csrf: auth.csrfToken || "",
+      };
+      // argsWithCsrf doesn't typecheck as TArgs, so we force the issue.
+      return fn(argsWithCsrf as TArgs).then((resp) => {
+        setRequestState(RequestState.Complete);
+        return resp;
+      });
+    },
+    [fn]
   );
+
+  return [
+    exec,
+    {
+      state: requestState,
+    },
+  ];
 };
