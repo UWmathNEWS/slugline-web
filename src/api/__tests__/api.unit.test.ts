@@ -69,7 +69,7 @@ describe("listFactory", () => {
 describe("getFactory", () => {
   it("handles successful GET requests", async () => {
     const get = getFactory("bingo/");
-    const resp = get("15");
+    const resp = get({ id: "15" });
     mockAxios.mockResponseFor(
       {
         method: "GET",
@@ -84,7 +84,7 @@ describe("getFactory", () => {
 
   it("handles unsuccessful GET requests", async () => {
     const get = getFactory("bingo/");
-    const resp = get("15");
+    const resp = get({ id: "15" });
     mockAxios.mockResponseFor(
       {
         method: "GET",
@@ -101,7 +101,7 @@ describe("getFactory", () => {
 describe("postFactory", () => {
   it("handles successful POST requests", async () => {
     const post = postFactory<typeof mockBody>("bingo/");
-    const resp = post(mockBody, mockCsrf);
+    const resp = post({ body: mockBody, csrf: mockCsrf });
     expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       mockCsrf
@@ -120,7 +120,7 @@ describe("postFactory", () => {
 
   it("handles unsuccessful POST requests", async () => {
     const post = postFactory<typeof mockBody>("bingo/");
-    const resp = post(mockBody, mockCsrf);
+    const resp = post({ body: mockBody, csrf: mockCsrf });
     expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       mockCsrf
@@ -141,7 +141,7 @@ describe("postFactory", () => {
 describe("patchFactory", () => {
   it("handles successful PATCH requests", async () => {
     const patch = patchFactory<typeof mockBody>("bingo/");
-    const resp = patch("15", mockBody, mockCsrf);
+    const resp = patch({ id: "15", body: mockBody, csrf: mockCsrf });
     expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       mockCsrf
@@ -160,7 +160,7 @@ describe("patchFactory", () => {
 
   it("handles unsuccessful PATCH requests", async () => {
     const patch = patchFactory<typeof mockBody>("bingo/");
-    const resp = patch("15", mockBody, mockCsrf);
+    const resp = patch({ id: "15", body: mockBody, csrf: mockCsrf });
     expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       mockCsrf
@@ -181,7 +181,7 @@ describe("patchFactory", () => {
 describe("deleteFactory", () => {
   it("handles successful DELETE requests", async () => {
     const deleteFn = deleteFactory("bingo/");
-    const resp = deleteFn("15", mockCsrf);
+    const resp = deleteFn({ id: "15", csrf: mockCsrf });
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       mockCsrf
     );
@@ -198,7 +198,7 @@ describe("deleteFactory", () => {
   });
   it("handles unsuccessful DELETE requests", async () => {
     const deleteFn = deleteFactory("bingo/");
-    const resp = deleteFn("15", mockCsrf);
+    const resp = deleteFn({ id: "15", csrf: mockCsrf });
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       mockCsrf
     );
@@ -219,10 +219,14 @@ describe("endpointFactory", () => {
   it("generates all HTTP methods", async () => {
     const endpoint = endpointFactory("bingo/");
     const listResp = endpoint.list();
-    const getResp = endpoint.get("15");
-    const postResp = endpoint.post(mockBody, mockCsrf);
-    const patchResp = endpoint.patch("15", mockBody, mockCsrf);
-    const deleteResp = endpoint.delete("15", mockCsrf);
+    const getResp = endpoint.get({ id: "15" });
+    const postResp = endpoint.post({ body: mockBody, csrf: mockCsrf });
+    const patchResp = endpoint.patch({
+      id: "15",
+      body: mockBody,
+      csrf: mockCsrf,
+    });
+    const deleteResp = endpoint.delete({ id: "15", csrf: mockCsrf });
     mockAxios.mockResponseFor(
       {
         method: "GET",

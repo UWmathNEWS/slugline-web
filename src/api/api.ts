@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { APIResponse, APIError, Issue, Article } from "../shared/types";
-import { ToastBody } from "react-bootstrap";
 
 export const API_ROOT = "/api/";
 
@@ -14,13 +13,13 @@ const axiosRequest = async (config: RequestConfig) => {
   return await axios({ ...baseConfig, ...config });
 };
 
-type APIListFn<TResp, TError extends APIError = APIError> = () => Promise<
-  APIResponse<TResp, TError>
->;
+export interface UnsafeRequestArgs {
+  csrf: string;
+}
 
 export const listFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
-): APIListFn<TResp, TError> => {
+) => {
   return async () => {
     const config: RequestConfig = {
       url: endpoint,
@@ -33,16 +32,16 @@ export const listFactory = <TResp, TError extends APIError = APIError>(
   };
 };
 
-type APIGetFn<TResp, TError extends APIError = APIError> = (
-  id: string
-) => Promise<APIResponse<TResp, TError>>;
+export interface APIGetArgs {
+  id: string;
+}
 
 export const getFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
-): APIGetFn<TResp, TError> => {
-  return async (id: string) => {
+) => {
+  return async (args: APIGetArgs) => {
     const config: RequestConfig = {
-      url: `${endpoint}${id}/`,
+      url: `${endpoint}${args.id}/`,
       method: "GET",
     };
     const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
@@ -52,10 +51,9 @@ export const getFactory = <TResp, TError extends APIError = APIError>(
   };
 };
 
-type APIPostFn<TResp, TError extends APIError = APIError, TBody = TResp> = (
-  body: TBody,
-  csrf: string
-) => Promise<APIResponse<TResp, TError>>;
+export interface APIPostArgs<TBody> extends UnsafeRequestArgs {
+  body: TBody;
+}
 
 export const postFactory = <
   TResp,
@@ -63,14 +61,14 @@ export const postFactory = <
   TBody = TResp
 >(
   endpoint: string
-): APIPostFn<TResp, TError, TBody> => {
-  return async (body: TBody, csrf: string) => {
+) => {
+  return async (args: APIPostArgs<TBody>) => {
     const config: AxiosRequestConfig = {
       url: endpoint,
       method: "POST",
-      data: body,
+      data: args.body,
       headers: {
-        "X-CSRFToken": csrf,
+        "X-CSRFToken": args.csrf,
       },
     };
     const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
@@ -80,11 +78,10 @@ export const postFactory = <
   };
 };
 
-type APIPatchFn<TResp, TError extends APIError = APIError, TBody = TResp> = (
-  id: string,
-  body: Partial<TBody>,
-  csrf: string
-) => Promise<APIResponse<TResp, TError>>;
+interface APIPatchArgs<TBody> extends UnsafeRequestArgs {
+  id: string;
+  body: Partial<TBody>;
+}
 
 export const patchFactory = <
   TResp,
@@ -92,14 +89,14 @@ export const patchFactory = <
   TBody = TResp
 >(
   endpoint: string
-): APIPatchFn<TResp, TError, TBody> => {
-  return async (id: string, body: Partial<TBody>, csrf: string) => {
+) => {
+  return async (args: APIPatchArgs<TBody>) => {
     const config: AxiosRequestConfig = {
-      url: `${endpoint}${id}/`,
+      url: `${endpoint}${args.id}/`,
       method: "PATCH",
-      data: body,
+      data: args.body,
       headers: {
-        "X-CSRFToken": csrf,
+        "X-CSRFToken": args.csrf,
       },
     };
     const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
@@ -109,20 +106,19 @@ export const patchFactory = <
   };
 };
 
-type APIDeleteFn<TResp, TError extends APIError = APIError> = (
-  id: string,
-  csrf: string
-) => Promise<APIResponse<TResp, TError>>;
+interface APIDeleteArgs extends UnsafeRequestArgs {
+  id: string;
+}
 
 export const deleteFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
-): APIDeleteFn<TResp, TError> => {
-  return async (id: string, csrf: string) => {
+) => {
+  return async (args: APIDeleteArgs) => {
     const config: AxiosRequestConfig = {
-      url: `${endpoint}${id}/`,
+      url: `${endpoint}${args.id}/`,
       method: "DELETE",
       headers: {
-        "X-CSRFToken": csrf,
+        "X-CSRFToken": args.csrf,
       },
     };
     const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
