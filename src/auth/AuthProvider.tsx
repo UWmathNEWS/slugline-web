@@ -55,6 +55,44 @@ interface AxiosConfig extends AxiosRequestConfig {
 const CSRF_COOKIE = "csrftoken";
 const USER_LOCALSTORAGE_KEY = "slugline-user";
 
+export const authReducer = (state: AuthState, action: AuthAction) => {
+  switch (action.type) {
+    case "post":
+      if (action.user === null) {
+        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+      } else {
+        localStorage.setItem(
+          USER_LOCALSTORAGE_KEY,
+          JSON.stringify(action.user)
+        );
+      }
+      return {
+        user: action.user,
+        csrfToken: state.csrfToken,
+      };
+    case "login":
+      if (action.user === null) {
+        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+      } else {
+        localStorage.setItem(
+          USER_LOCALSTORAGE_KEY,
+          JSON.stringify(action.user)
+        );
+      }
+      return {
+        user: action.user,
+        csrfToken: Cookie.get(CSRF_COOKIE) || null,
+      };
+    case "logout":
+      localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+      return {
+        user: null,
+        csrfToken: Cookie.get(CSRF_COOKIE) || null,
+      };
+  }
+  return state;
+};
+
 export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
   const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(
@@ -62,42 +100,7 @@ export const AuthProvider: React.FC = (props) => {
   );
   const isWaiting = useRef<boolean>(false);
   const [user, dispatchUser] = useReducer(
-    (state: AuthState, action: AuthAction) => {
-      switch (action.type) {
-        case "post":
-          if (action.user === null) {
-            localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-          } else {
-            localStorage.setItem(
-              USER_LOCALSTORAGE_KEY,
-              JSON.stringify(action.user)
-            );
-          }
-          return {
-            user: action.user,
-            csrfToken: state.csrfToken,
-          };
-        case "login":
-          if (action.user === null) {
-            localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-          } else {
-            localStorage.setItem(
-              USER_LOCALSTORAGE_KEY,
-              JSON.stringify(action.user)
-            );
-          }
-          return {
-            user: action.user,
-            csrfToken: Cookie.get(CSRF_COOKIE) || null,
-          };
-        case "logout":
-          return {
-            user: null,
-            csrfToken: Cookie.get(CSRF_COOKIE) || null,
-          };
-      }
-      return state;
-    },
+    authReducer,
     {
       user: storedUser !== null ? JSON.parse(storedUser) : null,
       csrfToken: null, // null is a sentinel value here so we know the page was just loaded
@@ -110,7 +113,7 @@ export const AuthProvider: React.FC = (props) => {
       const promise = (
         apiGet<User | null>(getApiUrl("me/"))
       ).then((data: User | null) => {
-        if (user.csrfToken === null) {
+        if (user.csrfToken === null || force) {
           if (data) {
             dispatchUser({ type: "login", user: data });
           } else {
