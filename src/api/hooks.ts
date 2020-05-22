@@ -1,6 +1,5 @@
 import { APIResponse, APIError } from "../shared/types";
 import { useState, useEffect, useCallback } from "react";
-import ERRORS from "../shared/errors";
 import { UnsafeRequestArgs } from "./api";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -28,7 +27,7 @@ type UseAPIHook<TResp, TError extends APIError = APIError> = [
  * @param fn A parameter-less async function returning an `APIResponse<TResp, TError>`. If you need this function to vary based on props,
  * wrap it in a parameter-less `useCallback` that captures the props and pass that instead.
  */
-export const useApi = <TResp, TError extends APIError = APIError>(
+export const useAPI = <TResp, TError extends APIError = APIError>(
   fn: () => Promise<APIResponse<TResp, TError>>
 ): UseAPIHook<TResp, TError> => {
   const [requestState, setRequestState] = useState<RequestState>(
@@ -69,7 +68,7 @@ type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
  * success/failure can be determined at the call site.
  * @param fn An async function taking an object extending `SafeRequestArgs` and returning an `APIResponse<TResp, TError>`.
  */
-export const useApiLazy = <TResp, TArgs, TError extends APIError = APIError>(
+export const useAPILazy = <TResp, TArgs, TError extends APIError = APIError>(
   fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
 ): UseAPILazyHook<TResp, TArgs> => {
   const [requestState, setRequestState] = useState<RequestState>(
@@ -99,13 +98,16 @@ type UseAPILazyCSRFHook<
   TResp,
   TArgs extends UnsafeRequestArgs,
   TError extends APIError = APIError
-> = [(args: TArgs) => Promise<APIResponse<TResp, TError>>, RequestInfo];
+> = [
+  (args: Omit<TArgs, "csrf">) => Promise<APIResponse<TResp, TError>>,
+  RequestInfo
+];
 
 /**
  * A variant of useAPILazy that handles the CSRF token automatically.
  * @see useApiLazy
  */
-export const useApiLazyCSRF = <
+export const useAPILazyCSRF = <
   TResp,
   TArgs extends UnsafeRequestArgs,
   TError extends APIError = APIError

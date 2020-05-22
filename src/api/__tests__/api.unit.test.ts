@@ -9,30 +9,16 @@ import {
   endpointFactory,
 } from "../api";
 import {
-  APIResponse,
   APIResponseSuccess,
   APIResponseFailure,
   APIError,
 } from "../../shared/types";
-
-const mockBody = {
-  data: "bingo bango bongo",
-};
-
-const mockCsrf = "bingobangobongo";
-
-const mockResponse: APIResponseSuccess<string> = {
-  success: true,
-  data: "bingo bango bongo",
-};
-
-const mockError: APIResponseFailure<APIError> = {
-  success: false,
-  error: {
-    detail: ["bingo bango bongo"],
-    status_code: 500,
-  },
-};
+import {
+  MOCK_RESPONSE,
+  MOCK_ERROR,
+  MOCK_BODY,
+  MOCK_CSRF,
+} from "../../shared/test-utils";
 
 describe("listFactory", () => {
   it("handles successful list requests", async () => {
@@ -44,10 +30,10 @@ describe("listFactory", () => {
         url: "bingo/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
-    expect(await resp).toEqual(mockResponse);
+    expect(await resp).toEqual(MOCK_RESPONSE);
   });
 
   it("handles unsuccessful list requests", async () => {
@@ -59,10 +45,10 @@ describe("listFactory", () => {
         url: "bingo/",
       },
       {
-        data: mockError,
+        data: MOCK_ERROR,
       }
     );
-    expect(await resp).toEqual(mockError);
+    expect(await resp).toEqual(MOCK_ERROR);
   });
 });
 
@@ -76,10 +62,10 @@ describe("getFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
-    expect(await resp).toEqual(mockResponse);
+    expect(await resp).toEqual(MOCK_RESPONSE);
   });
 
   it("handles unsuccessful GET requests", async () => {
@@ -91,20 +77,20 @@ describe("getFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockError,
+        data: MOCK_ERROR,
       }
     );
-    expect(await resp).toEqual(mockError);
+    expect(await resp).toEqual(MOCK_ERROR);
   });
 });
 
 describe("postFactory", () => {
   it("handles successful POST requests", async () => {
-    const post = postFactory<typeof mockBody>("bingo/");
-    const resp = post({ body: mockBody, csrf: mockCsrf });
-    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    const post = postFactory<typeof MOCK_BODY>("bingo/");
+    const resp = post({ body: MOCK_BODY, csrf: MOCK_CSRF });
+    expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
-      mockCsrf
+      MOCK_CSRF
     );
     mockAxios.mockResponseFor(
       {
@@ -112,18 +98,18 @@ describe("postFactory", () => {
         url: "bingo/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
-    expect(await resp).toEqual(mockResponse);
+    expect(await resp).toEqual(MOCK_RESPONSE);
   });
 
   it("handles unsuccessful POST requests", async () => {
-    const post = postFactory<typeof mockBody>("bingo/");
-    const resp = post({ body: mockBody, csrf: mockCsrf });
-    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    const post = postFactory<typeof MOCK_BODY>("bingo/");
+    const resp = post({ body: MOCK_BODY, csrf: MOCK_CSRF });
+    expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
-      mockCsrf
+      MOCK_CSRF
     );
     mockAxios.mockResponseFor(
       {
@@ -131,20 +117,20 @@ describe("postFactory", () => {
         url: "bingo/",
       },
       {
-        data: mockError,
+        data: MOCK_ERROR,
       }
     );
-    expect(await resp).toEqual(mockError);
+    expect(await resp).toEqual(MOCK_ERROR);
   });
 });
 
 describe("patchFactory", () => {
   it("handles successful PATCH requests", async () => {
-    const patch = patchFactory<typeof mockBody>("bingo/");
-    const resp = patch({ id: "15", body: mockBody, csrf: mockCsrf });
-    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    const patch = patchFactory<typeof MOCK_BODY>("bingo/");
+    const resp = patch({ id: "15", body: MOCK_BODY, csrf: MOCK_CSRF });
+    expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
-      mockCsrf
+      MOCK_CSRF
     );
     mockAxios.mockResponseFor(
       {
@@ -152,18 +138,18 @@ describe("patchFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
-    expect(await resp).toEqual(mockResponse);
+    expect(await resp).toEqual(MOCK_RESPONSE);
   });
 
   it("handles unsuccessful PATCH requests", async () => {
-    const patch = patchFactory<typeof mockBody>("bingo/");
-    const resp = patch({ id: "15", body: mockBody, csrf: mockCsrf });
-    expect(mockAxios.lastReqGet().config.data).toEqual(mockBody);
+    const patch = patchFactory<typeof MOCK_BODY>("bingo/");
+    const resp = patch({ id: "15", body: MOCK_BODY, csrf: MOCK_CSRF });
+    expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
-      mockCsrf
+      MOCK_CSRF
     );
     mockAxios.mockResponseFor(
       {
@@ -171,19 +157,19 @@ describe("patchFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockError,
+        data: MOCK_ERROR,
       }
     );
-    expect(await resp).toEqual(mockError);
+    expect(await resp).toEqual(MOCK_ERROR);
   });
 });
 
 describe("deleteFactory", () => {
   it("handles successful DELETE requests", async () => {
     const deleteFn = deleteFactory("bingo/");
-    const resp = deleteFn({ id: "15", csrf: mockCsrf });
+    const resp = deleteFn({ id: "15", csrf: MOCK_CSRF });
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
-      mockCsrf
+      MOCK_CSRF
     );
     mockAxios.mockResponseFor(
       {
@@ -191,16 +177,16 @@ describe("deleteFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
-    expect(await resp).toEqual(mockResponse);
+    expect(await resp).toEqual(MOCK_RESPONSE);
   });
   it("handles unsuccessful DELETE requests", async () => {
     const deleteFn = deleteFactory("bingo/");
-    const resp = deleteFn({ id: "15", csrf: mockCsrf });
+    const resp = deleteFn({ id: "15", csrf: MOCK_CSRF });
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
-      mockCsrf
+      MOCK_CSRF
     );
     mockAxios.mockResponseFor(
       {
@@ -208,10 +194,10 @@ describe("deleteFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockError,
+        data: MOCK_ERROR,
       }
     );
-    expect(await resp).toEqual(mockError);
+    expect(await resp).toEqual(MOCK_ERROR);
   });
 });
 
@@ -220,20 +206,20 @@ describe("endpointFactory", () => {
     const endpoint = endpointFactory("bingo/");
     const listResp = endpoint.list();
     const getResp = endpoint.get({ id: "15" });
-    const postResp = endpoint.post({ body: mockBody, csrf: mockCsrf });
+    const postResp = endpoint.post({ body: MOCK_BODY, csrf: MOCK_CSRF });
     const patchResp = endpoint.patch({
       id: "15",
-      body: mockBody,
-      csrf: mockCsrf,
+      body: MOCK_BODY,
+      csrf: MOCK_CSRF,
     });
-    const deleteResp = endpoint.delete({ id: "15", csrf: mockCsrf });
+    const deleteResp = endpoint.delete({ id: "15", csrf: MOCK_CSRF });
     mockAxios.mockResponseFor(
       {
         method: "GET",
         url: "bingo/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
     mockAxios.mockResponseFor(
@@ -242,7 +228,7 @@ describe("endpointFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
     mockAxios.mockResponseFor(
@@ -251,7 +237,7 @@ describe("endpointFactory", () => {
         url: "bingo/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
     mockAxios.mockResponseFor(
@@ -260,7 +246,7 @@ describe("endpointFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
     mockAxios.mockResponseFor(
@@ -269,13 +255,13 @@ describe("endpointFactory", () => {
         url: "bingo/15/",
       },
       {
-        data: mockResponse,
+        data: MOCK_RESPONSE,
       }
     );
-    expect(await listResp).toEqual(mockResponse);
-    expect(await getResp).toEqual(mockResponse);
-    expect(await postResp).toEqual(mockResponse);
-    expect(await patchResp).toEqual(mockResponse);
-    expect(await deleteResp).toEqual(mockResponse);
+    expect(await listResp).toEqual(MOCK_RESPONSE);
+    expect(await getResp).toEqual(MOCK_RESPONSE);
+    expect(await postResp).toEqual(MOCK_RESPONSE);
+    expect(await patchResp).toEqual(MOCK_RESPONSE);
+    expect(await deleteResp).toEqual(MOCK_RESPONSE);
   });
 });

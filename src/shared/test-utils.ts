@@ -1,3 +1,5 @@
+import { APIResponseFailure, APIResponseSuccess, APIError } from "./types";
+
 export const CSRF_COOKIE = "csrftoken";
 export const USER_LOCALSTORAGE_KEY = "slugline-user";
 
@@ -8,7 +10,7 @@ export const testUser = {
   email: "test@example.com",
   is_staff: false,
   is_editor: false,
-  writer_name: "testy mctestface"
+  writer_name: "testy mctestface",
 };
 
 export const testAdmin = {
@@ -18,7 +20,7 @@ export const testAdmin = {
   email: "admin@example.com",
   is_staff: true,
   is_editor: true,
-  writer_name: "ytsest ecaftsetcm"
+  writer_name: "ytsest ecaftsetcm",
 };
 
 export const makeTestError = (code: number, error: any) => ({
@@ -26,7 +28,26 @@ export const makeTestError = (code: number, error: any) => ({
   response: {
     data: {
       success: false,
-      error
-    }
-  }
+      error,
+    },
+  },
 });
+
+export const MOCK_BODY = {
+  data: "bingo bango bongo",
+};
+
+export const MOCK_CSRF = "bingobangobongo";
+
+export const MOCK_RESPONSE: APIResponseSuccess<string> = {
+  success: true,
+  data: "bingo bango bongo",
+};
+
+export const MOCK_ERROR: APIResponseFailure<APIError> = {
+  success: false,
+  error: {
+    detail: ["bingo bango bongo"],
+    status_code: 500,
+  },
+};

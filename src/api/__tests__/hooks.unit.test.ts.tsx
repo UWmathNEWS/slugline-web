@@ -1,513 +1,242 @@
 import "core-js";
 import mockAxios from "jest-mock-axios";
-import * as h from "../hooks";
 import { renderHook, act } from "@testing-library/react-hooks";
-import { RequestState } from "../../shared/types";
-import { CSRF_COOKIE, testUser, makeTestError } from "../../shared/test-utils";
 
+import { getFactory, patchFactory } from "../api";
+import { useAPI, RequestState, useAPILazy, useAPILazyCSRF } from "../hooks";
+import {
+  MOCK_RESPONSE,
+  MOCK_ERROR,
+  CSRF_COOKIE,
+  MOCK_CSRF,
+  MOCK_BODY,
+} from "../../shared/test-utils";
 import { AuthProvider } from "../../auth/AuthProvider";
-import ERRORS from "../../shared/errors";
 
-describe("useApiGet", () => {
+describe("useAPI", () => {
   afterEach(() => {
     mockAxios.reset();
   });
 
-  it("calls axios.get (sanity check)", () => {
-    const { result } = renderHook(() => h.useApiGet("test"));
+  it("makes the API call immediately", () => {
+    const get = getFactory<string>("bingo/");
+    const fn = () => get({ id: "15" });
+    renderHook(() => useAPI<string>(fn));
 
-    expect(mockAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockAxios.get.mock.calls[0][0]).toBe("test");
+    expect(mockAxios.lastReqGet().url).toBe("bingo/15/");
+  });
 
-    const [resp, err] = result.current;
+  it("returns the correct data", async () => {
+    const get = getFactory<string>("bingo/");
+    const fn = () => get({ id: "15" });
+    const { result } = renderHook(() => useAPI(fn));
+
+    let [resp, error, info] = result.current;
+    expect(resp).toBeUndefined();
+    expect(error).toBeUndefined();
+
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_RESPONSE,
+        }
+      );
+    });
+
+    [resp, error, info] = result.current;
+
+    expect(resp).toEqual(MOCK_RESPONSE.data);
+    expect(error).toBeUndefined();
+  });
+
+  it("returns the correct error", async () => {
+    const get = getFactory<string>("bingo/");
+    const fn = () => get({ id: "15" });
+    const { result } = renderHook(() => useAPI(fn));
+
+    let [resp, error, info] = result.current;
+    expect(resp).toBeUndefined();
+    expect(error).toBeUndefined();
+
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_ERROR,
+        }
+      );
+    });
+
+    [resp, error, info] = result.current;
 
     expect(resp).toBeUndefined();
-    expect(err).toBeUndefined();
+    expect(error).toEqual(MOCK_ERROR.error);
   });
 
-  it("handles successful responses", () => {
-    const { result } = renderHook(() => h.useApiGet("test"));
+  it("correctly updates RequestState", async () => {
+    const get = getFactory<string>("bingo/");
+    const fn = () => get({ id: "15" });
+    const { result } = renderHook(() => useAPI(fn));
 
-    act(() => {
-      mockAxios.mockResponse({ data: { success: true, data: "Success" } })
+    let [resp, error, info] = result.current;
+    expect(info.state).toBe(RequestState.Running);
+
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_RESPONSE,
+        }
+      );
     });
 
-    const [resp, err] = result.current;
-
-    expect(resp).toBe("Success");
-    expect(err).toBeUndefined();
-  });
-
-  it("handles successful responses with null data", () => {
-    const { result } = renderHook(() => h.useApiGet("test"));
-
-    act(() => {
-      mockAxios.mockResponse({ data: { success: true, data: null } })
-    });
-
-    const [resp, err] = result.current;
-
-    expect(resp).toBe(null);
-    expect(err).toBeUndefined();
-  });
-
-  it("returns an error on an unsuccessful response", () => {
-    const { result } = renderHook(() => h.useApiGet("test"));
-
-    act(() => {
-      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
-    });
-
-    const [resp, err] = result.current;
-
-    expect(resp).toBeUndefined();
-    expect(err).toBe(ERRORS.__TESTING);
-  });
-
-  it("returns a generic error message on an unsuccessful response without a specific error message", async () => {
-    const { result } = renderHook(() => h.useApiGet("test"));
-
-    act(() => {
-      mockAxios.mockError(makeTestError(500, null));
-    });
-
-    const [resp, err] = result.current;
-
-    expect(resp).toBeUndefined();
-    expect(err).toEqual({
-      status_code: 500,
-      detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
-    });
+    [resp, error, info] = result.current;
+    expect(info.state).toBe(RequestState.Complete);
   });
 });
 
-describe("useApiGetPaginated", () => {
+describe("useAPILazy", () => {
   afterEach(() => {
     mockAxios.reset();
   });
 
-  it("calls axios.get (sanity check)", () => {
-    renderHook(() => h.useApiGetPaginated("test"));
+  it("doesn't make the request immediately", () => {
+    const get = getFactory<string>("bingo/");
 
-    expect(mockAxios.get.mock.calls[0][0]).toBe("test");
+    const { result } = renderHook(() => useAPILazy(get));
+
+    expect(mockAxios.lastReqGet()).toBeUndefined();
   });
 
-  it("returns an object with null values when request is not ready", () => {
-    const { result } = renderHook(() => h.useApiGetPaginated("test"));
+  it("executes the request when the callback is called", async () => {
+    const get = getFactory<string>("bingo/");
 
-    const [{ next, previous, page }, err] = result.current;
+    const { result } = renderHook(() => useAPILazy(get));
 
-    expect(next).toBeNull();
-    expect(previous).toBeNull();
-    expect(page).toBeNull();
-    expect(err).toBeUndefined();
-  });
+    let [exec, info] = result.current;
 
-  it("returns pagination functions that paginate to next/previous page", async () => {
-    const { result } = renderHook(() => h.useApiGetPaginated("test"));
-    const data = {
-      count: 20,
-      page: 2,
-      num_pages: 2,
-      next: "test1",
-      previous: "test2",
-      results: []
-    };
+    await act(async () => {
+      const resp = exec({ id: "15" });
+      expect(mockAxios.lastReqGet().url).toEqual("bingo/15/");
 
-    act(() => {
-      mockAxios.mockResponse({
-        data: {
-          success: true,
-          data
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_RESPONSE,
         }
-      });
+      );
+      expect(await resp).toEqual(MOCK_RESPONSE);
     });
-
-    const [resp1, err1] = result.current;
-    expect(resp1.next).not.toBeNull();
-    expect(resp1.previous).not.toBeNull();
-    expect(resp1.page).toEqual(data);
-    expect(err1).toBeUndefined();
-
-    act(() => {
-      resp1.next!();
-    });
-
-    expect(mockAxios.get.mock.calls[1][0]).toBe("test1");
-
-    act(() => {
-      mockAxios.mockResponse({
-        data: {
-          success: true,
-          data
-        }
-      });
-    });
-
-    const [resp2, err2] = result.current;
-    expect(resp2.next).not.toBeNull();
-    expect(resp2.previous).not.toBeNull();
-    expect(resp2.page).toEqual(data);
-    expect(err2).toBeUndefined();
-
-    act(() => {
-      resp2.previous!();
-    });
-
-    expect(mockAxios.get.mock.calls[2][0]).toBe("test2");
   });
 
-  it("returns a null next paginator if next page does not exist", () => {
-    const { result } = renderHook(() => h.useApiGetPaginated("test"));
-    const data = {
-      count: 20,
-      page: 2,
-      num_pages: 2,
-      next: null,
-      previous: "test",
-      results: []
-    };
+  it("correctly updates RequestState", async () => {
+    const get = getFactory<string>("bingo/");
+
+    const { result } = renderHook(() => useAPILazy(get));
+
+    let [exec, info] = result.current;
+    expect(info.state).toBe(RequestState.NotStarted);
 
     act(() => {
-      mockAxios.mockResponse({
-        data: {
-          success: true,
-          data
+      exec({ id: "15" });
+    });
+
+    [exec, info] = result.current;
+    expect(info.state).toBe(RequestState.Running);
+
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_RESPONSE,
         }
-      });
+      );
     });
 
-    const [{ next, previous }] = result.current;
-
-    expect(next).toBeNull();
-    expect(typeof previous).toBe("function");
-  });
-
-  it("returns a null previous paginator if previous page does not exist", () => {
-    const { result } = renderHook(() => h.useApiGetPaginated("test"));
-    const data = {
-      count: 20,
-      page: 2,
-      num_pages: 2,
-      next: "test",
-      previous: null,
-      results: []
-    };
-
-    act(() => {
-      mockAxios.mockResponse({
-        data: {
-          success: true,
-          data
-        }
-      });
-    });
-
-    const [{ next, previous }] = result.current;
-
-    expect(typeof next).toBe("function");
-    expect(previous).toBeNull();
-  });
-
-  it("does not crash on an error", () => {
-    const { result } = renderHook(() => h.useApiGetPaginated("test"));
-
-    act(() => {
-      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
-    });
-
-    const [, err] = result.current;
-
-    expect(err).toBe(ERRORS.__TESTING);
+    [exec, info] = result.current;
+    expect(info.state).toBe(RequestState.Complete);
   });
 });
 
-describe("useApiPost", () => {
-  afterEach(() => {
-    mockAxios.reset();
+describe("useAPILazyCSRF", () => {
+  beforeEach(() => {
+    document.cookie = `${CSRF_COOKIE}=${MOCK_CSRF}`;
   });
 
-  it("returns a callback and does not immediately call axios.post (sanity check)", () => {
-    const { result } = renderHook(() => h.useApiPost("test"), { wrapper: AuthProvider });
+  it("doesn't make the request immediately", () => {
+    const patch = patchFactory("bingo/");
+    const { result } = renderHook(() => useAPILazyCSRF(patch), {
+      wrapper: AuthProvider,
+    });
 
-    const [post, state] = result.current;
-
-    expect(typeof post).toBe("function");
-    expect(post.length).toBe(1);
-    expect(state).toBe(RequestState.NotStarted);
-    expect(mockAxios.post).not.toHaveBeenCalled();
+    expect(mockAxios.lastReqGet()).toBeUndefined();
   });
 
-  describe("calling the returned callback", () => {
-    let result: any;
-    let dataPromise: any;
-
-    beforeAll(() => {
-      window.document.cookie = `${CSRF_COOKIE}=csrf`;
+  it("executes the request with a CSRF token", async () => {
+    const patch = patchFactory<string>("bingo/");
+    const { result } = renderHook(() => useAPILazyCSRF(patch), {
+      wrapper: AuthProvider,
     });
 
-    beforeEach(() => {
-      result = renderHook(() => h.useApiPost("test"), { wrapper: AuthProvider }).result;
-      const [post] = result.current;
-
-      act(() => {
-        mockAxios.mockResponse({
-          data: { success: true, data: testUser }
-        });
-      });
-
-      act(() => {
-        dataPromise = post("test post");
-      });
-    });
-
-    afterEach(() => {
-      mockAxios.reset();
-      localStorage.clear();
-    });
-
-    afterAll(() => {
-      delete window.document.cookie;
-    });
-
-    it("calls axios.post", () => {
-      expect(mockAxios.post).toHaveBeenCalled();
-
-      const postReq = mockAxios.lastReqGet();
-
-      expect(postReq.url).toBe("test");
-      expect(postReq.data).toBe("test post");
-    });
-
-    it("sends a CSRF token along with the request", () => {
-      expect(mockAxios.lastReqGet().config.headers).toEqual({
-        "X-CSRFToken": "csrf"
-      });
-    });
-
-    it("returns correct state and response data", async () => {
-      const data = { success: "true", data: "data" };
-      let [, state] = result.current;
-
-      expect(state).toBe(RequestState.Started);
-
-      act(() => {
-        mockAxios.mockResponse({ data });
-      });
-
-      await act(async () => {
-        const respData = await dataPromise;
-        [, state] = result.current;
-
-        expect(state).toBe(RequestState.Complete);
-        expect(respData).toBe(data);
-      });
-    });
-  });
-
-  it("returns an error on an unsuccessful response", async () => {
-    const { result } = renderHook(() => h.useApiPost("test"), { wrapper: AuthProvider });
-    act(() => {
-      mockAxios.mockResponse({
-        data: { success: true, data: testUser }
-      });
-    });
-
-    const [post] = result.current;
-    let dataPromise: any;
-
-    act(() => {
-      dataPromise = post("test data");
-    });
-
-    act(() => {
-      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
-    });
+    let [exec, info] = result.current;
 
     await act(async () => {
-      try {
-        await dataPromise;
-        expect("Error was not thrown by useApiPost").toBe(false);
-      } catch (e) {
-        expect(e).toBe(ERRORS.__TESTING);
-      }
+      const resp = exec({
+        body: "bingo bango bongo",
+        id: "15",
+      });
+
+      const req = mockAxios.lastReqGet();
+      expect(req.url).toEqual("bingo/15/");
+      expect(req.data).toEqual("bingo bango bongo");
+      expect(req.config.headers["X-CSRFToken"]).toEqual(MOCK_CSRF);
     });
   });
 
-  it("returns a generic error message on an unsuccessful response without a specific error message", async () => {
-    const { result } = renderHook(() => h.useApiPost("test"), { wrapper: AuthProvider });
-    act(() => {
-      mockAxios.mockResponse({
-        data: { success: true, data: testUser }
-      });
+  it("correctly updates RequestState", async () => {
+    const patch = patchFactory<string>("bingo/");
+    const { result } = renderHook(() => useAPILazyCSRF(patch), {
+      wrapper: AuthProvider,
     });
 
-    const [post] = result.current;
-    let dataPromise: any;
+    let [exec, info] = result.current;
+    expect(info.state).toBe(RequestState.NotStarted);
 
     act(() => {
-      dataPromise = post("test data");
+      exec({ id: "15", body: "bingo bango bongo" });
     });
 
-    act(() => {
-      mockAxios.mockError(makeTestError(500, null));
-    });
+    [exec, info] = result.current;
+    expect(info.state).toBe(RequestState.Running);
 
     await act(async () => {
-      try {
-        await dataPromise;
-        expect("Error was not thrown by useApiPost").toBe(false);
-      } catch (e) {
-        expect(e).toEqual({
-          status_code: 500,
-          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
-        });
-      }
-    });
-  });
-});
-
-describe("useApiPatch", () => {
-  afterEach(() => {
-    mockAxios.reset();
-  });
-
-  it("returns a callback and does not immediately call axios.patch (sanity check)", () => {
-    const { result } = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider });
-
-    const [patch, state] = result.current;
-
-    expect(typeof patch).toBe("function");
-    expect(patch.length).toBe(1);
-    expect(state).toBe(RequestState.NotStarted);
-    expect(mockAxios.patch).not.toHaveBeenCalled();
-  });
-
-  describe("calling the returned callback", () => {
-    let result: any;
-    let dataPromise: any;
-
-    beforeAll(() => {
-      window.document.cookie = `${CSRF_COOKIE}=csrf`;
+      mockAxios.mockResponseFor(
+        {
+          method: "PATCH",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_RESPONSE,
+        }
+      );
     });
 
-    beforeEach(() => {
-      result = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider }).result;
-      const [patch] = result.current;
-
-      act(() => {
-        mockAxios.mockResponse({
-          data: { success: true, data: testUser }
-        });
-      });
-
-      act(() => {
-        dataPromise = patch("test patch");
-      });
-    });
-
-    afterEach(() => {
-      mockAxios.reset();
-      localStorage.clear();
-    });
-
-    afterAll(() => {
-      delete window.document.cookie;
-    });
-
-    it("calls axios.patch", () => {
-      expect(mockAxios.patch).toHaveBeenCalled();
-
-      const patchReq = mockAxios.lastReqGet();
-
-      expect(patchReq.url).toBe("test");
-      expect(patchReq.data).toBe("test patch");
-    });
-
-    it("sends a CSRF token along with the request", () => {
-      expect(mockAxios.lastReqGet().config.headers).toEqual({
-        "X-CSRFToken": "csrf"
-      });
-    });
-
-    it("returns correct state and response data", async () => {
-      const data = { success: "true", data: "data" };
-      let [, state] = result.current;
-
-      expect(state).toBe(RequestState.Started);
-
-      act(() => {
-        mockAxios.mockResponse({ data });
-      });
-
-      await act(async () => {
-        const respData = await dataPromise;
-        [, state] = result.current;
-
-        expect(state).toBe(RequestState.Complete);
-        expect(respData).toBe(data);
-      });
-    });
-  });
-
-  it("returns an error on an unsuccessful response", async () => {
-    const { result } = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider });
-    act(() => {
-      mockAxios.mockResponse({
-        data: { success: true, data: testUser }
-      });
-    });
-
-    const [patch] = result.current;
-    let dataPromise: any;
-
-    act(() => {
-      dataPromise = patch("test data");
-    });
-
-    act(() => {
-      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
-    });
-
-    await act(async () => {
-      try {
-        await dataPromise;
-        expect("Error was not thrown by useApiPatch").toBe(false);
-      } catch (e) {
-        expect(e).toBe(ERRORS.__TESTING);
-      }
-    });
-  });
-
-  it("returns a generic error message on an unsuccessful response without a specific error message", async () => {
-    const { result } = renderHook(() => h.useApiPatch("test"), { wrapper: AuthProvider });
-    act(() => {
-      mockAxios.mockResponse({
-        data: { success: true, data: testUser }
-      });
-    });
-
-    const [patch] = result.current;
-    let dataPromise: any;
-
-    act(() => {
-      dataPromise = patch("test data");
-    });
-
-    act(() => {
-      mockAxios.mockError(makeTestError(500, null));
-    });
-
-    await act(async () => {
-      try {
-        await dataPromise;
-        expect("Error was not thrown by useApiPatch").toBe(false);
-      } catch (e) {
-        expect(e).toEqual({
-          status_code: 500,
-          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
-        });
-      }
-    });
+    expect(info.state).toBe(RequestState.Complete);
   });
 });
