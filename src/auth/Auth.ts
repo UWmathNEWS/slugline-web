@@ -22,6 +22,7 @@ export const Auth = createContext<AuthContext>({
   put: () => Promise.resolve(undefined),
   patch: () => Promise.resolve(undefined),
   delete: () => Promise.resolve(undefined),
+  setUser: () => {},
   login: () => Promise.resolve(undefined),
   logout: () => Promise.resolve(),
 });

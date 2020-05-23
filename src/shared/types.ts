@@ -140,6 +140,7 @@ export interface AuthContext {
     setCurUser?: boolean
   ) => Promise<User | undefined>;
   delete: (endpoint: string) => Promise<User | undefined>;
+  setUser: (user: User | null) => void;
   login: (username: string, password: string) => Promise<User | undefined>;
   logout: () => Promise<void>;
 }

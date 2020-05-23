@@ -38,6 +38,14 @@ export const AuthProvider: React.FC = (props) => {
     }
   );
 
+  const setUser = (user: User | null) => {
+    if (user) {
+      dispatchUser({ type: "login", user });
+    } else {
+      dispatchUser({ type: "logout" });
+    }
+  }
+
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise.current === undefined)) {
       // Ensure we don't end up with a race condition --- we now have an invariant that only one network request
@@ -60,11 +68,7 @@ export const AuthProvider: React.FC = (props) => {
             return false;
           })())
         ) {
-          if (data) {
-            dispatchUser({ type: "login", user: data });
-          } else {
-            dispatchUser({ type: "logout" });
-          }
+          setUser(data);
         }
         isWaiting.current = false;
       });
@@ -228,6 +232,7 @@ export const AuthProvider: React.FC = (props) => {
         put,
         patch,
         delete: del,
+        setUser,
         login,
         logout,
       }}

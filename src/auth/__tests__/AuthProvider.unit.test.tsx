@@ -34,17 +34,18 @@ describe("AuthProvider", () => {
   });
 
   it("provides access to all fields in interface (sanity check)", () => {
-    expect("user" in auth).toBe(true);
-    expect("csrfToken" in auth).toBe(true);
-    expect("check" in auth).toBe(true);
+    expect("user"            in auth).toBe(true);
+    expect("csrfToken"       in auth).toBe(true);
+    expect("check"           in auth).toBe(true);
     expect("isAuthenticated" in auth).toBe(true);
-    expect("isEditor" in auth).toBe(true);
-    expect("post" in auth).toBe(true);
-    expect("put" in auth).toBe(true);
-    expect("patch" in auth).toBe(true);
-    expect("delete" in auth).toBe(true);
-    expect("login" in auth).toBe(true);
-    expect("logout" in auth).toBe(true);
+    expect("isEditor"        in auth).toBe(true);
+    expect("post"            in auth).toBe(true);
+    expect("put"             in auth).toBe(true);
+    expect("patch"           in auth).toBe(true);
+    expect("delete"          in auth).toBe(true);
+    expect("setUser"         in auth).toBe(true);
+    expect("login"           in auth).toBe(true);
+    expect("logout"          in auth).toBe(true);
   });
 
   it("does an auth check on mount", () => {
@@ -284,6 +285,35 @@ describe("AuthProvider", () => {
     });
   });
 
+  describe("setUser", () => {
+    beforeEach(() => {
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: testUser } });
+      });
+      auth = result.current;
+    });
+
+    it("changes the user given a non-null user", () => {
+      act(() => {
+        auth.setUser(testAdmin);
+      });
+
+      auth = result.current;
+
+      expect(auth.user).toEqual(testAdmin);
+    });
+
+    it("logs out given a null user", () => {
+      act(() => {
+        auth.setUser(null);
+      });
+
+      auth = result.current;
+
+      expect(auth.user).toEqual(null);
+    });
+  });
+
   describe("login", () => {
     beforeEach(() => {
       act(() => {
@@ -318,7 +348,10 @@ describe("AuthProvider", () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
-      expect(spy.mock.calls[0][1].type).toBe("login");
+      const mockCall = spy.mock.calls[0][1] as { type: string, user: any };
+      expect(mockCall.type).toBe("login");
+      expect(mockCall.user).toEqual(testUser);
+
       spy.mockRestore();
     });
 
@@ -369,6 +402,7 @@ describe("AuthProvider", () => {
       });
 
       expect(spy.mock.calls[0][1].type).toBe("logout");
+
       spy.mockRestore();
     });
 
