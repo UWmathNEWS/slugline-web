@@ -128,7 +128,7 @@ const UserList = () => {
       </h1>
       <RichTable<User>
         columns={columns}
-        url={`${API_ROOT}users/`}
+        get={api.users.get}
         pk="username"
         paginated
         selectable

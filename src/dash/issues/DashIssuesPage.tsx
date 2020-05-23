@@ -189,7 +189,7 @@ const DashIssuesPage = () => {
       </Button>
       <RichTable
         columns={columns}
-        url={`${API_ROOT}issues/`}
+        get={api.issues.get}
         pk="id"
         paginated
         searchable

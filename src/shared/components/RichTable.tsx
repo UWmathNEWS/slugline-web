@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useEffect,
   useRef,
-  useCallback
+  useCallback,
 } from "react";
 import {
   FormControl,
@@ -13,16 +13,17 @@ import {
   Table,
   Row,
   Col,
-  Button, Spinner
+  Button,
+  Spinner,
 } from "react-bootstrap";
 import nanoid from "nanoid";
 import axios, { AxiosResponse, Method } from "axios";
-
-import { useApiGet } from "../../api/hooks";
 import { APIError, APIResponse, Pagination } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useToast } from "../contexts/ToastContext";
 import { useDebouncedCallback } from "../hooks";
+import { RequestArgs, QueryParams } from "../../api/api";
+import { useAPI } from "../../api/hooks";
 
 /**
  * RichTable describes a component that displays tabular data in an interactive manner. It defines two main exports:
@@ -45,10 +46,7 @@ export interface ColumnProps<D extends object = {}> {
   header: ReactElement;
   sortable?: boolean;
   width?: number;
-  render?: (
-    cell: any,
-    row: D
-  ) => ReactElement;
+  render?: (cell: any, row: D) => ReactElement;
 }
 
 export type Column<D extends object = {}> = ColumnProps<D> &
@@ -118,14 +116,15 @@ export interface RichTableRow<D extends object> {
 
 export interface RichTableHook<D extends object = {}> {
   columns: Column<D>[];
-  url: string;
+  get: (args: RequestArgs) => Promise<APIResponse<D | Pagination<D>, APIError>>;
   pk: keyof D & string;
   paginated: boolean;
   actions?: Action<D>[];
   selectable?: boolean;
 }
 
-export interface RichTableProps<D extends object = {}> extends RichTableHook<D> {
+export interface RichTableProps<D extends object = {}>
+  extends RichTableHook<D> {
   className?: string;
   searchable?: boolean;
   ref?: React.Ref<Table & HTMLTableElement>;
@@ -153,11 +152,11 @@ export interface RichTableBag<D extends object = {}> {
  */
 const useRichTable = <D extends object = {}>({
   columns,
-  url,
+  get,
   pk,
   paginated,
   actions = [],
-  selectable
+  selectable,
 }: RichTableHook<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
@@ -167,15 +166,18 @@ const useRichTable = <D extends object = {}>({
   // Named cuckoo because it reminds me of cuckoo hashing.
   const [cuckooLoad, setCuckoo] = useState(false);
 
-  const preSearchParams = useRef<{ page: number, sortColumn: [string, boolean] | null }>({
+  const preSearchParams = useRef<{
+    page: number;
+    sortColumn: [string, boolean] | null;
+  }>({
     page: 1,
-    sortColumn: null
+    sortColumn: null,
   });
   const setSearchQuery = (query: string) => {
     if (!searchQuery) {
       preSearchParams.current = {
         page,
-        sortColumn
+        sortColumn,
       };
     } else if (searchQuery && !query) {
       setPage(preSearchParams.current.page);
@@ -184,27 +186,28 @@ const useRichTable = <D extends object = {}>({
     _setSearchQuery(query);
   };
 
-  const dataUrl = useMemo<string>(
+  const getWithParams = useCallback(
     () => {
-      let queryBuilder: { [key: string]: string | number } = { time: Date.now() };
+      let params: QueryParams = {
+        time: Date.now(),
+      };
       if (paginated) {
-        queryBuilder.page = page;
+        params.page = page;
       }
       if (searchQuery) {
-        queryBuilder.search = window.encodeURIComponent(searchQuery);
+        params.search = window.encodeURIComponent(searchQuery);
       }
       if (sortColumn !== null) {
-        queryBuilder.sort = (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0]);
+        params.sort =
+          (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0]);
       }
-      return `${url}${Object.keys(queryBuilder).length ? "?" : ""}${Object.entries(queryBuilder)
-        .map(q => q.join("="))
-        .join("&")}`;
+      return get({ params: params });
     },
     // We can ignore the warning about cuckooLoad being an unnecessary dependency, since it exists to trigger
     // refreshing without changing other state.
-    [url, paginated, sortColumn, searchQuery, page, cuckooLoad]
+    [get, paginated, sortColumn, searchQuery, page, cuckooLoad]
   );
-  const [rawData, error] = useApiGet<Pagination<D> | D[]>(dataUrl);
+  const [rawData, error] = useAPI(getWithParams);
   const data = useMemo<D[]>(
     () =>
       (paginated ? (rawData as Pagination<D>)?.results : (rawData as D[])) ||
@@ -227,7 +230,7 @@ const useRichTable = <D extends object = {}>({
   useEffect(() => {
     if (selectAllRef.current) {
       selectAllRef.current.indeterminate =
-        !selected.every(d => d) && selected.some(d => d);
+        !selected.every((d) => d) && selected.some((d) => d);
     }
   }, [selected]);
   useEffect(() => {
@@ -237,7 +240,7 @@ const useRichTable = <D extends object = {}>({
   const clickActions = useMemo<Action<D>[]>(
     () =>
       actions.filter(
-        action => action.triggers && action.triggers.includes("click")
+        (action) => action.triggers && action.triggers.includes("click")
       ),
     [actions]
   );
@@ -248,14 +251,14 @@ const useRichTable = <D extends object = {}>({
         name: "refresh",
         displayName: "Refresh",
         call() {
-          setCuckoo(cuckoo => !cuckoo);
+          setCuckoo((cuckoo) => !cuckoo);
           return Promise.resolve();
-        }
+        },
       },
       ...actions.reduce(
         (acc, action) => ({ ...acc, [action.name]: action }),
         {}
-      )
+      ),
     }),
     [actions]
   );
@@ -288,7 +291,9 @@ const useRichTable = <D extends object = {}>({
   const executeAction = useCallback(
     (name: string) => {
       if (!(name in memoizedActions)) {
-        throw new Error(`Action ${name} does not exist or was improperly registered.`);
+        throw new Error(
+          `Action ${name} does not exist or was improperly registered.`
+        );
       }
 
       if ("bulk" in memoizedActions[name] && filteredSelected.length) {
@@ -305,63 +310,69 @@ const useRichTable = <D extends object = {}>({
   const header = useMemo<RichTableRow<{}>>(() => {
     const onSelectAll = () => {
       if (selectAllRef.current) {
-        setSelected(prevSelected =>
-          new Array(data.length).fill(!prevSelected.some(d => d))
+        setSelected((prevSelected) =>
+          new Array(data.length).fill(!prevSelected.some((d) => d))
         );
       }
     };
 
-    let cells: RichTableCell[] = columns.map(({ header, key, sortable, width }) => {
-      let props: PropsBag = { key };
+    let cells: RichTableCell[] = columns.map(
+      ({ header, key, sortable, width }) => {
+        let props: PropsBag = { key };
 
-      if (sortable) {
-        props.onClick = () => {
-          if (sortColumn === null || sortColumn[0] !== key) {
-            setSortColumn([key, true]);
-          } else {
-            if (sortColumn[1]) {
-              setSortColumn([key, false]);
+        if (sortable) {
+          props.onClick = () => {
+            if (sortColumn === null || sortColumn[0] !== key) {
+              setSortColumn([key, true]);
             } else {
-              setSortColumn(null);
+              if (sortColumn[1]) {
+                setSortColumn([key, false]);
+              } else {
+                setSortColumn(null);
+              }
             }
-          }
-        };
-      }
-
-      if (width) {
-        props.style = {
-          width: `${width}%`
-        };
-      }
-
-      return {
-        useCellProps() {
-          return props;
-        },
-        render() {
-          return <span className="RichTable_cellHeader">
-            {header}
-            {sortable &&
-            <FontAwesomeIcon
-              icon={(sortColumn && sortColumn[0] === key)
-                ? (sortColumn[1]
-                  ? "caret-up"
-                  : "caret-down")
-                : "sort"}
-              className="ml-auto"
-            />
-            }
-          </span>;
+          };
         }
-      };
-    });
+
+        if (width) {
+          props.style = {
+            width: `${width}%`,
+          };
+        }
+
+        return {
+          useCellProps() {
+            return props;
+          },
+          render() {
+            return (
+              <span className="RichTable_cellHeader">
+                {header}
+                {sortable && (
+                  <FontAwesomeIcon
+                    icon={
+                      sortColumn && sortColumn[0] === key
+                        ? sortColumn[1]
+                          ? "caret-up"
+                          : "caret-down"
+                        : "sort"
+                    }
+                    className="ml-auto"
+                  />
+                )}
+              </span>
+            );
+          },
+        };
+      }
+    );
 
     if (selectable) {
       cells.unshift({
         useCellProps() {
           return {
             key: "select-all",
-            className: "RichTable_selectCheckbox"
+            className: "RichTable_selectCheckbox",
           };
         },
         render() {
@@ -372,12 +383,12 @@ const useRichTable = <D extends object = {}>({
               type="checkbox"
               aria-label="select all"
               id={`RichTable-${id.current}-select-all`}
-              checked={selected.length > 0 && selected.every(d => d)}
+              checked={selected.length > 0 && selected.every((d) => d)}
               onChange={onSelectAll}
               ref={selectAllRef}
             />
           );
-        }
+        },
       });
     }
 
@@ -388,7 +399,7 @@ const useRichTable = <D extends object = {}>({
       data: {},
       cells,
       isSelected: false,
-      setSelected() {}
+      setSelected() {},
     };
   }, [columns, selected, sortColumn, selectable, data.length]);
 
@@ -401,22 +412,24 @@ const useRichTable = <D extends object = {}>({
             return { key: 0 };
           },
           data: {} as D,
-          cells: [{
-            useCellProps() {
-              return {
-                key: 0,
-                className: "RichTable_loading text-center",
-                colSpan: columns.length + (selectable ? 1 : 0)
-              }
+          cells: [
+            {
+              useCellProps() {
+                return {
+                  key: 0,
+                  className: "RichTable_loading text-center",
+                  colSpan: columns.length + (selectable ? 1 : 0),
+                };
+              },
+              render() {
+                return <Spinner animation="border" />;
+              },
             },
-            render() {
-              return <Spinner animation="border" />
-            }
-          }],
+          ],
           isSelected: false,
-          setSelected() {}
-        }
-      ]
+          setSelected() {},
+        },
+      ];
     }
 
     // No data state
@@ -427,22 +440,24 @@ const useRichTable = <D extends object = {}>({
             return { key: 0 };
           },
           data: {} as D,
-          cells: [{
-            useCellProps() {
-              return {
-                key: 0,
-                className: "RichTable_noRowsReturned text-center",
-                colSpan: columns.length + (selectable ? 1 : 0)
-              }
+          cells: [
+            {
+              useCellProps() {
+                return {
+                  key: 0,
+                  className: "RichTable_noRowsReturned text-center",
+                  colSpan: columns.length + (selectable ? 1 : 0),
+                };
+              },
+              render() {
+                return "No rows returned.";
+              },
             },
-            render() {
-              return "No rows returned."
-            }
-          }],
+          ],
           isSelected: false,
-          setSelected() {}
-        }
-      ]
+          setSelected() {},
+        },
+      ];
     }
 
     // Regular state
@@ -463,7 +478,7 @@ const useRichTable = <D extends object = {}>({
           },
           render() {
             return render ? render(cell, row) : cell;
-          }
+          },
         };
       });
 
@@ -474,7 +489,7 @@ const useRichTable = <D extends object = {}>({
               .closest("td")
               ?.classList.contains("RichTable_selectCheckbox")
           ) {
-            clickActions.forEach(action => {
+            clickActions.forEach((action) => {
               internalExecuteAction(action.name, [row]);
             });
           }
@@ -482,7 +497,7 @@ const useRichTable = <D extends object = {}>({
       }
 
       const selectRow = () => {
-        setSelected(prevSelected => {
+        setSelected((prevSelected) => {
           prevSelected[i] = !prevSelected[i];
           return prevSelected.slice();
         });
@@ -493,7 +508,7 @@ const useRichTable = <D extends object = {}>({
           useCellProps() {
             return {
               key: "select-row",
-              className: "RichTable_selectCheckbox"
+              className: "RichTable_selectCheckbox",
             };
           },
           render() {
@@ -508,7 +523,7 @@ const useRichTable = <D extends object = {}>({
                 onChange={selectRow}
               />
             );
-          }
+          },
         });
       }
 
@@ -519,7 +534,7 @@ const useRichTable = <D extends object = {}>({
         data: row,
         cells,
         isSelected: selected[i],
-        setSelected: selectRow
+        setSelected: selectRow,
       };
     });
   }, [
@@ -529,10 +544,14 @@ const useRichTable = <D extends object = {}>({
     selected,
     selectable,
     clickActions,
-    internalExecuteAction
+    internalExecuteAction,
   ]);
 
-  const makeRequest = <T extends any>(method: Method, row?: D, requestData?: any) => {
+  const makeRequest = <T extends any>(
+    method: Method,
+    row?: D,
+    requestData?: any
+  ) => {
     let requestUrl = url;
     if (row !== null && row !== undefined) {
       requestUrl = `${url}${row[pk]}/`;
@@ -540,15 +559,14 @@ const useRichTable = <D extends object = {}>({
 
     return axios(requestUrl, {
       method,
-      data: requestData
-    })
-      .then(({ data }: AxiosResponse<APIResponse<T>>) => {
-        if (data.success) {
-          return data.data;
-        } else {
-          throw data.error;
-        }
-      });
+      data: requestData,
+    }).then(({ data }: AxiosResponse<APIResponse<T>>) => {
+      if (data.success) {
+        return data.data;
+      } else {
+        throw data.error;
+      }
+    });
   };
 
   const bag: RichTableBag<D> = {
@@ -563,7 +581,7 @@ const useRichTable = <D extends object = {}>({
     searchQuery,
     setSearchQuery,
     executeAction,
-    makeRequest
+    makeRequest,
   };
 
   return bag;
@@ -586,7 +604,10 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     setSearchQuery,
     executeAction,
   } = bag;
-  const [setSearchDebounced, setSearch] = useDebouncedCallback(setSearchQuery, 500);
+  const [setSearchDebounced, setSearch] = useDebouncedCallback(
+    setSearchQuery,
+    500
+  );
   const { addToasts } = useToast();
 
   if (config.bagRef) {
@@ -614,31 +635,39 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
             />
           </Col>
         )}
-        {config.actions &&
+        {config.actions && (
           <Col lg={7} className="RichTable_actions">
-            {config.actions.map((action) =>
+            {config.actions.map((action) => (
               <Button
                 key={action.name}
                 variant="link"
-                disabled={"bulk" in action && (selected.length === 0 || (!action.bulk && selected.length > 1))}
+                disabled={
+                  "bulk" in action &&
+                  (selected.length === 0 ||
+                    (!action.bulk && selected.length > 1))
+                }
                 onClick={() => {
-                  executeAction(action.name)
-                    .catch((e: any) => {
-                      addToasts([{
+                  executeAction(action.name).catch((e: any) => {
+                    addToasts([
+                      {
                         id: `action-failed-${Date.now()}`,
-                        body: "Action failed to execute."
-                      }]);
-                      console.error(e);
-                    });
+                        body: "Action failed to execute.",
+                      },
+                    ]);
+                    console.error(e);
+                  });
                 }}
               >
                 {action.displayName ?? action.name}
               </Button>
-            )}
+            ))}
           </Col>
-        }
+        )}
         {config.paginated && (
-          <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
+          <Col
+            lg={2}
+            className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end"
+          >
             <Button variant="link" disabled={page >= numPages}>
               <FontAwesomeIcon
                 icon="chevron-left"
@@ -670,15 +699,15 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
       <Table striped hover className="RichTable_table" ref={config.ref}>
         <thead>
           <tr>
-            {header.cells.map(cell => (
+            {header.cells.map((cell) => (
               <th {...cell.useCellProps()}>{cell.render()}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map(row => (
+          {rows.map((row) => (
             <tr {...row.useRowProps()}>
-              {row.cells.map(cell => (
+              {row.cells.map((cell) => (
                 <td {...cell.useCellProps()}>{cell.render()}</td>
               ))}
             </tr>

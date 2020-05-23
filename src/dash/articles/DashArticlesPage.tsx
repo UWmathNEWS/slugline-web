@@ -70,8 +70,7 @@ const DashArticlesPage: React.FC = () => {
       <Button onClick={createNewArticle}>New Article</Button>
       <RichTable<Article>
         columns={columns}
-        // THIS IS SHADY, FIX LATER
-        url={`${API_ROOT}/user_articles/`}
+        get={api.articles.get}
         pk="id"
         paginated
         selectable

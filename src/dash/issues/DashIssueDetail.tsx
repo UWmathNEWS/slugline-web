@@ -45,7 +45,7 @@ const DashIssueDetail = () => {
       <h3>Articles</h3>
       <RichTable<Article>
         columns={columns}
-        url={`${API_ROOT}issues/${id}/`}
+        get={api.articles.get}
         pk="id"
         paginated
         selectable
