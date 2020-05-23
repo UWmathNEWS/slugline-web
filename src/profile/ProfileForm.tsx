@@ -138,34 +138,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
           }));
       return resp;
     }
-    // try {
-    //   if (props.user === undefined) {
-    //     await api.users.create({ body: cleaned, csrf: auth.csrfToken });
-    //     setSuccessMessage(`User ${vals.username} created successfully.`);
-    //     // refresh the form so we can add a new user
-    //     props.context.reset();
-    //   } else {
-    //     await auth.patch<ProfileFormVals>(
-    //       editingMe ? "me/" : `users/${vals?.username}/`,
-    //       cleaned,
-    //       editingMe
-    //     );
-    //     setSuccessMessage(`User ${vals.username} saved successfully.`);
-    //   }
-    //   setGeneralErrors(undefined);
-    //   setShowPassword(false);
-    //   if (props.onSubmitSuccessful) {
-    //     await props.onSubmitSuccessful(vals);
-    //   }
-    // } catch (err) {
-    //   const apiError = err as UserAPIError;
-    //   setServerErrors(props.context, apiError);
-    //   setSuccessMessage(undefined);
-    //   setGeneralErrors(apiError.detail);
-    //   if (props.onSubmitFailed) {
-    //     await props.onSubmitFailed(vals, apiError);
-    //   }
-    // }
   };
 
   return (
