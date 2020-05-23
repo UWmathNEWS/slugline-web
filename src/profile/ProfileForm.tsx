@@ -63,7 +63,7 @@ const validateUsernameAvailable = async (
   username: string
 ): Promise<boolean> => {
   const resp = await api.users.query({ username: username });
-  return resp.data.success;
+  return resp.success;
 };
 
 interface ProfileFormProps {
@@ -337,7 +337,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                 value={
                   props.context.getValues().is_editor ? "editor" : "contributor"
                 }
-                className="custom-select"
                 custom
               >
                 <option value="contributor">Contributor</option>

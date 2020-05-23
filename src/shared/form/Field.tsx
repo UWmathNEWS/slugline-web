@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Form,
   FormControl,
   FormControlProps,
   InputGroup,
@@ -10,11 +9,12 @@ import { BsPrefixProps, ReplaceProps } from "react-bootstrap/helpers";
 import ERRORS from "../errors";
 
 type FormControlElement =
-  | HTMLInputElement
-  | HTMLSelectElement
-  | HTMLTextAreaElement;
+  & HTMLInputElement
+  & HTMLSelectElement
+  & HTMLTextAreaElement;
 
-interface FieldPropsExtra<T> {
+interface FieldPropsExtra<T> extends FormControlProps {
+  name: string;
   errors: NestDataObject<T, FieldError>;
   hideErrorMessage?: boolean;
   validMessage?: string;
@@ -27,9 +27,10 @@ interface FieldPropsExtra<T> {
 type FieldProps<As extends React.ElementType = "input"> = FieldPropsExtra<any> &
   Omit<ReplaceProps<As, BsPrefixProps<As> & FormControlProps>, "ref">;
 
-const Field = React.forwardRef<FormControl & HTMLInputElement, FieldProps>(
-  (props: FieldProps, forwardedRef) => {
+const Field = React.forwardRef<FormControl & FormControlElement, FieldProps>(
+  (props, forwardedRef) => {
     const {
+      name,
       errors,
       hideErrorMessage,
       validMessage,
@@ -41,17 +42,16 @@ const Field = React.forwardRef<FormControl & HTMLInputElement, FieldProps>(
       <>
         <InputGroup>
           {prepend && <InputGroup.Prepend>{prepend}</InputGroup.Prepend>}
-          <Form.Control
-            name={rest.name}
-            id={rest.id}
-            isInvalid={errors[rest.name || ""]}
-            isValid={!!validMessage && !errors[rest.name || ""]}
+          <FormControl
+            name={name}
+            isInvalid={errors[name]}
+            isValid={!!validMessage && !errors[name]}
             ref={forwardedRef}
             {...rest}
           />
           {append && <InputGroup.Append>{append}</InputGroup.Append>}
           {!hideErrorMessage && (
-            <ErrorMessage name={rest.name || ""} errors={errors}>
+            <ErrorMessage name={name} errors={errors}>
               {({ message, messages }) => {
                 if (messages) {
                   return Object.values(messages).map(msg =>
@@ -74,7 +74,7 @@ const Field = React.forwardRef<FormControl & HTMLInputElement, FieldProps>(
               }}
             </ErrorMessage>
           )}
-          {validMessage && !errors[rest.name || ""] && (
+          {validMessage && !errors[name] && (
             <small className="valid-feedback">{validMessage}</small>
           )}
         </InputGroup>
