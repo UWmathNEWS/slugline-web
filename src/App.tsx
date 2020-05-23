@@ -23,26 +23,31 @@ initLibrary();
 
 const browserHistory = createBrowserHistory();
 
-const protectedRoutes = ["/dash", "/profile", "/admin"];
+const protectedRoutes: RegExp[] = [
+  /^\/dash/,
+  /^\/profile/,
+  /^\/admin/,
+];
 
 interface AppProps {
   history?: History;
 }
 
-const ContextlessApp: React.FC<AppProps> = ({ history }) => {
+const ContextlessApp: React.FC<Required<AppProps>> = ({ history }) => {
   const auth = useAuth();
-  const hist = history ?? browserHistory;
 
   React.useEffect(() => {
-    hist.listen((loc) => {
-      if (protectedRoutes.includes(loc.pathname)) {
+    const unlisten = history.listen((loc) => {
+      if (protectedRoutes.some(matcher => matcher.test(loc.pathname))) {
         auth.check(true);
       }
     });
-  }, []);
+
+    return () => { unlisten() };
+  }, [history, auth]);
 
   return (
-    <Router history={hist}>
+    <Router history={history}>
       <SluglineNav />
       <div className="container">
         <div>
@@ -75,7 +80,7 @@ const ContextlessApp: React.FC<AppProps> = ({ history }) => {
   );
 };
 
-export default ({ history }: AppProps) => (
+export default ({ history = browserHistory }: AppProps) => (
   <AuthProvider>
     <ToastProvider>
       <ContextlessApp history={history} />

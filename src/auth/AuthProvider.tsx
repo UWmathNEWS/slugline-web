@@ -1,5 +1,4 @@
 import React, {
-  useContext,
   useEffect,
   useReducer,
   useRef,
@@ -61,12 +60,10 @@ export const AuthProvider: React.FC = (props) => {
           (user.user !== null && data === null) ||
           (user.user === null && data !== null) ||
           // Conduct a deep equality check of two User objects
-          (user.user !== null && data !== null && (() => {
-            for (const k of Object.keys(data)) {
-              if (user.user[k as keyof User] !== data[k as keyof User]) return true;
-            }
-            return false;
-          })())
+          (user.user !== null && data !== null &&
+            // Typescript thinks user.user could be null despite our check above, hence the ! suffix
+            Object.keys(data).some(k => user.user![k as keyof User] !== data[k as keyof User])
+          )
         ) {
           setUser(data);
         }
