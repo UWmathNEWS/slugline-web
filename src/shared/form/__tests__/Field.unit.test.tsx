@@ -1,5 +1,4 @@
 import React from "react";
-import { FormControl } from "react-bootstrap";
 import { render } from "@testing-library/react";
 import Field from "../Field";
 import ERRORS from "../../errors";
@@ -11,7 +10,9 @@ describe("Field", () => {
       message: "__TESTING"
     }
   };
-  let ref: React.Ref<FormControl & HTMLInputElement>;
+  // NOTE: This isn't completely accurate, but it's what makes TypeScript complain the least.
+  // Hopefully as types improve over time, we can narrow this down.
+  let ref: React.Ref<any>;
 
   beforeEach(() => {
     ref = React.createRef();

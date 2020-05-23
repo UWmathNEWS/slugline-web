@@ -15,7 +15,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
 
-  const onChange = (evt: React.FormEvent<HTMLInputElement>) => {
+  const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     if (evt.currentTarget.name === "username") {
       setUsername(evt.currentTarget.value);
     } else if (evt.currentTarget.name === "password") {
