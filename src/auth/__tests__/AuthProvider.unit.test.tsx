@@ -123,6 +123,38 @@ describe("AuthProvider", () => {
       expect(mockAxios.get).toHaveBeenCalledTimes(2);
     });
 
+    it("does not change AuthProvider internal state if result of check is the same as current state", () => {
+      // (1) Check anonymous users
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: null } });
+      });
+
+      auth = result.current;
+      auth.check(true);
+
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: null } });
+      });
+
+      expect(auth).toBe(result.current);
+
+      // (2) Check logged-in users
+      auth.check(true);
+
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: testUser } });
+      });
+
+      auth = result.current;
+      auth.check(true);
+
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: testUser } });
+      });
+
+      expect(auth).toBe(result.current);
+    });
+
     it("does not change AuthProvider internal state until promise is resolved", () => {
       act(() => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
@@ -134,7 +166,7 @@ describe("AuthProvider", () => {
       expect(auth).toBe(result.current);
 
       act(() => {
-        mockAxios.mockResponse({ data: { success: true, data: null } });
+        mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
       expect(auth).not.toBe(result.current);
@@ -152,6 +184,8 @@ describe("AuthProvider", () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
+      expect(auth).not.toBe(result.current);
+
       auth = result.current;
       expect(auth.user).not.toBeNull();
     });
@@ -168,8 +202,28 @@ describe("AuthProvider", () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
+      expect(auth).not.toBe(result.current);
+
       auth = result.current;
       expect(auth.user).toBeNull();
+    });
+
+    it("updates the user if they changed between checks", () => {
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: testUser } });
+      });
+
+      auth = result.current;
+      auth.check(true);
+
+      act(() => {
+        mockAxios.mockResponse({ data: { success: true, data: testAdmin } });
+      });
+
+      expect(auth).not.toBe(result.current);
+
+      auth = result.current;
+      expect(auth.user).not.toEqual(testUser);
     });
 
     it("handles unsuccessful requests by throwing an error", async () => {

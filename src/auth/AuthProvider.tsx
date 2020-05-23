@@ -16,9 +16,10 @@ import axios, {
   AxiosResponse,
   Method as AxiosMethod,
 } from "axios";
+import Cookie from "js-cookie";
 import { apiGet, getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
-import { authReducer, USER_LOCALSTORAGE_KEY, Auth } from "./Auth";
+import { authReducer, USER_LOCALSTORAGE_KEY, Auth, CSRF_COOKIE } from "./Auth";
 
 interface AxiosConfig extends AxiosRequestConfig {
   method: AxiosMethod;
@@ -33,17 +34,32 @@ export const AuthProvider: React.FC = (props) => {
     authReducer,
     {
       user: storedUser !== null ? JSON.parse(storedUser) : null,
-      csrfToken: null, // null is a sentinel value here so we know the page was just loaded
+      csrfToken: Cookie.get(CSRF_COOKIE) || null,
     }
   );
 
   const check = (force: boolean = false) => {
     if (!isWaiting.current && (force || readyPromise.current === undefined)) {
+      // Ensure we don't end up with a race condition --- we now have an invariant that only one network request
+      // will be made at any point in time
       isWaiting.current = true;
       const promise = (
         apiGet<User | null>(getApiUrl("me/"))
       ).then((data: User | null) => {
-        if (user.csrfToken === null || force) {
+        // Test equality of received data here with the current user. If they're not equal, update internal state;
+        // otherwise, do nothing to save a rerender.
+        // Due to above invariant, we can be assured that user is up-to-date, since nothing can change it.
+        if (
+          (user.user !== null && data === null) ||
+          (user.user === null && data !== null) ||
+          // Conduct a deep equality check of two User objects
+          (user.user !== null && data !== null && (() => {
+            for (const k of Object.keys(data)) {
+              if (user.user[k as keyof User] !== data[k as keyof User]) return true;
+            }
+            return false;
+          })())
+        ) {
           if (data) {
             dispatchUser({ type: "login", user: data });
           } else {
@@ -195,6 +211,9 @@ export const AuthProvider: React.FC = (props) => {
 
   useEffect(() => {
     check();
+    // We only need to call check on component mount, hence the empty dependency array. The patch that disables ESLint
+    // yelling at us in this scenario hasn't landed in our toolchain yet, so we disable the warning for now.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

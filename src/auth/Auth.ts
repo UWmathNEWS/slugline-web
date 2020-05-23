@@ -33,14 +33,10 @@ export const authReducer = (state: AuthState, action: AuthAction) => {
   switch (action.type) {
     case "post":
     case "login":
-      if (action.user === null) {
-        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-      } else {
-        localStorage.setItem(
-          USER_LOCALSTORAGE_KEY,
-          JSON.stringify(action.user)
-        );
-      }
+      localStorage.setItem(
+        USER_LOCALSTORAGE_KEY,
+        JSON.stringify(action.user)
+      );
       return {
         user: action.user,
         csrfToken: Cookie.get(CSRF_COOKIE) || null,

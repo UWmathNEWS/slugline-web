@@ -78,8 +78,10 @@ const PrivateRouteWrapper: React.FC<{
   // authCheckCompleted tells us whether the auth check has been completed, meaning it's safe to mount the child.
   const authCheckCompleted = useRef(false);
 
-  // PrivateRoute can also be affected by changes in AuthProvider; we also check against auth.user to ensure children
+  // PrivateRoute can also be affected by changes in AuthProvider; we also check against auth to ensure children
   // are rerendered in the case of a change.
+  // Since auth.check() doesn't change auth unless a request is made, we can simply use the whole auth object
+  // as a dependency.
   useEffect(() => {
     dispatch({ type: 'is loading' });
     auth.check()?.then(() => {
@@ -90,7 +92,7 @@ const PrivateRouteWrapper: React.FC<{
     authCheckCompleted.current = true;
 
     return () => { authCheckCompleted.current = false };
-  }, [history.location.key, auth.user]);
+  }, [history.location.key, auth]);
 
   if (state.errors.length === 0) {
     if (authCheckCompleted.current && state.ready) {
