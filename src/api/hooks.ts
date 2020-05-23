@@ -16,7 +16,7 @@ import {
   IssueAPIError,
 } from "../shared/types";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 import { getApiUrl } from "./api";
 import ERRORS from "../shared/errors";
 

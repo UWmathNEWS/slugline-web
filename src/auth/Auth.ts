@@ -1,5 +1,5 @@
 import { AuthContext, User } from "../shared/types";
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import Cookie from "js-cookie";
 
 export interface AuthState {
@@ -52,3 +52,4 @@ export const authReducer = (state: AuthState, action: AuthAction) => {
   return state;
 };
 
+export const useAuth = () => useContext(Auth);

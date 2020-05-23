@@ -6,7 +6,7 @@ import Field from "../shared/form/Field";
 
 import axios from "axios";
 import { getApiUrl } from "../api/api";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";

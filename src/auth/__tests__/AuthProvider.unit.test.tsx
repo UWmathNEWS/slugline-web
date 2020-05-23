@@ -1,6 +1,6 @@
 import React from "react";
-import { CSRF_COOKIE } from "../Auth";
-import { AuthProvider, useAuth } from "../AuthProvider";
+import { useAuth, CSRF_COOKIE } from "../Auth";
+import { AuthProvider } from "../AuthProvider";
 import { render } from "@testing-library/react";
 import { HookResult, renderHook, act } from "@testing-library/react-hooks";
 import mockAxios from "jest-mock-axios";

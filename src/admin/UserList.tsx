@@ -6,7 +6,7 @@ import { User } from "../shared/types";
 import { ProfileFormConsumer, useProfileForm } from "../profile/ProfileForm";
 
 import "./UserList.scss";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 import ERRORS from "../shared/errors";
 import {
   RichTable,

@@ -5,7 +5,8 @@ import { createBrowserHistory, History } from "history";
 
 import IssuesList from "./issues/IssuesList";
 import IssuePage from "./issues/IssuePage";
-import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import { useAuth } from "./auth/Auth";
+import { AuthProvider } from "./auth/AuthProvider";
 import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
 import Dash from "./dash/Dash";
