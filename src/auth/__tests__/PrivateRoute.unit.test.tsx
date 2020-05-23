@@ -37,6 +37,7 @@ describe("Unit test for PrivateRoute", () => {
         put: jest.fn(),
         patch: jest.fn(),
         delete: jest.fn(),
+        setUser: jest.fn(),
         login: jest.fn(),
         logout: jest.fn()
       }}
