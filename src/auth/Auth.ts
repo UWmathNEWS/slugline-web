@@ -42,7 +42,7 @@ export type AuthAction =
 export const Auth = createContext<AuthContext>({
   user: null,
   csrfToken: null,
-  check: () => undefined,
+  check: () => Promise.resolve(),
   isAuthenticated: () => false,
   isEditor: () => false,
   post: () => Promise.resolve(undefined),

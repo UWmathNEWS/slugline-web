@@ -1,14 +1,6 @@
-import React, {
-  useEffect,
-  useReducer,
-  useRef,
-} from "react";
+import React, { useEffect, useReducer, useRef } from "react";
 
-import {
-  User,
-  UserAPIResponse,
-  APIResponse,
-} from "../shared/types";
+import { User, UserAPIResponse, APIResponse } from "../shared/types";
 import axios, {
   AxiosError,
   AxiosRequestConfig,
@@ -29,13 +21,10 @@ export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
   const readyPromise = useRef<Promise<void> | undefined>(undefined);
   const isWaiting = useRef<boolean>(false);
-  const [user, dispatchUser] = useReducer(
-    authReducer,
-    {
-      user: storedUser !== null ? JSON.parse(storedUser) : null,
-      csrfToken: Cookie.get(CSRF_COOKIE) || null,
-    }
-  );
+  const [user, dispatchUser] = useReducer(authReducer, {
+    user: storedUser !== null ? JSON.parse(storedUser) : null,
+    csrfToken: Cookie.get(CSRF_COOKIE) || null,
+  });
 
   const setUser = (user: User | null) => {
     if (user) {
@@ -43,32 +32,34 @@ export const AuthProvider: React.FC = (props) => {
     } else {
       dispatchUser({ type: "logout" });
     }
-  }
+  };
 
-  const check = (force: boolean = false) => {
-    if (!isWaiting.current && (force || readyPromise.current === undefined)) {
+  const check = (force: boolean = false): Promise<void> => {
+    if (readyPromise.current === undefined || (!isWaiting.current && force)) {
       // Ensure we don't end up with a race condition --- we now have an invariant that only one network request
       // will be made at any point in time
       isWaiting.current = true;
-      const promise = (
-        apiGet<User | null>(getApiUrl("me/"))
-      ).then((data: User | null) => {
-        // Test equality of received data here with the current user. If they're not equal, update internal state;
-        // otherwise, do nothing to save a rerender.
-        // Due to above invariant, we can be assured that user is up-to-date, since nothing can change it.
-        if (
-          (user.user !== null && data === null) ||
-          (user.user === null && data !== null) ||
-          // Conduct a deep equality check of two User objects
-          (user.user !== null && data !== null &&
-            // Typescript thinks user.user could be null despite our check above, hence the ! suffix
-            Object.keys(data).some(k => user.user![k as keyof User] !== data[k as keyof User])
-          )
-        ) {
-          setUser(data);
+      const promise = apiGet<User | null>(getApiUrl("me/")).then(
+        (data: User | null) => {
+          // Test equality of received data here with the current user. If they're not equal, update internal state;
+          // otherwise, do nothing to save a rerender.
+          // Due to above invariant, we can be assured that user is up-to-date, since nothing can change it.
+          if (
+            (user.user !== null && data === null) ||
+            (user.user === null && data !== null) ||
+            // Conduct a deep equality check of two User objects
+            (user.user !== null &&
+              data !== null &&
+              // Typescript thinks user.user could be null despite our check above, hence the ! suffix
+              Object.keys(data).some(
+                (k) => user.user![k as keyof User] !== data[k as keyof User]
+              ))
+          ) {
+            setUser(data);
+          }
+          isWaiting.current = false;
         }
-        isWaiting.current = false;
-      });
+      );
       readyPromise.current = promise;
       return promise;
     }
@@ -211,7 +202,18 @@ export const AuthProvider: React.FC = (props) => {
   };
 
   useEffect(() => {
-    check();
+    check().catch((e) => {
+      // something went horribly wrong here, but we only alert users if they're logged in as otherwise it causes no harm
+      if (storedUser !== null) {
+        window.alert(
+          "An error occurred and we couldn't verify that you're logged in. Try refreshing the page, or check your network connection."
+        );
+      }
+      console.error(
+        "The following error was thrown while performing an auth check:\n",
+        e
+      );
+    });
     // We only need to call check on component mount, hence the empty dependency array. The patch that disables ESLint
     // yelling at us in this scenario hasn't landed in our toolchain yet, so we disable the warning for now.
     // eslint-disable-next-line react-hooks/exhaustive-deps

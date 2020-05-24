@@ -86,7 +86,7 @@ const PrivateRouteWrapper: React.FC<{
     dispatch({ type: 'is loading' });
     auth.check()?.then(() => {
       dispatch({ type: 'done loading' });
-    }, (e: APIError) => {
+    }, ({ status_code, ...e }: APIError) => {
       dispatch({ type: 'error', data: Object.values(e).flat() });
     });
     authCheckCompleted.current = true;

@@ -39,7 +39,8 @@ const ContextlessApp: React.FC<Required<AppProps>> = ({ history }) => {
   React.useEffect(() => {
     const unlisten = history.listen((loc) => {
       if (protectedRoutes.some(matcher => matcher.test(loc.pathname))) {
-        auth.check(true);
+        // we no-op on error to prevent a crash as the error is handled by PrivateRoute
+        auth.check(true).catch(() => {});
       }
     });
 

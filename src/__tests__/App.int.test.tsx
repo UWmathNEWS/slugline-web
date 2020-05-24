@@ -109,4 +109,12 @@ describe("Integration test for main app component", () => {
 
     expect(getByText("404")).toBeInTheDocument();
   });
+
+  it("shouldn't crash if auth check fails", () => {
+    render(<App />);
+
+    act(() => {
+      mockAxios.mockError({});
+    });
+  });
 });
