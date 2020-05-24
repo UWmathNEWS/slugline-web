@@ -1,6 +1,6 @@
 import "./RichTable.scss";
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Col, Form, FormCheck, FormControl, Row, Table } from "react-bootstrap";
 import nanoid from "nanoid";
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
@@ -696,72 +696,95 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
   );
 };
 
-export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
-  const bag = useRichTable(config);
+const RichTableHeader = ({ config, bag }: { config: RichTableProps<any>, bag: RichTableBag<any> }) => {
   const {
-    header,
-    rows,
     selected,
-    page,
-    numPages,
-    count,
-    totalCount,
     setSearchQuery,
     executeAction,
   } = bag;
   const [setSearchDebounced, setSearch] = useDebouncedCallback(setSearchQuery, 500);
   const { addToasts } = useToast();
 
+  return (
+    <Row className="RichTable_header">
+      {config.searchable && (
+        <Col lg={3} className="RichTable_search">
+          <FormControl
+            type="text"
+            placeholder="Search..."
+            size="sm"
+            className="RichTable_searchBox"
+            onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+              const value = e.currentTarget.value;
+              if (value) {
+                await setSearchDebounced(value);
+              } else {
+                setSearch("");
+              }
+            }}
+          />
+        </Col>
+      )}
+      {config.actions &&
+      <Col lg={7} className="RichTable_actions">
+        {config.actions.map((action) =>
+          <Button
+            key={action.name}
+            variant="link"
+            disabled={"bulk" in action && (selected.length === 0 || (!action.bulk && selected.length > 1))}
+            onClick={() => {
+              executeAction(action.name)
+                .catch((e: any) => {
+                  addToasts([{
+                    id: `action-failed-${Date.now()}`,
+                    body: "Action failed to execute."
+                  }]);
+                  console.error(e);
+                });
+            }}
+          >
+            {action.displayName ?? action.name}
+          </Button>
+        )}
+      </Col>
+      }
+      {config.paginated && <RichTablePagination bag={bag} />}
+    </Row>
+  );
+}
+
+const RichTableFooter = ({ config, bag }: { config: RichTableProps<any>, bag: RichTableBag<any> }) => {
+  const {
+    page,
+    numPages,
+    count,
+    totalCount,
+  } = bag;
+
+  return (
+    <Row className="RichTable_footer">
+      <Col lg={3} className="d-none d-lg-flex RichTable_summary">
+        {totalCount && (page - 1) * count + 1}&ndash;{page < numPages ? page * count : totalCount} of {totalCount}
+      </Col>
+      {config.paginated && <RichTablePagination bag={bag} />}
+    </Row>
+  );
+}
+
+export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
+  const bag = useRichTable(config);
+  const {
+    header,
+    rows,
+  } = bag;
+
   if (config.bagRef) {
     config.bagRef(bag);
   }
 
   return (
-    <div className={`RichTable ${config.className ?? ""}`}>
-      <Row className="RichTable_header">
-        {config.searchable && (
-          <Col lg={3} className="RichTable_search">
-            <FormControl
-              type="text"
-              placeholder="Search..."
-              size="sm"
-              className="RichTable_searchBox"
-              onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.currentTarget.value;
-                if (value) {
-                  await setSearchDebounced(value);
-                } else {
-                  setSearch("");
-                }
-              }}
-            />
-          </Col>
-        )}
-        {config.actions &&
-          <Col lg={7} className="RichTable_actions">
-            {config.actions.map((action) =>
-              <Button
-                key={action.name}
-                variant="link"
-                disabled={"bulk" in action && (selected.length === 0 || (!action.bulk && selected.length > 1))}
-                onClick={() => {
-                  executeAction(action.name)
-                    .catch((e: any) => {
-                      addToasts([{
-                        id: `action-failed-${Date.now()}`,
-                        body: "Action failed to execute."
-                      }]);
-                      console.error(e);
-                    });
-                }}
-              >
-                {action.displayName ?? action.name}
-              </Button>
-            )}
-          </Col>
-        }
-        {config.paginated && <RichTablePagination bag={bag} />}
-      </Row>
+    <div className={`RichTable ${config.className || ""}`}>
+      <RichTableHeader config={config} bag={bag} />
       <Table striped hover responsive className="RichTable_table" ref={config.ref}>
         <thead>
           <tr>
@@ -780,12 +803,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
           ))}
         </tbody>
       </Table>
-      <Row className="RichTable_footer">
-        <Col lg={3} className="d-none d-lg-flex RichTable_summary">
-          {totalCount && (page - 1) * count + 1}&ndash;{page < numPages ? page * count : totalCount} of {totalCount}
-        </Col>
-        {config.paginated && <RichTablePagination bag={bag} />}
-      </Row>
+      <RichTableFooter config={config} bag={bag} />
     </div>
   );
 };
