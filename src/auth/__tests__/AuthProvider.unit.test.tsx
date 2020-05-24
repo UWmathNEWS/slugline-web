@@ -1,12 +1,11 @@
 import React from "react";
-import { useAuth, CSRF_COOKIE } from "../Auth";
+import { AuthContext, useAuth, CSRF_COOKIE } from "../Auth";
 import { AuthProvider } from "../AuthProvider";
 import { render } from "@testing-library/react";
 import { HookResult, renderHook, act } from "@testing-library/react-hooks";
 import mockAxios from "jest-mock-axios";
 import { makeTestError, testAdmin, testUser } from "../../shared/test-utils";
 import ERRORS from "../../shared/errors";
-import { AuthContext } from "../../shared/types";
 
 // for spies
 import * as _a from "../Auth";
