@@ -677,7 +677,7 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
               currentTarget.value = page.toString();
             }}
             style={{
-              height: "calc(2.25rem - 4px)",
+              height: "calc(2.0625rem - 1px)", // taken from bootstrap's height of a small input (1.5*.875rem + .75rem)
               width: `${numPages.toString().length + 1}ch`,
             }}
           /> / {numPages}
