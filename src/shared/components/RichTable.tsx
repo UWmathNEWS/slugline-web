@@ -686,18 +686,18 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
           onSubmit={(e: React.FormEvent) => {
             e.preventDefault();
             // if for whatever reason the input has an invalid value, reset it to the current page
-            setNewPage(newPage || page.toString());
-            setPage(parseInt(newPage) || page);
+            const requestedPage =
+              Math.max(1, Math.min(parseInt(newPage), numPages)) || page;
+            setNewPage(requestedPage.toString());
+            setPage(requestedPage);
           }}
         >
           <Form.Control
             className="d-inline-block d-lg-inline px-0 text-center"
             value={newPage}
             onChange={({ target }: React.ChangeEvent<HTMLInputElement>) => {
-              const requestedPage =
-                Math.max(1, Math.min(parseInt(target.value), numPages)) || "";
-              setNewPage(requestedPage.toString());
-              newPageRef.current = requestedPage.toString();
+              setNewPage(target.value);
+              newPageRef.current = target.value;
             }}
             onKeyDown={({
               key,
@@ -720,8 +720,10 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
                 hasBlurListener.current = true;
                 window.addEventListener("click", function fakeBlurListener() {
                   // no need to check the current target since we capture click events on this input anyways
-                  setNewPage(newPageRef.current || page.toString());
-                  setPage(parseInt(newPageRef.current) || page);
+                  const requestedPage =
+                    Math.max(1, Math.min(parseInt(newPageRef.current), numPages)) || page;
+                  setNewPage(requestedPage.toString());
+                  setPage(requestedPage);
                   window.removeEventListener("click", fakeBlurListener);
                   hasBlurListener.current = false;
                 });
