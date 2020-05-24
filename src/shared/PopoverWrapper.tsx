@@ -1,8 +1,7 @@
 import React from "react";
-import { Overlay } from "react-bootstrap";
+import { Overlay, OverlayProps } from "react-bootstrap";
 
-interface PopoverProps {
-  target: React.Component | Element | Node;
+interface PopoverProps extends OverlayProps {
   show: boolean;
   setShow: (show: boolean) => void;
 }

@@ -129,7 +129,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
 
     const editingMe = props.user?.username === auth.user?.username;
     try {
-      if (props.user === undefined) {
+      if (typeof props.user === "undefined") {
         await auth.post<ProfileFormVals>("users/", cleaned);
         setSuccessMessage(`User ${vals.username} created successfully.`);
         // refresh the form so we can add a new user
@@ -300,7 +300,6 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                 value={
                   props.context.getValues().is_editor ? "editor" : "contributor"
                 }
-                className="custom-select"
                 custom
               >
                 <option value="contributor">Contributor</option>
