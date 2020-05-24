@@ -42,6 +42,7 @@
 
     @include media-breakpoint-down(sm) {
       width: auto;
+      min-width: 100%;
     }
   }
 
