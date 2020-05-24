@@ -215,7 +215,7 @@ const useRichTable = <D extends object = {}>({
     }
   }, [rawData, error]);
 
-  const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 0 : 0;
+  const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 1 : 1;
 
   const totalCount = paginated
     ? (rawData as Pagination<D>)?.count || 0
@@ -440,7 +440,7 @@ const useRichTable = <D extends object = {}>({
                 }
               },
               render() {
-                return <Loader style="linear" hideFromScreenreaders={i > 0 || j > 0} />;
+                return <Loader variant="linear" hideFromScreenreaders={i > 0 || j > 0} />;
               }
             }))
           ],
@@ -605,6 +605,97 @@ const useRichTable = <D extends object = {}>({
  * The RichTable component, on the other hand, is a ready-to-use table with pagination, sorting, and search natively
  * supported.
  */
+const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
+  const {
+    page,
+    numPages,
+    setPage,
+    requestState,
+    executeAction
+  } = bag;
+  const [newPage, setNewPage] = useState(page.toString());
+  // we need a ref to store the new page to get around the fake blur listener capturing outdated values of newPage
+  const newPageRef = useRef(page.toString());
+  const hasBlurListener = useRef(false);
+
+  useEffect(() => {
+    setNewPage(page.toString());
+  }, [page]);
+
+  return (
+    <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
+      <Button variant="link" disabled={page <= 1 || requestState !== RequestState.Complete}>
+        <FontAwesomeIcon
+          icon="chevron-left"
+          className="RichTable_paginationIcon"
+          onClick={async () => {
+            await executeAction("_previous");
+          }}
+        />
+      </Button>
+      <span className="RichTable_paginationText">
+        <Form
+          onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
+            // if for whatever reason the input has an invalid value, reset it to the current page
+            setNewPage(newPage || page.toString());
+            setPage(parseInt(newPage) || page);
+          }}
+        >
+          <Form.Control
+            className="d-inline-block d-lg-inline px-0 text-center"
+            value={newPage}
+            onChange={({ target }: React.ChangeEvent<HTMLInputElement>) => {
+              const requestedPage = Math.max(1, Math.min(parseInt(target.value), numPages)) || "";
+              setNewPage(requestedPage.toString());
+              newPageRef.current = requestedPage.toString();
+            }}
+            onKeyDown={({ key, currentTarget }: React.KeyboardEvent<HTMLInputElement>) => {
+              if (key === "Escape") {
+                currentTarget.blur();
+              }
+            }}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+            }}
+            onFocus={({ currentTarget }: React.FocusEvent<HTMLInputElement>) => {
+              currentTarget.select();
+
+              // only submit if blur was the result of a click outside the control
+              if (!hasBlurListener.current) {
+                hasBlurListener.current = true;
+                window.addEventListener("click", function fakeBlurListener() {
+                  // no need to check the current target since we capture click events on this input anyways
+                  setNewPage(newPageRef.current || page.toString());
+                  setPage(parseInt(newPageRef.current) || page);
+                  window.removeEventListener("click", fakeBlurListener);
+                  hasBlurListener.current = false;
+                });
+              }
+            }}
+            onBlur={({ currentTarget }: React.FocusEvent<HTMLInputElement>) => {
+              currentTarget.value = page.toString();
+            }}
+            style={{
+              height: "calc(2.25rem - 4px)",
+              width: `${numPages.toString().length + 1}ch`,
+            }}
+          /> / {numPages}
+        </Form>
+      </span>
+      <Button variant="link" disabled={page >= numPages || requestState !== RequestState.Complete}>
+        <FontAwesomeIcon
+          icon="chevron-right"
+          className="RichTable_paginationIcon"
+          onClick={async () => {
+            await executeAction("_next");
+          }}
+        />
+      </Button>
+    </Col>
+  );
+};
+
 export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
   const bag = useRichTable(config);
   const {
@@ -613,12 +704,10 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
     selected,
     page,
     numPages,
-    setPage,
     count,
     totalCount,
     setSearchQuery,
     executeAction,
-    requestState,
   } = bag;
   const [setSearchDebounced, setSearch] = useDebouncedCallback(setSearchQuery, 500);
   const { addToasts } = useToast();
@@ -626,73 +715,6 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
   if (config.bagRef) {
     config.bagRef(bag);
   }
-
-  const Pagination = () => {
-    const [displayPageSelector, setDisplayPageSelector] = useState(false);
-    const pageSelectorRef = useRef<FormControl & HTMLInputElement>(null);
-    const pageSelectorId = useRef(`RichTable_pageSelector_${Math.random()}`);
-
-    useLayoutEffect(() => {
-      if (displayPageSelector) {
-        pageSelectorRef.current?.focus();
-      }
-    }, [displayPageSelector]);
-
-    if (displayPageSelector) {
-      return (
-        <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
-          <Form.Group className="mb-0 text-center text-lg-right" controlId={pageSelectorId.current}>
-            <Form.Label sm={2} className="d-inline mb-0">Go to page</Form.Label>
-            <FormControl
-              defaultValue={page.toString()}
-              onKeyDown={({ key, currentTarget }: React.KeyboardEvent<HTMLInputElement>) => {
-                if (key === "Enter") {
-                  const requestedPage = Math.max(1, Math.min(parseInt(currentTarget.value), numPages)) || page;
-                  setPage(requestedPage);
-                  setDisplayPageSelector(false);
-                } else if (key === "Escape") {
-                  setDisplayPageSelector(false);
-                }
-              }}
-              onBlur={() => { setDisplayPageSelector(false) }}
-              size="sm"
-              className="d-inline w-25"
-              ref={pageSelectorRef}
-            />
-          </Form.Group>
-        </Col>
-      )
-    }
-
-    return (
-      <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
-        <Button variant="link" disabled={page <= 1 || requestState !== RequestState.Complete}>
-          <FontAwesomeIcon
-            icon="chevron-left"
-            className="RichTable_paginationIcon"
-            onClick={async () => {
-              await executeAction("_previous");
-            }}
-          />
-        </Button>
-        <span className="RichTable_paginationText">
-          <span
-            className="form-control d-inline-block d-lg-inline w-auto mb-1"
-            onClick={() => { requestState === RequestState.Complete && setDisplayPageSelector(true) }}
-          >{page}</span> / {numPages}
-        </span>
-        <Button variant="link" disabled={page >= numPages || requestState !== RequestState.Complete}>
-          <FontAwesomeIcon
-            icon="chevron-right"
-            className="RichTable_paginationIcon"
-            onClick={async () => {
-              await executeAction("_next");
-            }}
-          />
-        </Button>
-      </Col>
-    );
-  };
 
   return (
     <div className={`RichTable ${config.className ?? ""}`}>
@@ -738,7 +760,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
             )}
           </Col>
         }
-        {config.paginated && <Pagination />}
+        {config.paginated && <RichTablePagination bag={bag} />}
       </Row>
       <Table striped hover responsive className="RichTable_table" ref={config.ref}>
         <thead>
@@ -762,7 +784,7 @@ export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
         <Col lg={3} className="d-none d-lg-flex RichTable_summary">
           {totalCount && (page - 1) * count + 1}&ndash;{page < numPages ? page * count : totalCount} of {totalCount}
         </Col>
-        {config.paginated && <Pagination />}
+        {config.paginated && <RichTablePagination bag={bag} />}
       </Row>
     </div>
   );
