@@ -10,10 +10,6 @@ jobs:
     runs-on: ubuntu-16.04
 
     steps:
-
-    - name: Turn off CI env var
-      run: echo "::set-env CI=false"
-
     - uses: actions/checkout@v1
 
     - name: Install size-limit
