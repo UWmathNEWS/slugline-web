@@ -41,11 +41,8 @@ jobs:
 
 
     - name: Setup size-limit
-      run: npm install size-limit @size-limit/preset-app
+      run: npm install --save-dev size-limit @size-limit/preset-app
 
     - uses: andresz1/size-limit-action@v1.0.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Size check
-      run: |
-        npm run size
