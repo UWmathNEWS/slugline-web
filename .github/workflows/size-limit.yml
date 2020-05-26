@@ -12,7 +12,7 @@ jobs:
     steps:
 
     - name: Turn off CI env var
-      run: set-env CI=false
+      run: echo "::set-env CI=false"
 
     - uses: actions/checkout@v1
 
