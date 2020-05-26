@@ -79,6 +79,25 @@ describe("useApiGet", () => {
       detail: [ERRORS.REQUEST.DID_NOT_SUCCEED]
     });
   });
+
+  it("clears errors after a successful request", async () => {
+    const { result, rerender } = renderHook((url) => h.useApiGet(url), { initialProps: "test" });
+
+    act(() => {
+      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
+    });
+
+    rerender("test2")
+
+    act(() => {
+      mockAxios.mockResponse({ data: { success: true, data: ""} });
+    });
+
+    let [resp, err] = result.current;
+
+    expect(resp).not.toBeUndefined();
+    expect(err).toBeUndefined();
+  });
 });
 
 describe("useApiGetPaginated", () => {

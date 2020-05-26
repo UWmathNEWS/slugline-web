@@ -1,28 +1,30 @@
 import "./RichTable.scss";
 
 import React, {
-  useState,
-  useMemo,
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
-  useCallback
+  useState,
 } from "react";
 import {
+  Form,
   FormControl,
   FormCheck,
   Table,
   Row,
   Col,
-  Button, Spinner
+  Button,
 } from "react-bootstrap";
 import nanoid from "nanoid";
-import axios, { AxiosResponse, Method } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
 import { useApiGet } from "../../api/hooks";
-import { APIError, APIResponse, Pagination } from "../types";
+import { APIError, APIResponse, Pagination, RequestState } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useToast } from "../contexts/ToastContext";
 import { useDebouncedCallback } from "../hooks";
+import Loader from "./Loader";
 
 /**
  * RichTable describes a component that displays tabular data in an interactive manner. It defines two main exports:
@@ -45,10 +47,7 @@ export interface ColumnProps<D extends object = {}> {
   header: ReactElement;
   sortable?: boolean;
   width?: number;
-  render?: (
-    cell: any,
-    row: D
-  ) => ReactElement;
+  render?: (cell: any, row: D) => ReactElement;
 }
 
 export type Column<D extends object = {}> = ColumnProps<D> &
@@ -125,7 +124,8 @@ export interface RichTableHook<D extends object = {}> {
   selectable?: boolean;
 }
 
-export interface RichTableProps<D extends object = {}> extends RichTableHook<D> {
+export interface RichTableProps<D extends object = {}>
+  extends RichTableHook<D> {
   className?: string;
   searchable?: boolean;
   ref?: React.Ref<Table & HTMLTableElement>;
@@ -142,9 +142,15 @@ export interface RichTableBag<D extends object = {}> {
   setPage: (page: number) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  count: number;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
-  makeRequest: <T>(method: Method, row?: D, data?: any) => Promise<T>;
+  makeRequest: <T>(
+    method: Method,
+    row?: D,
+    config?: AxiosRequestConfig
+  ) => Promise<T>;
+  requestState: RequestState;
 }
 
 /**
@@ -157,9 +163,12 @@ const useRichTable = <D extends object = {}>({
   pk,
   paginated,
   actions = [],
-  selectable
+  selectable,
 }: RichTableHook<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
+  const [requestState, setRequestState] = useState<RequestState>(
+    RequestState.NotStarted
+  );
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
   const [searchQuery, _setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -167,15 +176,18 @@ const useRichTable = <D extends object = {}>({
   // Named cuckoo because it reminds me of cuckoo hashing.
   const [cuckooLoad, setCuckoo] = useState(false);
 
-  const preSearchParams = useRef<{ page: number, sortColumn: [string, boolean] | null }>({
+  const preSearchParams = useRef<{
+    page: number;
+    sortColumn: [string, boolean] | null;
+  }>({
     page: 1,
-    sortColumn: null
+    sortColumn: null,
   });
   const setSearchQuery = (query: string) => {
     if (!searchQuery) {
       preSearchParams.current = {
         page,
-        sortColumn
+        sortColumn,
       };
     } else if (searchQuery && !query) {
       setPage(preSearchParams.current.page);
@@ -186,7 +198,9 @@ const useRichTable = <D extends object = {}>({
 
   const dataUrl = useMemo<string>(
     () => {
-      let queryBuilder: { [key: string]: string | number } = { time: Date.now() };
+      let queryBuilder: { [key: string]: string | number } = {
+        time: Date.now(),
+      };
       if (paginated) {
         queryBuilder.page = page;
       }
@@ -194,16 +208,24 @@ const useRichTable = <D extends object = {}>({
         queryBuilder.search = window.encodeURIComponent(searchQuery);
       }
       if (sortColumn !== null) {
-        queryBuilder.sort = (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0]);
+        queryBuilder.sort =
+          (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0]);
       }
-      return `${url}${Object.keys(queryBuilder).length ? "?" : ""}${Object.entries(queryBuilder)
-        .map(q => q.join("="))
+      return `${url}${
+        Object.keys(queryBuilder).length ? "?" : ""
+      }${Object.entries(queryBuilder)
+        .map((q) => q.join("="))
         .join("&")}`;
     },
     // We can ignore the warning about cuckooLoad being an unnecessary dependency, since it exists to trigger
     // refreshing without changing other state.
     [url, paginated, sortColumn, searchQuery, page, cuckooLoad]
   );
+
+  useEffect(() => {
+    setRequestState(RequestState.Started);
+  }, [dataUrl]);
+
   const [rawData, error] = useApiGet<Pagination<D> | D[]>(dataUrl);
   const data = useMemo<D[]>(
     () =>
@@ -212,12 +234,24 @@ const useRichTable = <D extends object = {}>({
     [paginated, rawData]
   );
 
-  const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 0 : 0;
+  useEffect(() => {
+    // Prevent table showing no data on initial load
+    if (rawData !== undefined || error !== undefined) {
+      setRequestState(RequestState.Complete);
+    }
+  }, [rawData, error]);
+
+  const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 1 : 1;
+
   const totalCount = paginated
     ? (rawData as Pagination<D>)?.count || 0
     : data.length;
+  const count =
+    page < numPages || page === 1
+      ? data.length
+      : (totalCount - data.length) / (numPages - 1);
 
-  const selectAllRef = useRef<HTMLInputElement & FormCheck>(null);
+  const selectAllRef = useRef<FormCheck & HTMLInputElement>(null);
   const [selected, setSelected] = useState<boolean[]>([]);
   const [filteredSelected, setFilteredSelected] = useState<D[]>([]);
 
@@ -227,7 +261,7 @@ const useRichTable = <D extends object = {}>({
   useEffect(() => {
     if (selectAllRef.current) {
       selectAllRef.current.indeterminate =
-        !selected.every(d => d) && selected.some(d => d);
+        !selected.every((d) => d) && selected.some((d) => d);
     }
   }, [selected]);
   useEffect(() => {
@@ -237,31 +271,48 @@ const useRichTable = <D extends object = {}>({
   const clickActions = useMemo<Action<D>[]>(
     () =>
       actions.filter(
-        action => action.triggers && action.triggers.includes("click")
+        (action) => action.triggers && action.triggers.includes("click")
       ),
     [actions]
   );
 
   const memoizedActions = useMemo<{ [key: string]: Action<D> }>(
     () => ({
-      refresh: {
-        name: "refresh",
-        displayName: "Refresh",
+      _refresh: {
+        name: "_refresh",
         call() {
-          setCuckoo(cuckoo => !cuckoo);
+          setCuckoo((cuckoo) => !cuckoo);
           return Promise.resolve();
-        }
+        },
+      },
+      _previous: {
+        name: "_previous",
+        call() {
+          setPage((page) => (page > 1 ? page - 1 : 1));
+          return Promise.resolve();
+        },
+      },
+      _next: {
+        name: "_next",
+        call() {
+          setPage((page) => (page < numPages ? page + 1 : numPages));
+          return Promise.resolve();
+        },
       },
       ...actions.reduce(
         (acc, action) => ({ ...acc, [action.name]: action }),
         {}
-      )
+      ),
     }),
-    [actions]
+    [actions, numPages]
   );
 
-  const internalExecuteAction = useCallback(
-    (name: string, rows: D[]) => {
+  const internalExecuteAction = useRef<
+    (name: string, rows: D[]) => Promise<any>
+  >(() => Promise.resolve());
+
+  useEffect(() => {
+    internalExecuteAction.current = (name: string, rows: D[]) => {
       const action = memoizedActions[name];
 
       if ("bulk" in action) {
@@ -279,89 +330,97 @@ const useRichTable = <D extends object = {}>({
       } else {
         return action.call(bag);
       }
-    },
-    // We can ignore the warning about bag being a missing dependency -- although this technically depends on
-    // it, both depend on data and so will refresh appropriately.
-    [data, memoizedActions]
-  );
+    };
+  });
 
   const executeAction = useCallback(
     (name: string) => {
       if (!(name in memoizedActions)) {
-        throw new Error(`Action ${name} does not exist or was improperly registered.`);
+        throw new Error(
+          `Action ${name} does not exist or was improperly registered.`
+        );
       }
 
       if ("bulk" in memoizedActions[name] && filteredSelected.length) {
-        return internalExecuteAction(name, filteredSelected);
+        return internalExecuteAction.current(name, filteredSelected);
       } else if (!("bulk" in memoizedActions[name])) {
-        return internalExecuteAction(name, []);
+        return internalExecuteAction.current(name, []);
       }
 
       return Promise.resolve();
     },
-    [filteredSelected, memoizedActions, internalExecuteAction]
+    [filteredSelected, memoizedActions]
   );
 
   const header = useMemo<RichTableRow<{}>>(() => {
     const onSelectAll = () => {
       if (selectAllRef.current) {
-        setSelected(prevSelected =>
-          new Array(data.length).fill(!prevSelected.some(d => d))
+        setSelected((prevSelected) =>
+          new Array(data.length).fill(!prevSelected.some((d) => d))
         );
       }
     };
 
-    let cells: RichTableCell[] = columns.map(({ header, key, sortable, width }) => {
-      let props: PropsBag = { key };
+    let cells: RichTableCell[] = columns.map(
+      ({ header, key, sortable, width }) => {
+        let props: PropsBag = { key };
 
-      if (sortable) {
-        props.onClick = () => {
-          if (sortColumn === null || sortColumn[0] !== key) {
-            setSortColumn([key, true]);
-          } else {
-            if (sortColumn[1]) {
-              setSortColumn([key, false]);
+        if (sortable) {
+          props.onClick = () => {
+            if (sortColumn === null || sortColumn[0] !== key) {
+              setSortColumn([key, true]);
             } else {
-              setSortColumn(null);
+              if (sortColumn[1]) {
+                setSortColumn([key, false]);
+              } else {
+                setSortColumn(null);
+              }
             }
-          }
-        };
-      }
-
-      if (width) {
-        props.style = {
-          width: `${width}%`
-        };
-      }
-
-      return {
-        useCellProps() {
-          return props;
-        },
-        render() {
-          return <span className="RichTable_cellHeader">
-            {header}
-            {sortable &&
-            <FontAwesomeIcon
-              icon={(sortColumn && sortColumn[0] === key)
-                ? (sortColumn[1]
-                  ? "caret-up"
-                  : "caret-down")
-                : "sort"}
-              className="ml-auto"
-            />
-            }
-          </span>;
+          };
         }
-      };
-    });
+
+        if (width) {
+          props.style = {
+            width: `${width}%`,
+          };
+        }
+
+        return {
+          useCellProps() {
+            return props;
+          },
+          render() {
+            return (
+              <span className="RichTable_cellHeader">
+                {header}
+                {sortable && (
+                  <>
+                    &nbsp;
+                    <FontAwesomeIcon
+                      icon={
+                        sortColumn && sortColumn[0] === key
+                          ? sortColumn[1]
+                            ? "caret-up"
+                            : "caret-down"
+                          : "sort"
+                      }
+                      className="ml-auto"
+                    />
+                  </>
+                )}
+              </span>
+            );
+          },
+        };
+      }
+    );
 
     if (selectable) {
       cells.unshift({
         useCellProps() {
           return {
             key: "select-all",
-            className: "RichTable_selectCheckbox"
+            className: "RichTable_selectCheckbox",
           };
         },
         render() {
@@ -372,12 +431,12 @@ const useRichTable = <D extends object = {}>({
               type="checkbox"
               aria-label="select all"
               id={`RichTable-${id.current}-select-all`}
-              checked={selected.length > 0 && selected.every(d => d)}
+              checked={selected.length > 0 && selected.every((d) => d)}
               onChange={onSelectAll}
               ref={selectAllRef}
             />
           );
-        }
+        },
       });
     }
 
@@ -388,61 +447,85 @@ const useRichTable = <D extends object = {}>({
       data: {},
       cells,
       isSelected: false,
-      setSelected() {}
+      setSelected() {},
     };
   }, [columns, selected, sortColumn, selectable, data.length]);
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
-    if (rawData === undefined) {
-      return [
-        {
+    if (requestState !== RequestState.Complete) {
+      return new Array(data.length || 1).fill(null).map(
+        (_, i): RichTableRow<D> => ({
           useRowProps() {
-            return { key: 0 };
+            return { key: i };
           },
           data: {} as D,
-          cells: [{
-            useCellProps() {
-              return {
-                key: 0,
-                className: "RichTable_loading text-center",
-                colSpan: columns.length + (selectable ? 1 : 0)
-              }
+          cells: [
+            {
+              useCellProps() {
+                return {
+                  key: 0,
+                  className: "RichTable_selectCheckbox RichTable_loading",
+                };
+              },
+              render() {
+                return "";
+              },
             },
-            render() {
-              return <Spinner animation="border" />
-            }
-          }],
+            ...columns.map(
+              ({ key }, j): RichTableCell => ({
+                useCellProps() {
+                  return {
+                    key,
+                    className: "RichTable_loading",
+                  };
+                },
+                render() {
+                  return (
+                    <Loader
+                      variant="linear"
+                      hideFromScreenreaders={i > 0 || j > 0}
+                    />
+                  );
+                },
+              })
+            ),
+          ],
           isSelected: false,
-          setSelected() {}
-        }
-      ]
+          setSelected() {},
+        })
+      );
     }
 
-    // No data state
-    if (!data.length) {
+    // No data or error state
+    if (!data.length || error !== undefined) {
       return [
         {
           useRowProps() {
             return { key: 0 };
           },
           data: {} as D,
-          cells: [{
-            useCellProps() {
-              return {
-                key: 0,
-                className: "RichTable_noRowsReturned text-center",
-                colSpan: columns.length + (selectable ? 1 : 0)
-              }
+          cells: [
+            {
+              useCellProps() {
+                return {
+                  key: 0,
+                  className: "RichTable_noRowsReturned text-center",
+                  colSpan: columns.length + (selectable ? 1 : 0),
+                };
+              },
+              render() {
+                // TODO: more descriptive error messages?
+                return error !== undefined
+                  ? `An error occurred: Error ${error.status_code}`
+                  : "No rows returned.";
+              },
             },
-            render() {
-              return "No rows returned."
-            }
-          }],
+          ],
           isSelected: false,
-          setSelected() {}
-        }
-      ]
+          setSelected() {},
+        },
+      ];
     }
 
     // Regular state
@@ -463,7 +546,7 @@ const useRichTable = <D extends object = {}>({
           },
           render() {
             return render ? render(cell, row) : cell;
-          }
+          },
         };
       });
 
@@ -474,15 +557,15 @@ const useRichTable = <D extends object = {}>({
               .closest("td")
               ?.classList.contains("RichTable_selectCheckbox")
           ) {
-            clickActions.forEach(action => {
-              internalExecuteAction(action.name, [row]);
+            clickActions.forEach((action) => {
+              internalExecuteAction.current(action.name, [row]);
             });
           }
         };
       }
 
       const selectRow = () => {
-        setSelected(prevSelected => {
+        setSelected((prevSelected) => {
           prevSelected[i] = !prevSelected[i];
           return prevSelected.slice();
         });
@@ -493,7 +576,7 @@ const useRichTable = <D extends object = {}>({
           useCellProps() {
             return {
               key: "select-row",
-              className: "RichTable_selectCheckbox"
+              className: "RichTable_selectCheckbox",
             };
           },
           render() {
@@ -508,7 +591,7 @@ const useRichTable = <D extends object = {}>({
                 onChange={selectRow}
               />
             );
-          }
+          },
         });
       }
 
@@ -519,20 +602,16 @@ const useRichTable = <D extends object = {}>({
         data: row,
         cells,
         isSelected: selected[i],
-        setSelected: selectRow
+        setSelected: selectRow,
       };
     });
-  }, [
-    columns,
-    rawData,
-    data,
-    selected,
-    selectable,
-    clickActions,
-    internalExecuteAction
-  ]);
+  }, [columns, requestState, data, selected, selectable, clickActions]);
 
-  const makeRequest = <T extends any>(method: Method, row?: D, requestData?: any) => {
+  const makeRequest = <T extends any>(
+    method: Method,
+    row?: D,
+    config?: AxiosRequestConfig
+  ) => {
     let requestUrl = url;
     if (row !== null && row !== undefined) {
       requestUrl = `${url}${row[pk]}/`;
@@ -540,15 +619,14 @@ const useRichTable = <D extends object = {}>({
 
     return axios(requestUrl, {
       method,
-      data: requestData
-    })
-      .then(({ data }: AxiosResponse<APIResponse<T>>) => {
-        if (data.success) {
-          return data.data;
-        } else {
-          throw data.error;
-        }
-      });
+      ...config,
+    }).then(({ data }: AxiosResponse<APIResponse<T>>) => {
+      if (data.success) {
+        return data.data;
+      } else {
+        throw data.error;
+      }
+    });
   };
 
   const bag: RichTableBag<D> = {
@@ -559,11 +637,13 @@ const useRichTable = <D extends object = {}>({
     page,
     numPages,
     setPage,
+    count,
     totalCount,
     searchQuery,
     setSearchQuery,
     executeAction,
-    makeRequest
+    makeRequest,
+    requestState,
   };
 
   return bag;
@@ -573,152 +653,231 @@ const useRichTable = <D extends object = {}>({
  * The RichTable component, on the other hand, is a ready-to-use table with pagination, sorting, and search natively
  * supported.
  */
+const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
+  const { page, numPages, setPage, requestState, executeAction } = bag;
+  const [newPage, setNewPage] = useState(page.toString());
+  // we need a ref to store the new page to get around the fake blur listener capturing outdated values of newPage
+  const newPageRef = useRef(page.toString());
+  const hasBlurListener = useRef(false);
+
+  useEffect(() => {
+    setNewPage(page.toString());
+  }, [page]);
+
+  return (
+    <Col
+      lg={2}
+      className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end"
+    >
+      <Button
+        variant="link"
+        disabled={page <= 1 || requestState !== RequestState.Complete}
+      >
+        <FontAwesomeIcon
+          icon="chevron-left"
+          className="RichTable_paginationIcon"
+          onClick={async () => {
+            await executeAction("_previous");
+          }}
+        />
+      </Button>
+      <span className="RichTable_paginationText">
+        <Form
+          onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
+            // if for whatever reason the input has an invalid value, reset it to the current page
+            const requestedPage =
+              Math.max(1, Math.min(parseInt(newPage), numPages)) || page;
+            setNewPage(requestedPage.toString());
+            setPage(requestedPage);
+          }}
+        >
+          <Form.Control
+            className="d-inline-block d-lg-inline px-0 text-center"
+            value={newPage}
+            onChange={({ target }: React.ChangeEvent<HTMLInputElement>) => {
+              setNewPage(target.value);
+              newPageRef.current = target.value;
+            }}
+            onKeyDown={({
+              key,
+              currentTarget,
+            }: React.KeyboardEvent<HTMLInputElement>) => {
+              if (key === "Escape") {
+                currentTarget.blur();
+              }
+            }}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+            }}
+            onFocus={({
+              currentTarget,
+            }: React.FocusEvent<HTMLInputElement>) => {
+              currentTarget.select();
+
+              // only submit if blur was the result of a click outside the control
+              if (!hasBlurListener.current) {
+                hasBlurListener.current = true;
+                window.addEventListener("click", function fakeBlurListener() {
+                  // no need to check the current target since we capture click events on this input anyways
+                  const requestedPage =
+                    Math.max(1, Math.min(parseInt(newPageRef.current), numPages)) || page;
+                  setNewPage(requestedPage.toString());
+                  setPage(requestedPage);
+                  window.removeEventListener("click", fakeBlurListener);
+                  hasBlurListener.current = false;
+                });
+              }
+            }}
+            onBlur={({ currentTarget }: React.FocusEvent<HTMLInputElement>) => {
+              currentTarget.value = page.toString();
+            }}
+            style={{
+              height: "calc(2.0625rem - 1px)", // taken from bootstrap's height of a small input (1.5*.875rem + .75rem)
+              width: `${numPages.toString().length + 1}ch`,
+            }}
+          />{" "}
+          / {numPages}
+        </Form>
+      </span>
+      <Button
+        variant="link"
+        disabled={page >= numPages || requestState !== RequestState.Complete}
+      >
+        <FontAwesomeIcon
+          icon="chevron-right"
+          className="RichTable_paginationIcon"
+          onClick={async () => {
+            await executeAction("_next");
+          }}
+        />
+      </Button>
+    </Col>
+  );
+};
+
+const RichTableHeader = ({
+  config,
+  bag,
+}: {
+  config: RichTableProps<any>;
+  bag: RichTableBag<any>;
+}) => {
+  const { selected, setSearchQuery, executeAction } = bag;
+  const [setSearchDebounced, setSearch] = useDebouncedCallback(
+    setSearchQuery,
+    500
+  );
+  const { addToasts } = useToast();
+
+  return (
+    <Row className="RichTable_header">
+      {config.searchable && (
+        <Col lg={3} className="RichTable_search">
+          <FormControl
+            type="text"
+            placeholder="Search..."
+            size="sm"
+            className="RichTable_searchBox"
+            onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+              const value = e.currentTarget.value;
+              if (value) {
+                await setSearchDebounced(value);
+              } else {
+                setSearch("");
+              }
+            }}
+          />
+        </Col>
+      )}
+      {config.actions && (
+        <Col lg={7} className="RichTable_actions">
+          {config.actions.map((action) => (
+            <Button
+              key={action.name}
+              variant="link"
+              disabled={
+                "bulk" in action &&
+                (selected.length === 0 || (!action.bulk && selected.length > 1))
+              }
+              onClick={() => {
+                executeAction(action.name).catch((e: any) => {
+                  addToasts([
+                    {
+                      id: `action-failed-${Date.now()}`,
+                      body: "Action failed to execute.",
+                    },
+                  ]);
+                  console.error(e);
+                });
+              }}
+            >
+              {action.displayName ?? action.name}
+            </Button>
+          ))}
+        </Col>
+      )}
+      {config.paginated && <RichTablePagination bag={bag} />}
+    </Row>
+  );
+};
+
+const RichTableFooter = ({
+  config,
+  bag,
+}: {
+  config: RichTableProps<any>;
+  bag: RichTableBag<any>;
+}) => {
+  const { page, numPages, count, totalCount } = bag;
+
+  return (
+    <Row className="RichTable_footer">
+      <Col lg={3} className="d-none d-lg-flex RichTable_summary">
+        {totalCount && (page - 1) * count + 1}&ndash;
+        {page < numPages ? page * count : totalCount} of {totalCount}
+      </Col>
+      {config.paginated && <RichTablePagination bag={bag} />}
+    </Row>
+  );
+};
+
 export const RichTable = <D extends object = {}>(config: RichTableProps<D>) => {
   const bag = useRichTable(config);
-  const {
-    header,
-    rows,
-    selected,
-    page,
-    setPage,
-    numPages,
-    totalCount,
-    setSearchQuery,
-    executeAction,
-  } = bag;
-  const [setSearchDebounced, setSearch] = useDebouncedCallback(setSearchQuery, 500);
-  const { addToasts } = useToast();
+  const { header, rows } = bag;
 
   if (config.bagRef) {
     config.bagRef(bag);
   }
 
   return (
-    <div className={`RichTable ${config.className ?? ""}`}>
-      <Row className="RichTable_header">
-        {config.searchable && (
-          <Col lg={3} className="RichTable_search">
-            <FormControl
-              type="text"
-              placeholder="Search..."
-              size="sm"
-              className="RichTable_searchBox"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.currentTarget.value;
-                if (value) {
-                  setSearchDebounced(value);
-                } else {
-                  setSearch("");
-                }
-              }}
-            />
-          </Col>
-        )}
-        {config.actions &&
-          <Col lg={7} className="RichTable_actions">
-            {config.actions.map((action) =>
-              <Button
-                key={action.name}
-                variant="link"
-                disabled={"bulk" in action && (selected.length === 0 || (!action.bulk && selected.length > 1))}
-                onClick={() => {
-                  executeAction(action.name)
-                    .catch((e: any) => {
-                      addToasts([{
-                        id: `action-failed-${Date.now()}`,
-                        body: "Action failed to execute."
-                      }]);
-                      console.error(e);
-                    });
-                }}
-              >
-                {action.displayName ?? action.name}
-              </Button>
-            )}
-          </Col>
-        }
-        {config.paginated && (
-          <Col lg={2} className="RichTable_pagination ml-lg-auto justify-content-center justify-content-lg-end">
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-left"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page > 1) {
-                    setPage(page - 1);
-                  }
-                }}
-              />
-            </Button>
-            <span className="RichTable_paginationText">
-              {page} / {numPages}
-            </span>
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-right"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page < numPages) {
-                    setPage(page + 1);
-                  }
-                }}
-              />
-            </Button>
-          </Col>
-        )}
-      </Row>
-      <Table striped hover className="RichTable_table" ref={config.ref}>
+    <div className={`RichTable ${config.className || ""}`}>
+      <RichTableHeader config={config} bag={bag} />
+      <Table
+        striped
+        hover
+        responsive
+        className="RichTable_table"
+        ref={config.ref}
+      >
         <thead>
           <tr>
-            {header.cells.map(cell => (
+            {header.cells.map((cell) => (
               <th {...cell.useCellProps()}>{cell.render()}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map(row => (
+          {rows.map((row) => (
             <tr {...row.useRowProps()}>
-              {row.cells.map(cell => (
+              {row.cells.map((cell) => (
                 <td {...cell.useCellProps()}>{cell.render()}</td>
               ))}
             </tr>
           ))}
         </tbody>
       </Table>
-      <Row className="RichTable_footer">
-        <Col lg={3} className="d-none d-lg-flex RichTable_summary">
-          Total count: {totalCount}
-        </Col>
-        {config.paginated && (
-          <Col lg={3} className="ml-lg-auto text-sm-center text-lg-right">
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-left"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page > 1) {
-                    setPage(page - 1);
-                  }
-                }}
-              />
-            </Button>
-            <span className="RichTable_paginationText">
-              {page} / {numPages}
-            </span>
-            <Button variant="link" disabled={page >= numPages}>
-              <FontAwesomeIcon
-                icon="chevron-right"
-                className="RichTable_paginationIcon"
-                onClick={() => {
-                  if (page < numPages) {
-                    setPage(page + 1);
-                  }
-                }}
-              />
-            </Button>
-          </Col>
-        )}
-      </Row>
+      <RichTableFooter config={config} bag={bag} />
     </div>
   );
 };
