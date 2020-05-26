@@ -9,7 +9,7 @@ jobs:
   size:
     runs-on: ubuntu-16.04
     env:
-      process.env.CI = false
+      CI = false
 
     steps:
     - uses: actions/checkout@v1
