@@ -29,6 +29,7 @@ export const useApiGet = <T, U extends APIError = APIError>(
   useEffect(() => {
     axios.get(url).then((axiosResp: AxiosResponse<APIResponseSuccess<T>>) => {
       setResponse(axiosResp.data.data);
+      setError(undefined);
     }, (axiosErr) => {
       setError(axiosErr.response?.data.error ?? {
         status_code: axiosErr.code,

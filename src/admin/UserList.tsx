@@ -24,14 +24,14 @@ const columns: Column<User>[] = [
   {
     header: "Name",
     key: "name",
-    width: 20,
+    width: 15,
     accessor: (user: User) =>
       `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
   },
   {
     header: "Writer Name",
     key: "writer_name",
-    width: 20,
+    width: 25,
   },
   {
     header: "Email",
@@ -156,15 +156,23 @@ const UserList = () => {
           {
             name: "Delete",
             bulk: false,
-            call({ makeRequest, executeAction }, data: User) {
+            call({ makeRequest, executeAction, rows, page, numPages }, data: User) {
               if (
                 window.confirm(
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
                 )
               ) {
-                return auth.delete(`users/${data.username}/`).then(
+                return makeRequest<User>("delete", data, {
+                  headers: {
+                    "X-CSRFToken": auth.csrfToken
+                  }
+                }).then(
                   () => {
-                    executeAction("refresh");
+                    if (page < numPages || page === 1) {
+                      executeAction("_refresh").then();
+                    } else if (rows.length === 1) {
+                      executeAction("_previous").then();
+                    }
                     alert(`Successfully deleted user ${data.username}`);
                   },
                   (err: string[] | string) => {
@@ -190,7 +198,7 @@ const UserList = () => {
         show={showEditModal}
         setShow={setShowEditModal}
         refreshTable={() => {
-          tableBagRef.current?.executeAction("refresh");
+          tableBagRef.current?.executeAction("_refresh");
         }}
       />
     </div>
