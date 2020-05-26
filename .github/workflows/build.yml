@@ -15,7 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-
     - name: Cache node modules
       id: npm-cache
       uses: actions/cache@v1
@@ -28,7 +27,6 @@ jobs:
           ${{ runner.os }}-npm-cache-${{ env.cache-name }}-
           ${{ runner.os }}-npm-cache-
 
-
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
       run: npm install --no-audit --no-fund
@@ -38,12 +36,3 @@ jobs:
 
     - name: Run tests
       run: npm test
-
-
-    - name: Setup size-limit
-      run: npm install --save-dev size-limit @size-limit/preset-app
-
-    - uses: andresz1/size-limit-action@v1.0.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        install: false
