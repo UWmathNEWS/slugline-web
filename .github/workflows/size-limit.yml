@@ -1,4 +1,4 @@
-name: "size"
+name: "Size limit"
 
 on:
   pull_request:
@@ -8,17 +8,13 @@ on:
 jobs:
   size:
     runs-on: ubuntu-16.04
-    env:
-      CI_JOB_NUMBER: 1
+
     steps:
     - uses: actions/checkout@v1
 
     - name: Install dependencies
-      run: npm install
+      run: npm install --no-audit --no-fund
 
     - uses: andresz1/size-limit-action@v1.3.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Run size-limit
-      run: npm run size
