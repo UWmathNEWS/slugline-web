@@ -12,6 +12,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Install size-limit
+      run: npm install --save-dev size-limit @size-limit/preset-app
+
     - name: Install dependencies
       run: npm install --no-audit --no-fund
 
