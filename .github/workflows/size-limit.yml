@@ -9,8 +9,8 @@ jobs:
   size:
     runs-on: ubuntu-16.04
 
-    name: Turn off CI env var
-    run: set-env CI=false
+    - name: Turn off CI env var
+      run: set-env CI=false
 
     steps:
     - uses: actions/checkout@v1
