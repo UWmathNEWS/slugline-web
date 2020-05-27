@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Alert, Form, Button } from "react-bootstrap";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./Auth";
 import { useHistory } from "react-router-dom";
 import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";

@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer, useRef } from "react";
 import { RouteProps, Route, useHistory } from "react-router-dom";
 import { Alert, Spinner } from "react-bootstrap";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./Auth";
 import Error404 from "../shared/errors/Error404";
 import { APIError } from "../shared/types";
 import ERRORS from "../shared/errors";
@@ -24,7 +24,7 @@ type PrivateRouteAction =
 /**
  * Wrapper for components inside a PrivateRoute. Handles authentication-related business.
  *
- * **This component depends on React handling  in a deterministic manner. If stuff breaks
+ * **This component depends on React handling state changes/lifecycle hooks in a deterministic manner. If stuff breaks
  * when changing routes or reloading pages, check here first.**
  *
  * The reason we created a wrapper component instead of handling authentication inside PrivateRoute is due to how
@@ -78,19 +78,21 @@ const PrivateRouteWrapper: React.FC<{
   // authCheckCompleted tells us whether the auth check has been completed, meaning it's safe to mount the child.
   const authCheckCompleted = useRef(false);
 
-  // PrivateRoute can also be affected by changes in AuthProvider; we also check against auth.user to ensure children
+  // PrivateRoute can also be affected by changes in AuthProvider; we also check against auth to ensure children
   // are rerendered in the case of a change.
+  // Since auth.check() doesn't change auth unless a request is made, we can simply use the whole auth object
+  // as a dependency.
   useEffect(() => {
     dispatch({ type: 'is loading' });
     auth.check()?.then(() => {
       dispatch({ type: 'done loading' });
-    }, (e: APIError) => {
+    }, ({ status_code, ...e }: APIError) => {
       dispatch({ type: 'error', data: Object.values(e).flat() });
     });
     authCheckCompleted.current = true;
 
     return () => { authCheckCompleted.current = false };
-  }, [history.location.key, auth.user]);
+  }, [history.location.key, auth]);
 
   if (state.errors.length === 0) {
     if (authCheckCompleted.current && state.ready) {

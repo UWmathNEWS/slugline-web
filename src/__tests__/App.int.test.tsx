@@ -7,7 +7,8 @@ import { render, fireEvent, getByText } from "@testing-library/react";
 import App from "../App";
 import { createMemoryHistory } from "history";
 import { act } from "react-dom/test-utils";
-import { USER_LOCALSTORAGE_KEY, testUser } from "../shared/test-utils";
+import { USER_LOCALSTORAGE_KEY } from "../auth/Auth";
+import { testUser } from "../shared/test-utils";
 
 describe("Integration test for main app component", () => {
   afterEach(() => {
@@ -20,7 +21,7 @@ describe("Integration test for main app component", () => {
     ReactDOM.render(<App />, div);
   });
 
-  it("changes routes correctly", () => {
+  it("changes routes correctly", async () => {
     const { container, getByRole } = render(<App />);
     const nav = container.querySelector(".navbar") as HTMLElement;
     expect(container.querySelector(".navbar")).toBeInTheDocument();
@@ -32,16 +33,26 @@ describe("Integration test for main app component", () => {
 
     expect(getByText(container, "HOME CONTENT")).toBeInTheDocument();
 
-    fireEvent.click(issuesLink);
+    // need to await here as navigating to some paths also mounts components that may change their state on mount.
+    // by awaiting navigation, we only continue once rendering finishes, thus avoiding race conditions.
+    await act(async () => {
+      fireEvent.click(issuesLink);
+    });
     expect(getByRole("heading")).toHaveTextContent(/issues/i);
 
-    // fireEvent.click(aboutLink);
+    // await act(async () => {
+    //   fireEvent.click(aboutLink);
+    // });
     // expect(getByRole("heading")).toHaveTextContent(/about/i);
 
-    fireEvent.click(loginLink);
+    await act(async () => {
+      fireEvent.click(loginLink);
+    });
     expect(getByRole("heading")).toHaveTextContent(/login/i);
 
-    fireEvent.click(homeLink!);
+    await act(async () => {
+      fireEvent.click(homeLink!);
+    });
     expect(getByText(container, "HOME CONTENT")).toBeInTheDocument();
   });
 
@@ -62,12 +73,15 @@ describe("Integration test for main app component", () => {
     expect(mockAxios.get).toHaveBeenCalledWith("/api/me/");
   });
 
-  it("does auth check on switching to protected routes", () => {
+  it("does auth check on switching to protected routes", async () => {
     localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
     const { getByText } = render(<App />);
 
     act(() => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
+    });
+
+    await act(async () => {
       fireEvent.click(getByText(/profile/i));
     });
 
@@ -94,5 +108,13 @@ describe("Integration test for main app component", () => {
     });
 
     expect(getByText("404")).toBeInTheDocument();
+  });
+
+  it("shouldn't crash if auth check fails", () => {
+    render(<App />);
+
+    act(() => {
+      mockAxios.mockError({});
+    });
   });
 });

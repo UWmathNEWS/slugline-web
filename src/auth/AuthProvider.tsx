@@ -1,128 +1,69 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useReducer,
-  useRef,
-} from "react";
-import Cookie from "js-cookie";
+import React, { useEffect, useReducer, useRef } from "react";
 
-import {
-  User,
-  UserAPIResponse,
-  AuthContext,
-  APIResponse,
-} from "../shared/types";
+import { User, UserAPIResponse, APIResponse } from "../shared/types";
 import axios, {
   AxiosError,
   AxiosRequestConfig,
   AxiosResponse,
   Method as AxiosMethod,
 } from "axios";
+import Cookie from "js-cookie";
 import { apiGet, getApiUrl } from "../api/api";
 import ERRORS from "../shared/errors";
-
-interface AuthState {
-  user: User | null;
-  csrfToken: string | null;
-}
-
-type AuthAction =
-  | { type: "post"; user: User }
-  | { type: "login"; user: User }
-  | { type: "logout" };
-
-export const Auth = createContext<AuthContext>({
-  user: null,
-  csrfToken: null,
-  check: () => undefined,
-  isAuthenticated: () => false,
-  isEditor: () => false,
-  post: () => Promise.resolve(undefined),
-  put: () => Promise.resolve(undefined),
-  patch: () => Promise.resolve(undefined),
-  delete: () => Promise.resolve(undefined),
-  login: () => Promise.resolve(undefined),
-  logout: () => Promise.resolve(),
-});
+import { authReducer, USER_LOCALSTORAGE_KEY, Auth, CSRF_COOKIE } from "./Auth";
 
 interface AxiosConfig extends AxiosRequestConfig {
   method: AxiosMethod;
   url: string;
 }
 
-const CSRF_COOKIE = "csrftoken";
-const USER_LOCALSTORAGE_KEY = "slugline-user";
-
 export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
-  const [readyPromise, setReadyPromise] = useState<Promise<void> | undefined>(
-    undefined
-  );
+  const readyPromise = useRef<Promise<void> | undefined>(undefined);
   const isWaiting = useRef<boolean>(false);
-  const [user, dispatchUser] = useReducer(
-    (state: AuthState, action: AuthAction) => {
-      switch (action.type) {
-        case "post":
-          if (action.user === null) {
-            localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-          } else {
-            localStorage.setItem(
-              USER_LOCALSTORAGE_KEY,
-              JSON.stringify(action.user)
-            );
-          }
-          return {
-            user: action.user,
-            csrfToken: state.csrfToken,
-          };
-        case "login":
-          if (action.user === null) {
-            localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-          } else {
-            localStorage.setItem(
-              USER_LOCALSTORAGE_KEY,
-              JSON.stringify(action.user)
-            );
-          }
-          return {
-            user: action.user,
-            csrfToken: Cookie.get(CSRF_COOKIE) || null,
-          };
-        case "logout":
-          return {
-            user: null,
-            csrfToken: Cookie.get(CSRF_COOKIE) || null,
-          };
-      }
-      return state;
-    },
-    {
-      user: storedUser !== null ? JSON.parse(storedUser) : null,
-      csrfToken: null, // null is a sentinel value here so we know the page was just loaded
-    }
-  );
+  const [user, dispatchUser] = useReducer(authReducer, {
+    user: storedUser !== null ? JSON.parse(storedUser) : null,
+    csrfToken: Cookie.get(CSRF_COOKIE) || null,
+  });
 
-  const check = (force: boolean = false) => {
-    if (!isWaiting.current && (force || readyPromise === undefined)) {
+  const setUser = (user: User | null) => {
+    if (user) {
+      dispatchUser({ type: "login", user });
+    } else {
+      dispatchUser({ type: "logout" });
+    }
+  };
+
+  const check = (force: boolean = false): Promise<void> => {
+    if (readyPromise.current === undefined || (!isWaiting.current && force)) {
+      // Ensure we don't end up with a race condition --- we now have an invariant that only one network request
+      // will be made at any point in time
       isWaiting.current = true;
-      const promise = (
-        apiGet<User | null>(getApiUrl("me/"))
-      ).then((data: User | null) => {
-        if (user.csrfToken === null) {
-          if (data) {
-            dispatchUser({ type: "login", user: data });
-          } else {
-            dispatchUser({ type: "logout" });
+      const promise = apiGet<User | null>(getApiUrl("me/")).then(
+        (data: User | null) => {
+          // Test equality of received data here with the current user. If they're not equal, update internal state;
+          // otherwise, do nothing to save a rerender.
+          // Due to above invariant, we can be assured that user is up-to-date, since nothing can change it.
+          if (
+            (user.user !== null && data === null) ||
+            (user.user === null && data !== null) ||
+            // Conduct a deep equality check of two User objects
+            (user.user !== null &&
+              data !== null &&
+              // Typescript thinks user.user could be null despite our check above, hence the ! suffix
+              Object.keys(data).some(
+                (k) => user.user![k as keyof User] !== data[k as keyof User]
+              ))
+          ) {
+            setUser(data);
           }
+          isWaiting.current = false;
         }
-        isWaiting.current = false;
-      });
-      setReadyPromise(promise);
+      );
+      readyPromise.current = promise;
       return promise;
     }
-    return readyPromise;
+    return readyPromise.current;
   };
 
   const isAuthenticated = () => {
@@ -261,7 +202,21 @@ export const AuthProvider: React.FC = (props) => {
   };
 
   useEffect(() => {
-    check();
+    check().catch((e) => {
+      // something went horribly wrong here, but we only alert users if they're logged in as otherwise it causes no harm
+      if (storedUser !== null) {
+        window.alert(
+          "An error occurred and we couldn't verify that you're logged in. Try refreshing the page, or check your network connection."
+        );
+      }
+      console.error(
+        "The following error was thrown while performing an auth check:\n",
+        e
+      );
+    });
+    // We only need to call check on component mount, hence the empty dependency array. The patch that disables ESLint
+    // yelling at us in this scenario hasn't landed in our toolchain yet, so we disable the warning for now.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -276,6 +231,7 @@ export const AuthProvider: React.FC = (props) => {
         put,
         patch,
         delete: del,
+        setUser,
         login,
         logout,
       }}
@@ -284,5 +240,3 @@ export const AuthProvider: React.FC = (props) => {
     </Auth.Provider>
   );
 };
-
-export const useAuth = () => useContext(Auth);

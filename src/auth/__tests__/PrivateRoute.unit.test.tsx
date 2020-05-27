@@ -4,10 +4,11 @@ import { Router, Switch } from "react-router-dom";
 import { createMemoryHistory, History } from "history";
 import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { USER_LOCALSTORAGE_KEY, testUser, testAdmin } from "../../shared/test-utils";
+import { testUser, testAdmin } from "../../shared/test-utils";
 import mockAxios from "jest-mock-axios";
 import PrivateRoute from "../PrivateRoute";
-import { Auth, AuthProvider } from "../AuthProvider";
+import { Auth, USER_LOCALSTORAGE_KEY } from "../Auth";
+import { AuthProvider } from "../AuthProvider";
 import ERRORS from "../../shared/errors";
 
 describe("Unit test for PrivateRoute", () => {
@@ -36,6 +37,7 @@ describe("Unit test for PrivateRoute", () => {
         put: jest.fn(),
         patch: jest.fn(),
         delete: jest.fn(),
+        setUser: jest.fn(),
         login: jest.fn(),
         logout: jest.fn()
       }}
