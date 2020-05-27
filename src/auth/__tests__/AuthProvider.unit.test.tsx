@@ -229,7 +229,7 @@ describe("AuthProvider", () => {
     it("handles unsuccessful requests by throwing an error", async () => {
       let checkPromise: Promise<any>;
 
-      checkPromise = auth.check(true)!; // if the force flag is true then check must return a promise
+      checkPromise = auth.check(true);
 
       act(() => {
         mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
