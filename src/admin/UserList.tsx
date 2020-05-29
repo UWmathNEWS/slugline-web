@@ -146,17 +146,19 @@ const UserList = () => {
             name: "Edit",
             bulk: false,
             triggers: ["click"],
-            call({ makeRequest }, data: User) {
-              return makeRequest<User>("get", data).then((user) => {
-                setEditedUser(user);
-                setShowEditModal(true);
+            call(bag, data: User) {
+              return api.users.retrieve({ id: data.username }).then((resp) => {
+                if (resp.success) {
+                  setEditedUser(resp.data);
+                  setShowEditModal(true);
+                }
               });
             },
           },
           {
             name: "Delete",
             bulk: false,
-            call({ makeRequest, executeAction }, data: User) {
+            call({ executeAction }, data: User) {
               if (
                 window.confirm(
                   `You are deleting user ${data.username}. Are you sure you want to continue?`

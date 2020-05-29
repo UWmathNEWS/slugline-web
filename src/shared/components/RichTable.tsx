@@ -143,7 +143,6 @@ export interface RichTableBag<D extends object = {}> {
   setSearchQuery: (query: string) => void;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
-  makeRequest: <T>(method: Method, row?: D, data?: any) => Promise<T>;
 }
 
 /**
@@ -547,28 +546,6 @@ const useRichTable = <D extends object = {}>({
     internalExecuteAction,
   ]);
 
-  const makeRequest = <T extends any>(
-    method: Method,
-    row?: D,
-    requestData?: any
-  ) => {
-    let requestUrl = url;
-    if (row !== null && row !== undefined) {
-      requestUrl = `${url}${row[pk]}/`;
-    }
-
-    return axios(requestUrl, {
-      method,
-      data: requestData,
-    }).then(({ data }: AxiosResponse<APIResponse<T>>) => {
-      if (data.success) {
-        return data.data;
-      } else {
-        throw data.error;
-      }
-    });
-  };
-
   const bag: RichTableBag<D> = {
     error,
     header,
@@ -581,7 +558,6 @@ const useRichTable = <D extends object = {}>({
     searchQuery,
     setSearchQuery,
     executeAction,
-    makeRequest,
   };
 
   return bag;
