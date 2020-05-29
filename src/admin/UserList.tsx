@@ -5,7 +5,7 @@ import { User } from "../shared/types";
 import { ProfileFormConsumer, useProfileForm } from "../profile/ProfileForm";
 
 import "./UserList.scss";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 import ERRORS from "../shared/errors";
 import {
   RichTable,
@@ -24,14 +24,14 @@ const columns: Column<User>[] = [
   {
     header: "Name",
     key: "name",
-    width: 20,
+    width: 15,
     accessor: (user: User) =>
       `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
   },
   {
     header: "Writer Name",
     key: "writer_name",
-    width: 20,
+    width: 25,
   },
   {
     header: "Email",
@@ -194,7 +194,7 @@ const UserList = () => {
         show={showEditModal}
         setShow={setShowEditModal}
         refreshTable={() => {
-          tableBagRef.current?.executeAction("refresh");
+          tableBagRef.current?.executeAction("_refresh");
         }}
       />
     </div>

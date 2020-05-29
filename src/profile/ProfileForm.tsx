@@ -4,7 +4,6 @@ import { Form, Row, Col, Button, Alert } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";
 
-import { useAuth } from "../auth/AuthProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
@@ -12,6 +11,7 @@ import { cleanFormData, setServerErrors } from "../shared/form/util";
 import { useDebouncedCallback } from "../shared/hooks";
 import NonFieldErrors from "../shared/form/NonFieldErrors";
 import api from "../api/api";
+import { useAuth } from "../auth/Auth";
 
 export interface ProfileFormVals {
   username?: string;

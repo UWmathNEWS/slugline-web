@@ -117,13 +117,3 @@ export type UserAPIResponse = APIResponse<
 export interface IssueAPIError extends APIError {
   non_field_errors?: string[];
 }
-
-export interface AuthContext {
-  user: User | null;
-  csrfToken: string | null;
-  check: (force?: boolean) => Promise<void> | undefined;
-  isAuthenticated: () => boolean;
-  isEditor: () => boolean;
-  login: (username: string, password: string) => Promise<User | undefined>;
-  logout: () => Promise<void>;
-}

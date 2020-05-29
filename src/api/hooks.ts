@@ -1,7 +1,7 @@
 import { APIResponse, APIError } from "../shared/types";
 import { useState, useEffect, useCallback } from "react";
 import { UnsafeRequestArgs, RequestArgs } from "./api";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 
 export enum RequestState {
   /** The request has never been triggered. */

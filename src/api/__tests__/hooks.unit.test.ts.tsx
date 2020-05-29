@@ -7,13 +7,13 @@ import { useAPI, RequestState, useAPILazy, useAPILazyCSRF } from "../hooks";
 import {
   MOCK_RESPONSE,
   MOCK_ERROR,
-  CSRF_COOKIE,
   MOCK_CSRF,
   MOCK_BODY,
   testUser,
 } from "../../shared/test-utils";
 import { AuthProvider } from "../../auth/AuthProvider";
 import { APIResponse } from "../../shared/types";
+import { CSRF_COOKIE } from "../../auth/Auth";
 
 describe("useAPI", () => {
   afterEach(() => {
