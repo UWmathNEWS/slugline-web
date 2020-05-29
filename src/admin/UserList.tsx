@@ -12,7 +12,7 @@ import {
   Column,
   RichTableBag,
 } from "../shared/components/RichTable";
-import api, { API_ROOT } from "../api/api";
+import api from "../api/api";
 
 const columns: Column<User>[] = [
   {

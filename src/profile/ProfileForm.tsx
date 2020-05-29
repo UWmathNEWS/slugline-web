@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { User, APIResponse, UserAPIError } from "../shared/types";
+import { User, UserAPIError } from "../shared/types";
 import { Form, Row, Col, Button, Alert } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";

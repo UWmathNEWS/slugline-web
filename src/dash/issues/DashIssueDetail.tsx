@@ -5,7 +5,7 @@ import { ArticleTitle } from "../articles/DashArticlesPage";
 import { ErrorPage } from "../../shared/errors/ErrorPage";
 import { RichTable, Column } from "../../shared/components/RichTable";
 import { Article } from "../../shared/types";
-import api, { API_ROOT } from "../../api/api";
+import api from "../../api/api";
 import { useAPI } from "../../api/hooks";
 
 const columns: Column<Article>[] = [

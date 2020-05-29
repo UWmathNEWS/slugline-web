@@ -6,7 +6,7 @@ import { useHistory, Link } from "react-router-dom";
 import { Article, ArticleType } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
 import { useAPILazyCSRF } from "../../api/hooks";
-import api, { API_ROOT } from "../../api/api";
+import api from "../../api/api";
 
 interface ArticleTitleProps {
   article: Article;

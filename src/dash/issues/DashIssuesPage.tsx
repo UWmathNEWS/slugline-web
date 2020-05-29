@@ -9,7 +9,7 @@ import NonFieldErrors from "../../shared/form/NonFieldErrors";
 import { Issue } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
 import { useAPILazyCSRF, useAPI } from "../../api/hooks";
-import api, { API_ROOT } from "../../api/api";
+import api from "../../api/api";
 
 interface IssueCreateModalProps {
   show: boolean;

@@ -583,7 +583,6 @@ const useRichTable = <D extends object = {}>({
     });
   }, [
     columns,
-    rawData,
     data,
     selected,
     selectable,

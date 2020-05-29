@@ -61,7 +61,7 @@ const EditorPage: React.FC = () => {
       });
       setLastSaved(new Date());
     },
-    [updateArticle, setLastSaved]
+    [updateArticle, setLastSaved, articleId]
   );
 
   const [saveArticleDebounced] = useDebouncedCallback(
@@ -83,7 +83,7 @@ const EditorPage: React.FC = () => {
       });
       setLastSaved(new Date());
     },
-    [updateArticleContent, setLastSaved]
+    [updateArticleContent, setLastSaved, articleId]
   );
 
   const [saveArticleContentDebounced] = useDebouncedCallback(
