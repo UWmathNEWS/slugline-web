@@ -42,7 +42,9 @@ export const useAPI = <TResp, TError extends APIError = APIError>(
     fn().then((resp) => {
       if (resp.success) {
         setData(resp.data);
+        setError(undefined);
       } else {
+        setData(undefined);
         setError(resp.error);
       }
       setRequestState(RequestState.Complete);

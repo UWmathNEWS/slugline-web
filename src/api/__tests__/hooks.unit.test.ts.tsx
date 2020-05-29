@@ -105,6 +105,53 @@ describe("useAPI", () => {
     [resp, error, info] = result.current;
     expect(info.state).toBe(RequestState.Complete);
   });
+
+  it("correctly updates return value on multiple fetches", async () => {
+    const get = retrieveFactory<string>("bingo/");
+    const { result, rerender } = renderHook(({ fn }) => useAPI(fn), {
+      initialProps: {
+        fn: () => get({ id: "15" }),
+      },
+    });
+
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_ERROR,
+        }
+      );
+    });
+
+    let [resp, error] = result.current;
+
+    expect(resp).toBeUndefined();
+    expect(error).toEqual(MOCK_ERROR.error);
+
+    // create a new function to get the hook to re run the request
+    const fn2 = () => get({ id: "15" });
+    rerender({ fn: fn2 });
+
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_RESPONSE,
+        }
+      );
+    });
+
+    [resp, error] = result.current;
+
+    expect(resp).toEqual(MOCK_RESPONSE.data);
+    expect(error).toBeUndefined();
+  });
 });
 
 describe("useAPILazy", () => {
