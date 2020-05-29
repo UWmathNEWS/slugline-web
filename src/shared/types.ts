@@ -60,11 +60,6 @@ export type APIResponse<
   F extends APIResponseFailure<U> = APIResponseFailure<U>
 > = S | F;
 
-export type APIGetHook<T, U extends APIError = APIError> = [
-  T | undefined,
-  U | undefined
-];
-
 export interface Pagination<T> {
   count: number;
   page: number;
@@ -74,31 +69,6 @@ export interface Pagination<T> {
   results: T[];
 }
 
-export type APIGetHookPaginated<T, U extends APIError = APIError> = [
-  {
-    next: (() => void) | null;
-    previous: (() => void) | null;
-    page: Pagination<T> | null;
-  },
-  U | undefined
-];
-
-export type PaginatedAPIResponse<
-  T,
-  U extends APIError = APIError
-> = APIResponse<Pagination<T>, U, Required<APIResponseSuccess<Pagination<T>>>>;
-
-export enum RequestState {
-  NotStarted,
-  Started,
-  Complete,
-}
-
-export type APIMutateHook<S, T, U extends APIError = APIError> = [
-  (body: S) => Promise<APIResponse<T, U>>,
-  RequestState
-];
-
 export interface UserAPIError extends APIError {
   user?: string[];
   username?: string[];
@@ -107,12 +77,6 @@ export interface UserAPIError extends APIError {
   password?: string[];
   writer_name?: string[];
 }
-
-export type UserAPIResponse = APIResponse<
-  User,
-  UserAPIError,
-  Required<APIResponseSuccess<User>>
->;
 
 export interface IssueAPIError extends APIError {
   non_field_errors?: string[];
