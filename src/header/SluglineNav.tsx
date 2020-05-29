@@ -85,8 +85,8 @@ const SluglineNav = () => {
             <NavLink text="Home" to="/" />
             <NavLink text="Issues" to="/issues" />
             {auth.isAuthenticated() && <NavLink text="Dash" to="/dash" />}
-            {auth.isAuthenticated() && <NavLink text="Profile" to="/profile" />}
-            {auth.isEditor() && <NavLink text="admin" to="/admin" />}
+            {auth.isAuthenticated() && <NavLink text="Profile" to="/dash/profile" />}
+            {auth.isEditor() && <NavLink text="admin" to="/dash/admin" />}
             <LoginLogoutLink />
           </Nav>
         </Navbar.Collapse>

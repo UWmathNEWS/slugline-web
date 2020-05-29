@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import "./slugline.scss";
 import { Router, Switch, Route } from "react-router-dom";
 import { createBrowserHistory, History } from "history";
@@ -9,17 +9,13 @@ import PrivateRoute from "./auth/PrivateRoute";
 import { ToastProvider } from "./shared/contexts/ToastContext";
 import ToastContainer from "./shared/components/ToastContainer";
 import { initLibrary } from "./shared/icons";
-import SluglineNav from "./header/SluglineNav";
 import Loader from "./shared/components/Loader";
 
-import "./slugline.scss";
-
+import SluglineNav from "./header/SluglineNav";
 const Login = React.lazy(() => import("./auth/Login"));
 const IssuesList = React.lazy(() => import("./issues/IssuesList"));
 const IssuePage = React.lazy(() => import("./issues/IssuePage"));
 const Dash = React.lazy(() => import("./dash/Dash"));
-const Profile = React.lazy(() => import("./profile/Profile"));
-const AdminPanel = React.lazy(() => import("./admin/Admin"));
 
 initLibrary();
 
@@ -27,8 +23,6 @@ const browserHistory = createBrowserHistory();
 
 const protectedRoutes: RegExp[] = [
   /^\/dash/,
-  /^\/profile/,
-  /^\/admin/,
 ];
 
 interface AppProps {
@@ -54,31 +48,25 @@ const ContextlessApp: React.FC<Required<AppProps>> = ({ history }) => {
       <SluglineNav />
       <div className="container">
         <div>
-          <Suspense fallback={<Loader variant="spinner" />}>
-          <Switch>
-            <Route exact path="/">
-              HOME CONTENT
-            </Route>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/issues/:issue_id">
-              <IssuePage />
-            </Route>
-            <Route path="/issues">
-              <IssuesList />
-            </Route>
-            <PrivateRoute path="/dash">
-              <Dash />
-            </PrivateRoute>
-            <PrivateRoute path="/profile">
-              <Profile />
-            </PrivateRoute>
-            <PrivateRoute admin={true} path="/admin">
-              <AdminPanel />
-            </PrivateRoute>
-          </Switch>
-          </Suspense>
+          <React.Suspense fallback={<Loader variant="spinner" />}>
+            <Switch>
+              <Route exact path="/">
+                HOME CONTENT
+              </Route>
+              <Route path="/login">
+                <Login />
+              </Route>
+              <Route path="/issues/:issue_id">
+                <IssuePage />
+              </Route>
+              <Route path="/issues">
+                <IssuesList />
+              </Route>
+              <PrivateRoute path="/dash">
+                <Dash />
+              </PrivateRoute>
+            </Switch>
+          </React.Suspense>
         </div>
       </div>
     </Router>

@@ -111,7 +111,7 @@ const PrivateRouteWrapper: React.FC<{
     }
   } else {
     return <>
-      {state.errors.map(err => <Alert key={err} variant="danger">{ERRORS[err] || err}</Alert>)}
+      {state.errors.map(err => <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
     </>;
   }
 };
