@@ -161,9 +161,6 @@ const useRichTable = <D extends object = {}>({
   selectable,
 }: RichTableHook<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
-  const [requestState, setRequestState] = useState<RequestState>(
-    RequestState.NotStarted
-  );
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
   const [searchQuery, _setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -219,13 +216,6 @@ const useRichTable = <D extends object = {}>({
       [],
     [paginated, rawData]
   );
-
-  useEffect(() => {
-    // Prevent table showing no data on initial load
-    if (rawData !== undefined || error !== undefined) {
-      setRequestState(RequestState.Complete);
-    }
-  }, [rawData, error]);
 
   const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 1 : 1;
 
@@ -439,7 +429,7 @@ const useRichTable = <D extends object = {}>({
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
-    if (requestState !== RequestState.Complete) {
+    if (reqInfo.state !== RequestState.Complete) {
       return new Array(data.length || 1).fill(null).map(
         (_, i): RichTableRow<D> => ({
           useRowProps() {
@@ -599,6 +589,8 @@ const useRichTable = <D extends object = {}>({
     selectable,
     clickActions,
     internalExecuteAction,
+    error,
+    reqInfo,
   ]);
 
   const bag: RichTableBag<D> = {
