@@ -49,20 +49,20 @@ describe("AuthProvider", () => {
     expect(mockAxios.get).toHaveBeenCalledWith("/api/me/");
   });
 
-  it("doesn't crash if the initial check fails", () => {
+  it("doesn't crash if the initial check fails", async () => {
     const { getByText } = render(<AuthProvider>test</AuthProvider>);
 
-    act(() => {
+    await act(async () => {
       mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
     });
 
     expect(getByText("test")).toBeInTheDocument();
   });
 
-  it("gives the correct user", () => {
+  it("gives the correct user", async () => {
     expect(auth.user).toBeNull();
 
-    act(() => {
+    await act(async () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
     });
 
@@ -70,8 +70,8 @@ describe("AuthProvider", () => {
     expect(auth.user).toEqual(testUser);
   });
 
-  it("gives the correct CSRF token", () => {
-    act(() => {
+  it("gives the correct CSRF token", async () => {
+    await act(async () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
     });
 
@@ -94,8 +94,8 @@ describe("AuthProvider", () => {
       expect(promise1).toBe(promise2);
     });
 
-    it("returns the same promise for multiple check requests when the request is resolved", () => {
-      act(() => {
+    it("returns the same promise for multiple check requests when the request is resolved", async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
@@ -105,9 +105,9 @@ describe("AuthProvider", () => {
       expect(promise1).toBe(promise2);
     });
 
-    it("creates a new request when forced", () => {
+    it("creates a new request when forced", async () => {
       // Clear existing check request
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
@@ -117,16 +117,16 @@ describe("AuthProvider", () => {
       expect(mockAxios.get).toHaveBeenCalledTimes(2);
     });
 
-    it("does not change AuthProvider internal state if result of check is the same as current state", () => {
+    it("does not change AuthProvider internal state if result of check is the same as current state", async () => {
       // (1) Check anonymous users
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
       auth = result.current;
       auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
@@ -135,22 +135,22 @@ describe("AuthProvider", () => {
       // (2) Check logged-in users
       auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
       auth = result.current;
       auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
       expect(auth).toBe(result.current);
     });
 
-    it("does not change AuthProvider internal state until promise is resolved", () => {
-      act(() => {
+    it("does not change AuthProvider internal state until promise is resolved", async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
@@ -159,22 +159,22 @@ describe("AuthProvider", () => {
 
       expect(auth).toBe(result.current);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
       expect(auth).not.toBe(result.current);
     });
 
-    it("updates the user if they logged in between checks", () => {
-      act(() => {
+    it("updates the user if they logged in between checks", async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
       auth = result.current;
       auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
@@ -184,15 +184,15 @@ describe("AuthProvider", () => {
       expect(auth.user).not.toBeNull();
     });
 
-    it("updates the user if they logged out between checks", () => {
-      act(() => {
+    it("updates the user if they logged out between checks", async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
       auth = result.current;
       auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
@@ -202,15 +202,15 @@ describe("AuthProvider", () => {
       expect(auth.user).toBeNull();
     });
 
-    it("updates the user if they changed between checks", () => {
-      act(() => {
+    it("updates the user if they changed between checks", async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
       auth = result.current;
       auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testAdmin } });
       });
 
@@ -225,7 +225,7 @@ describe("AuthProvider", () => {
 
       checkPromise = auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
       });
 
@@ -244,10 +244,10 @@ describe("AuthProvider", () => {
   });
 
   describe("isAuthenticated", () => {
-    it("is true if and only if the user is authenticated", () => {
+    it("is true if and only if the user is authenticated", async () => {
       expect(auth.isAuthenticated()).toBe(false);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
@@ -257,10 +257,10 @@ describe("AuthProvider", () => {
   });
 
   describe("isEditor", () => {
-    it("is true if and only if the user is an editor", () => {
+    it("is true if and only if the user is an editor", async () => {
       expect(auth.isEditor()).toBe(false);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
@@ -269,7 +269,7 @@ describe("AuthProvider", () => {
 
       auth.check(true);
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testAdmin } });
       });
 
@@ -279,15 +279,15 @@ describe("AuthProvider", () => {
   });
 
   describe("setUser", () => {
-    beforeEach(() => {
-      act(() => {
+    beforeEach(async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
       auth = result.current;
     });
 
-    it("changes the user given a non-null user", () => {
-      act(() => {
+    it("changes the user given a non-null user", async () => {
+      await act(async () => {
         auth.setUser(testAdmin);
       });
 
@@ -296,8 +296,8 @@ describe("AuthProvider", () => {
       expect(auth.user).toEqual(testAdmin);
     });
 
-    it("logs out given a null user", () => {
-      act(() => {
+    it("logs out given a null user", async () => {
+      await act(async () => {
         auth.setUser(null);
       });
 
@@ -308,8 +308,8 @@ describe("AuthProvider", () => {
   });
 
   describe("login", () => {
-    beforeEach(() => {
-      act(() => {
+    beforeEach(async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
       auth = result.current;
@@ -332,12 +332,12 @@ describe("AuthProvider", () => {
       });
     });
 
-    it("sends the login action to authReducer", () => {
+    it("sends the login action to authReducer", async () => {
       const spy = jest.spyOn(_a, "authReducer");
 
       auth.login("test", "test");
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
@@ -351,7 +351,7 @@ describe("AuthProvider", () => {
     it("handles unsuccessful requests by throwing an error", async () => {
       let loginPromise = auth.login("test", "test");
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
       });
 
@@ -370,8 +370,8 @@ describe("AuthProvider", () => {
   });
 
   describe("logout", () => {
-    beforeEach(() => {
-      act(() => {
+    beforeEach(async () => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
       auth = result.current;
@@ -385,12 +385,12 @@ describe("AuthProvider", () => {
       });
     });
 
-    it("sends the logout action to authReducer", () => {
+    it("sends the logout action to authReducer", async () => {
       const spy = jest.spyOn(_a, "authReducer");
 
       auth.logout();
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockResponse({ data: { success: true, data: null } });
       });
 
@@ -402,7 +402,7 @@ describe("AuthProvider", () => {
     it("handles unsuccessful requests by throwing an error", async () => {
       let logoutPromise = auth.logout();
 
-      act(() => {
+      await act(async () => {
         mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
       });
 
