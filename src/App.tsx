@@ -1,23 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import "./slugline.scss";
 import { Router, Switch, Route } from "react-router-dom";
 import { createBrowserHistory, History } from "history";
 
-import IssuesList from "./issues/IssuesList";
-import IssuePage from "./issues/IssuePage";
 import { useAuth } from "./auth/Auth";
 import { AuthProvider } from "./auth/AuthProvider";
-import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
-import Dash from "./dash/Dash";
-import Profile from "./profile/Profile";
-import AdminPanel from "./admin/Admin";
 import { ToastProvider } from "./shared/contexts/ToastContext";
 import ToastContainer from "./shared/components/ToastContainer";
 import { initLibrary } from "./shared/icons";
 import SluglineNav from "./header/SluglineNav";
+import Loader from "./shared/components/Loader";
 
 import "./slugline.scss";
+
+const Login = React.lazy(() => import("./auth/Login"));
+const IssuesList = React.lazy(() => import("./issues/IssuesList"));
+const IssuePage = React.lazy(() => import("./issues/IssuePage"));
+const Dash = React.lazy(() => import("./dash/Dash"));
+const Profile = React.lazy(() => import("./profile/Profile"));
+const AdminPanel = React.lazy(() => import("./admin/Admin"));
 
 initLibrary();
 
@@ -52,6 +54,7 @@ const ContextlessApp: React.FC<Required<AppProps>> = ({ history }) => {
       <SluglineNav />
       <div className="container">
         <div>
+          <Suspense fallback={<Loader variant="spinner" />}>
           <Switch>
             <Route exact path="/">
               HOME CONTENT
@@ -75,6 +78,7 @@ const ContextlessApp: React.FC<Required<AppProps>> = ({ history }) => {
               <AdminPanel />
             </PrivateRoute>
           </Switch>
+          </Suspense>
         </div>
       </div>
     </Router>

@@ -1,10 +1,11 @@
 import React, { useEffect, useReducer, useRef } from "react";
 import { RouteProps, Route, useHistory } from "react-router-dom";
-import { Alert, Spinner } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import { useAuth } from "./Auth";
 import Error404 from "../shared/errors/Error404";
 import { APIError } from "../shared/types";
 import ERRORS from "../shared/errors";
+import Loader from "../shared/components/Loader";
 
 interface PrivateRouteProps extends RouteProps {
   admin?: boolean;
@@ -104,9 +105,7 @@ const PrivateRouteWrapper: React.FC<{
       }
     } else {
       return <>
-        {props.fallback ?? <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>}
+        {props.fallback ?? <Loader variant="spinner" />}
         <div key="children" className="d-none" aria-hidden="true">{props.children}</div>
       </>;
     }
