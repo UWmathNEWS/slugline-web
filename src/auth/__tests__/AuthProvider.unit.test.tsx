@@ -33,30 +33,24 @@ describe("AuthProvider", () => {
   });
 
   it("provides access to all fields in interface (sanity check)", () => {
-    expect("user"            in auth).toBe(true);
-    expect("csrfToken"       in auth).toBe(true);
-    expect("check"           in auth).toBe(true);
+    expect("user" in auth).toBe(true);
+    expect("csrfToken" in auth).toBe(true);
+    expect("check" in auth).toBe(true);
     expect("isAuthenticated" in auth).toBe(true);
-    expect("isEditor"        in auth).toBe(true);
-    expect("post"            in auth).toBe(true);
-    expect("put"             in auth).toBe(true);
-    expect("patch"           in auth).toBe(true);
-    expect("delete"          in auth).toBe(true);
-    expect("setUser"         in auth).toBe(true);
-    expect("login"           in auth).toBe(true);
-    expect("logout"          in auth).toBe(true);
+    expect("isEditor" in auth).toBe(true);
+    expect("setUser" in auth).toBe(true);
+    expect("login" in auth).toBe(true);
+    expect("logout" in auth).toBe(true);
   });
 
   it("does an auth check on mount", () => {
-    render(<AuthProvider/>);
+    render(<AuthProvider />);
 
     expect(mockAxios.get).toHaveBeenCalledWith("/api/me/");
   });
 
   it("doesn't crash if the initial check fails", () => {
-    const { getByText } = render(<AuthProvider>
-      test
-    </AuthProvider>);
+    const { getByText } = render(<AuthProvider>test</AuthProvider>);
 
     act(() => {
       mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
@@ -334,7 +328,7 @@ describe("AuthProvider", () => {
       auth.login("test", "test");
 
       expect(mockAxios.lastReqGet().config.headers).toEqual({
-        "X-CSRFToken": auth.csrfToken
+        "X-CSRFToken": auth.csrfToken,
       });
     });
 
@@ -347,7 +341,7 @@ describe("AuthProvider", () => {
         mockAxios.mockResponse({ data: { success: true, data: testUser } });
       });
 
-      const mockCall = spy.mock.calls[0][1] as { type: string, user: any };
+      const mockCall = spy.mock.calls[0][1] as { type: string; user: any };
       expect(mockCall.type).toBe("login");
       expect(mockCall.user).toEqual(testUser);
 
@@ -387,7 +381,7 @@ describe("AuthProvider", () => {
       auth.logout();
 
       expect(mockAxios.lastReqGet().config.headers).toEqual({
-        "X-CSRFToken": auth.csrfToken
+        "X-CSRFToken": auth.csrfToken,
       });
     });
 
