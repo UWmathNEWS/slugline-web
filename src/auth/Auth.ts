@@ -39,7 +39,7 @@ export type AuthAction =
   | { type: "login"; user: User }
   | { type: "logout" };
 
-export const Auth = createContext<AuthContext>({
+export const defaultAuthContext = {
   user: null,
   csrfToken: null,
   check: () => Promise.resolve(),
@@ -52,7 +52,9 @@ export const Auth = createContext<AuthContext>({
   setUser: () => {},
   login: () => Promise.resolve(undefined),
   logout: () => Promise.resolve(),
-});
+};
+
+export const Auth = createContext<AuthContext>(defaultAuthContext);
 
 export const CSRF_COOKIE = "csrftoken";
 export const USER_LOCALSTORAGE_KEY = "slugline-user";
@@ -60,21 +62,27 @@ export const USER_LOCALSTORAGE_KEY = "slugline-user";
 export const authReducer = (state: AuthState, action: AuthAction) => {
   switch (action.type) {
     case "post":
-    case "login":
-      localStorage.setItem(
-        USER_LOCALSTORAGE_KEY,
-        JSON.stringify(action.user)
-      );
+    case "login": {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(
+          USER_LOCALSTORAGE_KEY,
+          JSON.stringify(action.user)
+        );
+      }
       return {
         user: action.user,
         csrfToken: Cookie.get(CSRF_COOKIE) || null,
       };
-    case "logout":
-      localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+    }
+    case "logout": {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+      }
       return {
         user: null,
         csrfToken: Cookie.get(CSRF_COOKIE) || null,
       };
+    }
   }
   return state;
 };

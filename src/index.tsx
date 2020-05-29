@@ -10,7 +10,7 @@ import * as serviceWorker from "./serviceWorker";
 // @ts-ignore
 const renderMethod = module.hot ? ReactDOM.render : ReactDOM.hydrate;
 
-const render = (Component: typeof App) =>
+const render = (Component: React.ComponentType) =>
   renderMethod(<Component />, document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change

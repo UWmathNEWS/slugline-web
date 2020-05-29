@@ -18,7 +18,7 @@ interface AxiosConfig extends AxiosRequestConfig {
 }
 
 export const AuthProvider: React.FC = (props) => {
-  const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
+  const storedUser = typeof localStorage !== "undefined" ? localStorage.getItem(USER_LOCALSTORAGE_KEY) : null;
   const readyPromise = useRef<Promise<void> | undefined>(undefined);
   const isWaiting = useRef<boolean>(false);
   const [user, dispatchUser] = useReducer(authReducer, {

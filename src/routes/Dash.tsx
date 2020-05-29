@@ -3,10 +3,10 @@ import { useRouteMatch, Switch, Route } from "react-router-dom";
 import Loader from "../shared/components/Loader";
 import PrivateRoute from "../auth/PrivateRoute";
 
-const DashArticlesPage = React.lazy(() => import("./articles/DashArticlesPage"));
-const EditorPage = React.lazy(() => import("./EditorPage"));
-const DashIssuesPage = React.lazy(() => import("./issues/DashIssuesPage"));
-const DashIssueDetail = React.lazy(() => import("./issues/DashIssueDetail"));
+const DashArticlesPage = React.lazy(() => import("../dash/articles/DashArticlesPage"));
+const EditorPage = React.lazy(() => import("../dash/EditorPage"));
+const DashIssuesPage = React.lazy(() => import("../dash/issues/DashIssuesPage"));
+const DashIssueDetail = React.lazy(() => import("../dash/issues/DashIssueDetail"));
 const Profile = React.lazy(() => import("../profile/Profile"));
 const AdminPanel = React.lazy(() => import("../admin/Admin"));
 
@@ -34,7 +34,7 @@ const Dash = () => {
         <PrivateRoute admin={true} path={`${match.path}/admin`}>
           <AdminPanel />
         </PrivateRoute>
-        <Route exact path={`${match.path}/`}>
+        <Route exact path={`${match.path}`}>
           <DashArticlesPage />
         </Route>
       </Switch>

@@ -9,17 +9,12 @@ import PrivateRoute from "./auth/PrivateRoute";
 import { ToastProvider } from "./shared/contexts/ToastContext";
 import ToastContainer from "./shared/components/ToastContainer";
 import { initLibrary } from "./shared/icons";
-import Loader from "./shared/components/Loader";
 
 import SluglineNav from "./header/SluglineNav";
-const Login = React.lazy(() => import("./auth/Login"));
-const IssuesList = React.lazy(() => import("./issues/IssuesList"));
-const IssuePage = React.lazy(() => import("./issues/IssuePage"));
-const Dash = React.lazy(() => import("./dash/Dash"));
+import Public from "./routes/Public";
+import Dash from "./routes/Dash";
 
 initLibrary();
-
-const browserHistory = createBrowserHistory();
 
 const protectedRoutes: RegExp[] = [
   /^\/dash/,
@@ -29,7 +24,33 @@ interface AppProps {
   history?: History;
 }
 
-const ContextlessApp: React.FC<Required<AppProps>> = ({ history }) => {
+export const appFactory = <T extends any = {}>(Component: React.ComponentType): React.FC<T> => {
+  return (props: T) => (
+    <>
+      <SluglineNav />
+      <div className="container">
+        <div>
+          <Component {...props} />
+        </div>
+      </div>
+    </>
+  );
+};
+
+const MainApp = () => (
+  <Switch>
+    <PrivateRoute path="/dash">
+      <Dash />
+    </PrivateRoute>
+    <Route path="/">
+      <Public />
+    </Route>
+  </Switch>
+);
+
+export const BaseApp: React.FC = appFactory(MainApp);
+
+const BrowserApp: React.FC<AppProps> = ({ history = createBrowserHistory() }) => {
   const auth = useAuth();
 
   React.useEffect(() => {
@@ -45,39 +66,16 @@ const ContextlessApp: React.FC<Required<AppProps>> = ({ history }) => {
 
   return (
     <Router history={history}>
-      <SluglineNav />
-      <div className="container">
-        <div>
-          <React.Suspense fallback={<Loader variant="spinner" />}>
-            <Switch>
-              <Route exact path="/">
-                HOME CONTENT
-              </Route>
-              <Route path="/login">
-                <Login />
-              </Route>
-              <Route path="/issues/:issue_id">
-                <IssuePage />
-              </Route>
-              <Route path="/issues">
-                <IssuesList />
-              </Route>
-              <PrivateRoute path="/dash">
-                <Dash />
-              </PrivateRoute>
-            </Switch>
-          </React.Suspense>
-        </div>
-      </div>
+      <AuthProvider>
+        <ToastProvider>
+          <Router history={history}>
+            <BaseApp />
+          </Router>
+          <ToastContainer />
+        </ToastProvider>
+      </AuthProvider>
     </Router>
-  );
+  )
 };
 
-export default ({ history = browserHistory }: AppProps) => (
-  <AuthProvider>
-    <ToastProvider>
-      <ContextlessApp history={history} />
-      <ToastContainer />
-    </ToastProvider>
-  </AuthProvider>
-);
+export default BrowserApp;
