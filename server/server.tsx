@@ -47,10 +47,10 @@ const serverRenderer = (req: Request, res: Response) => {
   });
 };
 
-router.use(
-  "^/static",
-  express.static(path.resolve(__dirname, "..", "build", "static"), { maxAge: "30d" })
-);
+// base path needs to be the first path as there already exists an index.html in static
+router.use("^/$", serverRenderer);
+
+router.use(express.static(path.resolve(__dirname, "..", "build"), { maxAge: "30d" }));
 
 // route API to Django --- dev use only
 router.use("^/api", proxy({ target: "http://localhost:8000", changeOrigin: true }));
