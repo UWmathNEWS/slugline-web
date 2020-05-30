@@ -18,10 +18,7 @@ export interface AuthState {
   csrfToken: string | null;
 }
 
-export type AuthAction =
-  | { type: "post"; user: User }
-  | { type: "login"; user: User }
-  | { type: "logout" };
+export type AuthAction = { type: "login"; user: User } | { type: "logout" };
 
 export const Auth = createContext<AuthContext>({
   user: null,
@@ -39,7 +36,6 @@ export const USER_LOCALSTORAGE_KEY = "slugline-user";
 
 export const authReducer = (state: AuthState, action: AuthAction) => {
   switch (action.type) {
-    case "post":
     case "login":
       localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(action.user));
       return {
