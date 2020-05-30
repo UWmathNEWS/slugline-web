@@ -9,11 +9,6 @@ import {
   endpointFactory,
 } from "../api";
 import {
-  APIResponseSuccess,
-  APIResponseFailure,
-  APIError,
-} from "../../shared/types";
-import {
   MOCK_RESPONSE,
   MOCK_ERROR,
   MOCK_BODY,
