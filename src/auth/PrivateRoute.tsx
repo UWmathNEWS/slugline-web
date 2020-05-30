@@ -118,7 +118,9 @@ const PrivateRouteWrapper: React.FC<{
 
 const PrivateRoute: React.FC<PrivateRouteProps> = (props: PrivateRouteProps) => {
   return <Route {...props}>
-    <PrivateRouteWrapper admin={props.admin} fallback={props.fallback}>{props.children}</PrivateRouteWrapper>
+    <PrivateRouteWrapper admin={props.admin} fallback={props.fallback}>
+      {props.component || props.children}
+    </PrivateRouteWrapper>
   </Route>;
 };
 

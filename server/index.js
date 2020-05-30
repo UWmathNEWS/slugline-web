@@ -6,7 +6,7 @@ require('@babel/register')({
   plugins: [
     ["@babel/transform-runtime"]
   ],
-  extensions: [".tsx", ".ts", ".jsx", ".js", ".mjs"]
+  extensions: [".tsx", ".ts", ".jsx", ".js", ".mjs"],
 });
 
 require('./server');

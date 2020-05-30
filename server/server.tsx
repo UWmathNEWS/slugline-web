@@ -14,39 +14,21 @@ import { StaticRouter } from "react-router";
 import { Auth, defaultAuthContext } from "../src/auth/Auth";
 import { appFactory } from "../src/App";
 import Public from "../src/routes/Public";
-import { Route, Switch } from "react-router-dom";
-import Login from "../src/auth/Login";
-import IssuePage from "../src/issues/IssuePage";
-import IssuesList from "../src/issues/IssueList";
 
 const PORT = 3030;
 const app = express();
 
 const router = express.Router();
 
-const ServerApp = appFactory(Public)
+const ServerApp = appFactory(Public);
 
 const serverRenderer = (req: Request, res: Response) => {
-  console.log(req.url);
+  const context = {};
 
   const app = ReactDOMServer.renderToString(
     <Auth.Provider value={defaultAuthContext}>
-      <StaticRouter location={req.url} context={{}}>
-        {/*<ServerApp />*/}
-        <Switch>
-          <Route exact path="/">
-            HOME CONTENT
-          </Route>
-          <Route path="/login">
-            <Login/>
-          </Route>
-          <Route path="/issues/:issue_id">
-            <IssuePage/>
-          </Route>
-          <Route path="/issues">
-            <IssuesList />
-          </Route>
-        </Switch>
+      <StaticRouter location={req.url} context={context}>
+        <ServerApp />
       </StaticRouter>
     </Auth.Provider>
   );
@@ -66,7 +48,8 @@ const serverRenderer = (req: Request, res: Response) => {
 };
 
 router.use(
-  express.static(path.resolve(__dirname, "..", "build"), { maxAge: "30d" })
+  "^/static",
+  express.static(path.resolve(__dirname, "..", "build", "static"), { maxAge: "30d" })
 );
 
 // route API to Django --- dev use only
