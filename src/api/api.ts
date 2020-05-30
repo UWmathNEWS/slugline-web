@@ -166,6 +166,21 @@ export const deleteFactory = <TResp, TError extends APIError = APIError>(
 };
 
 /**
+ * Unwraps a APIResponse promise into its data type, throwing the error if the request was unsuccessful
+ * @param p The promise to unwrap
+ */
+export const unwrap = async <TResp, TError extends APIError = APIError>(
+  p: Promise<APIResponse<TResp, TError>>
+): Promise<TResp> => {
+  const resp = await p;
+  if (resp.success) {
+    return resp.data;
+  } else {
+    throw resp.error;
+  }
+};
+
+/**
  * A basic, all-defaults endpoint factory that assumes all API methods
  * have the same response/body types and all return the same error type.
  * @param endpoint The endpoint url, ending in a slash
