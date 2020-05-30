@@ -1,16 +1,19 @@
-import { User } from "../shared/types";
+import { User, APIResponse } from "../shared/types";
 import { createContext, useContext } from "react";
 import Cookie from "js-cookie";
 
 export interface AuthContext {
   user: User | null;
   csrfToken: string | null;
-  check: (force?: boolean) => Promise<void>;
+  check: (force?: boolean) => Promise<APIResponse<User | null>>;
   isAuthenticated: () => boolean;
   isEditor: () => boolean;
   setUser: (user: User | null) => void;
-  login: (username: string, password: string) => Promise<User | undefined>;
-  logout: () => Promise<void>;
+  login: (
+    username: string,
+    password: string
+  ) => Promise<APIResponse<User | undefined>>;
+  logout: () => Promise<APIResponse<void>>;
 }
 
 export interface AuthState {
@@ -23,12 +26,12 @@ export type AuthAction = { type: "login"; user: User } | { type: "logout" };
 export const Auth = createContext<AuthContext>({
   user: null,
   csrfToken: null,
-  check: () => Promise.resolve(),
+  check: () => Promise.resolve({ success: true, data: null }),
   isAuthenticated: () => false,
   isEditor: () => false,
   setUser: () => {},
-  login: () => Promise.resolve(undefined),
-  logout: () => Promise.resolve(),
+  login: () => Promise.resolve({ success: true, data: undefined }),
+  logout: () => Promise.resolve({ success: true, data: undefined }),
 });
 
 export const CSRF_COOKIE = "csrftoken";

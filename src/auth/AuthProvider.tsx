@@ -1,13 +1,15 @@
 import React, { useEffect, useReducer, useRef } from "react";
 
-import { User } from "../shared/types";
+import { User, APIResponse } from "../shared/types";
 import Cookie from "js-cookie";
 import { authReducer, USER_LOCALSTORAGE_KEY, Auth, CSRF_COOKIE } from "./Auth";
 import api from "../api/api";
 
 export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
-  const readyPromise = useRef<Promise<void> | undefined>(undefined);
+  const readyPromise = useRef<Promise<APIResponse<User | null>> | undefined>(
+    undefined
+  );
   const isWaiting = useRef<boolean>(false);
   const [user, dispatchUser] = useReducer(authReducer, {
     user: storedUser !== null ? JSON.parse(storedUser) : null,
@@ -22,7 +24,7 @@ export const AuthProvider: React.FC = (props) => {
     }
   };
 
-  const check = (force: boolean = false): Promise<void> => {
+  const check = (force: boolean = false): Promise<APIResponse<User | null>> => {
     if (readyPromise.current === undefined || (!isWaiting.current && force)) {
       // Ensure we don't end up with a race condition --- we now have an invariant that only one network request
       // will be made at any point in time
@@ -46,10 +48,9 @@ export const AuthProvider: React.FC = (props) => {
           ) {
             setUser(resp.data);
           }
-        } else {
-          throw resp.error;
         }
         isWaiting.current = false;
+        return resp;
       });
       readyPromise.current = promise;
       return promise;
@@ -77,8 +78,8 @@ export const AuthProvider: React.FC = (props) => {
       .then((resp) => {
         if (resp.success) {
           dispatchUser({ type: "login", user: resp.data });
-          return resp.data;
         }
+        return resp;
       });
   };
 
@@ -92,21 +93,24 @@ export const AuthProvider: React.FC = (props) => {
         if (resp.success) {
           dispatchUser({ type: "logout" });
         }
+        return resp;
       });
   };
 
   useEffect(() => {
-    check().catch((e) => {
-      // something went horribly wrong here, but we only alert users if they're logged in as otherwise it causes no harm
-      if (storedUser !== null) {
-        window.alert(
-          "An error occurred and we couldn't verify that you're logged in. Try refreshing the page, or check your network connection."
+    check().then((resp) => {
+      if (!resp.success) {
+        // something went horribly wrong here, but we only alert users if they're logged in as otherwise it causes no harm
+        if (storedUser !== null) {
+          window.alert(
+            "An error occurred and we couldn't verify that you're logged in. Try refreshing the page, or check your network connection."
+          );
+        }
+        console.error(
+          "The following error was thrown while performing an auth check:\n",
+          resp.error
         );
       }
-      console.error(
-        "The following error was thrown while performing an auth check:\n",
-        e
-      );
     });
     // We only need to call check on component mount, hence the empty dependency array. The patch that disables ESLint
     // yelling at us in this scenario hasn't landed in our toolchain yet, so we disable the warning for now.
