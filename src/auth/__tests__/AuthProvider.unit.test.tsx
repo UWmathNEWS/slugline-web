@@ -4,11 +4,17 @@ import { AuthProvider } from "../AuthProvider";
 import { render } from "@testing-library/react";
 import { HookResult, renderHook, act } from "@testing-library/react-hooks";
 import mockAxios from "jest-mock-axios";
-import { makeTestError, testAdmin, testUser } from "../../shared/test-utils";
+import {
+  makeTestError,
+  testAdmin,
+  testUser,
+  MOCK_ERROR,
+} from "../../shared/test-utils";
 import ERRORS from "../../shared/errors";
 
 // for spies
 import * as _a from "../Auth";
+import { APIResponseFailure, APIError } from "../../shared/types";
 
 describe("AuthProvider", () => {
   let result: HookResult<AuthContext>;
@@ -25,6 +31,7 @@ describe("AuthProvider", () => {
 
   afterEach(() => {
     mockAxios.reset();
+    mockAxios.mockClear();
     localStorage.clear();
   });
 
@@ -46,14 +53,14 @@ describe("AuthProvider", () => {
   it("does an auth check on mount", () => {
     render(<AuthProvider />);
 
-    expect(mockAxios.get).toHaveBeenCalledWith("/api/me/");
+    expect(mockAxios.lastReqGet().url).toEqual("me/");
   });
 
   it("doesn't crash if the initial check fails", async () => {
     const { getByText } = render(<AuthProvider>test</AuthProvider>);
 
     await act(async () => {
-      mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
+      mockAxios.mockResponse({ data: MOCK_ERROR });
     });
 
     expect(getByText("test")).toBeInTheDocument();
@@ -84,7 +91,7 @@ describe("AuthProvider", () => {
       auth.check();
       auth.check();
 
-      expect(mockAxios.get).toHaveBeenCalledTimes(1);
+      expect(mockAxios).toHaveBeenCalledTimes(1);
     });
 
     it("returns the same promise for multiple check requests", () => {
@@ -114,7 +121,7 @@ describe("AuthProvider", () => {
       auth = result.current;
       auth.check(true);
 
-      expect(mockAxios.get).toHaveBeenCalledTimes(2);
+      expect(mockAxios).toHaveBeenCalledTimes(2);
     });
 
     it("does not change AuthProvider internal state if result of check is the same as current state", async () => {
@@ -220,25 +227,22 @@ describe("AuthProvider", () => {
       expect(auth.user).not.toEqual(testUser);
     });
 
-    it("handles unsuccessful requests by throwing an error", async () => {
+    it("handles unsuccessful requests by returning an error", async () => {
       let checkPromise: Promise<any>;
 
       checkPromise = auth.check(true);
 
       await act(async () => {
-        mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
+        mockAxios.mockResponse({ data: MOCK_ERROR });
       });
 
       await act(async () => {
-        try {
-          await checkPromise;
-          expect("Error was not thrown by AuthProvider.check()").toBe(false);
-        } catch (e) {
-          auth = result.current;
+        const resp = (await checkPromise) as APIResponseFailure<APIError>;
+        auth = result.current;
 
-          expect(e).toBe(ERRORS.__TESTING);
-          expect(auth.user).toBeNull();
-        }
+        expect(resp.success).toBe(false);
+        expect(resp).toEqual(MOCK_ERROR);
+        expect(auth.user).toBeNull();
       });
     });
   });
@@ -348,23 +352,20 @@ describe("AuthProvider", () => {
       spy.mockRestore();
     });
 
-    it("handles unsuccessful requests by throwing an error", async () => {
+    it("handles unsuccessful requests by returning an error", async () => {
       let loginPromise = auth.login("test", "test");
 
       await act(async () => {
-        mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
+        mockAxios.mockResponse({ data: MOCK_ERROR });
       });
 
       await act(async () => {
-        try {
-          await loginPromise;
-          expect("Error was not thrown by AuthProvider.login()").toBe(false);
-        } catch (e) {
-          auth = result.current;
+        const resp = (await loginPromise) as APIResponseFailure<APIError>;
+        auth = result.current;
 
-          expect(e).toBe(ERRORS.__TESTING);
-          expect(auth.user).toBeNull();
-        }
+        expect(resp.success).toBe(false);
+        expect(resp).toEqual(MOCK_ERROR);
+        expect(auth.user).toBeNull();
       });
     });
   });
@@ -399,23 +400,21 @@ describe("AuthProvider", () => {
       spy.mockRestore();
     });
 
-    it("handles unsuccessful requests by throwing an error", async () => {
+    it("handles unsuccessful requests by returning an error", async () => {
       let logoutPromise = auth.logout();
 
       await act(async () => {
-        mockAxios.mockError(makeTestError(500, ERRORS.__TESTING));
+        mockAxios.mockResponse({
+          data: MOCK_ERROR,
+        });
       });
 
       await act(async () => {
-        try {
-          await logoutPromise;
-          expect("Error was not thrown by AuthProvider.logout()").toBe(false);
-        } catch (e) {
-          auth = result.current;
+        const resp = (await logoutPromise) as APIResponseFailure<APIError>;
 
-          expect(e).toBe(ERRORS.__TESTING);
-          expect(auth.user).not.toBeNull();
-        }
+        expect(resp.success).toBe(false);
+        expect(resp).toEqual(MOCK_ERROR);
+        expect(auth.user).not.toBeNull();
       });
     });
   });
