@@ -4,7 +4,7 @@ import { Router, Switch } from "react-router-dom";
 import { createMemoryHistory, History } from "history";
 import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { testUser, testAdmin } from "../../shared/test-utils";
+import { testUser, testAdmin, MOCK_ERROR } from "../../shared/test-utils";
 import mockAxios from "jest-mock-axios";
 import PrivateRoute from "../PrivateRoute";
 import { Auth, USER_LOCALSTORAGE_KEY } from "../Auth";
@@ -176,16 +176,8 @@ describe("Unit test for PrivateRoute", () => {
     );
 
     await act(async () => {
-      mockAxios.mockError({
-        code: 500,
-        response: {
-          data: {
-            success: false,
-            error: {
-              detail: ["__TESTING"],
-            },
-          },
-        },
+      mockAxios.mockResponse({
+        data: MOCK_ERROR,
       });
     });
 
