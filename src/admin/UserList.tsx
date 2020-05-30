@@ -166,21 +166,15 @@ const UserList = () => {
               ) {
                 return api.users
                   .delete({ id: data.username, csrf: auth.csrfToken || "" })
-                  .then(
-                    () => {
-                      executeAction("refresh");
+                  .then((resp) => {
+                    if (resp.success) {
+                      executeAction("_refresh");
                       alert(`Successfully deleted user ${data.username}`);
-                    },
-                    (err: string[] | string) => {
-                      alert(
-                        typeof err === "string"
-                          ? ERRORS[err]
-                          : err.map((e) => ERRORS[e])
-                      );
+                    } else {
+                      alert(resp.error.detail?.map((e) => ERRORS[e]));
                     }
-                  );
+                  });
               }
-
               return Promise.reject();
             },
           },
