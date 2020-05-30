@@ -44,7 +44,7 @@ export const MOCK_RESPONSE: APIResponseSuccess<string> = {
 export const MOCK_ERROR: APIResponseFailure<APIError> = {
   success: false,
   error: {
-    detail: ["bingo bango bongo"],
+    detail: ["__TESTING"],
     status_code: 500,
   },
 };
