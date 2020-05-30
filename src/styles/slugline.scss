@@ -1,7 +1,7 @@
 @import "slugline_vars";
 @import "slugline_fonts";
 
-@import "~bootstrap/scss/bootstrap.scss";
+@import "../../node_modules/bootstrap/scss/bootstrap";
 
 // Convenient class for mathnews logo
 .mathnews-logo::before {

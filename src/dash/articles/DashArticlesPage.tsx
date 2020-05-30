@@ -2,7 +2,7 @@ import React from "react";
 import { useCreateArticle } from "../../api/hooks";
 import { Button } from "react-bootstrap";
 
-import "./DashArticlesPage.scss";
+import "./styles/DashArticlesPage.scss";
 import { useHistory, Link } from "react-router-dom";
 import { Article, ArticleType } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";

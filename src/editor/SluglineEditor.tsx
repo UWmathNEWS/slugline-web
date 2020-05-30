@@ -13,7 +13,7 @@ import { Leaf } from "./components/Leaf";
 import * as EditorHelpers from "./helpers";
 import { SluglineElement, ElementType } from "./types";
 
-import "./SluglineEditor.scss";
+import "./styles/SluglineEditor.scss";
 import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";

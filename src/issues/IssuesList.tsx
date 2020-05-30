@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAllIssues } from "../api/hooks";
 
-import "./IssuesList.scss";
+import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue } from "../shared/types";
 

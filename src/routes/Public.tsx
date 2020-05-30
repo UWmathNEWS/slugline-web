@@ -4,7 +4,7 @@ import { RouteProps, Switch } from "react-router-dom";
 import Home from "../home/Home";
 import Login from "../auth/Login";
 import IssuePage from "../issues/IssuePage";
-import IssueList from "../issues/IssueList";
+import IssueList from "../issues/IssuesList";
 
 export const routes: RouteProps[] = [
   {
@@ -28,11 +28,7 @@ export const routes: RouteProps[] = [
 ];
 
 const Public = () => {
-  return (
-    <Switch>
-      {renderRoutes(routes)}
-    </Switch>
-  );
+  return <Switch>{renderRoutes(routes)}</Switch>;
 };
 
 export default Public;

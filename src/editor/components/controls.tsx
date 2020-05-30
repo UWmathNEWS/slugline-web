@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { toggleMark, isMarkActive, toggleInline } from "../helpers";
 
-import "./controls.scss";
+import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "../../shared/PopoverWrapper";
@@ -45,7 +45,7 @@ export const LinkButton: React.FC = () => {
     const newLink: LinkElement = {
       type: ElementType.Link,
       href: href,
-      children: [{ text: href }]
+      children: [{ text: href }],
     };
     toggleInline(editor, newLink);
   };
@@ -86,7 +86,7 @@ export const InlineLatexButton: React.FC = () => {
     const newLatex: InlineLatexElement = {
       type: ElementType.InlineLatex,
       latex: latex,
-      children: [{ text: "" }]
+      children: [{ text: "" }],
     };
     toggleInline(editor, newLatex);
   };

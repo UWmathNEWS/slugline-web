@@ -5,7 +5,7 @@ import { Modal, Button } from "react-bootstrap";
 import { User } from "../shared/types";
 import { ProfileFormConsumer, useProfileForm } from "../profile/ProfileForm";
 
-import "./UserList.scss";
+import "./styles/UserList.scss";
 import { useAuth } from "../auth/Auth";
 import ERRORS from "../shared/errors";
 import {
@@ -156,7 +156,10 @@ const UserList = () => {
           {
             name: "Delete",
             bulk: false,
-            call({ makeRequest, executeAction, rows, page, numPages }, data: User) {
+            call(
+              { makeRequest, executeAction, rows, page, numPages },
+              data: User
+            ) {
               if (
                 window.confirm(
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
@@ -164,8 +167,8 @@ const UserList = () => {
               ) {
                 return makeRequest<User>("delete", data, {
                   headers: {
-                    "X-CSRFToken": auth.csrfToken
-                  }
+                    "X-CSRFToken": auth.csrfToken,
+                  },
                 }).then(
                   () => {
                     if (page < numPages || page === 1) {

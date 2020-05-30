@@ -1,5 +1,5 @@
 import React from "react";
-import "./slugline.scss";
+import "./styles/slugline.scss";
 import { Router, Switch, Route } from "react-router-dom";
 import { createBrowserHistory, History } from "history";
 
@@ -16,15 +16,15 @@ import Dash from "./routes/Dash";
 
 initLibrary();
 
-const protectedRoutes: RegExp[] = [
-  /^\/dash/,
-];
+const protectedRoutes: RegExp[] = [/^\/dash/];
 
 interface AppProps {
   history?: History;
 }
 
-export const appFactory = <T extends any = {}>(Component: React.ComponentType): React.FC<T> => {
+export const appFactory = <T extends any = {}>(
+  Component: React.ComponentType
+): React.FC<T> => {
   return (props: T) => (
     <>
       <SluglineNav />
@@ -50,18 +50,22 @@ const MainApp = () => (
 
 export const BaseApp: React.FC = appFactory(MainApp);
 
-const BrowserApp: React.FC<AppProps> = ({ history = createBrowserHistory() }) => {
+const BrowserApp: React.FC<AppProps> = ({
+  history = createBrowserHistory(),
+}) => {
   const auth = useAuth();
 
   React.useEffect(() => {
     const unlisten = history.listen((loc) => {
-      if (protectedRoutes.some(matcher => matcher.test(loc.pathname))) {
+      if (protectedRoutes.some((matcher) => matcher.test(loc.pathname))) {
         // we no-op on error to prevent a crash as the error is handled by PrivateRoute
         auth.check(true).catch(() => {});
       }
     });
 
-    return () => { unlisten() };
+    return () => {
+      unlisten();
+    };
   }, [history, auth]);
 
   return (
@@ -75,7 +79,7 @@ const BrowserApp: React.FC<AppProps> = ({ history = createBrowserHistory() }) =>
         </ToastProvider>
       </AuthProvider>
     </Router>
-  )
+  );
 };
 
 export default BrowserApp;

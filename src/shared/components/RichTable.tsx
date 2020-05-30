@@ -1,4 +1,4 @@
-import "./RichTable.scss";
+import "./styles/RichTable.scss";
 
 import React, {
   useCallback,
@@ -721,7 +721,10 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
                 window.addEventListener("click", function fakeBlurListener() {
                   // no need to check the current target since we capture click events on this input anyways
                   const requestedPage =
-                    Math.max(1, Math.min(parseInt(newPageRef.current), numPages)) || page;
+                    Math.max(
+                      1,
+                      Math.min(parseInt(newPageRef.current), numPages)
+                    ) || page;
                   setNewPage(requestedPage.toString());
                   setPage(requestedPage);
                   window.removeEventListener("click", fakeBlurListener);

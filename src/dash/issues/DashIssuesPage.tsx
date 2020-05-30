@@ -4,7 +4,7 @@ import { Button, Modal, Form, Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { useForm, DeepPartial } from "react-hook-form";
 
-import "./DashIssuesPage.scss";
+import "./styles/DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import NonFieldErrors from "../../shared/form/NonFieldErrors";
 import { Issue } from "../../shared/types";
