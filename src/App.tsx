@@ -50,9 +50,7 @@ const MainApp = () => (
 
 export const BaseApp: React.FC = appFactory(MainApp);
 
-const BrowserApp: React.FC<AppProps> = ({
-  history = createBrowserHistory(),
-}) => {
+const BaseAppWrapper: React.FC<Required<AppProps>> = ({ history }) => {
   const auth = useAuth();
 
   React.useEffect(() => {
@@ -68,17 +66,21 @@ const BrowserApp: React.FC<AppProps> = ({
     };
   }, [history, auth]);
 
+  return <BaseApp />;
+}
+
+const BrowserApp: React.FC<AppProps> = ({
+  history = createBrowserHistory(),
+}) => {
   return (
-    <Router history={history}>
-      <AuthProvider>
-        <ToastProvider>
-          <Router history={history}>
-            <BaseApp />
-          </Router>
-          <ToastContainer />
-        </ToastProvider>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <ToastProvider>
+        <Router history={history}>
+          <BaseAppWrapper history={history} />
+        </Router>
+        <ToastContainer />
+      </ToastProvider>
+    </AuthProvider>
   );
 };
 

@@ -1,7 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 
-const Error500: React.FC = () => {
+const Error500: React.FC<Partial<RouteComponentProps>> = ({ staticContext = {} }) => {
+  staticContext.statusCode = 500;
+
   return (
     <div>
       <h1 className="display-1">500</h1>

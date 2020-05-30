@@ -1,7 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 
-const Error404: React.FC = () => {
+const Error404: React.FC<Partial<RouteComponentProps>> = ({ staticContext = {} }) => {
+  staticContext.statusCode = 404;
+
   return (
     <div>
       <h1 className="display-1">404</h1>

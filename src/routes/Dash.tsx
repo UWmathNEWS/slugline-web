@@ -1,43 +1,68 @@
 import React from "react";
-import { useRouteMatch, Switch, Route } from "react-router-dom";
+import { useRouteMatch } from "react-router-dom";
 import Loader from "../shared/components/Loader";
 import PrivateRoute from "../auth/PrivateRoute";
+import renderRoutes, { RouteProps } from "../shared/helpers/renderRoutes";
+import Error404 from "../shared/errors/Error404";
 
-const DashArticlesPage = React.lazy(() => import("../dash/articles/DashArticlesPage"));
+const DashArticlesPage = React.lazy(() =>
+  import("../dash/articles/DashArticlesPage")
+);
 const EditorPage = React.lazy(() => import("../dash/EditorPage"));
-const DashIssuesPage = React.lazy(() => import("../dash/issues/DashIssuesPage"));
-const DashIssueDetail = React.lazy(() => import("../dash/issues/DashIssueDetail"));
+const DashIssuesPage = React.lazy(() =>
+  import("../dash/issues/DashIssuesPage")
+);
+const DashIssueDetail = React.lazy(() =>
+  import("../dash/issues/DashIssueDetail")
+);
 const Profile = React.lazy(() => import("../profile/Profile"));
 const AdminPanel = React.lazy(() => import("../admin/Admin"));
+
+export const routes: RouteProps[] = [
+  {
+    path: "/edit/:articleId",
+    component: EditorPage,
+  },
+  {
+    path: "/issues/:issueId",
+    component: DashIssueDetail,
+  },
+  {
+    path: "/issues",
+    component: DashIssuesPage,
+  },
+  {
+    path: "/articles",
+    component: DashArticlesPage,
+  },
+  {
+    path: "/profile",
+    component: Profile,
+  },
+  {
+    path: "/admin",
+    component: AdminPanel,
+    routeComponent: PrivateRoute,
+    routeProps: {
+      admin: true,
+    },
+  },
+  {
+    path: "",
+    exact: true,
+    component: DashArticlesPage,
+  },
+  {
+    component: Error404,
+  },
+];
 
 const Dash = () => {
   const match = useRouteMatch();
 
   return (
     <React.Suspense fallback={<Loader variant="spinner" />}>
-      <Switch>
-        <Route path={`${match.path}/edit/:articleId`}>
-          <EditorPage />
-        </Route>
-        <Route path={`${match.path}/issues/:issueId`}>
-          <DashIssueDetail />
-        </Route>
-        <Route path={`${match.path}/issues`}>
-          <DashIssuesPage />
-        </Route>
-        <Route path={`${match.path}/articles`}>
-          <DashArticlesPage />
-        </Route>
-        <Route path={`${match.path}/profile`}>
-          <Profile />
-        </Route>
-        <PrivateRoute admin={true} path={`${match.path}/admin`}>
-          <AdminPanel />
-        </PrivateRoute>
-        <Route exact path={`${match.path}`}>
-          <DashArticlesPage />
-        </Route>
-      </Switch>
+      {renderRoutes(match.path, routes)}
     </React.Suspense>
   );
 };

@@ -18,9 +18,9 @@ interface PrivateRouteState {
 }
 
 type PrivateRouteAction =
-  { type: 'done loading' } |
-  { type: 'is loading' } |
-  { type: 'error', data: string[] }
+  | { type: "done loading" }
+  | { type: "is loading" }
+  | { type: "error"; data: string[] };
 
 /**
  * Wrapper for components inside a PrivateRoute. Handles authentication-related business.
@@ -56,26 +56,29 @@ type PrivateRouteAction =
  * change.
  */
 const PrivateRouteWrapper: React.FC<{
-  admin?: boolean,
-  fallback?: React.ReactNode,
-  children: React.ReactNode
+  admin?: boolean;
+  fallback?: React.ReactNode;
+  children: React.ReactNode;
 }> = (props) => {
   const auth = useAuth();
   const history = useHistory();
-  const [state, dispatch] = useReducer((state: PrivateRouteState, action: PrivateRouteAction) => {
-    switch (action.type) {
-    case 'done loading':
-      return { ready: true, errors: [] };
-    case 'is loading':
-      return { ready: false, errors: [] };
-    case 'error':
-      return { ready: false, errors: action.data }
+  const [state, dispatch] = useReducer(
+    (state: PrivateRouteState, action: PrivateRouteAction) => {
+      switch (action.type) {
+        case "done loading":
+          return { ready: true, errors: [] };
+        case "is loading":
+          return { ready: false, errors: [] };
+        case "error":
+          return { ready: false, errors: action.data };
+      }
+      return state;
+    },
+    {
+      ready: false,
+      errors: [],
     }
-    return state;
-  }, {
-    ready: false,
-    errors: []
-  });
+  );
   // authCheckCompleted tells us whether the auth check has been completed, meaning it's safe to mount the child.
   const authCheckCompleted = useRef(false);
 
@@ -84,44 +87,80 @@ const PrivateRouteWrapper: React.FC<{
   // Since auth.check() doesn't change auth unless a request is made, we can simply use the whole auth object
   // as a dependency.
   useEffect(() => {
-    dispatch({ type: 'is loading' });
-    auth.check()?.then(() => {
-      dispatch({ type: 'done loading' });
-    }, ({ status_code, ...e }: APIError) => {
-      dispatch({ type: 'error', data: Object.values(e).flat() });
-    });
+    dispatch({ type: "is loading" });
+    auth.check()?.then(
+      () => {
+        dispatch({ type: "done loading" });
+      },
+      ({ status_code, ...e }: APIError) => {
+        dispatch({ type: "error", data: Object.values(e).flat() });
+      }
+    );
     authCheckCompleted.current = true;
 
-    return () => { authCheckCompleted.current = false };
+    return () => {
+      authCheckCompleted.current = false;
+    };
   }, [history.location.key, auth]);
 
   if (state.errors.length === 0) {
     if (authCheckCompleted.current && state.ready) {
-      if (auth.isAuthenticated() && ((props.admin && auth.isEditor()) || !props.admin)) {
+      if (
+        auth.isAuthenticated() &&
+        ((props.admin && auth.isEditor()) || !props.admin)
+      ) {
         authCheckCompleted.current = false;
         return <div key="children">{props.children}</div>;
       } else {
         return <Error404 />;
       }
     } else {
-      return <>
-        {props.fallback ?? <Loader variant="spinner" />}
-        <div key="children" className="d-none" aria-hidden="true">{props.children}</div>
-      </>;
+      return (
+        <>
+          {props.fallback ?? <Loader variant="spinner" />}
+          <div key="children" className="d-none" aria-hidden="true">
+            {props.children}
+          </div>
+        </>
+      );
     }
   } else {
-    return <>
-      {state.errors.map(err => <Alert key={err} variant="danger">{ERRORS[err]}</Alert>)}
-    </>;
+    return (
+      <>
+        {state.errors.map((err) => (
+          <Alert key={err} variant="danger">
+            {ERRORS[err]}
+          </Alert>
+        ))}
+      </>
+    );
   }
 };
 
-const PrivateRoute: React.FC<PrivateRouteProps> = (props: PrivateRouteProps) => {
-  return <Route {...props}>
-    <PrivateRouteWrapper admin={props.admin} fallback={props.fallback}>
-      {props.component || props.children}
-    </PrivateRouteWrapper>
-  </Route>;
+const PrivateRoute: React.FC<PrivateRouteProps> = ({
+  admin,
+  fallback,
+  render,
+  component: Component,
+  children,
+  ...props
+}: PrivateRouteProps) => {
+  return (
+    <Route
+      {...props}
+      render={(routeProps) => (
+        <PrivateRouteWrapper admin={admin} fallback={fallback}>
+          {render ? (
+            render(routeProps)
+          ) : Component ? (
+            <Component {...routeProps} />
+          ) : (
+            children
+          )}
+        </PrivateRouteWrapper>
+      )}
+    />
+  );
 };
 
 export default PrivateRoute;
