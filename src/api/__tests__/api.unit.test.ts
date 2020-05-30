@@ -7,6 +7,7 @@ import {
   patchFactory,
   deleteFactory,
   endpointFactory,
+  unwrap,
 } from "../api";
 import {
   MOCK_RESPONSE,
@@ -307,5 +308,44 @@ describe("endpointFactory", () => {
     expect(await createResp).toEqual(MOCK_RESPONSE);
     expect(await patchResp).toEqual(MOCK_RESPONSE);
     expect(await deleteResp).toEqual(MOCK_RESPONSE);
+  });
+});
+
+describe("unwrap", () => {
+  it("returns the data", async () => {
+    const get = getFactory("bingo/");
+    const resp = get();
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: MOCK_RESPONSE,
+      }
+    );
+
+    expect(await unwrap(resp)).toEqual(MOCK_RESPONSE.data);
+  });
+
+  it("throws the error", async () => {
+    const get = getFactory("bingo/");
+    const resp = get();
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: MOCK_ERROR,
+      }
+    );
+
+    try {
+      const result = await unwrap(resp);
+      expect("unwrap does not throw error").toBe(false);
+    } catch (err) {
+      expect(err).toEqual(MOCK_ERROR.error);
+    }
   });
 });
