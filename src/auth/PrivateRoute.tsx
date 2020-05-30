@@ -91,6 +91,7 @@ const PrivateRouteWrapper: React.FC<{
       if (resp.success) {
         dispatch({ type: "done loading" });
       } else {
+        console.log(resp);
         dispatch({
           type: "error",
           data: resp.error.detail?.flat() || ["REQUEST.DID_NOT_SUCCEED"],
