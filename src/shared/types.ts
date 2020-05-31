@@ -1,3 +1,7 @@
+declare global {
+    interface Window { __SSR_DIRECTIVES__: any; }
+}
+
 export enum ArticleType {
   Wordpress = "wordpress",
   Slate = "slate",

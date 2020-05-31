@@ -70,20 +70,7 @@ const serverRenderer = (req: Request, res: Response) => {
   });
 };
 
-// base path needs to be the first path as there already exists an index.html in static
-router.use("^/$", serverRenderer);
-
-router.use(
-  express.static(path.resolve(__dirname, "..", "build"), { maxAge: "30d" })
-);
-
-// route API to Django --- dev use only
-router.use(
-  "^/api",
-  proxy({ target: "http://localhost:8000", changeOrigin: true })
-);
-
-router.use("^/dash", (req, res) => {
+const dashRenderer = (req: Request, res: Response) => {
   axios
     .get<APIResponse<User | null>>("http://localhost:8000/api/me")
     .then(({ data }) => {
@@ -94,7 +81,6 @@ router.use("^/dash", (req, res) => {
             return res.status(500).send("An error occurred");
           }
 
-          const context = {};
           if (data.data) {
             // user is authenticated
 
@@ -115,6 +101,9 @@ router.use("^/dash", (req, res) => {
                 html.replace(
                   '<div id="root"></div>',
                   `<div id="root">${ReactDOMServer.renderToString(serverAppWrapper(Error404App, req.url))}</div>`
+                ).replace(
+                  "window.__SSR_DIRECTIVES__={}",
+                  "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
                 )
               );
           }
@@ -125,7 +114,22 @@ router.use("^/dash", (req, res) => {
       console.log(err);
       return res.status(500).send("An error occurred");
     });
-});
+};
+
+// base path needs to be the first path as there already exists an index.html in static
+router.use("^/$", serverRenderer);
+
+router.use(
+  express.static(path.resolve(__dirname, "..", "build"), { maxAge: "30d" })
+);
+
+// route API to Django --- dev use only
+router.use(
+  "^/api",
+  proxy({ target: "http://localhost:8000", changeOrigin: true })
+);
+
+router.use("^/dash", dashRenderer);
 
 router.use("^/", serverRenderer);
 

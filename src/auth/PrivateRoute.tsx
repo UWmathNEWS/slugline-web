@@ -9,7 +9,7 @@ import Loader from "../shared/components/Loader";
 
 interface PrivateRouteProps extends RouteProps {
   admin?: boolean;
-  fallback?: React.ReactNode;
+  fallback?: React.ReactElement;
 }
 
 interface PrivateRouteState {
@@ -57,7 +57,7 @@ type PrivateRouteAction =
  */
 const PrivateRouteWrapper: React.FC<{
   admin?: boolean;
-  fallback?: React.ReactNode;
+  fallback?: React.ReactElement;
   children: React.ReactNode;
 }> = (props) => {
   const auth = useAuth();
@@ -105,6 +105,10 @@ const PrivateRouteWrapper: React.FC<{
 
   if (state.errors.length === 0) {
     if (authCheckCompleted.current && state.ready) {
+      if ("NO_PRELOAD_ROUTE" in window.__SSR_DIRECTIVES__) {
+        delete window.__SSR_DIRECTIVES__.NO_PRELOAD_ROUTE;
+      }
+
       if (
         auth.isAuthenticated() &&
         ((props.admin && auth.isEditor()) || !props.admin)
@@ -115,12 +119,18 @@ const PrivateRouteWrapper: React.FC<{
         return <Error404 />;
       }
     } else {
+      // Sometimes, the server may send a directive to not preload a route. When that happens, we only render the
+      // loader and skip mounting the child component.
+      if ("NO_PRELOAD_ROUTE" in window.__SSR_DIRECTIVES__) {
+        return props.fallback ?? <Loader variant="spinner" />;
+      }
+
       return (
         <>
           {props.fallback ?? <Loader variant="spinner" />}
-          <div key="children" className="d-none" aria-hidden="true">
+          {<div key="children" className="d-none" aria-hidden="true">
             {props.children}
-          </div>
+          </div>}
         </>
       );
     }
