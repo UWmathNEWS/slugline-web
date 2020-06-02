@@ -7,9 +7,11 @@ import {
 } from "react-router";
 
 interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
+  title: string;
   key?: string | number;
   routeComponent?: React.ComponentType;
   routeProps?: any;
+  loadData?: <T>() => Promise<T>;
 }
 
 export type RouteProps = RouteBaseProps &
@@ -28,23 +30,24 @@ export type RouteProps = RouteBaseProps &
       }
   );
 
-function renderRoutes(
-  basePath: string,
-  routes: RouteProps[],
-  extraProps?: any,
-  switchProps?: any
-): React.ReactElement;
-function renderRoutes(
-  routes: RouteProps[],
-  extraProps?: any,
-  switchProps?: any
-): React.ReactElement;
-function renderRoutes(
+const renderRoutes: {
+  (
+    basePath: string,
+    routes: RouteProps[],
+    extraProps?: any,
+    switchProps?: any
+  ): React.ReactElement;
+  (
+    routes: RouteProps[],
+    extraProps?: any,
+    switchProps?: any
+  ): React.ReactElement;
+} = (
   basePath: any,
   routes: any = {},
   extraProps: any = {},
   switchProps: any = {}
-): any {
+): any => {
   if (typeof basePath !== "string") {
     switchProps = extraProps;
     extraProps = routes;
@@ -81,6 +84,6 @@ function renderRoutes(
       )}
     </Switch>
   );
-}
+};
 
 export default renderRoutes;

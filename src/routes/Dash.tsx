@@ -22,26 +22,32 @@ export const routes: RouteProps[] = [
   {
     path: "/edit/:articleId",
     component: EditorPage,
+    title: "Edit {}",
   },
   {
     path: "/issues/:issueId",
     component: DashIssueDetail,
+    title: "Issue {}",
   },
   {
     path: "/issues",
     component: DashIssuesPage,
+    title: "Issues",
   },
   {
     path: "/articles",
     component: DashArticlesPage,
+    title: "Articles",
   },
   {
     path: "/profile",
     component: Profile,
+    title: "Profile",
   },
   {
     path: "/admin",
     component: AdminPanel,
+    title: "Users",
     routeComponent: PrivateRoute,
     routeProps: {
       admin: true,
@@ -51,9 +57,11 @@ export const routes: RouteProps[] = [
     path: "",
     exact: true,
     component: DashArticlesPage,
+    title: "Dash",
   },
   {
     component: Error404,
+    title: "Page Not Found",
   },
 ];
 

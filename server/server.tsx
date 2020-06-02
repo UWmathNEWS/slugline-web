@@ -16,23 +16,37 @@ import axios from "axios";
 
 import { Auth, defaultAuthContext } from "../src/auth/Auth";
 import { appFactory } from "../src/App";
-import Public from "../src/routes/Public";
+import Public, { routes as publicRoutes } from "../src/routes/Public";
 import { routes as dashRoutes } from "../src/routes/Dash";
 import Error404 from "../src/shared/errors/Error404";
 import { APIResponse, User } from "../src/shared/types";
 import { ToastProvider } from "../src/shared/contexts/ToastContext";
 import ToastContainer from "../src/shared/components/ToastContainer";
 
+interface StaticRouterContextWithData<T = any> extends StaticRouterContext {
+  data?: T;
+}
+
 const PORT = 3030;
 const app = express();
 
 const router = express.Router();
 
-const serverAppWrapper = (Component: React.ComponentType, location: string, context: any = {}) => {
+const serverAppWrapper: {
+  <T extends StaticRouterContext = StaticRouterContext>(
+    Component: React.ComponentType,
+    location: string,
+    context: T
+  ): React.ReactElement;
+  (Component: React.ComponentType, location: string): React.ReactElement;
+} = (Component: any, location: any, context: any = {}) => {
   return (
     <Auth.Provider value={defaultAuthContext}>
       <ToastProvider>
-        <StaticRouter location={location} context={context}>
+        <StaticRouter
+          location={location}
+          context={context as StaticRouterContext}
+        >
           <Component />
         </StaticRouter>
         <ToastContainer />
@@ -45,9 +59,13 @@ const PublicApp = appFactory(Public);
 const Error404App = appFactory(Error404);
 
 const serverRenderer = (req: Request, res: Response) => {
-  let context: StaticRouterContext = {};
+  const currentRoute = publicRoutes.find(route => matchPath(req.url, route));
 
-  const app = ReactDOMServer.renderToString(serverAppWrapper(PublicApp, req.url));
+  let context: StaticRouterContextWithData = {};
+
+  const app = ReactDOMServer.renderToString(
+    serverAppWrapper(PublicApp, req.url, context)
+  );
 
   fs.readFile(path.resolve("./build/index.html"), "utf8", (err, html) => {
     if (err) {
@@ -55,17 +73,25 @@ const serverRenderer = (req: Request, res: Response) => {
       return res.status(500).send("An error occurred");
     }
 
-    if (context.statusCode) {
-      return res.status(404).send(
-        html.replace(
-          '<div id="root"></div>',
-          `<div id="root">${ReactDOMServer.renderToString(serverAppWrapper(Error404App, req.url))}</div>`
-        )
-      );
+    if (currentRoute === undefined || context.statusCode == 404) {
+      return res
+        .status(404)
+        .send(
+          html.replace(
+            '<div id="root"></div>',
+            `<div id="root">${ReactDOMServer.renderToString(
+              serverAppWrapper(Error404App, req.url)
+            )}</div>`
+          ).replace(
+            "{{TITLE}}",
+            "Page Not Found | mathNEWS"
+          )
+        );
     }
 
     return res.send(
       html.replace('<div id="root"></div>', `<div id="root">${app}</div>`)
+        .replace("{{TITLE}}", currentRoute.title ? `${currentRoute.title} | mathNEWS` : "mathNEWS - description")
     );
   });
 };
@@ -98,13 +124,17 @@ const dashRenderer = (req: Request, res: Response) => {
             return res
               .status(404)
               .send(
-                html.replace(
-                  '<div id="root"></div>',
-                  `<div id="root">${ReactDOMServer.renderToString(serverAppWrapper(Error404App, req.url))}</div>`
-                ).replace(
-                  "window.__SSR_DIRECTIVES__={}",
-                  "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
-                )
+                html
+                  .replace(
+                    '<div id="root"></div>',
+                    `<div id="root">${ReactDOMServer.renderToString(
+                      serverAppWrapper(Error404App, req.url)
+                    )}</div>`
+                  )
+                  .replace(
+                    "window.__SSR_DIRECTIVES__={}",
+                    "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
+                  )
               );
           }
         });

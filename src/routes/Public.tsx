@@ -11,22 +11,27 @@ export const routes: RouteProps[] = [
     path: "/",
     exact: true,
     component: Home,
+    title: "",
   },
   {
     path: "/login",
     component: Login,
+    title: "Login",
   },
   {
     path: "/issues/:issue_id",
     component: IssuePage,
+    title: "Issue {}",
   },
   {
     path: "/issues",
     exact: true,
     component: IssueList,
+    title: "Issues",
   },
   {
     component: Error404,
+    title: "Page Not Found",
   },
 ];
 
