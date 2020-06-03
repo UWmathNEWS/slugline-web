@@ -4,6 +4,7 @@ import { useAllIssues } from "../api/hooks";
 import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue } from "../shared/types";
+import { makeTitle } from "../shared/helpers";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -41,9 +42,13 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
   );
 };
 
-const IssuesList = () => {
+const IssuesList = (props: any) => {
   const [issues, ,] = useAllIssues();
   const [volumes, setVolumes] = useState<Issue[][]>([]);
+
+  useEffect(() => {
+    document.title = makeTitle(props.route?.title);
+  }, []);
 
   useEffect(() => {
     if (issues?.results === undefined || issues?.results.length === 0) {

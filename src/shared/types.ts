@@ -1,5 +1,9 @@
+import { StaticRouterContext } from "react-router";
+
 declare global {
-    interface Window { __SSR_DIRECTIVES__: any; }
+  interface Window {
+    __SSR_DIRECTIVES__: any;
+  }
 }
 
 export enum ArticleType {
@@ -120,4 +124,9 @@ export type UserAPIResponse = APIResponse<
 
 export interface IssueAPIError extends APIError {
   non_field_errors?: string[];
+}
+
+export interface StaticRouterContextWithData<T = any>
+  extends StaticRouterContext {
+  data?: T;
 }

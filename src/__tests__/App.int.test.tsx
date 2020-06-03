@@ -11,6 +11,10 @@ import { USER_LOCALSTORAGE_KEY } from "../auth/Auth";
 import { testUser } from "../shared/test-utils";
 
 describe("Integration test for main app component", () => {
+  beforeAll(() => {
+    window.__SSR_DIRECTIVES__ = {};
+  });
+
   afterEach(() => {
     mockAxios.reset();
     localStorage.clear();

@@ -14,6 +14,10 @@ import ERRORS from "../../shared/errors";
 describe("Unit test for PrivateRoute", () => {
   let history: History;
 
+  beforeAll(() => {
+    window.__SSR_DIRECTIVES__ = {};
+  });
+
   beforeEach(() => {
     history = createMemoryHistory();
     history.push("/private");

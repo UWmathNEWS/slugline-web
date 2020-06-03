@@ -21,7 +21,7 @@ export const routes: RouteProps[] = [
   {
     path: "/issues/:issue_id",
     component: IssuePage,
-    title: "Issue {}",
+    title: "v{}i{}",
   },
   {
     path: "/issues",

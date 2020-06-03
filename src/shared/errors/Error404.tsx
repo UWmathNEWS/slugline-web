@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, RouteComponentProps } from "react-router-dom";
+import { makeTitle } from "../helpers";
 
-const Error404: React.FC<Partial<RouteComponentProps>> = ({ staticContext = {} }) => {
+const Error404: React.FC<Partial<RouteComponentProps>> = ({
+  staticContext = {},
+}) => {
   staticContext.statusCode = 404;
+
+  useEffect(() => {
+    document.title = makeTitle("Page Not Found");
+  }, []);
 
   return (
     <div>

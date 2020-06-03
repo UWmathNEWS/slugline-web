@@ -10,7 +10,7 @@ import proxy from "http-proxy-middleware";
 
 import React from "react";
 import ReactDOMServer from "react-dom/server";
-import { StaticRouter, StaticRouterContext, matchPath } from "react-router";
+import { matchPath, StaticRouter, StaticRouterContext } from "react-router";
 
 import axios from "axios";
 
@@ -19,13 +19,14 @@ import { appFactory } from "../src/App";
 import Public, { routes as publicRoutes } from "../src/routes/Public";
 import { routes as dashRoutes } from "../src/routes/Dash";
 import Error404 from "../src/shared/errors/Error404";
-import { APIResponse, User } from "../src/shared/types";
+import {
+  APIResponse,
+  StaticRouterContextWithData,
+  User,
+} from "../src/shared/types";
 import { ToastProvider } from "../src/shared/contexts/ToastContext";
 import ToastContainer from "../src/shared/components/ToastContainer";
-
-interface StaticRouterContextWithData<T = any> extends StaticRouterContext {
-  data?: T;
-}
+import { makeTitle } from "../src/shared/helpers";
 
 const PORT = 3030;
 const app = express();
@@ -59,7 +60,7 @@ const PublicApp = appFactory(Public);
 const Error404App = appFactory(Error404);
 
 const serverRenderer = (req: Request, res: Response) => {
-  const currentRoute = publicRoutes.find(route => matchPath(req.url, route));
+  const currentRoute = publicRoutes.find((route) => matchPath(req.url, route));
 
   let context: StaticRouterContextWithData = {};
 
@@ -77,21 +78,21 @@ const serverRenderer = (req: Request, res: Response) => {
       return res
         .status(404)
         .send(
-          html.replace(
-            '<div id="root"></div>',
-            `<div id="root">${ReactDOMServer.renderToString(
-              serverAppWrapper(Error404App, req.url)
-            )}</div>`
-          ).replace(
-            "{{TITLE}}",
-            "Page Not Found | mathNEWS"
-          )
+          html
+            .replace(
+              '<div id="root"></div>',
+              `<div id="root">${ReactDOMServer.renderToString(
+                serverAppWrapper(Error404App, req.url)
+              )}</div>`
+            )
+            .replace("{{TITLE}}", makeTitle("Page Not Found"))
         );
     }
 
     return res.send(
-      html.replace('<div id="root"></div>', `<div id="root">${app}</div>`)
-        .replace("{{TITLE}}", currentRoute.title ? `${currentRoute.title} | mathNEWS` : "mathNEWS - description")
+      html
+        .replace('<div id="root"></div>', `<div id="root">${app}</div>`)
+        .replace("{{TITLE}}", makeTitle(currentRoute.title))
     );
   });
 };
@@ -135,6 +136,7 @@ const dashRenderer = (req: Request, res: Response) => {
                     "window.__SSR_DIRECTIVES__={}",
                     "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
                   )
+                  .replace("{{TITLE}}", makeTitle("Page Not Found"))
               );
           }
         });

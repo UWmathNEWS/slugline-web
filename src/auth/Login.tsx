@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Form, Button } from "react-bootstrap";
 import { useAuth } from "./Auth";
 import { useHistory } from "react-router-dom";
 import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";
 import { APIError } from "../shared/types";
+import { makeTitle } from "../shared/helpers";
 
-const Login: React.FC = () => {
+const Login: React.FC = (props: any) => {
   const auth = useAuth();
   const toast = useToast();
   const history = useHistory();
@@ -14,6 +15,10 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    document.title = makeTitle(props.route?.title);
+  }, []);
 
   const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     if (evt.currentTarget.name === "username") {
