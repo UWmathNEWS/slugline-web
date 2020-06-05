@@ -11,10 +11,10 @@ import {
   MOCK_ERROR,
 } from "../../shared/test-utils";
 import ERRORS from "../../shared/errors";
+import { APIResponseFailure, APIError } from "../../shared/types";
 
 // for spies
 import * as _a from "../Auth";
-import { APIResponseFailure, APIError } from "../../shared/types";
 
 describe("AuthProvider", () => {
   let result: HookResult<AuthContext>;
