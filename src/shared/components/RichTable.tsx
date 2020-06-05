@@ -117,10 +117,7 @@ export interface RichTableRow<D extends object> {
 
 export interface RichTableHook<D extends object = {}> {
   columns: Column<D>[];
-  list: (
-    args: RequestArgs
-  ) => Promise<APIResponse<D | Pagination<D>, APIError>>;
-  pk: keyof D & string;
+  list: (args: RequestArgs) => Promise<APIResponse<D | Pagination<D>>>;
   paginated: boolean;
   actions?: Action<D>[];
   selectable?: boolean;
@@ -157,7 +154,6 @@ export interface RichTableBag<D extends object = {}> {
 const useRichTable = <D extends object = {}>({
   columns,
   list: get,
-  pk,
   paginated,
   actions = [],
   selectable,
@@ -199,11 +195,10 @@ const useRichTable = <D extends object = {}>({
         params.page = page;
       }
       if (searchQuery) {
-        params.search = window.encodeURIComponent(searchQuery);
+        params.search = searchQuery;
       }
       if (sortColumn !== null) {
-        params.sort =
-          (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0]);
+        params.sort = (sortColumn[1] ? "" : "-") + sortColumn[0];
       }
       return get({ params: params });
     },

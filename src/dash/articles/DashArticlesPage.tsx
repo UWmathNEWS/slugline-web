@@ -71,7 +71,6 @@ const DashArticlesPage: React.FC = () => {
       <RichTable<Article>
         columns={columns}
         list={api.articles.list}
-        pk="id"
         paginated
         selectable
         searchable

@@ -129,7 +129,6 @@ const UserList = () => {
       <RichTable<User>
         columns={columns}
         list={api.users.list}
-        pk="username"
         paginated
         selectable
         searchable

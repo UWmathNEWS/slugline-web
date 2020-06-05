@@ -50,7 +50,6 @@ const DashIssueDetail = () => {
       <RichTable<Article>
         columns={columns}
         list={listIssueArticles}
-        pk="id"
         paginated
         selectable
         searchable
