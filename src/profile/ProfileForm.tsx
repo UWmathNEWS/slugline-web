@@ -123,20 +123,18 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
 
     const editingMe = props.user?.username === auth.user?.username;
     if (props.user === undefined) {
-      const resp = await api.users.create({
+      return await api.users.create({
         body: cleaned,
         csrf: auth.csrfToken || "",
       });
-      return resp;
     } else {
-      const resp = await (editingMe
+      return editingMe
         ? await api.me.patch({ body: cleaned, csrf: auth.csrfToken || "" })
         : await api.users.patch({
             id: props.user.username,
             body: cleaned,
             csrf: auth.csrfToken || "",
-          }));
-      return resp;
+          });
     }
   };
 
