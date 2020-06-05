@@ -185,7 +185,7 @@ export const endpointFactory = <T, TError extends APIError = APIError>(
   endpoint: string
 ) => {
   return {
-    list: listFactory<T, TError>(endpoint),
+    list: listFactory<Pagination<T>, TError>(endpoint),
     get: getFactory<T, TError>(endpoint),
     create: createFactory<T, TError>(endpoint),
     patch: patchFactory<T, TError>(endpoint),
@@ -243,7 +243,6 @@ const api = {
   logout: createFactory<void, APIError, void>("logout/"),
   issues: {
     ...endpointFactory<Issue>("issues/"),
-    list: listFactory<Pagination<Issue>>("issues/"),
     create: createFactory<Issue, IssueAPIError, Issue>("issues/"),
     latest: listFactory<Issue, APIError>("issues/latest/"),
   },
