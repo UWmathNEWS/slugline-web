@@ -47,7 +47,8 @@ describe("listFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
-  it("sends URL params", async () => {
+
+  it("sends URL params", () => {
     const getFn = listFactory("bingo/");
     getFn({
       params: MOCK_PARAMS,
@@ -87,7 +88,8 @@ describe("getFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
-  it("sends URL params", async () => {
+
+  it("sends URL params", () => {
     const get = getFactory("bingo/");
     get({
       id: "15",
@@ -136,7 +138,8 @@ describe("createFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
-  it("sends URL params", async () => {
+
+  it("sends URL params", () => {
     const createFn = createFactory("bingo/");
     createFn({
       body: MOCK_BODY,
@@ -186,7 +189,8 @@ describe("patchFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
-  it("sends URL params", async () => {
+
+  it("sends URL params", () => {
     const patchFn = patchFactory("bingo/");
     patchFn({
       id: "15",
@@ -217,6 +221,7 @@ describe("deleteFactory", () => {
     );
     expect(await resp).toEqual(MOCK_RESPONSE);
   });
+
   it("handles unsuccessful DELETE requests", async () => {
     const deleteFn = deleteFactory("bingo/");
     const resp = deleteFn({ id: "15", csrf: MOCK_CSRF });
@@ -234,7 +239,8 @@ describe("deleteFactory", () => {
     );
     expect(await resp).toEqual(MOCK_ERROR);
   });
-  it("sends URL params", async () => {
+
+  it("sends URL params", () => {
     const deleteFn = deleteFactory("bingo/");
     deleteFn({
       id: "15",
