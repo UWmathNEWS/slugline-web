@@ -33,7 +33,6 @@ export interface QueryParams {
  */
 export interface RequestArgs {
   params?: QueryParams;
-  throw?: boolean;
 }
 
 /**
@@ -58,9 +57,6 @@ export const listFactory = <TResp, TError extends APIError = APIError>(
     const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
       config
     );
-    if (args?.throw && resp.data.success === false) {
-      throw resp.data.error;
-    }
     return resp.data;
   };
 };
