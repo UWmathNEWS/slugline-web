@@ -128,7 +128,7 @@ const UserList = () => {
       </h1>
       <RichTable<User>
         columns={columns}
-        get={api.users.get}
+        get={api.users.list}
         pk="username"
         paginated
         selectable
@@ -147,7 +147,7 @@ const UserList = () => {
             bulk: false,
             triggers: ["click"],
             call(bag, data: User) {
-              return api.users.retrieve({ id: data.username }).then((resp) => {
+              return api.users.get({ id: data.username }).then((resp) => {
                 if (resp.success) {
                   setEditedUser(resp.data);
                   setShowEditModal(true);

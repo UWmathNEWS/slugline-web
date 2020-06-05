@@ -46,7 +46,7 @@ export interface UnsafeRequestArgs extends RequestArgs {
   csrf: string;
 }
 
-export const getFactory = <TResp, TError extends APIError = APIError>(
+export const listFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
 ) => {
   return async (args?: RequestArgs) => {
@@ -69,7 +69,7 @@ export interface APIGetArgs extends RequestArgs {
   id: string;
 }
 
-export const retrieveFactory = <TResp, TError extends APIError = APIError>(
+export const getFactory = <TResp, TError extends APIError = APIError>(
   endpoint: string
 ) => {
   return async (args: APIGetArgs) => {
@@ -189,8 +189,8 @@ export const endpointFactory = <T, TError extends APIError = APIError>(
   endpoint: string
 ) => {
   return {
+    list: listFactory<T, TError>(endpoint),
     get: getFactory<T, TError>(endpoint),
-    retrieve: retrieveFactory<T, TError>(endpoint),
     create: createFactory<T, TError>(endpoint),
     patch: patchFactory<T, TError>(endpoint),
     delete: deleteFactory<T, TError>(endpoint),
@@ -235,7 +235,8 @@ const patchMe = async (
 
 const api = {
   me: {
-    get: getFactory<User | null>("me/"),
+    // this looks odd, but me/ gets with no parameters, which is equivalent to a list endpoint
+    get: listFactory<User | null>("me/"),
     patch: patchMe,
   },
   login: createFactory<
@@ -246,16 +247,16 @@ const api = {
   logout: createFactory<void, APIError, void>("logout/"),
   issues: {
     ...endpointFactory<Issue>("issues/"),
-    get: getFactory<Pagination<Issue>>("issues/"),
+    list: listFactory<Pagination<Issue>>("issues/"),
     create: createFactory<Issue, IssueAPIError, Issue>("issues/"),
-    latest: getFactory<Issue, APIError>("issues/latest/"),
+    latest: listFactory<Issue, APIError>("issues/latest/"),
   },
   articles: {
     ...endpointFactory<Article>("articles/"),
     create: createFactory<Article, APIError, void>("articles/"),
   },
   articleContent: {
-    retrieve: retrieveFactory<ArticleContent>("article_content/"),
+    get: getFactory<ArticleContent>("article_content/"),
     patch: patchFactory<ArticleContent, APIError, ArticleContent>(
       "article_content/"
     ),

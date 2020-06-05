@@ -1,8 +1,8 @@
 import "core-js";
 import mockAxios from "jest-mock-axios";
 import {
-  retrieveFactory,
   getFactory,
+  listFactory,
   createFactory,
   patchFactory,
   deleteFactory,
@@ -19,7 +19,7 @@ import {
 
 describe("listFactory", () => {
   it("handles successful list requests", async () => {
-    const list = getFactory("bingo/");
+    const list = listFactory("bingo/");
     const resp = list();
     mockAxios.mockResponseFor(
       {
@@ -34,7 +34,7 @@ describe("listFactory", () => {
   });
 
   it("handles unsuccessful list requests", async () => {
-    const list = getFactory("bingo/");
+    const list = listFactory("bingo/");
     const resp = list();
     mockAxios.mockResponseFor(
       {
@@ -48,7 +48,7 @@ describe("listFactory", () => {
     expect(await resp).toEqual(MOCK_ERROR);
   });
   it("sends URL params", async () => {
-    const getFn = getFactory("bingo/");
+    const getFn = listFactory("bingo/");
     getFn({
       params: MOCK_PARAMS,
     });
@@ -59,7 +59,7 @@ describe("listFactory", () => {
 
 describe("getFactory", () => {
   it("handles successful GET requests", async () => {
-    const get = retrieveFactory("bingo/");
+    const get = getFactory("bingo/");
     const resp = get({ id: "15" });
     mockAxios.mockResponseFor(
       {
@@ -74,7 +74,7 @@ describe("getFactory", () => {
   });
 
   it("handles unsuccessful GET requests", async () => {
-    const get = retrieveFactory("bingo/");
+    const get = getFactory("bingo/");
     const resp = get({ id: "15" });
     mockAxios.mockResponseFor(
       {
@@ -88,8 +88,8 @@ describe("getFactory", () => {
     expect(await resp).toEqual(MOCK_ERROR);
   });
   it("sends URL params", async () => {
-    const retreiveFn = retrieveFactory("bingo/");
-    retreiveFn({
+    const get = getFactory("bingo/");
+    get({
       id: "15",
       params: MOCK_PARAMS,
     });
@@ -98,10 +98,10 @@ describe("getFactory", () => {
   });
 });
 
-describe("postFactory", () => {
+describe("createFactory", () => {
   it("handles successful POST requests", async () => {
-    const post = createFactory<typeof MOCK_BODY>("bingo/");
-    const resp = post({ body: MOCK_BODY, csrf: MOCK_CSRF });
+    const create = createFactory<typeof MOCK_BODY>("bingo/");
+    const resp = create({ body: MOCK_BODY, csrf: MOCK_CSRF });
     expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       MOCK_CSRF
@@ -119,8 +119,8 @@ describe("postFactory", () => {
   });
 
   it("handles unsuccessful POST requests", async () => {
-    const post = createFactory<typeof MOCK_BODY>("bingo/");
-    const resp = post({ body: MOCK_BODY, csrf: MOCK_CSRF });
+    const create = createFactory<typeof MOCK_BODY>("bingo/");
+    const resp = create({ body: MOCK_BODY, csrf: MOCK_CSRF });
     expect(mockAxios.lastReqGet().config.data).toEqual(MOCK_BODY);
     expect(mockAxios.lastReqGet().config.headers["X-CSRFToken"]).toEqual(
       MOCK_CSRF
@@ -249,8 +249,8 @@ describe("deleteFactory", () => {
 describe("endpointFactory", () => {
   it("generates all HTTP methods", async () => {
     const endpoint = endpointFactory("bingo/");
-    const getResp = endpoint.get();
-    const retrieveResp = endpoint.retrieve({ id: "15" });
+    const listResp = endpoint.list();
+    const getResp = endpoint.get({ id: "15" });
     const createResp = endpoint.create({ body: MOCK_BODY, csrf: MOCK_CSRF });
     const patchResp = endpoint.patch({
       id: "15",
@@ -303,8 +303,8 @@ describe("endpointFactory", () => {
         data: MOCK_RESPONSE,
       }
     );
+    expect(await listResp).toEqual(MOCK_RESPONSE);
     expect(await getResp).toEqual(MOCK_RESPONSE);
-    expect(await retrieveResp).toEqual(MOCK_RESPONSE);
     expect(await createResp).toEqual(MOCK_RESPONSE);
     expect(await patchResp).toEqual(MOCK_RESPONSE);
     expect(await deleteResp).toEqual(MOCK_RESPONSE);
@@ -313,8 +313,8 @@ describe("endpointFactory", () => {
 
 describe("unwrap", () => {
   it("returns the data", async () => {
-    const get = getFactory("bingo/");
-    const resp = get();
+    const list = listFactory("bingo/");
+    const resp = list();
     mockAxios.mockResponseFor(
       {
         method: "GET",
@@ -329,8 +329,8 @@ describe("unwrap", () => {
   });
 
   it("throws the error", async () => {
-    const get = getFactory("bingo/");
-    const resp = get();
+    const list = listFactory("bingo/");
+    const resp = list();
     mockAxios.mockResponseFor(
       {
         method: "GET",

@@ -43,7 +43,7 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
 };
 
 const IssuesList = () => {
-  const [issues, ,] = useAPI(api.issues.get);
+  const [issues, ,] = useAPI(api.issues.list);
   const [volumes, setVolumes] = useState<Issue[][]>([]);
 
   useEffect(() => {

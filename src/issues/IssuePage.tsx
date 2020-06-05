@@ -7,7 +7,7 @@ const IssuePage = () => {
   const { issue_id } = useParams();
   const [issue, ,] = useAPI(
     useCallback(() => {
-      return api.issues.retrieve({ id: issue_id || "" });
+      return api.issues.get({ id: issue_id || "" });
     }, [issue_id])
   );
 

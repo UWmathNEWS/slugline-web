@@ -2,7 +2,7 @@ import "core-js";
 import mockAxios from "jest-mock-axios";
 import { renderHook, act } from "@testing-library/react-hooks";
 
-import { retrieveFactory, patchFactory } from "../api";
+import { getFactory, patchFactory } from "../api";
 import { useAPI, RequestState, useAPILazy, useAPILazyCSRF } from "../hooks";
 import {
   MOCK_RESPONSE,
@@ -21,7 +21,7 @@ describe("useAPI", () => {
   });
 
   it("makes the API call immediately", () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
     const fn = () => get({ id: "15" });
     renderHook(() => useAPI<string>(fn));
 
@@ -29,7 +29,7 @@ describe("useAPI", () => {
   });
 
   it("returns the correct data", async () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
     const fn = () => get({ id: "15" });
     const { result } = renderHook(() => useAPI(fn));
 
@@ -56,7 +56,7 @@ describe("useAPI", () => {
   });
 
   it("returns the correct error", async () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
     const fn = () => get({ id: "15" });
     const { result } = renderHook(() => useAPI(fn));
 
@@ -83,7 +83,7 @@ describe("useAPI", () => {
   });
 
   it("correctly updates RequestState", async () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
     const fn = () => get({ id: "15" });
     const { result } = renderHook(() => useAPI(fn));
 
@@ -107,7 +107,7 @@ describe("useAPI", () => {
   });
 
   it("correctly updates return value on multiple fetches", async () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
     const { result, rerender } = renderHook(({ fn }) => useAPI(fn), {
       initialProps: {
         fn: () => get({ id: "15" }),
@@ -160,7 +160,7 @@ describe("useAPILazy", () => {
   });
 
   it("doesn't make the request immediately", () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
 
     const { result } = renderHook(() => useAPILazy(get));
 
@@ -168,7 +168,7 @@ describe("useAPILazy", () => {
   });
 
   it("executes the request when the callback is called", async () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
 
     const { result } = renderHook(() => useAPILazy(get));
 
@@ -192,7 +192,7 @@ describe("useAPILazy", () => {
   });
 
   it("correctly updates RequestState", async () => {
-    const get = retrieveFactory<string>("bingo/");
+    const get = getFactory<string>("bingo/");
 
     const { result } = renderHook(() => useAPILazy(get));
 

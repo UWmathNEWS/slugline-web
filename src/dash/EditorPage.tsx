@@ -37,13 +37,13 @@ const EditorPage: React.FC = () => {
 
   const [article, articleError] = useAPI(
     useCallback(() => {
-      return api.articles.retrieve({ id: articleId || "" });
+      return api.articles.get({ id: articleId || "" });
     }, [articleId])
   );
 
   const [articleContent, articleContentError] = useAPI(
     useCallback(() => {
-      return api.articleContent.retrieve({ id: articleId || "" });
+      return api.articleContent.get({ id: articleId || "" });
     }, [articleId])
   );
 
