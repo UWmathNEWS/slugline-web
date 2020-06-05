@@ -23,12 +23,12 @@ const columns: Column<Article>[] = [
 ];
 
 const DashIssueDetail = () => {
-  const { id } = useParams();
+  const { issueId } = useParams();
 
   const [issue, issueError] = useAPI(
     useCallback(() => {
-      return api.issues.get({ id: id || "" });
-    }, [id])
+      return api.issues.get({ id: issueId || "" });
+    }, [issueId])
   );
 
   if (issueError) {
