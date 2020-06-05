@@ -158,7 +158,7 @@ const UserList = () => {
           {
             name: "Delete",
             bulk: false,
-            call({ executeAction }, data: User) {
+            call({ executeAction, rows, page, numPages }, data: User) {
               if (
                 window.confirm(
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
@@ -168,7 +168,11 @@ const UserList = () => {
                   .delete({ id: data.username, csrf: auth.csrfToken || "" })
                   .then((resp) => {
                     if (resp.success) {
-                      executeAction("_refresh");
+                      if (page < numPages || page === 1) {
+                        executeAction("_refresh").then();
+                      } else if (rows.length === 1) {
+                        executeAction("_previous").then();
+                      }
                       alert(`Successfully deleted user ${data.username}`);
                     } else {
                       alert(resp.error.detail?.map((e) => ERRORS[e]));
