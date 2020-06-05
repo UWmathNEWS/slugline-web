@@ -31,6 +31,10 @@ const DashIssueDetail = () => {
     }, [issueId])
   );
 
+  const getIssueArticles = useCallback(() => {
+    return api.issues.articles({ id: issueId || "" });
+  }, [issueId]);
+
   if (issueError) {
     return <ErrorPage error={issueError} />;
   }
@@ -45,7 +49,7 @@ const DashIssueDetail = () => {
       <h3>Articles</h3>
       <RichTable<Article>
         columns={columns}
-        get={api.articles.list}
+        get={getIssueArticles}
         pk="id"
         paginated
         selectable

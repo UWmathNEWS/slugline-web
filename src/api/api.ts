@@ -229,6 +229,21 @@ const patchMe = async (
   return resp.data;
 };
 
+interface IssueArticlesArgs extends RequestArgs {
+  id: string;
+}
+
+const issueArticles = async (
+  args: IssueArticlesArgs
+): Promise<APIResponse<Pagination<Article>>> => {
+  const config: RequestConfig = {
+    url: `issues/${args.id}/articles/`,
+    method: "GET",
+  };
+  const resp = await axiosRequest(config);
+  return resp.data;
+};
+
 const api = {
   me: {
     // this looks odd, but me/ gets with no parameters, which is equivalent to a list endpoint
@@ -245,6 +260,7 @@ const api = {
     ...endpointFactory<Issue>("issues/"),
     create: createFactory<Issue, IssueAPIError, Issue>("issues/"),
     latest: listFactory<Issue, APIError>("issues/latest/"),
+    articles: issueArticles,
   },
   articles: {
     ...endpointFactory<Article>("articles/"),
