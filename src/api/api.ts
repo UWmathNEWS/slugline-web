@@ -199,11 +199,10 @@ interface UserQueryArgs extends RequestArgs {
 
 const usernameQuery = async (
   args: UserQueryArgs
-): Promise<APIResponse<void, APIError>> => {
+): Promise<APIResponse<void>> => {
   const config: RequestConfig = {
     url: `users/${args.username}/query/`,
     method: "GET",
-    params: args.params,
   };
   const resp = await axiosRequest(config);
   return resp.data;
@@ -220,7 +219,6 @@ const patchMe = async (
     url: "me/",
     method: "PATCH",
     data: args.body,
-    params: args.params,
     headers: {
       "X-CSRFToken": args.csrf,
     },
