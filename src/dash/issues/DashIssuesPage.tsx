@@ -84,7 +84,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 
   const history = useHistory();
 
-  const [createIssue, ,] = useAPILazyCSRF(api.issues.create);
+  const [createIssue] = useAPILazyCSRF(api.issues.create);
 
   const [nonFieldErrors, setNonFieldErrors] = useState<string[]>([]);
 
@@ -170,7 +170,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 const DashIssuesPage = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
-  const [latestIssue, ,] = useAPI(api.issues.latest);
+  const [latestIssue] = useAPI(api.issues.latest);
 
   if (!latestIssue) {
     return <Spinner animation="border" />;

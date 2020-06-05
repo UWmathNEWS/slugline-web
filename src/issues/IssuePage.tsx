@@ -5,7 +5,7 @@ import api from "../api/api";
 
 const IssuePage = () => {
   const { issue_id } = useParams();
-  const [issue, ,] = useAPI(
+  const [issue] = useAPI(
     useCallback(() => {
       return api.issues.get({ id: issue_id || "" });
     }, [issue_id])

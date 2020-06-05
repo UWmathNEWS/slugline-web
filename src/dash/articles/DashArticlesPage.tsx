@@ -53,7 +53,7 @@ const columns: Column<Article>[] = [
 ];
 
 const DashArticlesPage: React.FC = () => {
-  const [createArticle, ,] = useAPILazyCSRF(api.articles.create);
+  const [createArticle] = useAPILazyCSRF(api.articles.create);
 
   const history = useHistory();
 
