@@ -113,7 +113,7 @@ type UseAPILazyCSRFHook<
  * A variant of useAPILazy that handles the CSRF token automatically.
  * @see useApiLazy
  */
-export const useAPILazyCSRF = <
+export const useAPILazyUnsafe = <
   TResp,
   TArgs extends UnsafeRequestArgs,
   TError extends APIError = APIError

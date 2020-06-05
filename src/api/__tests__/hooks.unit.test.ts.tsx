@@ -3,7 +3,7 @@ import mockAxios from "jest-mock-axios";
 import { renderHook, act } from "@testing-library/react-hooks";
 
 import { getFactory, patchFactory } from "../api";
-import { useAPI, RequestState, useAPILazy, useAPILazyCSRF } from "../hooks";
+import { useAPI, RequestState, useAPILazy, useAPILazyUnsafe } from "../hooks";
 import {
   MOCK_RESPONSE,
   MOCK_ERROR,
@@ -234,7 +234,7 @@ describe("useAPILazyCSRF", () => {
 
   it("doesn't make the request immediately", () => {
     const patch = patchFactory("bingo/");
-    const { result } = renderHook(() => useAPILazyCSRF(patch), {
+    const { result } = renderHook(() => useAPILazyUnsafe(patch), {
       wrapper: AuthProvider,
     });
 
@@ -244,7 +244,7 @@ describe("useAPILazyCSRF", () => {
 
   it("executes the request with a CSRF token", async () => {
     const patch = patchFactory<string>("bingo/");
-    const { result } = renderHook(() => useAPILazyCSRF(patch), {
+    const { result } = renderHook(() => useAPILazyUnsafe(patch), {
       wrapper: AuthProvider,
     });
 
@@ -281,7 +281,7 @@ describe("useAPILazyCSRF", () => {
 
   it("correctly updates RequestState", async () => {
     const patch = patchFactory<string>("bingo/");
-    const { result } = renderHook(() => useAPILazyCSRF(patch), {
+    const { result } = renderHook(() => useAPILazyUnsafe(patch), {
       wrapper: AuthProvider,
     });
 

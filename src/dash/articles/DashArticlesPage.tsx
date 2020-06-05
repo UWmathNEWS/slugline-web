@@ -5,7 +5,7 @@ import "./DashArticlesPage.scss";
 import { useHistory, Link } from "react-router-dom";
 import { Article, ArticleType } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
-import { useAPILazyCSRF } from "../../api/hooks";
+import { useAPILazyUnsafe } from "../../api/hooks";
 import api from "../../api/api";
 
 interface ArticleTitleProps {
@@ -53,7 +53,7 @@ const columns: Column<Article>[] = [
 ];
 
 const DashArticlesPage: React.FC = () => {
-  const [createArticle] = useAPILazyCSRF(api.articles.create);
+  const [createArticle] = useAPILazyUnsafe(api.articles.create);
 
   const history = useHistory();
 

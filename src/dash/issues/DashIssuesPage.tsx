@@ -8,7 +8,7 @@ import Field from "../../shared/form/Field";
 import NonFieldErrors from "../../shared/form/NonFieldErrors";
 import { Issue } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
-import { useAPILazyCSRF, useAPI } from "../../api/hooks";
+import { useAPILazyUnsafe, useAPI } from "../../api/hooks";
 import api from "../../api/api";
 
 interface IssueCreateModalProps {
@@ -84,7 +84,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
 
   const history = useHistory();
 
-  const [createIssue] = useAPILazyCSRF(api.issues.create);
+  const [createIssue] = useAPILazyUnsafe(api.issues.create);
 
   const [nonFieldErrors, setNonFieldErrors] = useState<string[]>([]);
 

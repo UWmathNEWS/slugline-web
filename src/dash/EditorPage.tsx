@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import SluglineEditor from "../editor/SluglineEditor";
 import { useParams } from "react-router-dom";
-import { useAPI, useAPILazyCSRF, RequestState } from "../api/hooks";
+import { useAPI, useAPILazyUnsafe, RequestState } from "../api/hooks";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { Node } from "slate";
 import { useDebouncedCallback } from "../shared/hooks";
@@ -47,7 +47,9 @@ const EditorPage: React.FC = () => {
     }, [articleId])
   );
 
-  const [updateArticle, updateArticleInfo] = useAPILazyCSRF(api.articles.patch);
+  const [updateArticle, updateArticleInfo] = useAPILazyUnsafe(
+    api.articles.patch
+  );
 
   const saveArticle = useCallback(
     async (title: string, subtitle: string, author: string) => {
@@ -69,7 +71,7 @@ const EditorPage: React.FC = () => {
     ARTICLE_SAVE_DELAY_MSECS
   );
 
-  const [updateArticleContent, updateArticleContentInfo] = useAPILazyCSRF(
+  const [updateArticleContent, updateArticleContentInfo] = useAPILazyUnsafe(
     api.articleContent.patch
   );
 
