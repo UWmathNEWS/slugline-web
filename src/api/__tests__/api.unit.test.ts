@@ -19,6 +19,10 @@ import {
 } from "../../shared/test-utils";
 
 describe("listFactory", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
   it("handles successful list requests", async () => {
     const list = listFactory("bingo/");
     const resp = list();
@@ -62,6 +66,10 @@ describe("listFactory", () => {
 });
 
 describe("getFactory", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
   it("handles successful GET requests", async () => {
     const get = getFactory("bingo/");
     const resp = get({ id: "15" });
@@ -106,6 +114,10 @@ describe("getFactory", () => {
 });
 
 describe("createFactory", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
   it("handles successful POST requests", async () => {
     const create = createFactory<typeof MOCK_BODY>("bingo/");
     const resp = create({ body: MOCK_BODY, csrf: MOCK_CSRF });
@@ -159,6 +171,10 @@ describe("createFactory", () => {
 });
 
 describe("patchFactory", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
   it("handles successful PATCH requests", async () => {
     const patch = patchFactory<typeof MOCK_BODY>("bingo/");
     const resp = patch({ id: "15", body: MOCK_BODY, csrf: MOCK_CSRF });
@@ -213,6 +229,10 @@ describe("patchFactory", () => {
 });
 
 describe("deleteFactory", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
   it("handles successful DELETE requests", async () => {
     const deleteFn = deleteFactory("bingo/");
     const resp = deleteFn({ id: "15", csrf: MOCK_CSRF });
@@ -264,6 +284,10 @@ describe("deleteFactory", () => {
 });
 
 describe("endpointFactory", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
   it("generates all HTTP methods", async () => {
     const endpoint = endpointFactory("bingo/");
     const listResp = endpoint.list();
@@ -334,6 +358,10 @@ describe("endpointFactory", () => {
 });
 
 describe("unwrap", () => {
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
   it("returns the data", async () => {
     const list = listFactory("bingo/");
     const resp = list();
