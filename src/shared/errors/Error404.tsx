@@ -11,7 +11,7 @@ const Error404: React.FC<Partial<RouteComponentProps>> = ({
     <div>
       <Visor title="Page Not Found" />
       <h1 className="display-1">404</h1>
-      <h1>Page not found</h1>
+      <h1>Page Not Found</h1>
       <p>
         Well, one of us made a mistake. I'll give you the benefit of the doubt
         and let you try again at the <Link to="/">home page.</Link>
