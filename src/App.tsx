@@ -13,6 +13,7 @@ import { initLibrary } from "./shared/icons";
 import SluglineNav from "./header/SluglineNav";
 import Public from "./routes/Public";
 import Dash from "./routes/Dash";
+import { BaseVisor } from "./shared/components/Visor";
 
 initLibrary();
 
@@ -27,6 +28,7 @@ export const appFactory = <T extends any = {}>(
 ): React.FC<T> => {
   return (props: T) => (
     <>
+      <BaseVisor />
       <SluglineNav />
       <div className="container">
         <div>
@@ -67,7 +69,7 @@ const BaseAppWrapper: React.FC<Required<AppProps>> = ({ history }) => {
   }, [history, auth]);
 
   return <BaseApp />;
-}
+};
 
 const BrowserApp: React.FC<AppProps> = ({
   history = createBrowserHistory(),

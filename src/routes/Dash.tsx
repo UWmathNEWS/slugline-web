@@ -2,8 +2,9 @@ import React from "react";
 import { useRouteMatch } from "react-router-dom";
 import Loader from "../shared/components/Loader";
 import PrivateRoute from "../auth/PrivateRoute";
-import renderRoutes, { RouteProps } from "../shared/helpers/renderRoutes";
+import { renderRoutes } from "../shared/helpers";
 import Error404 from "../shared/errors/Error404";
+import { RouteProps } from "../shared/types";
 
 const DashArticlesPage = React.lazy(() =>
   import("../dash/articles/DashArticlesPage")
@@ -22,46 +23,46 @@ export const routes: RouteProps[] = [
   {
     path: "/edit/:articleId",
     component: EditorPage,
-    title: "Edit {}",
+    title: "Edit {} | Dash",
   },
   {
     path: "/issues/:issueId",
     component: DashIssueDetail,
-    title: "Issue {}",
+    title: "v{}i{} | Dash",
   },
   {
     path: "/issues",
     component: DashIssuesPage,
-    title: "Issues",
+    title: "Issues | Dash",
   },
   {
     path: "/articles",
     component: DashArticlesPage,
-    title: "Articles",
+    title: "Articles | Dash",
   },
   {
     path: "/profile",
     component: Profile,
-    title: "Profile",
+    title: "Profile | Dash",
   },
   {
     path: "/admin",
     component: AdminPanel,
-    title: "Users",
+    title: "Users | Dash",
     routeComponent: PrivateRoute,
     routeProps: {
       admin: true,
     },
   },
   {
-    path: "",
+    path: "/",
     exact: true,
     component: DashArticlesPage,
     title: "Dash",
   },
   {
     component: Error404,
-    title: "Page Not Found",
+    title: "",
   },
 ];
 

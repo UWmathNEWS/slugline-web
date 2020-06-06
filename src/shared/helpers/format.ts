@@ -6,7 +6,7 @@
  *     format("Hello, {{name}}!, "world") // => Hello, {name}!
  *
  * @param fmtStr The format string
- * @param params
+ * @param params Parameters to pass in to be formatted
  */
 const format: {
   (fmtStr: string): string;
@@ -16,7 +16,9 @@ const format: {
   if (params.length === 0) return fmtStr;
 
   const paramsObj =
-    typeof params[0] == "number" || typeof params[0] === "string" || typeof params[0] === "undefined"
+    typeof params[0] === "number" ||
+    typeof params[0] === "string" ||
+    typeof params[0] === "undefined"
       ? params
       : params[0];
   let unlabelledMatches = 0;
@@ -25,7 +27,7 @@ const format: {
     if (!paramName) {
       return paramsObj[unlabelledMatches++];
     }
-    if (paramName[0] == "{" && fmtStr[offset + match.length] == "}") {
+    if (paramName[0] == "{" && fmtStr[offset + match.length] === "}") {
       return paramName;
     }
     return paramsObj[

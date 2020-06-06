@@ -7,9 +7,10 @@ import { useForm, DeepPartial } from "react-hook-form";
 import "./styles/DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import NonFieldErrors from "../../shared/form/NonFieldErrors";
-import { Issue } from "../../shared/types";
+import { Issue, RouteComponentProps } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
 import { getApiUrl } from "../../api/api";
+import Visor from "../../shared/components/Visor";
 
 interface IssueCreateModalProps {
   show: boolean;
@@ -168,7 +169,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
   );
 };
 
-const DashIssuesPage = () => {
+const DashIssuesPage: React.FC<RouteComponentProps> = (props) => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
   const [latestIssue, ,] = useLatestIssue();
@@ -179,6 +180,10 @@ const DashIssuesPage = () => {
 
   return (
     <>
+      <Visor
+        title={props.route.title}
+        location={props.location.pathname}
+      />
       <h1>Issues</h1>
       <Button
         variant="primary"

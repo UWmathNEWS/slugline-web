@@ -5,8 +5,9 @@ import { Spinner } from "react-bootstrap";
 import { ArticleTitle } from "../articles/DashArticlesPage";
 import { ErrorPage } from "../../shared/errors/ErrorPage";
 import { RichTable, Column } from "../../shared/components/RichTable";
-import { Article } from "../../shared/types";
+import { Article, RouteComponentProps } from "../../shared/types";
 import { getApiUrl } from "../../api/api";
+import Visor from "../../shared/components/Visor";
 
 const columns: Column<Article>[] = [
   {
@@ -22,7 +23,7 @@ const columns: Column<Article>[] = [
   },
 ];
 
-const DashIssueDetail = () => {
+const DashIssueDetail: React.FC<RouteComponentProps> = (props) => {
   const { issueId } = useParams();
 
   const id = issueId || "";
@@ -39,6 +40,11 @@ const DashIssueDetail = () => {
 
   return (
     <>
+      <Visor
+        title={props.route.title}
+        titleParams={[issue.volume_num, issue.issue_code]}
+        location={props.location.pathname}
+      />
       <h1>{`v${issue?.volume_num}i${issue?.issue_code}`}</h1>
       <h3>Articles</h3>
       <RichTable<Article>

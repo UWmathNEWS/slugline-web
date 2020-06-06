@@ -1,34 +1,6 @@
 import React from "react";
-import {
-  Switch,
-  Route,
-  RouteProps as _RouteProps,
-  RouteComponentProps,
-} from "react-router";
-
-interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
-  title: string;
-  key?: string | number;
-  routeComponent?: React.ComponentType;
-  routeProps?: any;
-  loadData?: <T>() => Promise<T>;
-}
-
-export type RouteProps = RouteBaseProps &
-  (
-    | {
-        render: (
-          props: RouteComponentProps<any> & { route: RouteProps }
-        ) => React.ReactNode;
-      }
-    | {
-        component:
-          | React.ComponentType<
-              RouteComponentProps<any> & { route: RouteProps }
-            >
-          | React.ComponentType<any>;
-      }
-  );
+import { Route, RouteComponentProps, Switch } from "react-router";
+import { RouteProps } from "../types";
 
 const renderRoutes: {
   (

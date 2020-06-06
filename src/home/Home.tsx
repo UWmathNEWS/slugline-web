@@ -1,12 +1,14 @@
-import React, { useEffect } from "react";
-import { makeTitle } from "../shared/helpers";
+import React from "react";
+import Visor from "../shared/components/Visor";
+import { RouteComponentProps } from "../shared/types";
 
-const Home = (props: any) => {
-  useEffect(() => {
-    document.title = makeTitle(props.route?.title);
-  }, []);
-
-  return <span>HOME CONTENT</span>;
+const Home: React.FC<RouteComponentProps> = (props) => {
+  return (
+    <>
+      <Visor title={props.route.title} />
+      <span>HOME CONTENT</span>
+    </>
+  );
 };
 
 export default Home;

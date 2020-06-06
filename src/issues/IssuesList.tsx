@@ -3,8 +3,8 @@ import { useAllIssues } from "../api/hooks";
 
 import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
-import { Issue } from "../shared/types";
-import { makeTitle } from "../shared/helpers";
+import { Issue, RouteComponentProps } from "../shared/types";
+import Visor from "../shared/components/Visor";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -42,13 +42,9 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
   );
 };
 
-const IssuesList = (props: any) => {
+const IssuesList: React.FC<RouteComponentProps> = (props) => {
   const [issues, ,] = useAllIssues();
   const [volumes, setVolumes] = useState<Issue[][]>([]);
-
-  useEffect(() => {
-    document.title = makeTitle(props.route?.title);
-  }, []);
 
   useEffect(() => {
     if (issues?.results === undefined || issues?.results.length === 0) {
@@ -69,6 +65,7 @@ const IssuesList = (props: any) => {
 
   return (
     <>
+      <Visor title={props.route.title} location={props.location.pathname} />
       <h1>Issues</h1>
       {volumes.map((volume) => {
         return <VolumeIssues volume={volume} />;

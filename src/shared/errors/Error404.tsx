@@ -1,18 +1,15 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, RouteComponentProps } from "react-router-dom";
-import { makeTitle } from "../helpers";
+import Visor from "../components/Visor";
 
 const Error404: React.FC<Partial<RouteComponentProps>> = ({
   staticContext = {},
 }) => {
   staticContext.statusCode = 404;
 
-  useEffect(() => {
-    document.title = makeTitle("Page Not Found");
-  }, []);
-
   return (
     <div>
+      <Visor title="Page Not Found" />
       <h1 className="display-1">404</h1>
       <h1>Page not found</h1>
       <p>

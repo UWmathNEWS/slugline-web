@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 
 import express, { Request, Response } from "express";
+import cookieParser from "cookie-parser";
 import proxy from "http-proxy-middleware";
 
 import React from "react";
@@ -26,10 +27,12 @@ import {
 } from "../src/shared/types";
 import { ToastProvider } from "../src/shared/contexts/ToastContext";
 import ToastContainer from "../src/shared/components/ToastContainer";
-import { makeTitle } from "../src/shared/helpers";
+import { Helmet } from "react-helmet";
 
 const PORT = 3030;
 const app = express();
+
+app.use(cookieParser());
 
 const router = express.Router();
 
@@ -54,6 +57,20 @@ const serverAppWrapper: {
       </ToastProvider>
     </Auth.Provider>
   );
+};
+
+const renderHelmet = () => {
+  const helmet = Helmet.renderStatic();
+
+  return `
+  
+  ${helmet.title.toString()}
+  ${helmet.meta.toString()}
+  ${helmet.link.toString()}
+  ${helmet.script.toString()}
+  ${helmet.style.toString()}
+  
+  `;
 };
 
 const PublicApp = appFactory(Public);
@@ -85,21 +102,28 @@ const serverRenderer = (req: Request, res: Response) => {
                 serverAppWrapper(Error404App, req.url)
               )}</div>`
             )
-            .replace("{{TITLE}}", makeTitle("Page Not Found"))
+            .replace("{{HELMET}}", renderHelmet)
         );
     }
 
     return res.send(
       html
         .replace('<div id="root"></div>', `<div id="root">${app}</div>`)
-        .replace("{{TITLE}}", makeTitle(currentRoute.title))
+        .replace("{{HELMET}}", renderHelmet)
     );
   });
 };
 
 const dashRenderer = (req: Request, res: Response) => {
   axios
-    .get<APIResponse<User | null>>("http://localhost:8000/api/me")
+    .get<APIResponse<User | null>>("http://localhost:8000/api/me", {
+      headers: {
+        // Forward cookies
+        Cookie: Object.entries(req.cookies || {})
+          .map(([name, value]) => `${name}=${value}`)
+          .join(";"),
+      },
+    })
     .then(({ data }) => {
       if (data.success) {
         fs.readFile(path.resolve("./build/index.html"), "utf8", (err, html) => {
@@ -113,31 +137,27 @@ const dashRenderer = (req: Request, res: Response) => {
 
             // check if 404
             if (
-              dashRoutes.find((route) =>
-                matchPath(req.url.replace("/dash", ""), route)
-              )
+              dashRoutes.every((route) => matchPath(req.url, route) === null)
             ) {
               res.status(404);
             }
 
-            return res.send(html);
+            return res.send(html.replace("{{HELMET}}", ""));
           } else {
-            return res
-              .status(404)
-              .send(
-                html
-                  .replace(
-                    '<div id="root"></div>',
-                    `<div id="root">${ReactDOMServer.renderToString(
-                      serverAppWrapper(Error404App, req.url)
-                    )}</div>`
-                  )
-                  .replace(
-                    "window.__SSR_DIRECTIVES__={}",
-                    "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
-                  )
-                  .replace("{{TITLE}}", makeTitle("Page Not Found"))
-              );
+            return res.status(404).send(
+              html
+                .replace(
+                  '<div id="root"></div>',
+                  `<div id="root">${ReactDOMServer.renderToString(
+                    serverAppWrapper(Error404App, req.url)
+                  )}</div>`
+                )
+                .replace("{{HELMET}}", renderHelmet)
+                .replace(
+                  "window.__SSR_DIRECTIVES__={}",
+                  "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
+                )
+            );
           }
         });
       }

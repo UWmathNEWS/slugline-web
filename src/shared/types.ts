@@ -1,4 +1,9 @@
-import { StaticRouterContext } from "react-router";
+import {
+  RouteComponentProps as _RouteComponentProps,
+  RouteProps as _RouteProps,
+  StaticRouterContext,
+} from "react-router";
+import React from "react";
 
 declare global {
   interface Window {
@@ -130,3 +135,27 @@ export interface StaticRouterContextWithData<T = any>
   extends StaticRouterContext {
   data?: T;
 }
+
+interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
+  title: string;
+  key?: string | number;
+  routeComponent?: React.ComponentType;
+  routeProps?: any;
+  loadData?: <T>() => Promise<T>;
+}
+
+export type RouteProps = RouteBaseProps &
+  (
+    | {
+        render: (props: RouteComponentProps) => React.ReactNode;
+      }
+    | {
+        component:
+          | React.ComponentType<RouteComponentProps>
+          | React.ComponentType<any>;
+      }
+  );
+
+export type RouteComponentProps = _RouteComponentProps<any> & {
+  route: RouteProps;
+};

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert, Form, Button } from "react-bootstrap";
 import { useAuth } from "./Auth";
 import { useHistory } from "react-router-dom";
 import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";
-import { APIError } from "../shared/types";
-import { makeTitle } from "../shared/helpers";
+import { APIError, RouteComponentProps } from "../shared/types";
+import Visor from "../shared/components/Visor";
 
-const Login: React.FC = (props: any) => {
+const Login: React.FC<RouteComponentProps> = (props) => {
   const auth = useAuth();
   const toast = useToast();
   const history = useHistory();
@@ -15,10 +15,6 @@ const Login: React.FC = (props: any) => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
-
-  useEffect(() => {
-    document.title = makeTitle(props.route?.title);
-  }, []);
 
   const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     if (evt.currentTarget.name === "username") {
@@ -49,6 +45,8 @@ const Login: React.FC = (props: any) => {
 
   return (
     <>
+      <Visor title={props.route.title} location={props.location.pathname} />
+
       <h1>LOGIN:</h1>
 
       {errors.map((err) => (

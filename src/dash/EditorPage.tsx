@@ -11,8 +11,9 @@ import { Row, Col, Spinner } from "react-bootstrap";
 import { Node } from "slate";
 import { useDebouncedCallback } from "../shared/hooks";
 import EditorInfo from "../editor/EditorInfo";
-import { RequestState } from "../shared/types";
+import { RequestState, RouteComponentProps } from "../shared/types";
 import { ErrorPage } from "../shared/errors/ErrorPage";
+import Visor from "../shared/components/Visor";
 
 const getEditorRequestState = (
   articleState: RequestState,
@@ -35,7 +36,7 @@ const getEditorRequestState = (
 
 const ARTICLE_SAVE_DELAY_MSECS = 10000;
 
-const EditorPage: React.FC = () => {
+const EditorPage: React.FC<RouteComponentProps> = (props) => {
   const { articleId } = useParams();
   const id = parseInt(articleId || "");
 
@@ -101,26 +102,33 @@ const EditorPage: React.FC = () => {
       : undefined;
 
   return (
-    <Row>
-      <Col sm={9}>
-        <SluglineEditor
-          title={article.title}
-          subtitle={article.sub_title}
-          content_raw={editorContent}
-          saveArticle={saveArticleDebounced}
-          saveArticleContent={saveArticleContentDebounced}
-        />
-      </Col>
-      <Col sm={3}>
-        <EditorInfo
-          lastSaveTime={lastSaved}
-          editorRequestState={getEditorRequestState(
-            updateArticleState,
-            updateArticleContentState
-          )}
-        />
-      </Col>
-    </Row>
+    <>
+      <Visor
+        title={props.route.title}
+        titleParams={[article.title || "Untitled"]}
+        location={props.location.pathname}
+      />
+      <Row>
+        <Col sm={9}>
+          <SluglineEditor
+            title={article.title}
+            subtitle={article.sub_title}
+            content_raw={editorContent}
+            saveArticle={saveArticleDebounced}
+            saveArticleContent={saveArticleContentDebounced}
+          />
+        </Col>
+        <Col sm={3}>
+          <EditorInfo
+            lastSaveTime={lastSaved}
+            editorRequestState={getEditorRequestState(
+              updateArticleState,
+              updateArticleContentState
+            )}
+          />
+        </Col>
+      </Row>
+    </>
   );
 };
 
