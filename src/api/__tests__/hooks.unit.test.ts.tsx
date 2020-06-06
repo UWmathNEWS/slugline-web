@@ -107,7 +107,7 @@ describe("useAPI", () => {
     expect(info.state).toBe(RequestState.Complete);
   });
 
-  it("correctly updates return value on multiple fetches", async () => {
+  it("clears error state after subsequent successful fetches", async () => {
     const get = getFactory<string>("bingo/");
     const { result, rerender } = renderHook(({ fn }) => useAPI(fn), {
       initialProps: {
