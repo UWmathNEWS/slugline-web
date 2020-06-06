@@ -27,6 +27,10 @@ export type UseAPIHook<TResp, TError extends APIError = APIError> = [
  * Wrap a promise-based API call so that it runs immediately when the component is mounted.
  * @param fn A parameter-less async function returning an `APIResponse<TResp, TError>`. If you need this function to vary based on props,
  * wrap it in a parameter-less `useCallback` that captures the props and pass that instead.
+ * @example
+ * useAPI(useCallback(() => {
+ *  return api.get({ id: propsId })
+ * }, [propsId]))
  */
 export const useAPI = <TResp, TError extends APIError = APIError>(
   fn: () => Promise<APIResponse<TResp, TError>>
@@ -72,7 +76,8 @@ export type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
 /**
  * Wrap a promise-based API call and return a callback to execute it. The callback returns an `APIResponse` so
  * success/failure can be determined at the call site.
- * @param fn An async function taking an object extending `SafeRequestArgs` and returning an `APIResponse<TResp, TError>`.
+ * @param fn An async function, similar to a useAPI argument. However, this function may take as an argument
+ * an object extending `SafeRequestArgs`.
  */
 export const useAPILazy = <
   TResp,
