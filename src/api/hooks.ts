@@ -17,7 +17,7 @@ export interface RequestInfo {
   statusCode: number | undefined;
 }
 
-type UseAPIHook<TResp, TError extends APIError = APIError> = [
+export type UseAPIHook<TResp, TError extends APIError = APIError> = [
   TResp | undefined,
   TError | undefined,
   RequestInfo
@@ -64,7 +64,7 @@ export const useAPI = <TResp, TError extends APIError = APIError>(
   ];
 };
 
-type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
+export type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
   (args: TArgs) => Promise<APIResponse<TResp, TError>>,
   RequestInfo
 ];
@@ -107,7 +107,7 @@ export const useAPILazy = <
   ];
 };
 
-type UseAPILazyCSRFHook<
+export type UseAPILazyCSRFHook<
   TResp,
   TArgs extends UnsafeRequestArgs,
   TError extends APIError = APIError
