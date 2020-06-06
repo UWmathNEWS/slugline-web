@@ -92,7 +92,7 @@ const PrivateRouteWrapper: React.FC<{
       } else {
         dispatch({
           type: "error",
-          data: resp.error.detail?.flat() || ["REQUEST.DID_NOT_SUCCEED"],
+          data: Object.values(resp.error).flat() || ["REQUEST.DID_NOT_SUCCEED"],
         });
       }
     });
