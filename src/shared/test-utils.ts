@@ -1,4 +1,9 @@
-import { APIResponseFailure, APIResponseSuccess, APIError } from "./types";
+import {
+  APIResponseFailure,
+  APIResponseSuccess,
+  APIError,
+  APIResponse,
+} from "./types";
 
 export const testUser = {
   username: "test",
@@ -45,8 +50,17 @@ export const MOCK_ERROR: APIResponseFailure<APIError> = {
   success: false,
   error: {
     detail: ["__TESTING"],
-    status_code: 500,
   },
+};
+
+export const withStatus = <TResp, TError extends APIError = APIError>(
+  statusCode: number,
+  resp: APIResponseSuccess<TResp> | APIResponseFailure<TError>
+): APIResponse<TResp, TError> => {
+  return {
+    statusCode: statusCode,
+    ...resp,
+  };
 };
 
 export const MOCK_PARAMS = {

@@ -10,6 +10,7 @@ import {
   MOCK_CSRF,
   MOCK_BODY,
   testUser,
+  withStatus,
 } from "../../shared/test-utils";
 import { AuthProvider } from "../../auth/AuthProvider";
 import { APIResponse } from "../../shared/types";
@@ -185,9 +186,10 @@ describe("useAPILazy", () => {
         },
         {
           data: MOCK_RESPONSE,
+          status: 200,
         }
       );
-      expect(await resp).toEqual(MOCK_RESPONSE);
+      expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
     });
   });
 

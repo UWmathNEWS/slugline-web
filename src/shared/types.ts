@@ -40,7 +40,6 @@ export interface User {
 
 export interface APIError {
   detail?: string[];
-  status_code: number;
 }
 
 export interface APIResponseSuccess<T> {
@@ -53,12 +52,9 @@ export interface APIResponseFailure<T extends APIError> {
   error: T;
 }
 
-export type APIResponse<
-  T,
-  U extends APIError = APIError,
-  S extends APIResponseSuccess<T> = APIResponseSuccess<T>,
-  F extends APIResponseFailure<U> = APIResponseFailure<U>
-> = S | F;
+export type APIResponse<T, U extends APIError = APIError> = {
+  statusCode: number;
+} & (APIResponseSuccess<T> | APIResponseFailure<U>);
 
 export interface Pagination<T> {
   count: number;

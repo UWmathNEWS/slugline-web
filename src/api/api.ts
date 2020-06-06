@@ -16,12 +16,21 @@ export const API_ROOT = "/api/";
 
 type RequestConfig = Omit<AxiosRequestConfig, "baseURL" | "validateStatus">;
 
-const axiosRequest = async (config: RequestConfig) => {
+const axiosRequest = async <TResp, TError extends APIError = APIError>(
+  config: RequestConfig
+): Promise<APIResponse<TResp, TError>> => {
   const baseConfig: AxiosRequestConfig = {
     baseURL: API_ROOT,
     validateStatus: () => true,
   };
-  return await axios({ ...baseConfig, ...config });
+  return axios({ ...baseConfig, ...config }).then((resp) => {
+    const success = resp.status >= 200 && resp.status <= 299;
+    return {
+      statusCode: resp.status,
+      success: success,
+      ...resp.data,
+    };
+  });
 };
 
 export interface QueryParams {
@@ -54,10 +63,8 @@ export const listFactory = <TResp, TError extends APIError = APIError>(
       method: "GET",
       params: args?.params || undefined,
     };
-    const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
-      config
-    );
-    return resp.data;
+    const data: APIResponse<TResp, TError> = await axiosRequest(config);
+    return data;
   };
 };
 
@@ -74,10 +81,8 @@ export const getFactory = <TResp, TError extends APIError = APIError>(
       method: "GET",
       params: args.params || undefined,
     };
-    const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
-      config
-    );
-    return resp.data;
+    const data: APIResponse<TResp, TError> = await axiosRequest(config);
+    return data;
   };
 };
 
@@ -102,10 +107,8 @@ export const createFactory = <
         "X-CSRFToken": args.csrf,
       },
     };
-    const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
-      config
-    );
-    return resp.data;
+    const data: APIResponse<TResp, TError> = await axiosRequest(config);
+    return data;
   };
 };
 
@@ -131,10 +134,8 @@ export const patchFactory = <
         "X-CSRFToken": args.csrf,
       },
     };
-    const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
-      config
-    );
-    return resp.data;
+    const data: APIResponse<TResp, TError> = await axiosRequest(config);
+    return data;
   };
 };
 
@@ -154,10 +155,8 @@ export const deleteFactory = <TResp, TError extends APIError = APIError>(
         "X-CSRFToken": args.csrf,
       },
     };
-    const resp: AxiosResponse<APIResponse<TResp, TError>> = await axiosRequest(
-      config
-    );
-    return resp.data;
+    const data: APIResponse<TResp, TError> = await axiosRequest(config);
+    return data;
   };
 };
 

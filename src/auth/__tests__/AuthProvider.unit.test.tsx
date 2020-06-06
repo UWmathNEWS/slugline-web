@@ -9,6 +9,7 @@ import {
   testAdmin,
   testUser,
   MOCK_ERROR,
+  withStatus,
 } from "../../shared/test-utils";
 import ERRORS from "../../shared/errors";
 import { APIResponseFailure, APIError } from "../../shared/types";
@@ -233,7 +234,7 @@ describe("AuthProvider", () => {
       checkPromise = auth.check(true);
 
       await act(async () => {
-        mockAxios.mockResponse({ data: MOCK_ERROR });
+        mockAxios.mockResponse({ data: MOCK_ERROR, status: 500 });
       });
 
       await act(async () => {
@@ -241,7 +242,7 @@ describe("AuthProvider", () => {
         auth = result.current;
 
         expect(resp.success).toBe(false);
-        expect(resp).toEqual(MOCK_ERROR);
+        expect(resp).toEqual(withStatus(500, MOCK_ERROR));
         expect(auth.user).toBeNull();
       });
     });
@@ -356,7 +357,7 @@ describe("AuthProvider", () => {
       let loginPromise = auth.login("test", "test");
 
       await act(async () => {
-        mockAxios.mockResponse({ data: MOCK_ERROR });
+        mockAxios.mockResponse({ data: MOCK_ERROR, status: 500 });
       });
 
       await act(async () => {
@@ -364,7 +365,7 @@ describe("AuthProvider", () => {
         auth = result.current;
 
         expect(resp.success).toBe(false);
-        expect(resp).toEqual(MOCK_ERROR);
+        expect(resp).toEqual(withStatus(500, MOCK_ERROR));
         expect(auth.user).toBeNull();
       });
     });
@@ -406,6 +407,7 @@ describe("AuthProvider", () => {
       await act(async () => {
         mockAxios.mockResponse({
           data: MOCK_ERROR,
+          status: 500,
         });
       });
 
@@ -413,7 +415,7 @@ describe("AuthProvider", () => {
         const resp = (await logoutPromise) as APIResponseFailure<APIError>;
 
         expect(resp.success).toBe(false);
-        expect(resp).toEqual(MOCK_ERROR);
+        expect(resp).toEqual(withStatus(500, MOCK_ERROR));
         expect(auth.user).not.toBeNull();
       });
     });

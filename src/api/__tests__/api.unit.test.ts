@@ -15,6 +15,7 @@ import {
   MOCK_BODY,
   MOCK_CSRF,
   MOCK_PARAMS,
+  withStatus,
 } from "../../shared/test-utils";
 
 describe("listFactory", () => {
@@ -28,9 +29,10 @@ describe("listFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
-    expect(await resp).toEqual(MOCK_RESPONSE);
+    expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
   });
 
   it("handles unsuccessful list requests", async () => {
@@ -43,9 +45,10 @@ describe("listFactory", () => {
       },
       {
         data: MOCK_ERROR,
+        status: 500,
       }
     );
-    expect(await resp).toEqual(MOCK_ERROR);
+    expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
   });
 
   it("sends URL params", () => {
@@ -69,9 +72,10 @@ describe("getFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
-    expect(await resp).toEqual(MOCK_RESPONSE);
+    expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
   });
 
   it("handles unsuccessful GET requests", async () => {
@@ -84,9 +88,10 @@ describe("getFactory", () => {
       },
       {
         data: MOCK_ERROR,
+        status: 500,
       }
     );
-    expect(await resp).toEqual(MOCK_ERROR);
+    expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
   });
 
   it("sends URL params", () => {
@@ -115,9 +120,10 @@ describe("createFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
-    expect(await resp).toEqual(MOCK_RESPONSE);
+    expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
   });
 
   it("handles unsuccessful POST requests", async () => {
@@ -134,9 +140,10 @@ describe("createFactory", () => {
       },
       {
         data: MOCK_ERROR,
+        status: 500,
       }
     );
-    expect(await resp).toEqual(MOCK_ERROR);
+    expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
   });
 
   it("sends URL params", () => {
@@ -166,9 +173,10 @@ describe("patchFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
-    expect(await resp).toEqual(MOCK_RESPONSE);
+    expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
   });
 
   it("handles unsuccessful PATCH requests", async () => {
@@ -185,9 +193,10 @@ describe("patchFactory", () => {
       },
       {
         data: MOCK_ERROR,
+        status: 500,
       }
     );
-    expect(await resp).toEqual(MOCK_ERROR);
+    expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
   });
 
   it("sends URL params", () => {
@@ -217,9 +226,10 @@ describe("deleteFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
-    expect(await resp).toEqual(MOCK_RESPONSE);
+    expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
   });
 
   it("handles unsuccessful DELETE requests", async () => {
@@ -235,9 +245,10 @@ describe("deleteFactory", () => {
       },
       {
         data: MOCK_ERROR,
+        status: 500,
       }
     );
-    expect(await resp).toEqual(MOCK_ERROR);
+    expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
   });
 
   it("sends URL params", () => {
@@ -271,6 +282,7 @@ describe("endpointFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
     mockAxios.mockResponseFor(
@@ -280,6 +292,7 @@ describe("endpointFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
     mockAxios.mockResponseFor(
@@ -289,6 +302,7 @@ describe("endpointFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
     mockAxios.mockResponseFor(
@@ -298,6 +312,7 @@ describe("endpointFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
     mockAxios.mockResponseFor(
@@ -307,13 +322,14 @@ describe("endpointFactory", () => {
       },
       {
         data: MOCK_RESPONSE,
+        status: 200,
       }
     );
-    expect(await listResp).toEqual(MOCK_RESPONSE);
-    expect(await getResp).toEqual(MOCK_RESPONSE);
-    expect(await createResp).toEqual(MOCK_RESPONSE);
-    expect(await patchResp).toEqual(MOCK_RESPONSE);
-    expect(await deleteResp).toEqual(MOCK_RESPONSE);
+    expect(await listResp).toEqual(withStatus(200, MOCK_RESPONSE));
+    expect(await getResp).toEqual(withStatus(200, MOCK_RESPONSE));
+    expect(await createResp).toEqual(withStatus(200, MOCK_RESPONSE));
+    expect(await patchResp).toEqual(withStatus(200, MOCK_RESPONSE));
+    expect(await deleteResp).toEqual(withStatus(200, MOCK_RESPONSE));
   });
 });
 
