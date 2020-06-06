@@ -204,6 +204,7 @@ const useRichTable = <D extends object = {}>({
     },
     // We can ignore the warning about cuckooLoad being an unnecessary dependency, since it exists to trigger
     // refreshing without changing other state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [get, paginated, sortColumn, searchQuery, page, cuckooLoad]
   );
   const [rawData, error, reqInfo] = useAPI(getWithParams);
