@@ -252,10 +252,10 @@ const api = {
     UserAPIError,
     { username: string; password: string }
   >("login/"),
-  logout: createFactory<void, APIError, void>("logout/"),
+  logout: createFactory<void, APIError>("logout/"),
   issues: {
     ...endpointFactory<Issue>("issues/"),
-    create: createFactory<Issue, IssueAPIError, Issue>("issues/"),
+    create: createFactory<Issue, IssueAPIError>("issues/"),
     latest: listFactory<Issue, APIError>("issues/latest/"),
     articles: issueArticles,
   },
@@ -265,9 +265,7 @@ const api = {
   },
   articleContent: {
     get: getFactory<ArticleContent>("article_content/"),
-    patch: patchFactory<ArticleContent, APIError, ArticleContent>(
-      "article_content/"
-    ),
+    patch: patchFactory<ArticleContent, APIError>("article_content/"),
   },
   users: {
     ...endpointFactory<User>("users/"),
