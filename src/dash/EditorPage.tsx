@@ -35,13 +35,13 @@ const EditorPage: React.FC = () => {
 
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
-  const [article, articleError] = useAPI(
+  const [article, articleError, articleReqInfo] = useAPI(
     useCallback(() => {
       return api.articles.get({ id: articleId || "" });
     }, [articleId])
   );
 
-  const [articleContent, articleContentError] = useAPI(
+  const [articleContent, articleContentError, articleContentReqInfo] = useAPI(
     useCallback(() => {
       return api.articleContent.get({ id: articleId || "" });
     }, [articleId])
@@ -94,11 +94,11 @@ const EditorPage: React.FC = () => {
   );
 
   if (articleError) {
-    return <ErrorPage error={articleError} />;
+    return <ErrorPage statusCode={articleReqInfo.statusCode || 500} />;
   }
 
   if (articleContentError) {
-    return <ErrorPage error={articleContentError} />;
+    return <ErrorPage statusCode={articleContentReqInfo.statusCode || 500} />;
   }
 
   if (!article || !articleContent) {

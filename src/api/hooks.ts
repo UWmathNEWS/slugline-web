@@ -14,6 +14,7 @@ export enum RequestState {
 
 export interface RequestInfo {
   state: RequestState;
+  statusCode: number | undefined;
 }
 
 type UseAPIHook<TResp, TError extends APIError = APIError> = [
@@ -36,10 +37,12 @@ export const useAPI = <TResp, TError extends APIError = APIError>(
 
   const [data, setData] = useState<TResp | undefined>(undefined);
   const [error, setError] = useState<TError | undefined>(undefined);
+  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     setRequestState(RequestState.Running);
     fn().then((resp) => {
+      setStatusCode(resp.statusCode);
       if (resp.success) {
         setData(resp.data);
         setError(undefined);
@@ -56,6 +59,7 @@ export const useAPI = <TResp, TError extends APIError = APIError>(
     error,
     {
       state: requestState,
+      statusCode: statusCode,
     },
   ];
 };
@@ -80,11 +84,13 @@ export const useAPILazy = <
   const [requestState, setRequestState] = useState<RequestState>(
     RequestState.NotStarted
   );
+  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
 
   const exec = useCallback(
     (args: TArgs) => {
       setRequestState(RequestState.Running);
       return fn(args).then((resp) => {
+        setStatusCode(resp.statusCode);
         setRequestState(RequestState.Complete);
         return resp;
       });
@@ -96,6 +102,7 @@ export const useAPILazy = <
     exec,
     {
       state: requestState,
+      statusCode: statusCode,
     },
   ];
 };
@@ -123,6 +130,7 @@ export const useAPILazyUnsafe = <
   const [requestState, setRequestState] = useState<RequestState>(
     RequestState.NotStarted
   );
+  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
 
   const auth = useAuth();
 
@@ -136,6 +144,7 @@ export const useAPILazyUnsafe = <
       // argsWithCsrf doesn't typecheck as TArgs, so we force the issue.
       return fn(argsWithCsrf as TArgs).then((resp) => {
         setRequestState(RequestState.Complete);
+        setStatusCode(resp.statusCode);
         return resp;
       });
     },
@@ -146,6 +155,7 @@ export const useAPILazyUnsafe = <
     exec,
     {
       state: requestState,
+      statusCode: statusCode,
     },
   ];
 };

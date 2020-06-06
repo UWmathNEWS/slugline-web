@@ -25,7 +25,7 @@ const columns: Column<Article>[] = [
 const DashIssueDetail = () => {
   const { issueId } = useParams();
 
-  const [issue, issueError] = useAPI(
+  const [issue, issueError, issueReqInfo] = useAPI(
     useCallback(() => {
       return api.issues.get({ id: issueId || "" });
     }, [issueId])
@@ -36,7 +36,7 @@ const DashIssueDetail = () => {
   }, [issueId]);
 
   if (issueError) {
-    return <ErrorPage error={issueError} />;
+    return <ErrorPage statusCode={issueReqInfo.statusCode || 500} />;
   }
 
   if (!issue) {

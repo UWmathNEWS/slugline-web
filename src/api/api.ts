@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import {
   APIResponse,
   APIError,
@@ -203,8 +203,8 @@ const usernameQuery = async (
     url: `users/${args.username}/query/`,
     method: "GET",
   };
-  const resp = await axiosRequest(config);
-  return resp.data;
+  const data = await axiosRequest<void>(config);
+  return data;
 };
 
 interface PatchMeArgs extends UnsafeRequestArgs {
@@ -222,8 +222,8 @@ const patchMe = async (
       "X-CSRFToken": args.csrf,
     },
   };
-  const resp = await axiosRequest(config);
-  return resp.data;
+  const data = await axiosRequest<User, UserAPIError>(config);
+  return data;
 };
 
 interface IssueArticlesArgs extends RequestArgs {
@@ -237,8 +237,8 @@ const issueArticles = async (
     url: `issues/${args.id}/articles/`,
     method: "GET",
   };
-  const resp = await axiosRequest(config);
-  return resp.data;
+  const data = await axiosRequest<Pagination<Article>>(config);
+  return data;
 };
 
 const api = {

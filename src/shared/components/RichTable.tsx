@@ -490,7 +490,7 @@ const useRichTable = <D extends object = {}>({
               render() {
                 // TODO: more descriptive error messages?
                 return error !== undefined
-                  ? `An error occurred: Error ${error.status_code}`
+                  ? `An error occurred: Error ${reqInfo.statusCode}`
                   : "No rows returned.";
               },
             },

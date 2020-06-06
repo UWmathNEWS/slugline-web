@@ -26,12 +26,14 @@ export type AuthAction = { type: "login"; user: User } | { type: "logout" };
 export const Auth = createContext<AuthContext>({
   user: null,
   csrfToken: null,
-  check: () => Promise.resolve({ success: true, data: null }),
+  check: () => Promise.resolve({ success: true, statusCode: 200, data: null }),
   isAuthenticated: () => false,
   isEditor: () => false,
   setUser: () => {},
-  login: () => Promise.resolve({ success: true, data: undefined }),
-  logout: () => Promise.resolve({ success: true, data: undefined }),
+  login: () =>
+    Promise.resolve({ success: true, statusCode: 200, data: undefined }),
+  logout: () =>
+    Promise.resolve({ success: true, statusCode: 200, data: undefined }),
 });
 
 export const CSRF_COOKIE = "csrftoken";
