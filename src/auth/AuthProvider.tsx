@@ -31,19 +31,20 @@ export const AuthProvider: React.FC = (props) => {
       isWaiting.current = true;
       const promise = api.me.get().then((resp) => {
         if (resp.success) {
+          // this destructuring gets Typescript to believe that data does in fact exist
+          const { data } = resp;
           // Test equality of received data here with the current user. If they're not equal, update internal state;
           // otherwise, do nothing to save a rerender.
           // Due to above invariant, we can be assured that user is up-to-date, since nothing can change it.
           if (
-            (user.user !== null && resp.data === null) ||
-            (user.user === null && resp.data !== null) ||
+            (user.user !== null && data === null) ||
+            (user.user === null && data !== null) ||
             // Conduct a deep equality check of two User objects
             (user.user !== null &&
-              resp.data !== null &&
-              // Typescript thinks user.user and resp.data could be null despite our check above, hence the ! suffix
-              Object.keys(resp.data).some(
-                (k) =>
-                  user.user![k as keyof User] !== resp.data![k as keyof User]
+              data !== null &&
+              // Typescript thinks user.user could be null despite our check above, hence the ! suffix
+              Object.keys(data).some(
+                (k) => user.user![k as keyof User] !== data[k as keyof User]
               ))
           ) {
             setUser(resp.data);
