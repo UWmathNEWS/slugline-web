@@ -77,7 +77,7 @@ export type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
  * Wrap a promise-based API call and return a callback to execute it. The callback returns an `APIResponse` so
  * success/failure can be determined at the call site.
  * @param fn An async function, similar to a useAPI argument. However, this function may take as an argument
- * an object extending `SafeRequestArgs`.
+ * an object extending `RequestArgs`.
  */
 export const useAPILazy = <
   TResp,
