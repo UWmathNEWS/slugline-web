@@ -29,5 +29,11 @@ export default {
       site: "@UWmathNEWS",
     },
   },
+  manifest: {
+    fullName: "",
+    start_url: ".",
+    display: "standalone",
+    backgroundColor: "#ffffff",
+  },
   googleSiteVerification: "",
 };
