@@ -27,7 +27,7 @@ const format: {
     if (!paramName) {
       return paramsObj[unlabelledMatches++];
     }
-    if (paramName[0] == "{" && fmtStr[offset + match.length] === "}") {
+    if (paramName[0] === "{" && fmtStr[offset + match.length] === "}") {
       return paramName;
     }
     return paramsObj[
