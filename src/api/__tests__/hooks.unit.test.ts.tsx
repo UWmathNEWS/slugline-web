@@ -278,6 +278,19 @@ describe("useAPILazyUnsafe", () => {
       expect(req.url).toEqual("bingo/15/");
       expect(req.data).toEqual("bingo bango bongo");
       expect(req.config.headers["X-CSRFToken"]).toEqual(MOCK_CSRF);
+
+      mockAxios.mockResponseFor(
+        {
+          method: "PATCH",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_RESPONSE,
+          status: 200,
+        }
+      );
+
+      expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
     });
   });
 
