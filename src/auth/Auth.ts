@@ -23,7 +23,7 @@ export interface AuthState {
 
 export type AuthAction = { type: "login"; user: User } | { type: "logout" };
 
-export const defaultAuthContext = {
+export const defaultAuthContext: AuthContext = {
   user: null,
   csrfToken: null,
   check: () => Promise.resolve({ success: true, statusCode: 200, data: null }),
