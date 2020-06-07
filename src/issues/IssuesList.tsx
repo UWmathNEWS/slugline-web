@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useAllIssues } from "../api/hooks";
 
 import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
+import { useAPI } from "../api/hooks";
+import api from "../api/api";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -43,7 +44,7 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
 };
 
 const IssuesList: React.FC<RouteComponentProps> = (props) => {
-  const [issues, ,] = useAllIssues();
+  const [issues] = useAPI(api.issues.list);
   const [volumes, setVolumes] = useState<Issue[][]>([]);
 
   useEffect(() => {

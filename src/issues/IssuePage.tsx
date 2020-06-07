@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { useIssue } from "../api/hooks";
 import { RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
 import Loader from "../shared/components/Loader";
+import { useAPI } from "../api/hooks";
+import api from "../api/api";
 
 const IssuePage: React.FC<RouteComponentProps> = ({ route, location }) => {
   const { issue_id } = useParams();
-  const [issue, ,] = useIssue(issue_id);
+  const [issue] = useAPI(
+    useCallback(() => {
+      return api.issues.get({ id: issue_id || "" });
+    }, [issue_id])
+  );
 
   if (issue) {
     return (

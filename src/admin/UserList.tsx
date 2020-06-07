@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import { getApiUrl } from "../api/api";
 import { Modal, Button } from "react-bootstrap";
 
 import { User } from "../shared/types";
@@ -13,6 +12,7 @@ import {
   Column,
   RichTableBag,
 } from "../shared/components/RichTable";
+import api from "../api/api";
 
 const columns: Column<User>[] = [
   {
@@ -128,8 +128,7 @@ const UserList = () => {
       </h1>
       <RichTable<User>
         columns={columns}
-        url={getApiUrl("users/")}
-        pk="username"
+        list={api.users.list}
         paginated
         selectable
         searchable
@@ -146,48 +145,39 @@ const UserList = () => {
             name: "Edit",
             bulk: false,
             triggers: ["click"],
-            call({ makeRequest }, data: User) {
-              return makeRequest<User>("get", data).then((user) => {
-                setEditedUser(user);
-                setShowEditModal(true);
+            call(bag, data: User) {
+              return api.users.get({ id: data.username }).then((resp) => {
+                if (resp.success) {
+                  setEditedUser(resp.data);
+                  setShowEditModal(true);
+                }
               });
             },
           },
           {
             name: "Delete",
             bulk: false,
-            call(
-              { makeRequest, executeAction, rows, page, numPages },
-              data: User
-            ) {
+            call({ executeAction, rows, page, numPages }, data: User) {
               if (
                 window.confirm(
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
                 )
               ) {
-                return makeRequest<User>("delete", data, {
-                  headers: {
-                    "X-CSRFToken": auth.csrfToken,
-                  },
-                }).then(
-                  () => {
-                    if (page < numPages || page === 1) {
-                      executeAction("_refresh").then();
-                    } else if (rows.length === 1) {
-                      executeAction("_previous").then();
+                return api.users
+                  .delete({ id: data.username, csrf: auth.csrfToken || "" })
+                  .then((resp) => {
+                    if (resp.success) {
+                      if (page < numPages || page === 1) {
+                        executeAction("_refresh").then();
+                      } else if (rows.length === 1) {
+                        executeAction("_previous").then();
+                      }
+                      alert(`Successfully deleted user ${data.username}`);
+                    } else {
+                      alert(resp.error.detail?.map((e) => ERRORS[e]));
                     }
-                    alert(`Successfully deleted user ${data.username}`);
-                  },
-                  (err: string[] | string) => {
-                    alert(
-                      typeof err === "string"
-                        ? ERRORS[err]
-                        : err.map((e) => ERRORS[e])
-                    );
-                  }
-                );
+                  });
               }
-
               return Promise.reject();
             },
           },

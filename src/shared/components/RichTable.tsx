@@ -1,10 +1,10 @@
 import "./styles/RichTable.scss";
 
 import React, {
-  useCallback,
   useEffect,
   useMemo,
   useRef,
+  useCallback,
   useState,
 } from "react";
 import {
@@ -17,13 +17,13 @@ import {
   Button,
 } from "react-bootstrap";
 import nanoid from "nanoid";
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 
-import { useApiGet } from "../../api/hooks";
-import { APIError, APIResponse, Pagination, RequestState } from "../types";
+import { APIError, APIResponse, Pagination } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useToast } from "../contexts/ToastContext";
 import { useDebouncedCallback } from "../hooks";
+import { QueryParams, RequestArgs } from "../../api/api";
+import { useAPI, RequestInfo, RequestState } from "../../api/hooks";
 import Loader from "./Loader";
 
 /**
@@ -117,8 +117,7 @@ export interface RichTableRow<D extends object> {
 
 export interface RichTableHook<D extends object = {}> {
   columns: Column<D>[];
-  url: string;
-  pk: keyof D & string;
+  list: (args: RequestArgs) => Promise<APIResponse<D | Pagination<D>>>;
   paginated: boolean;
   actions?: Action<D>[];
   selectable?: boolean;
@@ -145,12 +144,7 @@ export interface RichTableBag<D extends object = {}> {
   count: number;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
-  makeRequest: <T>(
-    method: Method,
-    row?: D,
-    config?: AxiosRequestConfig
-  ) => Promise<T>;
-  requestState: RequestState;
+  reqInfo: RequestInfo;
 }
 
 /**
@@ -159,16 +153,12 @@ export interface RichTableBag<D extends object = {}> {
  */
 const useRichTable = <D extends object = {}>({
   columns,
-  url,
-  pk,
+  list: get,
   paginated,
   actions = [],
   selectable,
 }: RichTableHook<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
-  const [requestState, setRequestState] = useState<RequestState>(
-    RequestState.NotStarted
-  );
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
   const [searchQuery, _setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -196,50 +186,34 @@ const useRichTable = <D extends object = {}>({
     _setSearchQuery(query);
   };
 
-  const dataUrl = useMemo<string>(
+  const getWithParams = useCallback(
     () => {
-      let queryBuilder: { [key: string]: string | number } = {
+      let params: QueryParams = {
         time: Date.now(),
       };
       if (paginated) {
-        queryBuilder.page = page;
+        params.page = page;
       }
       if (searchQuery) {
-        queryBuilder.search = window.encodeURIComponent(searchQuery);
+        params.search = searchQuery;
       }
       if (sortColumn !== null) {
-        queryBuilder.sort =
-          (sortColumn[1] ? "" : "-") + window.encodeURIComponent(sortColumn[0]);
+        params.sort = (sortColumn[1] ? "" : "-") + sortColumn[0];
       }
-      return `${url}${
-        Object.keys(queryBuilder).length ? "?" : ""
-      }${Object.entries(queryBuilder)
-        .map((q) => q.join("="))
-        .join("&")}`;
+      return get({ params: params });
     },
     // We can ignore the warning about cuckooLoad being an unnecessary dependency, since it exists to trigger
     // refreshing without changing other state.
-    [url, paginated, sortColumn, searchQuery, page, cuckooLoad]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [get, paginated, sortColumn, searchQuery, page, cuckooLoad]
   );
-
-  useEffect(() => {
-    setRequestState(RequestState.Started);
-  }, [dataUrl]);
-
-  const [rawData, error] = useApiGet<Pagination<D> | D[]>(dataUrl);
+  const [rawData, error, reqInfo] = useAPI(getWithParams);
   const data = useMemo<D[]>(
     () =>
       (paginated ? (rawData as Pagination<D>)?.results : (rawData as D[])) ||
       [],
     [paginated, rawData]
   );
-
-  useEffect(() => {
-    // Prevent table showing no data on initial load
-    if (rawData !== undefined || error !== undefined) {
-      setRequestState(RequestState.Complete);
-    }
-  }, [rawData, error]);
 
   const numPages = paginated ? (rawData as Pagination<D>)?.num_pages || 1 : 1;
 
@@ -453,7 +427,7 @@ const useRichTable = <D extends object = {}>({
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
-    if (requestState !== RequestState.Complete) {
+    if (reqInfo.state !== RequestState.Complete) {
       return new Array(data.length || 1).fill(null).map(
         (_, i): RichTableRow<D> => ({
           useRowProps() {
@@ -517,7 +491,7 @@ const useRichTable = <D extends object = {}>({
               render() {
                 // TODO: more descriptive error messages?
                 return error !== undefined
-                  ? `An error occurred: Error ${error.status_code}`
+                  ? `An error occurred: Error ${reqInfo.statusCode}`
                   : "No rows returned.";
               },
             },
@@ -605,29 +579,16 @@ const useRichTable = <D extends object = {}>({
         setSelected: selectRow,
       };
     });
-  }, [columns, requestState, data, selected, selectable, clickActions]);
-
-  const makeRequest = <T extends any>(
-    method: Method,
-    row?: D,
-    config?: AxiosRequestConfig
-  ) => {
-    let requestUrl = url;
-    if (row !== null && row !== undefined) {
-      requestUrl = `${url}${row[pk]}/`;
-    }
-
-    return axios(requestUrl, {
-      method,
-      ...config,
-    }).then(({ data }: AxiosResponse<APIResponse<T>>) => {
-      if (data.success) {
-        return data.data;
-      } else {
-        throw data.error;
-      }
-    });
-  };
+  }, [
+    columns,
+    data,
+    selected,
+    selectable,
+    clickActions,
+    internalExecuteAction,
+    error,
+    reqInfo,
+  ]);
 
   const bag: RichTableBag<D> = {
     error,
@@ -642,8 +603,7 @@ const useRichTable = <D extends object = {}>({
     searchQuery,
     setSearchQuery,
     executeAction,
-    makeRequest,
-    requestState,
+    reqInfo,
   };
 
   return bag;
@@ -654,7 +614,7 @@ const useRichTable = <D extends object = {}>({
  * supported.
  */
 const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
-  const { page, numPages, setPage, requestState, executeAction } = bag;
+  const { page, numPages, setPage, reqInfo, executeAction } = bag;
   const [newPage, setNewPage] = useState(page.toString());
   // we need a ref to store the new page to get around the fake blur listener capturing outdated values of newPage
   const newPageRef = useRef(page.toString());
@@ -671,7 +631,7 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
     >
       <Button
         variant="link"
-        disabled={page <= 1 || requestState !== RequestState.Complete}
+        disabled={page <= 1 || reqInfo.state !== RequestState.Complete}
       >
         <FontAwesomeIcon
           icon="chevron-left"
@@ -745,7 +705,7 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
       </span>
       <Button
         variant="link"
-        disabled={page >= numPages || requestState !== RequestState.Complete}
+        disabled={page >= numPages || reqInfo.state !== RequestState.Complete}
       >
         <FontAwesomeIcon
           icon="chevron-right"

@@ -1,32 +1,19 @@
-import { User } from "../shared/types";
+import { User, APIResponse } from "../shared/types";
 import { createContext, useContext } from "react";
 import Cookie from "js-cookie";
 
 export interface AuthContext {
   user: User | null;
   csrfToken: string | null;
-  check: (force?: boolean) => Promise<void>;
+  check: (force?: boolean) => Promise<APIResponse<User | null>>;
   isAuthenticated: () => boolean;
   isEditor: () => boolean;
-  post: <T>(
-    endpoint: string,
-    data: T,
-    setCurUser?: boolean
-  ) => Promise<User | undefined>;
-  put: <T>(
-    endpoint: string,
-    data: T,
-    setCurUser?: boolean
-  ) => Promise<User | undefined>;
-  patch: <T>(
-    endpoint: string,
-    data: T,
-    setCurUser?: boolean
-  ) => Promise<User | undefined>;
-  delete: (endpoint: string) => Promise<User | undefined>;
   setUser: (user: User | null) => void;
-  login: (username: string, password: string) => Promise<User | undefined>;
-  logout: () => Promise<void>;
+  login: (
+    username: string,
+    password: string
+  ) => Promise<APIResponse<User | undefined>>;
+  logout: () => Promise<APIResponse<void>>;
 }
 
 export interface AuthState {
@@ -34,24 +21,19 @@ export interface AuthState {
   csrfToken: string | null;
 }
 
-export type AuthAction =
-  | { type: "post"; user: User }
-  | { type: "login"; user: User }
-  | { type: "logout" };
+export type AuthAction = { type: "login"; user: User } | { type: "logout" };
 
 export const defaultAuthContext = {
   user: null,
   csrfToken: null,
-  check: () => Promise.resolve(),
+  check: () => Promise.resolve({ success: true, statusCode: 200, data: null }),
   isAuthenticated: () => false,
   isEditor: () => false,
-  post: () => Promise.resolve(undefined),
-  put: () => Promise.resolve(undefined),
-  patch: () => Promise.resolve(undefined),
-  delete: () => Promise.resolve(undefined),
   setUser: () => {},
-  login: () => Promise.resolve(undefined),
-  logout: () => Promise.resolve(),
+  login: () =>
+    Promise.resolve({ success: true, statusCode: 200, data: undefined }),
+  logout: () =>
+    Promise.resolve({ success: true, statusCode: 200, data: undefined }),
 };
 
 export const Auth = createContext<AuthContext>(defaultAuthContext);
@@ -61,7 +43,6 @@ export const USER_LOCALSTORAGE_KEY = "slugline-user";
 
 export const authReducer = (state: AuthState, action: AuthAction) => {
   switch (action.type) {
-    case "post":
     case "login": {
       if (typeof localStorage !== "undefined") {
         localStorage.setItem(

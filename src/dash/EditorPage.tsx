@@ -1,19 +1,15 @@
 import React, { useState, useCallback } from "react";
 import SluglineEditor from "../editor/SluglineEditor";
 import { useParams } from "react-router-dom";
-import {
-  useArticle,
-  useArticleContent,
-  useUpdateArticleContent,
-  useUpdateArticle,
-} from "../api/hooks";
+import { useAPI, useAPILazyUnsafe, RequestState } from "../api/hooks";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { Node } from "slate";
 import { useDebouncedCallback } from "../shared/hooks";
 import EditorInfo from "../editor/EditorInfo";
-import { RequestState, RouteComponentProps } from "../shared/types";
-import { ErrorPage } from "../shared/errors/ErrorPage";
+import { RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
+import { ErrorPage } from "../shared/errors/ErrorPage";
+import api from "../api/api";
 
 const getEditorRequestState = (
   articleState: RequestState,
@@ -30,7 +26,7 @@ const getEditorRequestState = (
   ) {
     return RequestState.Complete;
   } else {
-    return RequestState.Started;
+    return RequestState.Running;
   }
 };
 
@@ -38,25 +34,38 @@ const ARTICLE_SAVE_DELAY_MSECS = 10000;
 
 const EditorPage: React.FC<RouteComponentProps> = (props) => {
   const { articleId } = useParams();
-  const id = parseInt(articleId || "");
 
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
-  const [article, articleError] = useArticle(id);
-  const [articleContent, articleContentError] = useArticleContent(id);
+  const [article, articleError, articleReqInfo] = useAPI(
+    useCallback(() => {
+      return api.articles.get({ id: articleId || "" });
+    }, [articleId])
+  );
 
-  const [updateArticle, updateArticleState] = useUpdateArticle(id);
+  const [articleContent, articleContentError, articleContentReqInfo] = useAPI(
+    useCallback(() => {
+      return api.articleContent.get({ id: articleId || "" });
+    }, [articleId])
+  );
+
+  const [updateArticle, updateArticleInfo] = useAPILazyUnsafe(
+    api.articles.patch
+  );
 
   const saveArticle = useCallback(
     async (title: string, subtitle: string, author: string) => {
       await updateArticle({
-        title: title,
-        sub_title: subtitle,
-        author: author,
+        id: articleId || "",
+        body: {
+          title: title,
+          sub_title: subtitle,
+          author: author,
+        },
       });
       setLastSaved(new Date());
     },
-    [updateArticle, setLastSaved]
+    [updateArticle, setLastSaved, articleId]
   );
 
   const [saveArticleDebounced] = useDebouncedCallback(
@@ -64,19 +73,21 @@ const EditorPage: React.FC<RouteComponentProps> = (props) => {
     ARTICLE_SAVE_DELAY_MSECS
   );
 
-  const [
-    updateArticleContent,
-    updateArticleContentState,
-  ] = useUpdateArticleContent(id);
+  const [updateArticleContent, updateArticleContentInfo] = useAPILazyUnsafe(
+    api.articleContent.patch
+  );
 
   const saveArticleContent = useCallback(
     async (content_raw: Node[]) => {
       await updateArticleContent({
-        content_raw: JSON.stringify(content_raw),
+        id: articleId || "",
+        body: {
+          content_raw: JSON.stringify(content_raw),
+        },
       });
       setLastSaved(new Date());
     },
-    [updateArticleContent, setLastSaved]
+    [updateArticleContent, setLastSaved, articleId]
   );
 
   const [saveArticleContentDebounced] = useDebouncedCallback(
@@ -85,11 +96,11 @@ const EditorPage: React.FC<RouteComponentProps> = (props) => {
   );
 
   if (articleError) {
-    return <ErrorPage error={articleError} />;
+    return <ErrorPage statusCode={articleReqInfo.statusCode || 500} />;
   }
 
   if (articleContentError) {
-    return <ErrorPage error={articleContentError} />;
+    return <ErrorPage statusCode={articleContentReqInfo.statusCode || 500} />;
   }
 
   if (!article || !articleContent) {
@@ -122,8 +133,8 @@ const EditorPage: React.FC<RouteComponentProps> = (props) => {
           <EditorInfo
             lastSaveTime={lastSaved}
             editorRequestState={getEditorRequestState(
-              updateArticleState,
-              updateArticleContentState
+              updateArticleInfo.state,
+              updateArticleContentInfo.state
             )}
           />
         </Col>

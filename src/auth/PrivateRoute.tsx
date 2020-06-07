@@ -3,7 +3,6 @@ import { RouteProps, Route, useHistory } from "react-router-dom";
 import { Alert } from "react-bootstrap";
 import { useAuth } from "./Auth";
 import Error404 from "../shared/errors/Error404";
-import { APIError } from "../shared/types";
 import ERRORS from "../shared/errors";
 import Loader from "../shared/components/Loader";
 
@@ -88,14 +87,16 @@ const PrivateRouteWrapper: React.FC<{
   // as a dependency.
   useEffect(() => {
     dispatch({ type: "is loading" });
-    auth.check()?.then(
-      () => {
+    auth.check()?.then((resp) => {
+      if (resp.success) {
         dispatch({ type: "done loading" });
-      },
-      ({ status_code, ...e }: APIError) => {
-        dispatch({ type: "error", data: Object.values(e).flat() });
+      } else {
+        dispatch({
+          type: "error",
+          data: Object.values(resp.error).flat() || ["REQUEST.DID_NOT_SUCCEED"],
+        });
       }
-    );
+    });
     authCheckCompleted.current = true;
 
     return () => {
@@ -128,9 +129,11 @@ const PrivateRouteWrapper: React.FC<{
       return (
         <>
           {props.fallback ?? <Loader variant="spinner" />}
-          {<div key="children" className="d-none" aria-hidden="true">
-            {props.children}
-          </div>}
+          {
+            <div key="children" className="d-none" aria-hidden="true">
+              {props.children}
+            </div>
+          }
         </>
       );
     }

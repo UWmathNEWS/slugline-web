@@ -1,13 +1,13 @@
 import React from "react";
-import { useCreateArticle } from "../../api/hooks";
 import { Button } from "react-bootstrap";
 
 import "./styles/DashArticlesPage.scss";
 import { useHistory, Link } from "react-router-dom";
 import { Article, ArticleType, RouteComponentProps } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
-import { getApiUrl } from "../../api/api";
 import Visor from "../../shared/components/Visor";
+import { useAPILazyUnsafe } from "../../api/hooks";
+import api from "../../api/api";
 
 interface ArticleTitleProps {
   article: Article;
@@ -54,12 +54,12 @@ const columns: Column<Article>[] = [
 ];
 
 const DashArticlesPage: React.FC<RouteComponentProps> = (props) => {
-  const [createArticle, ,] = useCreateArticle();
+  const [createArticle] = useAPILazyUnsafe(api.articles.create);
 
   const history = useHistory();
 
   const createNewArticle = async () => {
-    const createResp = await createArticle();
+    const createResp = await createArticle({ body: undefined });
     if (createResp.success) {
       history.push(`/dash/edit/${createResp.data.id}`);
     }
@@ -75,8 +75,7 @@ const DashArticlesPage: React.FC<RouteComponentProps> = (props) => {
       <Button onClick={createNewArticle}>New Article</Button>
       <RichTable<Article>
         columns={columns}
-        url={getApiUrl("user_articles/")}
-        pk="id"
+        list={api.articles.list}
         paginated
         selectable
         searchable
