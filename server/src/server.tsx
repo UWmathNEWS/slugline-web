@@ -8,6 +8,7 @@ import fs from "fs";
 import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import proxy from "http-proxy-middleware";
+import morgan from "morgan";
 
 import React from "react";
 import ReactDOMServer from "react-dom/server";
@@ -31,6 +32,7 @@ import { Helmet } from "react-helmet";
 
 const app = express();
 
+app.use(morgan("combined"));
 app.use(cookieParser());
 
 const router = express.Router();
