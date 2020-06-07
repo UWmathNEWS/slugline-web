@@ -39,14 +39,14 @@ const serverRenderer = (req: Request, res: Response) => {
                 serverAppWrapper(Error404App, req.url)
               )}</div>`
             )
-            .replace("{{HELMET}}", renderHelmet)
+            .replace("<title>{{HELMET}}</title>", renderHelmet)
         );
     }
 
     return res.send(
       html
         .replace('<div id="root"></div>', `<div id="root">${app}</div>`)
-        .replace("{{HELMET}}", renderHelmet)
+        .replace("<title>{{HELMET}}</title>", renderHelmet)
     );
   });
 };

@@ -54,7 +54,7 @@ const dashRenderer = (req: Request, res: Response) => {
                       serverAppWrapper(Error404App, req.url)
                     )}</div>`
                   )
-                  .replace("{{HELMET}}", renderHelmet)
+                  .replace("<title>{{HELMET}}</title>", renderHelmet)
                   .replace(
                     "window.__SSR_DIRECTIVES__={}",
                     "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
