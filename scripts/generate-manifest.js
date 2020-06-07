@@ -13,7 +13,7 @@ const configPath = path.resolve(__dirname, "..", "src", "config.ts");
 const manifestPath = path.resolve(
   __dirname,
   "..",
-  "public",
+  "build",
   "manifest.json"
 );
 
