@@ -15,21 +15,20 @@ import { matchPath, StaticRouter, StaticRouterContext } from "react-router";
 
 import axios from "axios";
 
-import { Auth, defaultAuthContext } from "../src/auth/Auth";
-import { appFactory } from "../src/App";
-import Public, { routes as publicRoutes } from "../src/routes/Public";
-import { routes as dashRoutes } from "../src/routes/Dash";
-import Error404 from "../src/shared/errors/Error404";
+import { Auth, defaultAuthContext } from "../../src/auth/Auth";
+import { appFactory } from "../../src/App";
+import Public, { routes as publicRoutes } from "../../src/routes/Public";
+import { routes as dashRoutes } from "../../src/routes/Dash";
+import Error404 from "../../src/shared/errors/Error404";
 import {
   APIResponse,
   StaticRouterContextWithData,
   User,
-} from "../src/shared/types";
-import { ToastProvider } from "../src/shared/contexts/ToastContext";
-import ToastContainer from "../src/shared/components/ToastContainer";
+} from "../../src/shared/types";
+import { ToastProvider } from "../../src/shared/contexts/ToastContext";
+import ToastContainer from "../../src/shared/components/ToastContainer";
 import { Helmet } from "react-helmet";
 
-const PORT = 3030;
 const app = express();
 
 app.use(cookieParser());
@@ -187,6 +186,4 @@ router.use("^/", serverRenderer);
 
 app.use(router);
 
-app.listen(PORT, () => {
-  console.log(`SSR running on port ${PORT}`);
-});
+export default app;

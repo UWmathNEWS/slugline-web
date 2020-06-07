@@ -1,12 +1,10 @@
-require('ignore-styles');
+#!/usr/bin/env node
 
-require('@babel/register')({
-  ignore: [/(node_modules)/],
-  presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
-  plugins: [
-    ["@babel/transform-runtime"]
-  ],
-  extensions: [".tsx", ".ts", ".jsx", ".js", ".mjs"],
+"use strict";
+
+const app = require('./lib/server').default;
+
+const PORT = parseInt(process.env.PORT) || 3030;
+app.listen(PORT, () => {
+  console.log(`SSR running on port ${PORT}`);
 });
-
-require('./server');
