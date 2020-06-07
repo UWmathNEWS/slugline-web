@@ -193,6 +193,31 @@ describe("useAPILazy", () => {
     });
   });
 
+  it("returns errors properly", async () => {
+    const get = getFactory<string>("bingo/");
+
+    const { result } = renderHook(() => useAPILazy(get));
+
+    let [exec, info] = result.current;
+
+    await act(async () => {
+      const resp = exec({ id: "15" });
+      expect(mockAxios.lastReqGet().url).toEqual("bingo/15/");
+
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_ERROR,
+          status: 500,
+        }
+      );
+      expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
+    });
+  });
+
   it("correctly updates RequestState", async () => {
     const get = getFactory<string>("bingo/");
 
@@ -291,6 +316,56 @@ describe("useAPILazyUnsafe", () => {
       );
 
       expect(await resp).toEqual(withStatus(200, MOCK_RESPONSE));
+    });
+  });
+
+  it("returns errors properly", async () => {
+    const patch = patchFactory<string>("bingo/");
+    const { result } = renderHook(() => useAPILazyUnsafe(patch), {
+      wrapper: AuthProvider,
+    });
+
+    // get the AuthProvider to trigger first
+    await act(async () => {
+      mockAxios.mockResponseFor(
+        {
+          method: "GET",
+          url: "me/",
+        },
+        {
+          data: {
+            success: true,
+            data: testUser,
+          },
+        }
+      );
+    });
+
+    let [exec, info] = result.current;
+
+    await act(async () => {
+      const resp = exec({
+        body: "bingo bango bongo",
+        id: "15",
+      });
+
+      const req = mockAxios.getReqMatching({ method: "PATCH" });
+      expect(req.url).toEqual("bingo/15/");
+      expect(req.data).toEqual("bingo bango bongo");
+      expect(req.config.headers["X-CSRFToken"]).toEqual(MOCK_CSRF);
+
+      mockAxios.mockResponseFor(
+        {
+          method: "PATCH",
+          url: "bingo/15/",
+        },
+        {
+          data: MOCK_ERROR,
+          status: 500,
+        }
+      );
+
+      expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
     });
   });
 
