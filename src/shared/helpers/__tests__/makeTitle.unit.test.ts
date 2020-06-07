@@ -1,21 +1,25 @@
 import makeTitle from "../makeTitle";
 
 jest.mock("../../../config", () => ({
-  title: "test",
-  description: "test",
+  title: "title",
+  description: "desc",
 }));
 
 describe("helpers.makeTitle", () => {
-  it("returns a formatted title if provided arguments", () => {
-    expect(makeTitle("test")).toBe("test | test");
+  it("returns a custom title if provided arguments", () => {
+    expect(makeTitle("test")).toBe("test | title");
   });
 
   it("passes on parameters to format", () => {
-    expect(makeTitle("test {}", "test")).toBe("test test | test");
+    expect(makeTitle("test {}", "test")).toBe("test test | title");
+  });
+
+  it("does not format the title if no parameters are given", () => {
+    expect(makeTitle("test {}")).toBe("test {} | title");
   });
 
   it("returns the default title when called without parameters or when called with an empty string", () => {
-    expect(makeTitle()).toBe("test - test");
-    expect(makeTitle("")).toBe("test - test");
+    expect(makeTitle()).toBe("title - desc");
+    expect(makeTitle("")).toBe("title - desc");
   });
 });

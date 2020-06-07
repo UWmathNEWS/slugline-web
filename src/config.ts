@@ -5,5 +5,29 @@ export default {
   themeColor: "#000000",
   locale: "en_CA",
   alternateLocales: [],
-  favicon: "favicon.ico",
+  icons: {
+    favicon: {
+      src: "favicon.ico",
+      type: "image/x-icon",
+      sizes: "64x64 32x32 24x24 16x16",
+    },
+    touchIcon: {
+      src: "logo192.png",
+      type: "image/png",
+      sizes: "192x192",
+    },
+    largeIcon: {
+      src: "logo512.png",
+      type: "image/png",
+      sizes: "512x512",
+    },
+  },
+  seo: {
+    image: "",
+    twitter: {
+      card: "summary_large_image",
+      site: "@UWmathNEWS",
+    },
+  },
+  googleSiteVerification: "",
 };
