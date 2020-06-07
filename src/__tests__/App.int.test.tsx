@@ -8,11 +8,12 @@ import App from "../App";
 import { createMemoryHistory } from "history";
 import { act } from "react-dom/test-utils";
 import { USER_LOCALSTORAGE_KEY } from "../auth/Auth";
-import { testUser } from "../shared/test-utils";
+import { testUser, MOCK_ERROR } from "../shared/test-utils";
 
 describe("Integration test for main app component", () => {
   afterEach(() => {
     mockAxios.reset();
+    mockAxios.mockClear();
     localStorage.clear();
   });
 
@@ -69,15 +70,15 @@ describe("Integration test for main app component", () => {
   it("does auth check on startup", () => {
     render(<App />);
 
-    expect(mockAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockAxios.get).toHaveBeenCalledWith("/api/me/");
+    expect(mockAxios).toHaveBeenCalledTimes(1);
+    expect(mockAxios.lastReqGet().url).toEqual("me/");
   });
 
   it("does auth check on switching to protected routes", async () => {
     localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
     const { getByText } = render(<App />);
 
-    act(() => {
+    await act(async () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
     });
 
@@ -85,36 +86,39 @@ describe("Integration test for main app component", () => {
       fireEvent.click(getByText(/profile/i));
     });
 
-    expect(mockAxios.get).toHaveBeenCalledTimes(2);
-    expect(mockAxios.get).toHaveBeenLastCalledWith("/api/me/");
+    expect(mockAxios).toHaveBeenCalledTimes(2);
+    expect(mockAxios.lastReqGet().url).toEqual("me/");
 
-    act(() => {
+    await act(async () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
     });
 
     expect(getByText(/your profile/i)).toBeInTheDocument();
   });
 
-  it("integrates private routes",  () => {
+  it("integrates private routes", async () => {
     const history = createMemoryHistory();
     history.push("/dash");
     const { getByRole, getByText } = render(<App history={history} />);
-    expect(getByRole('status')).toHaveTextContent("Loading...");
+    expect(getByRole("status")).toHaveTextContent("Loading...");
 
-    expect(mockAxios.get).toHaveBeenLastCalledWith("/api/me/");
+    expect(mockAxios.lastReqGet().url).toEqual("me/");
     const checkInfo = mockAxios.lastReqGet();
-    act(() => {
-      mockAxios.mockResponse({ data: { success: true, data: null } }, checkInfo);
+    await act(async () => {
+      mockAxios.mockResponse(
+        { data: { success: true, data: null } },
+        checkInfo
+      );
     });
 
     expect(getByText("404")).toBeInTheDocument();
   });
 
-  it("shouldn't crash if auth check fails", () => {
+  it("shouldn't crash if auth check fails", async () => {
     render(<App />);
 
-    act(() => {
-      mockAxios.mockError({});
+    await act(async () => {
+      mockAxios.mockResponse({ data: MOCK_ERROR });
     });
   });
 });

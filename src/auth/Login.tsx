@@ -4,7 +4,6 @@ import { useAuth } from "./Auth";
 import { useHistory } from "react-router-dom";
 import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";
-import { APIError } from "../shared/types";
 
 const Login: React.FC = () => {
   const auth = useAuth();
@@ -25,21 +24,20 @@ const Login: React.FC = () => {
 
   const onSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
-    auth.login(username, password).then(
-      (user) => {
+    auth.login(username, password).then((resp) => {
+      if (resp.success) {
         history.push("/");
         toast.addToasts([
           {
             id: Math.random().toString(),
-            body: `Logged in as ${user?.username}.`,
+            body: `Logged in as ${resp.data?.username}.`,
             delay: 3000,
           },
         ]);
-      },
-      (errors: APIError) => {
-        setErrors(errors.detail || []);
+      } else {
+        setErrors(resp.error.detail || []);
       }
-    );
+    });
   };
 
   return (

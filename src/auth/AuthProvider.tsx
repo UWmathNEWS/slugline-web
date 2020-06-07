@@ -1,25 +1,15 @@
 import React, { useEffect, useReducer, useRef } from "react";
 
-import { User, UserAPIResponse, APIResponse } from "../shared/types";
-import axios, {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  Method as AxiosMethod,
-} from "axios";
+import { User, APIResponse } from "../shared/types";
 import Cookie from "js-cookie";
-import { apiGet, getApiUrl } from "../api/api";
-import ERRORS from "../shared/errors";
 import { authReducer, USER_LOCALSTORAGE_KEY, Auth, CSRF_COOKIE } from "./Auth";
-
-interface AxiosConfig extends AxiosRequestConfig {
-  method: AxiosMethod;
-  url: string;
-}
+import api from "../api/api";
 
 export const AuthProvider: React.FC = (props) => {
   const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
-  const readyPromise = useRef<Promise<void> | undefined>(undefined);
+  const readyPromise = useRef<Promise<APIResponse<User | null>> | undefined>(
+    undefined
+  );
   const isWaiting = useRef<boolean>(false);
   const [user, dispatchUser] = useReducer(authReducer, {
     user: storedUser !== null ? JSON.parse(storedUser) : null,
@@ -34,13 +24,15 @@ export const AuthProvider: React.FC = (props) => {
     }
   };
 
-  const check = (force: boolean = false): Promise<void> => {
+  const check = (force: boolean = false): Promise<APIResponse<User | null>> => {
     if (readyPromise.current === undefined || (!isWaiting.current && force)) {
       // Ensure we don't end up with a race condition --- we now have an invariant that only one network request
       // will be made at any point in time
       isWaiting.current = true;
-      const promise = apiGet<User | null>(getApiUrl("me/")).then(
-        (data: User | null) => {
+      const promise = api.me.get().then((resp) => {
+        if (resp.success) {
+          // this destructuring gets Typescript to believe that data does in fact exist
+          const { data } = resp;
           // Test equality of received data here with the current user. If they're not equal, update internal state;
           // otherwise, do nothing to save a rerender.
           // Due to above invariant, we can be assured that user is up-to-date, since nothing can change it.
@@ -55,11 +47,12 @@ export const AuthProvider: React.FC = (props) => {
                 (k) => user.user![k as keyof User] !== data[k as keyof User]
               ))
           ) {
-            setUser(data);
+            setUser(resp.data);
           }
-          isWaiting.current = false;
         }
-      );
+        isWaiting.current = false;
+        return resp;
+      });
       readyPromise.current = promise;
       return promise;
     }
@@ -74,145 +67,51 @@ export const AuthProvider: React.FC = (props) => {
     return user.user?.is_editor ?? false;
   };
 
-  const makeRequest = (config: AxiosConfig, setCurUser: boolean = false) => {
-    return axios({
-      ...config,
-      url: getApiUrl(config.url),
-      headers: user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {},
-    }).then(
-      (resp: AxiosResponse<UserAPIResponse>) => {
-        if (resp.status === 401 || resp.status === 403) {
-          // auth error
-          throw ERRORS.REQUEST.NEEDS_AUTHENTICATION;
-        }
-        if (!resp.data.success) {
-          throw resp.data.error ?? { detail: [ERRORS.REQUEST.DID_NOT_SUCCEED] };
-        }
-        if (setCurUser) {
-          dispatchUser({ type: "post", user: resp.data.data });
-        }
-        return resp.data.data;
-      },
-      (err: AxiosError) => {
-        throw err.response?.data.error ?? {
-          detail: [ERRORS.REQUEST.DID_NOT_SUCCEED],
-        };
-      }
-    );
-  };
-
-  const post = <T extends {}>(
-    url: string,
-    data: T,
-    setCurUser: boolean = false
-  ) => {
-    return makeRequest(
-      {
-        method: "post",
-        url,
-        data,
-      },
-      setCurUser
-    );
-  };
-
-  const put = <T extends {}>(
-    url: string,
-    data: T,
-    setCurUser: boolean = false
-  ) => {
-    return makeRequest(
-      {
-        method: "put",
-        url,
-        data,
-      },
-      setCurUser
-    );
-  };
-
-  const patch = <T extends {}>(
-    url: string,
-    data: T,
-    setCurUser: boolean = false
-  ) => {
-    return makeRequest(
-      {
-        method: "patch",
-        url,
-        data,
-      },
-      setCurUser
-    );
-  };
-
-  const del = (url: string) => {
-    return makeRequest(
-      {
-        method: "delete",
-        url,
-      },
-      false
-    );
-  };
-
   const login = (username: string, password: string) => {
-    const body = {
-      username: username,
-      password: password,
-    };
-    const headers = user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {};
-    return axios
-      .post<UserAPIResponse>(getApiUrl("login/"), body, {
-        headers: headers,
-      })
-      .then(
-        (resp) => {
-          if (resp.data.success) {
-            dispatchUser({ type: "login", user: resp.data.data });
-            return resp.data.data;
-          }
+    return api
+      .login({
+        body: {
+          username: username,
+          password: password,
         },
-        (err: AxiosError) => {
-          throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
+        csrf: user.csrfToken || "",
+      })
+      .then((resp) => {
+        if (resp.success) {
+          dispatchUser({ type: "login", user: resp.data });
         }
-      );
+        return resp;
+      });
   };
 
   const logout = () => {
-    const headers = user.csrfToken ? { "X-CSRFToken": user.csrfToken } : {};
-    return axios
-      .post<APIResponse<undefined>>(
-        getApiUrl("logout/"),
-        {},
-        {
-          headers: headers,
+    return api
+      .logout({
+        csrf: user.csrfToken || "",
+        body: undefined,
+      })
+      .then((resp) => {
+        if (resp.success) {
+          dispatchUser({ type: "logout" });
         }
-      )
-      .then(
-        (resp) => {
-          if (resp.data.success) {
-            dispatchUser({ type: "logout" });
-          }
-        },
-        (err: AxiosError) => {
-          throw err.response?.data.error ?? [ERRORS.REQUEST.DID_NOT_SUCCEED];
-        }
-      );
+        return resp;
+      });
   };
 
   useEffect(() => {
-    check().catch((e) => {
-      // something went horribly wrong here, but we only alert users if they're logged in as otherwise it causes no harm
-      if (storedUser !== null) {
-        window.alert(
-          "An error occurred and we couldn't verify that you're logged in. Try refreshing the page, or check your network connection."
+    check().then((resp) => {
+      if (!resp.success) {
+        // something went horribly wrong here, but we only alert users if they're logged in as otherwise it causes no harm
+        if (storedUser !== null) {
+          window.alert(
+            "An error occurred and we couldn't verify that you're logged in. Try refreshing the page, or check your network connection."
+          );
+        }
+        console.error(
+          "The following error was thrown while performing an auth check:\n",
+          resp.error
         );
       }
-      console.error(
-        "The following error was thrown while performing an auth check:\n",
-        e
-      );
     });
     // We only need to call check on component mount, hence the empty dependency array. The patch that disables ESLint
     // yelling at us in this scenario hasn't landed in our toolchain yet, so we disable the warning for now.
@@ -227,13 +126,9 @@ export const AuthProvider: React.FC = (props) => {
         check,
         isAuthenticated,
         isEditor,
-        post,
-        put,
-        patch,
-        delete: del,
-        setUser,
         login,
         logout,
+        setUser,
       }}
     >
       {props.children}

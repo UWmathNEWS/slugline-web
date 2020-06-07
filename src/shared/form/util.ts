@@ -1,7 +1,7 @@
 import { FormContextValues } from "react-hook-form";
 import { APIError } from "../types";
 
-export const cleanFormData = (data: object) => {
+export const cleanFormData = <T>(data: T): Partial<T> => {
   return Object.fromEntries(
     Object.entries(data).filter(([key, value]) => value !== "")
   );

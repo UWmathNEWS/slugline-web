@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useAllIssues } from "../api/hooks";
 
 import "./IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue } from "../shared/types";
+import { useAPI } from "../api/hooks";
+import api from "../api/api";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -42,7 +43,7 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
 };
 
 const IssuesList = () => {
-  const [issues, ,] = useAllIssues();
+  const [issues] = useAPI(api.issues.list);
   const [volumes, setVolumes] = useState<Issue[][]>([]);
 
   useEffect(() => {

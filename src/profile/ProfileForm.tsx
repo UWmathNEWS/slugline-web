@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { User, APIResponse, UserAPIError } from "../shared/types";
+import { User, UserAPIError } from "../shared/types";
 import { Form, Row, Col, Button, Alert } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";
 
-import axios from "axios";
-import { getApiUrl } from "../api/api";
-import { useAuth } from "../auth/Auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
 import { cleanFormData, setServerErrors } from "../shared/form/util";
 import { useDebouncedCallback } from "../shared/hooks";
 import NonFieldErrors from "../shared/form/NonFieldErrors";
+import api from "../api/api";
+import { useAuth } from "../auth/Auth";
 
 export interface ProfileFormVals {
   username?: string;
@@ -63,13 +62,8 @@ export const useProfileForm = (user?: User) => {
 const validateUsernameAvailable = async (
   username: string
 ): Promise<boolean> => {
-  const resp = await axios.get<APIResponse<void>>(
-    getApiUrl(`users/${username}/query/`),
-    {
-      validateStatus: () => true,
-    }
-  );
-  return resp.data.success;
+  const resp = await api.users.query({ username: username });
+  return resp.success;
 };
 
 interface ProfileFormProps {
@@ -128,33 +122,19 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
     const cleaned = cleanFormData(vals);
 
     const editingMe = props.user?.username === auth.user?.username;
-    try {
-      if (typeof props.user === "undefined") {
-        await auth.post<ProfileFormVals>("users/", cleaned);
-        setSuccessMessage(`User ${vals.username} created successfully.`);
-        // refresh the form so we can add a new user
-        props.context.reset();
-      } else {
-        await auth.patch<ProfileFormVals>(
-          editingMe ? "me/" : `users/${vals?.username}/`,
-          cleaned,
-          editingMe
-        );
-        setSuccessMessage(`User ${vals.username} saved successfully.`);
-      }
-      setGeneralErrors(undefined);
-      setShowPassword(false);
-      if (props.onSubmitSuccessful) {
-        await props.onSubmitSuccessful(vals);
-      }
-    } catch (err) {
-      const apiError = err as UserAPIError;
-      setServerErrors(props.context, apiError);
-      setSuccessMessage(undefined);
-      setGeneralErrors(apiError.detail);
-      if (props.onSubmitFailed) {
-        await props.onSubmitFailed(vals, apiError);
-      }
+    if (props.user === undefined) {
+      return await api.users.create({
+        body: cleaned,
+        csrf: auth.csrfToken || "",
+      });
+    } else {
+      return editingMe
+        ? await api.me.patch({ body: cleaned, csrf: auth.csrfToken || "" })
+        : await api.users.patch({
+            id: props.user.username,
+            body: cleaned,
+            csrf: auth.csrfToken || "",
+          });
     }
   };
 
@@ -172,7 +152,32 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
         </Alert>
       )}
       <NonFieldErrors errors={generalErrors || []} />
-      <Form id={props.formId} onSubmit={props.context.handleSubmit(submit)}>
+      <Form
+        id={props.formId}
+        onSubmit={props.context.handleSubmit(async (vals) => {
+          const resp = await submit(vals);
+          if (resp.success) {
+            setSuccessMessage(
+              props.user
+                ? `User ${vals.username} saved successfully.`
+                : `User ${vals.username} created successfully.`
+            );
+            setGeneralErrors(undefined);
+            setShowPassword(false);
+            if (props.onSubmitSuccessful) {
+              await props.onSubmitSuccessful(vals);
+            }
+            props.context.reset();
+          } else {
+            setServerErrors(props.context, resp.error);
+            setSuccessMessage(undefined);
+            setGeneralErrors(resp.error.detail);
+            if (props.onSubmitFailed) {
+              await props.onSubmitFailed(vals, resp.error);
+            }
+          }
+        })}
+      >
         <Form.Group as={Row} controlId="username">
           <Form.Label column sm={2}>
             Username
@@ -202,7 +207,10 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                     // if we're editing a user the field is disabled anyway, don't validate
                     return;
                   }
-                  if (username.length && !(await validateUserNameDebounced(username))) {
+                  if (
+                    username.length &&
+                    !(await validateUserNameDebounced(username))
+                  ) {
                     return Promise.resolve("USER.USERNAME.ALREADY_EXISTS");
                   }
                 },
