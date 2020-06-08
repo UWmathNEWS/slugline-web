@@ -4,7 +4,7 @@
 
 const app = require('./lib/server').default;
 
-const PORT = parseInt(process.env.PORT) || 3030;
+const PORT = parseInt(process.env.PORT) || 8080;
 app.listen(PORT, () => {
   console.log(`SSR running on port ${PORT}`);
 });
