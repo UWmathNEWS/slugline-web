@@ -25,7 +25,10 @@ router.use(express.static(BUILD_DIR, { maxAge: "30d" }));
 // route API to Django --- dev use only
 router.use(
   "^/api",
-  proxy({ target: "http://localhost:8000", changeOrigin: true })
+  proxy({
+    target: process.env.SLUGLINE_SERVER || "http://localhost:8000",
+    changeOrigin: true,
+  })
 );
 
 router.use("^/dash", dashRenderer);
