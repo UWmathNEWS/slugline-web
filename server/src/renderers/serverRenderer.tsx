@@ -8,8 +8,7 @@ import {
   renderHelmet,
   serverAppWrapper,
   PublicApp,
-  Error404App,
-  Error500App,
+  ErrorApp,
 } from "../helpers";
 import fs from "fs";
 import path from "path";
@@ -39,7 +38,7 @@ const serverRenderer = (req: Request, res: Response) => {
               .replace(
                 '<div id="root"></div>',
                 `<div id="root">${ReactDOMServer.renderToString(
-                  serverAppWrapper(Error404App, req.url)
+                  serverAppWrapper(ErrorApp, req.url, {}, { statusCode: 404 })
                 )}</div>`
               )
               .replace("<title>{{HELMET}}</title>", renderHelmet)
@@ -48,27 +47,32 @@ const serverRenderer = (req: Request, res: Response) => {
 
       if (currentRoute.loadData) {
         const { params } = matchPath(req.url, currentRoute)!;
-        try {
-          data = await unwrap(
-            currentRoute.loadData({
-              params,
-              headers: { Cookie: req.header("cookie") || "" },
-            })
+        const resp = await currentRoute.loadData({
+          params,
+          headers: { Cookie: req.header("cookie") || "" },
+        });
+
+        if (resp.success) {
+          data = resp.data;
+        } else {
+          const statusCode = resp.statusCode;
+          console.error(req.url, currentRoute, resp.error);
+          return res.status(statusCode).send(
+            html
+              .replace(
+                '<div id="root"></div>',
+                `<div id="root">${ReactDOMServer.renderToString(
+                  serverAppWrapper(ErrorApp, req.url, {}, { statusCode })
+                )}</div>`
+              )
+              .replace("<title>{{HELMET}}</title>", renderHelmet)
+              .replace(
+                "window.__SSR_DIRECTIVES__={}",
+                `window.__SSR_DIRECTIVES__={STATUS_CODE:${
+                  resp.statusCode
+                },ERROR:${serialize(resp.error)}}`
+              )
           );
-        } catch (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .send(
-              html
-                .replace(
-                  '<div id="root"></div>',
-                  `<div id="root">${ReactDOMServer.renderToString(
-                    serverAppWrapper(Error500App, req.url)
-                  )}</div>`
-                )
-                .replace("<title>{{HELMET}}</title>", renderHelmet)
-            );
         }
       }
 

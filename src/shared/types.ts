@@ -101,7 +101,7 @@ interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
   key?: string | number;
   routeComponent?: React.ComponentType;
   routeProps?: any;
-  loadData?: (args: { params: any; headers: any }) => Promise<any>;
+  loadData?: (args: { params: any; headers: any }) => Promise<APIResponse<any>>;
 }
 
 export type RouteProps = RouteBaseProps &

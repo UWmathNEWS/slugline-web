@@ -7,6 +7,7 @@ import Visor from "../shared/components/Visor";
 import { RequestState, useAPILazy } from "../api/hooks";
 import api from "../api/api";
 import Loader from "../shared/components/Loader";
+import { ErrorPage } from "../shared/errors/ErrorPage";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -73,9 +74,15 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
       ? issuesToVolumes(props.staticContext.data.results)
       : []
   );
+  const [statusCode, setStatusCode] = useState<number>(0);
 
   useEffect(() => {
     setTimeout(() => {
+      if (window.__SSR_DIRECTIVES__.STATUS_CODE) {
+        setStatusCode(window.__SSR_DIRECTIVES__.STATUS_CODE);
+        delete window.__SSR_DIRECTIVES__.STATUS_CODE;
+        return;
+      }
       if (window.__SSR_DIRECTIVES__.DATA) {
         setVolumes(issuesToVolumes(window.__SSR_DIRECTIVES__.DATA.results));
         delete window.__SSR_DIRECTIVES__.DATA;
@@ -88,6 +95,10 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
       }
     }, 0);
   }, [getIssues]);
+
+  if (statusCode) {
+    return <ErrorPage statusCode={statusCode} />;
+  }
 
   return (
     <>

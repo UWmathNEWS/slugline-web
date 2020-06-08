@@ -6,20 +6,20 @@ import ToastContainer from "../../src/shared/components/ToastContainer";
 import path from "path";
 import { Helmet } from "react-helmet";
 import { appFactory } from "../../src/App";
-import Error404 from "../../src/shared/errors/Error404";
-import Error500 from "../../src/shared/errors/Error500";
+import { ErrorPage, ErrorPageProps } from "../../src/shared/errors/ErrorPage";
 import Public from "../../src/routes/Public";
 
 export const BUILD_DIR = path.resolve(__dirname, "..", "..", "build");
 
 export const serverAppWrapper: {
-  <T extends StaticRouterContext = StaticRouterContext>(
-    Component: React.ComponentType,
+  <T extends StaticRouterContext = StaticRouterContext, U = any>(
+    Component: React.ComponentType<U>,
     location: string,
-    context: T
+    context: T,
+    props?: U
   ): React.ReactElement;
   (Component: React.ComponentType, location: string): React.ReactElement;
-} = (Component: any, location: any, context: any = {}) => {
+} = (Component: any, location: any, context: any = {}, props: any = {}) => {
   return (
     <Auth.Provider value={defaultAuthContext}>
       <ToastProvider>
@@ -27,7 +27,7 @@ export const serverAppWrapper: {
           location={location}
           context={context as StaticRouterContext}
         >
-          <Component />
+          <Component {...props} />
         </StaticRouter>
         <ToastContainer />
       </ToastProvider>
@@ -50,5 +50,4 @@ export const renderHelmet = () => {
 };
 
 export const PublicApp = appFactory(Public);
-export const Error404App = appFactory(Error404);
-export const Error500App = appFactory(Error500);
+export const ErrorApp = appFactory<ErrorPageProps>(ErrorPage);

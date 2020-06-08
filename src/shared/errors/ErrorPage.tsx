@@ -1,13 +1,12 @@
 import React from "react";
-import { APIError } from "../types";
 import Error404 from "./Error404";
 import Error500 from "./Error500";
 
-interface ErrorPageProps<U extends APIError = APIError> {
+export interface ErrorPageProps {
   statusCode: number;
 }
 
-export const ErrorPage: React.FC<ErrorPageProps> = (props: ErrorPageProps) => {
+export const ErrorPage: React.FC<ErrorPageProps> = (props) => {
   if (props.statusCode === 404) {
     return <Error404 />;
   } else {

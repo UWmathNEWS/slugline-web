@@ -5,7 +5,7 @@ import {
   BUILD_DIR,
   renderHelmet,
   serverAppWrapper,
-  Error404App,
+  ErrorApp,
 } from "../helpers";
 import { routes as dashRoutes } from "../../../src/routes/Dash";
 import { matchPath } from "react-router";
@@ -48,7 +48,12 @@ const dashRenderer = (req: Request, res: Response) => {
                   .replace(
                     '<div id="root"></div>',
                     `<div id="root">${ReactDOMServer.renderToString(
-                      serverAppWrapper(Error404App, req.url)
+                      serverAppWrapper(
+                        ErrorApp,
+                        req.url,
+                        {},
+                        { statusCode: 404 }
+                      )
                     )}</div>`
                   )
                   .replace("<title>{{HELMET}}</title>", renderHelmet)

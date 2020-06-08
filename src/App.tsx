@@ -24,7 +24,7 @@ interface AppProps {
 }
 
 export const appFactory = <T extends any = {}>(
-  Component: React.ComponentType
+  Component: React.ComponentType<T>
 ): React.FC<T> => {
   return (props: T) => (
     <>
