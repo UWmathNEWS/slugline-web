@@ -69,7 +69,7 @@ export const useAPI = <TResp, TError extends APIError = APIError>(
 };
 
 export type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
-  (args: TArgs) => Promise<APIResponse<TResp, TError>>,
+  (args?: TArgs) => Promise<APIResponse<TResp, TError>>,
   RequestInfo
 ];
 
@@ -84,7 +84,7 @@ export const useAPILazy = <
   TArgs extends RequestArgs,
   TError extends APIError = APIError
 >(
-  fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
+  fn: (args?: TArgs) => Promise<APIResponse<TResp, TError>>
 ): UseAPILazyHook<TResp, TArgs> => {
   const [requestState, setRequestState] = useState<RequestState>(
     RequestState.NotStarted
@@ -92,7 +92,7 @@ export const useAPILazy = <
   const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
 
   const exec = useCallback(
-    (args: TArgs) => {
+    (args?: TArgs) => {
       setRequestState(RequestState.Running);
       return fn(args).then((resp) => {
         setStatusCode(resp.statusCode);
@@ -122,7 +122,9 @@ export type UseAPILazyCSRFHook<
 ];
 
 /**
- * A variant of useAPILazy that handles the CSRF token automatically.
+ * A variant of useAPILazy that handles the CSRF token automatically. A major difference is that an argument must be
+ * supplied to the returned callback, which will then be passed on to the supplied API call.
+ *
  * @see useApiLazy
  */
 export const useAPILazyUnsafe = <

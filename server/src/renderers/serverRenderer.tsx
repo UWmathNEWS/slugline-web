@@ -9,20 +9,20 @@ import {
   serverAppWrapper,
   PublicApp,
   Error404App,
+  Error500App, cookiesToString
 } from "../helpers";
 import fs from "fs";
 import path from "path";
+import serialize from "serialize-javascript";
+import { unwrap } from "../../../src/api/api";
 
 const serverRenderer = (req: Request, res: Response) => {
   const currentRoute = publicRoutes.find((route) => matchPath(req.url, route));
 
   let context: StaticRouterContextWithData = {};
+  let data: any = null;
 
-  const app = ReactDOMServer.renderToString(
-    serverAppWrapper(PublicApp, req.url, context)
-  );
-
-  fs.readFile(path.resolve(BUILD_DIR, "index.html"), "utf8", (err, html) => {
+  fs.readFile(path.resolve(BUILD_DIR, "index.html"), "utf8", async (err, html) => {
     if (err) {
       console.error(err);
       return res.status(500).send("An error occurred");
@@ -43,10 +43,44 @@ const serverRenderer = (req: Request, res: Response) => {
         );
     }
 
+    if (currentRoute.loadData) {
+      const { params } = matchPath(req.url, currentRoute)!;
+      try {
+        data = await unwrap(currentRoute.loadData({
+          params,
+          headers: { Cookie: cookiesToString(req.cookies) }
+        }));
+      } catch (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .send(
+            html
+              .replace(
+                '<div id="root"></div>',
+                `<div id="root">${ReactDOMServer.renderToString(
+                  serverAppWrapper(Error500App, req.url)
+                )}</div>`
+              )
+              .replace("<title>{{HELMET}}</title>", renderHelmet)
+          );
+      }
+    }
+
+    context.data = data;
+
+    const app = ReactDOMServer.renderToString(
+      serverAppWrapper(PublicApp, req.url, context)
+    );
+
     return res.send(
       html
         .replace('<div id="root"></div>', `<div id="root">${app}</div>`)
         .replace("<title>{{HELMET}}</title>", renderHelmet)
+        .replace(
+          "window.__SSR_DIRECTIVES__={}",
+          `window.__SSR_DIRECTIVES__={DATA:${serialize(data)}}`
+        )
     );
   });
 };

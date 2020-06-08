@@ -5,6 +5,7 @@ import IssueList from "../issues/IssuesList";
 import Error404 from "../shared/errors/Error404";
 import { renderRoutes } from "../shared/helpers";
 import { RouteProps } from "../shared/types";
+import api from "../api/api";
 
 export const routes: RouteProps[] = [
   {
@@ -22,12 +23,18 @@ export const routes: RouteProps[] = [
     path: "/issues/:issue_id",
     component: IssuePage,
     title: "v{}i{}",
+    loadData: ({ params, headers }) =>
+      api.issues.get({
+        id: params.issue_id,
+        headers,
+      }),
   },
   {
     path: "/issues",
     exact: true,
     component: IssueList,
     title: "Issues",
+    loadData: ({ headers }) => api.issues.list({ headers }),
   },
   {
     component: Error404,

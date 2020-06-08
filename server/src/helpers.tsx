@@ -7,6 +7,7 @@ import path from "path";
 import { Helmet } from "react-helmet";
 import { appFactory } from "../../src/App";
 import Error404 from "../../src/shared/errors/Error404";
+import Error500 from "../../src/shared/errors/Error500";
 import Public from "../../src/routes/Public";
 
 export const BUILD_DIR = path.resolve(__dirname, "..", "..", "build");
@@ -48,5 +49,11 @@ export const renderHelmet = () => {
   `;
 };
 
+export const cookiesToString = (cookies: any) =>
+  Object.entries(cookies || {})
+    .map(([name, value]) => `${name}=${value}`)
+    .join(";");
+
 export const PublicApp = appFactory(Public);
 export const Error404App = appFactory(Error404);
+export const Error500App = appFactory(Error500);

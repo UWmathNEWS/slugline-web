@@ -1,29 +1,26 @@
 import { Request, Response } from "express";
-import axios from "axios";
-import { APIResponse, User } from "../../../src/shared/types";
 import fs from "fs";
 import path from "path";
 import {
   BUILD_DIR,
   renderHelmet,
   serverAppWrapper,
-  Error404App,
+  Error404App, cookiesToString
 } from "../helpers";
 import { routes as dashRoutes } from "../../../src/routes/Dash";
 import { matchPath } from "react-router";
 import ReactDOMServer from "react-dom/server";
+import api from "../../../src/api/api";
 
 const dashRenderer = (req: Request, res: Response) => {
-  axios
-    .get<APIResponse<User | null>>("http://localhost:8000/api/me", {
+  api.me
+    .get({
       headers: {
         // Forward cookies
-        Cookie: Object.entries(req.cookies || {})
-          .map(([name, value]) => `${name}=${value}`)
-          .join(";"),
+        Cookie: cookiesToString(req.cookies),
       },
     })
-    .then(({ data }) => {
+    .then((data) => {
       if (data.success) {
         fs.readFile(
           path.resolve(BUILD_DIR, "index.html"),
@@ -63,11 +60,10 @@ const dashRenderer = (req: Request, res: Response) => {
             }
           }
         );
+      } else {
+        console.log(data.error);
+        return res.status(500).send("An error occurred");
       }
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).send("An error occurred");
     });
 };
 
