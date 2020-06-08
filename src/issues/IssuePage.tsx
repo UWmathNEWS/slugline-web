@@ -55,15 +55,15 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
         <h1>{`Volume ${issue?.volume_num} Issue ${issue?.issue_code}`}</h1>
       </>
     );
-  } else if (getIssueInfo.state === RequestState.Running) {
+  } else if (statusCode) {
+    return <ErrorPage statusCode={statusCode} />;
+  } else {
     return (
       <>
         <Visor key="visor" title="Loading..." location={location.pathname} />
         <Loader variant="spinner" />
       </>
     );
-  } else {
-    return <ErrorPage statusCode={statusCode || 500} />;
   }
 };
 
