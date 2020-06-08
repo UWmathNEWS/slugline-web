@@ -79,13 +79,14 @@ export type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
  * @param fn An async function, similar to a useAPI argument. However, this function may take as an argument
  * an object extending `RequestArgs`.
  */
-export const useAPILazy = <
-  TResp,
-  TArgs extends RequestArgs,
-  TError extends APIError = APIError
->(
-  fn: (args?: TArgs) => Promise<APIResponse<TResp, TError>>
-): UseAPILazyHook<TResp, TArgs> => {
+export const useAPILazy: {
+  <TResp, TArgs extends RequestArgs, TError extends APIError = APIError>(
+    fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
+  ): UseAPILazyHook<TResp, TArgs>;
+  <TResp, TError extends APIError = APIError>(
+    fn: () => Promise<APIResponse<TResp, TError>>
+  ): UseAPILazyHook<TResp, void>;
+} = <TResp, TArgs, TError>(fn: (args: any) => Promise<APIResponse<TResp, TError>>): any => {
   const [requestState, setRequestState] = useState<RequestState>(
     RequestState.NotStarted
   );
