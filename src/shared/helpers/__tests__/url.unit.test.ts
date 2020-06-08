@@ -24,5 +24,13 @@ describe("helper.url", () => {
       expect(url.resolve("file:///usr/lib/")).toBe("file:///usr/lib/");
       expect(url.resolve("file:///", "usr", "lib/")).toBe("file:///usr/lib/");
     });
+
+    it("resolves protocol-less URLs", () => {
+      expect(url.resolve("/", "test")).toBe("/test");
+    });
+
+    it("resolves protocol-relative URLs", () => {
+      expect(url.resolve("//localhost:80", "test")).toBe("//localhost:80/test");
+    })
   });
 });

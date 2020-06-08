@@ -24,8 +24,11 @@ export const BaseVisor = () => {
 
       <meta name="description" content={config.description} />
 
-      <link rel="icon" href={config.icons.favicon.src} />
-      <link rel="apple-touch-icon" href={config.icons.touchIcon.src} />
+      <link rel="icon" href={url.resolve("/", config.icons.favicon.src)} />
+      <link
+        rel="apple-touch-icon"
+        href={url.resolve("/", config.icons.touchIcon.src)}
+      />
       <meta name="theme-color" content={config.themeColor} />
 
       {/* BEGIN SEO */}
