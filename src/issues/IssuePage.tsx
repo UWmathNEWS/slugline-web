@@ -32,7 +32,7 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
         });
       }
     }, 0);
-  }, []);
+  }, [getIssue]);
 
   if (issue && getIssueInfo.state !== RequestState.Running) {
     return (

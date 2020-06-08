@@ -87,7 +87,7 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
         });
       }
     }, 0);
-  }, []);
+  }, [getIssues]);
 
   return (
     <>
