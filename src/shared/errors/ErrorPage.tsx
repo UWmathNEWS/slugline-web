@@ -6,10 +6,12 @@ export interface ErrorPageProps {
   statusCode: number;
 }
 
-export const ErrorPage: React.FC<ErrorPageProps> = (props) => {
+const ErrorPage: React.FC<ErrorPageProps> = (props) => {
   if (props.statusCode === 404) {
     return <Error404 />;
   } else {
     return <Error500 />;
   }
 };
+
+export default ErrorPage;

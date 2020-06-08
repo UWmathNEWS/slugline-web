@@ -7,7 +7,7 @@ import Visor from "../shared/components/Visor";
 import { RequestState, useAPILazy } from "../api/hooks";
 import api from "../api/api";
 import Loader from "../shared/components/Loader";
-import { ErrorPage } from "../shared/errors/ErrorPage";
+import ErrorPage from "../shared/errors/ErrorPage";
 
 export interface VolumeIssuesProps {
   volume: Issue[];

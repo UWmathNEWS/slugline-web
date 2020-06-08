@@ -6,7 +6,7 @@ import ToastContainer from "../../src/shared/components/ToastContainer";
 import path from "path";
 import { Helmet } from "react-helmet";
 import { appFactory } from "../../src/App";
-import { ErrorPage, ErrorPageProps } from "../../src/shared/errors/ErrorPage";
+import ErrorPage, { ErrorPageProps } from "../../src/shared/errors/ErrorPage";
 import Public from "../../src/routes/Public";
 
 export const BUILD_DIR = path.resolve(__dirname, "..", "..", "build");

@@ -5,7 +5,7 @@ import Visor from "../shared/components/Visor";
 import Loader from "../shared/components/Loader";
 import { RequestState, useAPILazy } from "../api/hooks";
 import api from "../api/api";
-import { ErrorPage } from "../shared/errors/ErrorPage";
+import ErrorPage from "../shared/errors/ErrorPage";
 
 const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
   route,

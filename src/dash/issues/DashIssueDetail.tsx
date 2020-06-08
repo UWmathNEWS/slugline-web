@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
 import { ArticleTitle } from "../articles/DashArticlesPage";
-import { ErrorPage } from "../../shared/errors/ErrorPage";
+import ErrorPage from "../../shared/errors/ErrorPage";
 import { RichTable, Column } from "../../shared/components/RichTable";
 import { Article, RouteComponentProps } from "../../shared/types";
 import Visor from "../../shared/components/Visor";

@@ -8,7 +8,7 @@ import { useDebouncedCallback } from "../shared/hooks";
 import EditorInfo from "../editor/EditorInfo";
 import { RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
-import { ErrorPage } from "../shared/errors/ErrorPage";
+import ErrorPage from "../shared/errors/ErrorPage";
 import api from "../api/api";
 
 const getEditorRequestState = (
