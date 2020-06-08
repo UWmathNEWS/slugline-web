@@ -5,7 +5,7 @@ import {
   BUILD_DIR,
   renderHelmet,
   serverAppWrapper,
-  Error404App, cookiesToString
+  Error404App,
 } from "../helpers";
 import { routes as dashRoutes } from "../../../src/routes/Dash";
 import { matchPath } from "react-router";
@@ -17,7 +17,7 @@ const dashRenderer = (req: Request, res: Response) => {
     .get({
       headers: {
         // Forward cookies
-        Cookie: cookiesToString(req.cookies),
+        Cookie: req.header("cookie") || "",
       },
     })
     .then((data) => {

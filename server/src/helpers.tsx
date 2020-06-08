@@ -49,11 +49,6 @@ export const renderHelmet = () => {
   `;
 };
 
-export const cookiesToString = (cookies: any) =>
-  Object.entries(cookies || {})
-    .map(([name, value]) => `${name}=${value}`)
-    .join(";");
-
 export const PublicApp = appFactory(Public);
 export const Error404App = appFactory(Error404);
 export const Error500App = appFactory(Error500);

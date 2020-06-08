@@ -3,7 +3,6 @@
  */
 
 import express from "express";
-import cookieParser from "cookie-parser";
 import proxy from "http-proxy-middleware";
 import morgan from "morgan";
 
@@ -15,7 +14,6 @@ import serverRenderer from "./renderers/serverRenderer";
 const app = express();
 
 app.use(morgan("combined"));
-app.use(cookieParser());
 
 const router = express.Router();
 

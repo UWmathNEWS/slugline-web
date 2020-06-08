@@ -9,7 +9,7 @@ import {
   serverAppWrapper,
   PublicApp,
   Error404App,
-  Error500App, cookiesToString
+  Error500App,
 } from "../helpers";
 import fs from "fs";
 import path from "path";
@@ -22,67 +22,73 @@ const serverRenderer = (req: Request, res: Response) => {
   let context: StaticRouterContextWithData = {};
   let data: any = null;
 
-  fs.readFile(path.resolve(BUILD_DIR, "index.html"), "utf8", async (err, html) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send("An error occurred");
-    }
-
-    if (currentRoute === undefined || context.statusCode == 404) {
-      return res
-        .status(404)
-        .send(
-          html
-            .replace(
-              '<div id="root"></div>',
-              `<div id="root">${ReactDOMServer.renderToString(
-                serverAppWrapper(Error404App, req.url)
-              )}</div>`
-            )
-            .replace("<title>{{HELMET}}</title>", renderHelmet)
-        );
-    }
-
-    if (currentRoute.loadData) {
-      const { params } = matchPath(req.url, currentRoute)!;
-      try {
-        data = await unwrap(currentRoute.loadData({
-          params,
-          headers: { Cookie: cookiesToString(req.cookies) }
-        }));
-      } catch (err) {
+  fs.readFile(
+    path.resolve(BUILD_DIR, "index.html"),
+    "utf8",
+    async (err, html) => {
+      if (err) {
         console.error(err);
+        return res.status(500).send("An error occurred");
+      }
+
+      if (currentRoute === undefined || context.statusCode == 404) {
         return res
-          .status(500)
+          .status(404)
           .send(
             html
               .replace(
                 '<div id="root"></div>',
                 `<div id="root">${ReactDOMServer.renderToString(
-                  serverAppWrapper(Error500App, req.url)
+                  serverAppWrapper(Error404App, req.url)
                 )}</div>`
               )
               .replace("<title>{{HELMET}}</title>", renderHelmet)
           );
       }
+
+      if (currentRoute.loadData) {
+        const { params } = matchPath(req.url, currentRoute)!;
+        try {
+          data = await unwrap(
+            currentRoute.loadData({
+              params,
+              headers: { Cookie: req.header("cookie") || "" },
+            })
+          );
+        } catch (err) {
+          console.error(err);
+          return res
+            .status(500)
+            .send(
+              html
+                .replace(
+                  '<div id="root"></div>',
+                  `<div id="root">${ReactDOMServer.renderToString(
+                    serverAppWrapper(Error500App, req.url)
+                  )}</div>`
+                )
+                .replace("<title>{{HELMET}}</title>", renderHelmet)
+            );
+        }
+      }
+
+      context.data = data;
+
+      const app = ReactDOMServer.renderToString(
+        serverAppWrapper(PublicApp, req.url, context)
+      );
+
+      return res.send(
+        html
+          .replace('<div id="root"></div>', `<div id="root">${app}</div>`)
+          .replace("<title>{{HELMET}}</title>", renderHelmet)
+          .replace(
+            "window.__SSR_DIRECTIVES__={}",
+            `window.__SSR_DIRECTIVES__={DATA:${serialize(data)}}`
+          )
+      );
     }
-
-    context.data = data;
-
-    const app = ReactDOMServer.renderToString(
-      serverAppWrapper(PublicApp, req.url, context)
-    );
-
-    return res.send(
-      html
-        .replace('<div id="root"></div>', `<div id="root">${app}</div>`)
-        .replace("<title>{{HELMET}}</title>", renderHelmet)
-        .replace(
-          "window.__SSR_DIRECTIVES__={}",
-          `window.__SSR_DIRECTIVES__={DATA:${serialize(data)}}`
-        )
-    );
-  });
+  );
 };
 
 export default serverRenderer;
