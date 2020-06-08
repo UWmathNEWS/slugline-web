@@ -39,26 +39,16 @@ export const defaultAuthContext: AuthContext = {
 export const Auth = createContext<AuthContext>(defaultAuthContext);
 
 export const CSRF_COOKIE = "csrftoken";
-export const USER_LOCALSTORAGE_KEY = "slugline-user";
 
 export const authReducer = (state: AuthState, action: AuthAction) => {
   switch (action.type) {
     case "login": {
-      if (typeof localStorage !== "undefined") {
-        localStorage.setItem(
-          USER_LOCALSTORAGE_KEY,
-          JSON.stringify(action.user)
-        );
-      }
       return {
         user: action.user,
         csrfToken: Cookie.get(CSRF_COOKIE) || null,
       };
     }
     case "logout": {
-      if (typeof localStorage !== "undefined") {
-        localStorage.removeItem(USER_LOCALSTORAGE_KEY);
-      }
       return {
         user: null,
         csrfToken: Cookie.get(CSRF_COOKIE) || null,

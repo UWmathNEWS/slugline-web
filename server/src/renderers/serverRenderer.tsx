@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { routes as publicRoutes } from "../../../src/routes/Public";
 import { matchPath } from "react-router";
-import { StaticRouterContextWithData } from "../../../src/shared/types";
+import { StaticRouterContextWithData, User } from "../../../src/shared/types";
 import ReactDOMServer from "react-dom/server";
 import {
   BUILD_DIR,
@@ -13,12 +13,18 @@ import {
 import fs from "fs";
 import path from "path";
 import serialize from "serialize-javascript";
-import { unwrap } from "../../../src/api/api";
+import api from "../../../src/api/api";
 
 const serverRenderer = (req: Request, res: Response) => {
   const currentRoute = publicRoutes.find((route) => matchPath(req.url, route));
 
   let context: StaticRouterContextWithData = {};
+  let promises = [
+    api.me.get({
+      headers: { Cookie: req.header("cookie") || "" },
+    }),
+  ];
+  let user: User | null = null;
   let data: any = null;
 
   fs.readFile(
@@ -47,16 +53,20 @@ const serverRenderer = (req: Request, res: Response) => {
 
       if (currentRoute.loadData) {
         const { params } = matchPath(req.url, currentRoute)!;
-        const resp = await currentRoute.loadData({
-          params,
-          headers: { Cookie: req.header("cookie") || "" },
-        });
+        promises.push(
+          currentRoute.loadData({
+            params,
+            headers: { Cookie: req.header("cookie") || "" },
+          })
+        );
 
-        if (resp.success) {
-          data = resp.data;
+        const [, dataResp] = await Promise.all(promises);
+
+        if (dataResp.success) {
+          data = dataResp.data;
         } else {
-          const statusCode = resp.statusCode;
-          console.error(req.url, currentRoute, resp.error);
+          const statusCode = dataResp.statusCode;
+          console.error(req.url, currentRoute, dataResp.error);
           return res.status(statusCode).send(
             html
               .replace(
@@ -69,12 +79,15 @@ const serverRenderer = (req: Request, res: Response) => {
               .replace(
                 "window.__SSR_DIRECTIVES__={}",
                 `window.__SSR_DIRECTIVES__={STATUS_CODE:${
-                  resp.statusCode
-                },ERROR:${serialize(resp.error)}}`
+                  dataResp.statusCode
+                },ERROR:${serialize(dataResp.error)}}`
               )
           );
         }
       }
+
+      const [userResp] = await Promise.all(promises);
+      user = userResp.success ? userResp.data : null;
 
       context.data = data;
 
@@ -88,7 +101,9 @@ const serverRenderer = (req: Request, res: Response) => {
           .replace("<title>{{HELMET}}</title>", renderHelmet)
           .replace(
             "window.__SSR_DIRECTIVES__={}",
-            `window.__SSR_DIRECTIVES__={DATA:${serialize(data)}}`
+            `window.__SSR_DIRECTIVES__={USER:${serialize(
+              user
+            )},DATA:${serialize(data)}}`
           )
       );
     }

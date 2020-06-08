@@ -5,13 +5,11 @@ import { render } from "@testing-library/react";
 import { HookResult, renderHook, act } from "@testing-library/react-hooks";
 import mockAxios from "jest-mock-axios";
 import {
-  makeTestError,
   testAdmin,
   testUser,
   MOCK_ERROR,
   withStatus,
 } from "../../shared/test-utils";
-import ERRORS from "../../shared/errors";
 import { APIResponseFailure, APIError } from "../../shared/types";
 
 // for spies
@@ -26,6 +24,7 @@ describe("AuthProvider", () => {
   });
 
   beforeEach(() => {
+    window.__SSR_DIRECTIVES__ = {};
     result = renderHook(() => useAuth(), { wrapper: AuthProvider }).result;
     auth = result.current;
   });

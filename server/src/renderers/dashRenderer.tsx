@@ -11,6 +11,7 @@ import { routes as dashRoutes } from "../../../src/routes/Dash";
 import { matchPath } from "react-router";
 import ReactDOMServer from "react-dom/server";
 import api from "../../../src/api/api";
+import serialize from "serialize-javascript";
 
 const dashRenderer = (req: Request, res: Response) => {
   api.me
@@ -41,7 +42,14 @@ const dashRenderer = (req: Request, res: Response) => {
                 res.status(404);
               }
 
-              return res.send(html.replace("{{HELMET}}", ""));
+              return res.send(
+                html
+                  .replace("{{HELMET}}", "")
+                  .replace(
+                    "window.__SSR_DIRECTIVES__={}",
+                    `window.__SSR_DIRECTIVES__={USER:${serialize(data.data)}}`
+                  )
+              );
             } else {
               return res.status(404).send(
                 html
@@ -59,7 +67,7 @@ const dashRenderer = (req: Request, res: Response) => {
                   .replace("<title>{{HELMET}}</title>", renderHelmet)
                   .replace(
                     "window.__SSR_DIRECTIVES__={}",
-                    "window.__SSR_DIRECTIVES__={NO_PRELOAD_ROUTE:1}"
+                    "window.__SSR_DIRECTIVES__={USER:null,NO_PRELOAD_ROUTE:1}"
                   )
               );
             }

@@ -7,11 +7,10 @@ import { render, fireEvent, getByText } from "@testing-library/react";
 import App from "../App";
 import { createMemoryHistory } from "history";
 import { act } from "react-dom/test-utils";
-import { USER_LOCALSTORAGE_KEY } from "../auth/Auth";
 import { testUser, MOCK_ERROR } from "../shared/test-utils";
 
 describe("Integration test for main app component", () => {
-  beforeAll(() => {
+  beforeEach(() => {
     window.__SSR_DIRECTIVES__ = {};
   });
 
@@ -62,7 +61,7 @@ describe("Integration test for main app component", () => {
   });
 
   it("has correct header when logged in", () => {
-    localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
+    window.__SSR_DIRECTIVES__ = { USER: testUser };
     const { container, getByText: _getByText } = render(<App />);
 
     expect(
@@ -79,18 +78,14 @@ describe("Integration test for main app component", () => {
   });
 
   it("does auth check on switching to protected routes", async () => {
-    localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
+    window.__SSR_DIRECTIVES__ = { USER: testUser };
     const { getByText } = render(<App />);
-
-    await act(async () => {
-      mockAxios.mockResponse({ data: { success: true, data: testUser } });
-    });
 
     await act(async () => {
       fireEvent.click(getByText(/profile/i));
     });
 
-    expect(mockAxios).toHaveBeenCalledTimes(2);
+    expect(mockAxios).toHaveBeenCalledTimes(1);
     expect(mockAxios.lastReqGet().url).toEqual("me/");
 
     await act(async () => {
