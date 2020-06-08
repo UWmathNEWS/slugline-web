@@ -1,5 +1,9 @@
-export const CSRF_COOKIE = "csrftoken";
-export const USER_LOCALSTORAGE_KEY = "slugline-user";
+import {
+  APIResponseFailure,
+  APIResponseSuccess,
+  APIError,
+  APIResponse,
+} from "./types";
 
 export const testUser = {
   username: "test",
@@ -8,7 +12,7 @@ export const testUser = {
   email: "test@example.com",
   is_staff: false,
   is_editor: false,
-  writer_name: "testy mctestface"
+  writer_name: "testy mctestface",
 };
 
 export const testAdmin = {
@@ -18,7 +22,7 @@ export const testAdmin = {
   email: "admin@example.com",
   is_staff: true,
   is_editor: true,
-  writer_name: "ytsest ecaftsetcm"
+  writer_name: "ytsest ecaftsetcm",
 };
 
 export const makeTestError = (code: number, error: any) => ({
@@ -26,7 +30,40 @@ export const makeTestError = (code: number, error: any) => ({
   response: {
     data: {
       success: false,
-      error
-    }
-  }
+      error,
+    },
+  },
 });
+
+export const MOCK_BODY = {
+  data: "bingo bango bongo",
+};
+
+export const MOCK_CSRF = "bingobangobongo";
+
+export const MOCK_RESPONSE: APIResponseSuccess<string> = {
+  success: true,
+  data: "bingo bango bongo",
+};
+
+export const MOCK_ERROR: APIResponseFailure<APIError> = {
+  success: false,
+  error: {
+    detail: ["__TESTING"],
+  },
+};
+
+export const withStatus = <TResp, TError extends APIError = APIError>(
+  statusCode: number,
+  resp: APIResponseSuccess<TResp> | APIResponseFailure<TError>
+): APIResponse<TResp, TError> => {
+  return {
+    statusCode: statusCode,
+    ...resp,
+  };
+};
+
+export const MOCK_PARAMS = {
+  p: "p",
+  q: 15,
+};

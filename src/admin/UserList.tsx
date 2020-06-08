@@ -1,18 +1,18 @@
 import React, { useRef, useState } from "react";
-import { getApiUrl } from "../api/api";
 import { Modal, Button } from "react-bootstrap";
 
 import { User } from "../shared/types";
 import { ProfileFormConsumer, useProfileForm } from "../profile/ProfileForm";
 
 import "./UserList.scss";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 import ERRORS from "../shared/errors";
 import {
   RichTable,
   Column,
   RichTableBag,
 } from "../shared/components/RichTable";
+import api from "../api/api";
 
 const columns: Column<User>[] = [
   {
@@ -24,14 +24,14 @@ const columns: Column<User>[] = [
   {
     header: "Name",
     key: "name",
-    width: 20,
+    width: 15,
     accessor: (user: User) =>
       `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
   },
   {
     header: "Writer Name",
     key: "writer_name",
-    width: 20,
+    width: 25,
   },
   {
     header: "Email",
@@ -128,8 +128,7 @@ const UserList = () => {
       </h1>
       <RichTable<User>
         columns={columns}
-        url={getApiUrl("users/")}
-        pk="username"
+        list={api.users.list}
         paginated
         selectable
         searchable
@@ -146,37 +145,39 @@ const UserList = () => {
             name: "Edit",
             bulk: false,
             triggers: ["click"],
-            call({ makeRequest }, data: User) {
-              return makeRequest<User>("get", data).then((user) => {
-                setEditedUser(user);
-                setShowEditModal(true);
+            call(bag, data: User) {
+              return api.users.get({ id: data.username }).then((resp) => {
+                if (resp.success) {
+                  setEditedUser(resp.data);
+                  setShowEditModal(true);
+                }
               });
             },
           },
           {
             name: "Delete",
             bulk: false,
-            call({ makeRequest, executeAction }, data: User) {
+            call({ executeAction, rows, page, numPages }, data: User) {
               if (
                 window.confirm(
                   `You are deleting user ${data.username}. Are you sure you want to continue?`
                 )
               ) {
-                return auth.delete(`users/${data.username}/`).then(
-                  () => {
-                    executeAction("refresh");
-                    alert(`Successfully deleted user ${data.username}`);
-                  },
-                  (err: string[] | string) => {
-                    alert(
-                      typeof err === "string"
-                        ? ERRORS[err]
-                        : err.map((e) => ERRORS[e])
-                    );
-                  }
-                );
+                return api.users
+                  .delete({ id: data.username, csrf: auth.csrfToken || "" })
+                  .then((resp) => {
+                    if (resp.success) {
+                      if (page < numPages || page === 1) {
+                        executeAction("_refresh").then();
+                      } else if (rows.length === 1) {
+                        executeAction("_previous").then();
+                      }
+                      alert(`Successfully deleted user ${data.username}`);
+                    } else {
+                      alert(resp.error.detail?.map((e) => ERRORS[e]));
+                    }
+                  });
               }
-
               return Promise.reject();
             },
           },
@@ -190,7 +191,7 @@ const UserList = () => {
         show={showEditModal}
         setShow={setShowEditModal}
         refreshTable={() => {
-          tableBagRef.current?.executeAction("refresh");
+          tableBagRef.current?.executeAction("_refresh");
         }}
       />
     </div>

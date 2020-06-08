@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 import ProfileForm from "./ProfileForm";
 
 const Profile = () => {

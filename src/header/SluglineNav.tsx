@@ -2,7 +2,7 @@ import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/Auth";
 import { useToast } from "../shared/contexts/ToastContext";
 
 import "./SluglineNav.scss";

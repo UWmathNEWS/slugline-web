@@ -1,9 +1,8 @@
 import React, { useEffect, useReducer, useRef } from "react";
 import { RouteProps, Route, useHistory } from "react-router-dom";
 import { Alert, Spinner } from "react-bootstrap";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./Auth";
 import Error404 from "../shared/errors/Error404";
-import { APIError } from "../shared/types";
 import ERRORS from "../shared/errors";
 
 interface PrivateRouteProps extends RouteProps {
@@ -17,14 +16,14 @@ interface PrivateRouteState {
 }
 
 type PrivateRouteAction =
-  { type: 'done loading' } |
-  { type: 'is loading' } |
-  { type: 'error', data: string[] }
+  | { type: "done loading" }
+  | { type: "is loading" }
+  | { type: "error"; data: string[] };
 
 /**
  * Wrapper for components inside a PrivateRoute. Handles authentication-related business.
  *
- * **This component depends on React handling  in a deterministic manner. If stuff breaks
+ * **This component depends on React handling state changes/lifecycle hooks in a deterministic manner. If stuff breaks
  * when changing routes or reloading pages, check here first.**
  *
  * The reason we created a wrapper component instead of handling authentication inside PrivateRoute is due to how
@@ -55,70 +54,103 @@ type PrivateRouteAction =
  * change.
  */
 const PrivateRouteWrapper: React.FC<{
-  admin?: boolean,
-  fallback?: React.ReactNode,
-  children: React.ReactNode
+  admin?: boolean;
+  fallback?: React.ReactNode;
+  children: React.ReactNode;
 }> = (props) => {
   const auth = useAuth();
   const history = useHistory();
-  const [state, dispatch] = useReducer((state: PrivateRouteState, action: PrivateRouteAction) => {
-    switch (action.type) {
-    case 'done loading':
-      return { ready: true, errors: [] };
-    case 'is loading':
-      return { ready: false, errors: [] };
-    case 'error':
-      return { ready: false, errors: action.data }
+  const [state, dispatch] = useReducer(
+    (state: PrivateRouteState, action: PrivateRouteAction) => {
+      switch (action.type) {
+        case "done loading":
+          return { ready: true, errors: [] };
+        case "is loading":
+          return { ready: false, errors: [] };
+        case "error":
+          return { ready: false, errors: action.data };
+      }
+      return state;
+    },
+    {
+      ready: false,
+      errors: [],
     }
-    return state;
-  }, {
-    ready: false,
-    errors: []
-  });
+  );
   // authCheckCompleted tells us whether the auth check has been completed, meaning it's safe to mount the child.
   const authCheckCompleted = useRef(false);
 
-  // PrivateRoute can also be affected by changes in AuthProvider; we also check against auth.user to ensure children
+  // PrivateRoute can also be affected by changes in AuthProvider; we also check against auth to ensure children
   // are rerendered in the case of a change.
+  // Since auth.check() doesn't change auth unless a request is made, we can simply use the whole auth object
+  // as a dependency.
   useEffect(() => {
-    dispatch({ type: 'is loading' });
-    auth.check()?.then(() => {
-      dispatch({ type: 'done loading' });
-    }, (e: APIError) => {
-      dispatch({ type: 'error', data: Object.values(e).flat() });
+    dispatch({ type: "is loading" });
+    auth.check()?.then((resp) => {
+      if (resp.success) {
+        dispatch({ type: "done loading" });
+      } else {
+        dispatch({
+          type: "error",
+          data: Object.values(resp.error).flat() || ["REQUEST.DID_NOT_SUCCEED"],
+        });
+      }
     });
     authCheckCompleted.current = true;
 
-    return () => { authCheckCompleted.current = false };
-  }, [history.location.key, auth.user]);
+    return () => {
+      authCheckCompleted.current = false;
+    };
+  }, [history.location.key, auth]);
 
   if (state.errors.length === 0) {
     if (authCheckCompleted.current && state.ready) {
-      if (auth.isAuthenticated() && ((props.admin && auth.isEditor()) || !props.admin)) {
+      if (
+        auth.isAuthenticated() &&
+        ((props.admin && auth.isEditor()) || !props.admin)
+      ) {
         authCheckCompleted.current = false;
         return <div key="children">{props.children}</div>;
       } else {
         return <Error404 />;
       }
     } else {
-      return <>
-        {props.fallback ?? <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>}
-        <div key="children" className="d-none" aria-hidden="true">{props.children}</div>
-      </>;
+      return (
+        <>
+          {props.fallback ?? (
+            <Spinner animation="border" role="status">
+              <span className="sr-only">Loading...</span>
+            </Spinner>
+          )}
+          <div key="children" className="d-none" aria-hidden="true">
+            {props.children}
+          </div>
+        </>
+      );
     }
   } else {
-    return <>
-      {state.errors.map(err => <Alert key={err} variant="danger">{ERRORS[err] || err}</Alert>)}
-    </>;
+    return (
+      <>
+        {state.errors.map((err) => (
+          <Alert key={err} variant="danger">
+            {ERRORS[err] || err}
+          </Alert>
+        ))}
+      </>
+    );
   }
 };
 
-const PrivateRoute: React.FC<PrivateRouteProps> = (props: PrivateRouteProps) => {
-  return <Route {...props}>
-    <PrivateRouteWrapper admin={props.admin} fallback={props.fallback}>{props.children}</PrivateRouteWrapper>
-  </Route>;
+const PrivateRoute: React.FC<PrivateRouteProps> = (
+  props: PrivateRouteProps
+) => {
+  return (
+    <Route {...props}>
+      <PrivateRouteWrapper admin={props.admin} fallback={props.fallback}>
+        {props.children}
+      </PrivateRouteWrapper>
+    </Route>
+  );
 };
 
 export default PrivateRoute;
