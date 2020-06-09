@@ -9,6 +9,7 @@
     "@babel/preset-env": "^7.10.2",
     "@babel/preset-react": "^7.10.1",
     "@babel/preset-typescript": "^7.10.1",
+    "@dr.pogodin/babel-preset-svgr": "^1.0.10",
     "@fortawesome/fontawesome-svg-core": "^1.2.27",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/react-fontawesome": "^0.1.8",
@@ -55,7 +56,9 @@
     "eject": "react-scripts eject",
     "lib": "npm run lib:app && npm run lib:ssr",
     "lib:app": "rm -rf lib/ && NODE_ENV=production npm run lib:app:babel && npm run lib:app:esm && SERVER=\"${SLUGLINE_SERVER-http://localhost:8000}\" npm run lib:app:api_root",
-    "lib:app:babel": "babel --extensions .tsx,.ts --ignore 'src/**/*.test.js' --copy-files src -d lib",
+    "lib:app:babel": "npm run lib:app:babel:jsx && npm run lib:app:babel:svg",
+    "lib:app:babel:jsx": "babel --extensions .tsx,.ts --ignore 'src/**/*.test.js' --copy-files src -d lib",
+    "lib:app:babel:svg": "babel --extensions .svg --keep-file-extension src -d lib",
     "lib:app:esm": "find lib/ -type f -name *.js -exec sed -i'' -e 's|@babel/runtime/helpers/esm|@babel/runtime/helpers|g' {} +",
     "lib:app:api_root": "find lib/api -name api.js -exec sed -i'' -e \"s|API_ROOT = \\\"|API_ROOT = \\\"$SERVER|\" {} +",
     "lib:ssr": "rm -rf server/lib/ && npm run lib:ssr:babel && npm run lib:ssr:sed",
@@ -70,15 +73,20 @@
         "transform-assets",
         {
           "extensions": [
-            "css",
-            "svg"
+            "css"
           ],
-          "name": "static/[name].[hash:8].[ext]"
+          "name": "static/media/[name].[hash:8].[ext]"
         }
       ]
     ],
     "presets": [
-      "react-app"
+      "react-app",
+      [
+        "@dr.pogodin/babel-preset-svgr",
+        {
+          "mimicCreateReactApp": true
+        }
+      ]
     ]
   },
   "eslintConfig": {

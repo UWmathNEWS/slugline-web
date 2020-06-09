@@ -3,18 +3,6 @@
 
 @import "../../node_modules/bootstrap/scss/bootstrap";
 
-// Convenient class for mathnews logo
-.mathnews-logo::before {
-  content: "math";
-  font-family: $body-ff;
-}
-
-.mathnews-logo::after {
-  content: "NEWS";
-  font-family: $headings-ff;
-  font-weight: bold;
-}
-
 h1,
 h2,
 h3,

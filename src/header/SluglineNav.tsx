@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/Auth";
 import { useToast } from "../shared/contexts/ToastContext";
 
+import { ReactComponent as Logo } from "../logo.svg";
 import "./styles/SluglineNav.scss";
 
 const LoginLogoutLink = () => {
@@ -74,7 +75,7 @@ const SluglineNav = () => {
     <Navbar bg="primary" expand="lg">
       <div className="container nav-container">
         <Navbar.Brand as={Link} to="/" href="/">
-          <span className="mathnews-logo" />
+          <Logo height={48} className="align-top" title="Go to mathNEWS home page" />
         </Navbar.Brand>
         <Navbar.Toggle
           className="custom-toggler"

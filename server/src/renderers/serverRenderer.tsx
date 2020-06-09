@@ -37,6 +37,9 @@ const serverRenderer = (req: Request, res: Response) => {
       }
 
       if (currentRoute === undefined || context.statusCode == 404) {
+        const [userResp] = await Promise.all(promises);
+        user = userResp.success ? userResp.data : null;
+
         return res
           .status(404)
           .send(
@@ -48,6 +51,12 @@ const serverRenderer = (req: Request, res: Response) => {
                 )}</div>`
               )
               .replace("<title>{{HELMET}}</title>", renderHelmet)
+              .replace(
+                "window.__SSR_DIRECTIVES__={}",
+                `window.__SSR_DIRECTIVES__={USER:${serialize(
+                  user
+                )}}`
+              )
           );
       }
 
@@ -67,6 +76,10 @@ const serverRenderer = (req: Request, res: Response) => {
         } else {
           const statusCode = dataResp.statusCode;
           console.error(req.url, currentRoute, dataResp.error);
+
+          const [userResp] = await Promise.all(promises);
+          user = userResp.success ? userResp.data : null;
+
           return res.status(statusCode).send(
             html
               .replace(
@@ -78,7 +91,9 @@ const serverRenderer = (req: Request, res: Response) => {
               .replace("<title>{{HELMET}}</title>", renderHelmet)
               .replace(
                 "window.__SSR_DIRECTIVES__={}",
-                `window.__SSR_DIRECTIVES__={STATUS_CODE:${
+                `window.__SSR_DIRECTIVES__={USER:${
+                  serialize(user)
+                },STATUS_CODE:${
                   dataResp.statusCode
                 },ERROR:${serialize(dataResp.error)}}`
               )
