@@ -27,6 +27,16 @@ const serverRenderer = (req: Request, res: Response) => {
   let user: User | null = null;
   let data: any = null;
 
+  if (currentRoute?.loadData) {
+    const { params } = matchPath(req.url, currentRoute)!;
+    promises.push(
+      currentRoute.loadData({
+        params,
+        headers: { Cookie: req.header("cookie") || "" },
+      })
+    );
+  }
+
   fs.readFile(
     path.resolve(BUILD_DIR, "index.html"),
     "utf8",
@@ -60,25 +70,17 @@ const serverRenderer = (req: Request, res: Response) => {
           );
       }
 
-      if (currentRoute.loadData) {
-        const { params } = matchPath(req.url, currentRoute)!;
-        promises.push(
-          currentRoute.loadData({
-            params,
-            headers: { Cookie: req.header("cookie") || "" },
-          })
-        );
+      const [userResp, ...additionalResps] = await Promise.all(promises);
+      user = userResp.success ? userResp.data : null;
 
-        const [, dataResp] = await Promise.all(promises);
+      if (currentRoute.loadData) {
+        const [dataResp] = additionalResps;
 
         if (dataResp.success) {
           data = dataResp.data;
         } else {
           const statusCode = dataResp.statusCode;
           console.error(req.url, currentRoute, dataResp.error);
-
-          const [userResp] = await Promise.all(promises);
-          user = userResp.success ? userResp.data : null;
 
           return res.status(statusCode).send(
             html
@@ -100,9 +102,6 @@ const serverRenderer = (req: Request, res: Response) => {
           );
         }
       }
-
-      const [userResp] = await Promise.all(promises);
-      user = userResp.success ? userResp.data : null;
 
       context.data = data;
 
