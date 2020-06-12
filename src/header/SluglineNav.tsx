@@ -75,7 +75,7 @@ const SluglineNav = () => {
     <Navbar bg="primary" expand="lg">
       <div className="container nav-container">
         <Navbar.Brand as={Link} to="/" href="/">
-          <Logo height={48} className="align-top" title="Go to mathNEWS home page" />
+          <Logo height={28} className="navbar-logo align-top" />
         </Navbar.Brand>
         <Navbar.Toggle
           className="custom-toggler"

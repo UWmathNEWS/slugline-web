@@ -2,10 +2,13 @@
 
 a.nav-link {
   margin: 0 $spacer;
-  margin-bottom: 0;
   font-weight: normal;
   color: black !important;
   text-transform: uppercase;
+}
+
+.navbar-logo {
+  margin-top: .625rem; // height of navbar-brand is 3rem, and height of the logo is 1.75rem
 }
 
 // some manual spacing to get the navbar to line up with the content
