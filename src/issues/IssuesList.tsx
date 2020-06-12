@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue, Pagination, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
-import { RequestState, useAPILazy } from "../api/hooks";
+import { RequestState } from "../api/hooks";
 import api from "../api/api";
 import Loader from "../shared/components/Loader";
 import ErrorPage from "../shared/errors/ErrorPage";
+import { useSSRData } from "../shared/hooks";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -45,7 +46,9 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
   );
 };
 
-const issuesToVolumes = (issues: Issue[]): Issue[][] => {
+const issuesToVolumes = (paginatedIssues: Pagination<Issue>): Issue[][] => {
+  const issues = paginatedIssues.results;
+
   if (issues.length === 0) {
     return [];
   }
@@ -68,50 +71,28 @@ const issuesToVolumes = (issues: Issue[]): Issue[][] => {
 const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
   props
 ) => {
-  const [getIssues, getIssuesInfo] = useAPILazy(api.issues.list);
-  const [volumes, setVolumes] = useState<Issue[][]>(
-    props.staticContext?.data
-      ? issuesToVolumes(props.staticContext.data.results)
-      : []
+  const [volumes, dataInfo, fail] = useSSRData(
+    api.issues.list,
+    issuesToVolumes,
+    props.staticContext?.data ? issuesToVolumes(props.staticContext.data) : []
   );
-  const [statusCode, setStatusCode] = useState<number>(0);
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (window.__SSR_DIRECTIVES__.STATUS_CODE) {
-        setStatusCode(window.__SSR_DIRECTIVES__.STATUS_CODE);
-        delete window.__SSR_DIRECTIVES__.STATUS_CODE;
-        return;
-      }
-      if (window.__SSR_DIRECTIVES__.DATA) {
-        setVolumes(issuesToVolumes(window.__SSR_DIRECTIVES__.DATA.results));
-        delete window.__SSR_DIRECTIVES__.DATA;
-      } else {
-        getIssues().then((resp) => {
-          if (resp.success) {
-            setVolumes(issuesToVolumes(resp.data.results));
-          }
-        });
-      }
-    }, 0);
-  }, [getIssues]);
-
-  if (statusCode) {
-    return <ErrorPage statusCode={statusCode} />;
+  if (fail) {
+    return <ErrorPage statusCode={dataInfo.statusCode || 500} />;
   }
 
   return (
     <>
       <Visor
         title={
-          getIssuesInfo.state === RequestState.Running
+          dataInfo.state === RequestState.Running
             ? "Loading..."
             : props.route.title
         }
         location={props.location.pathname}
       />
       <h1>Issues</h1>
-      {getIssuesInfo.state === RequestState.Running ? (
+      {dataInfo.state === RequestState.Running ? (
         <Loader variant="spinner" />
       ) : (
         volumes.map((volume, i) => {

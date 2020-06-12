@@ -1,45 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Issue, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
 import Loader from "../shared/components/Loader";
-import { RequestState, useAPILazy } from "../api/hooks";
+import { RequestState } from "../api/hooks";
 import api from "../api/api";
 import ErrorPage from "../shared/errors/ErrorPage";
+import { useSSRData } from "../shared/hooks";
 
 const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
   route,
   location,
   staticContext,
 }) => {
-  const { issue_id: issueId } = useParams();
-  const [getIssue, getIssueInfo] = useAPILazy(api.issues.get);
-  const [issue, setIssue] = useState(staticContext?.data);
-  const [statusCode, setStatusCode] = useState<number>(0);
+  const { issue_id: issueId } = useParams<{ issue_id: string }>();
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (window.__SSR_DIRECTIVES__.STATUS_CODE) {
-        setStatusCode(window.__SSR_DIRECTIVES__.STATUS_CODE);
-        delete window.__SSR_DIRECTIVES__.STATUS_CODE;
-        return;
-      }
-      if (window.__SSR_DIRECTIVES__.DATA) {
-        setIssue(window.__SSR_DIRECTIVES__.DATA);
-        delete window.__SSR_DIRECTIVES__.DATA;
-      } else {
-        getIssue({ id: issueId || "" }).then((resp) => {
-          if (resp.success) {
-            setIssue(resp.data);
-          } else {
-            setStatusCode(resp.statusCode);
-          }
-        });
-      }
-    }, 0);
-  }, [getIssue, issueId]);
+  const [issue, issueInfo, fail] = useSSRData(
+    useCallback(() => api.issues.get({ id: issueId }), [issueId]),
+    staticContext?.data
+  );
 
-  if (!statusCode && issue && getIssueInfo.state !== RequestState.Running) {
+  if (!fail && issue && issueInfo.state !== RequestState.Running) {
     return (
       <>
         <Visor
@@ -51,8 +32,8 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
         <h1>{`Volume ${issue?.volume_num} Issue ${issue?.issue_code}`}</h1>
       </>
     );
-  } else if (statusCode) {
-    return <ErrorPage statusCode={statusCode} />;
+  } else if (fail) {
+    return <ErrorPage statusCode={issueInfo.statusCode || 500} />;
   } else {
     return (
       <>
