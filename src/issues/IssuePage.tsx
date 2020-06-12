@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Issue, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
@@ -12,12 +12,8 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
   location,
   staticContext,
 }) => {
-  const { issue_id } = useParams();
-  const [getIssue, getIssueInfo] = useAPILazy(
-    useCallback(() => {
-      return api.issues.get({ id: issue_id || "" });
-    }, [issue_id])
-  );
+  const { issue_id: issueId } = useParams();
+  const [getIssue, getIssueInfo] = useAPILazy(api.issues.get);
   const [issue, setIssue] = useState(staticContext?.data);
   const [statusCode, setStatusCode] = useState<number>(0);
 
@@ -32,7 +28,7 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
         setIssue(window.__SSR_DIRECTIVES__.DATA);
         delete window.__SSR_DIRECTIVES__.DATA;
       } else {
-        getIssue().then((resp) => {
+        getIssue({ id: issueId || "" }).then((resp) => {
           if (resp.success) {
             setIssue(resp.data);
           } else {
@@ -41,7 +37,7 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
         });
       }
     }, 0);
-  }, [getIssue]);
+  }, [getIssue, issueId]);
 
   if (!statusCode && issue && getIssueInfo.state !== RequestState.Running) {
     return (
