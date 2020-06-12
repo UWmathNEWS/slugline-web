@@ -20,6 +20,7 @@ const renderRoutes: {
   extraProps: any = {},
   switchProps: any = {}
 ): any => {
+  // shuffle arguments if we didn't receive a basePath
   if (typeof basePath !== "string") {
     switchProps = extraProps;
     extraProps = routes;
@@ -40,7 +41,7 @@ const renderRoutes: {
         ) => (
           <RouteComponent
             key={route.key || i}
-            path={route.path ? `${basePath}${route.path}` : route.path}
+            path={`${basePath}${route.path}`}
             exact={route.exact}
             strict={route.strict}
             render={(props: RouteComponentProps) =>
