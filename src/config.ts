@@ -9,7 +9,7 @@ export default {
     favicon: {
       src: "favicon.ico",
       type: "image/x-icon",
-      sizes: "64x64 32x32 24x24 16x16",
+      sizes: "64x64 32x32 16x16",
     },
     touchIcon: {
       src: "logo192.png",
