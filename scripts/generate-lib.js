@@ -5,6 +5,7 @@
 const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
+const rimraf = require("rimraf");
 const babel = require("@babel/core");
 
 const clientSrcPath = path.resolve(__dirname, "..", "src");
@@ -36,17 +37,15 @@ const log = (logMethod, ...message) => {
   );
 };
 
-const makeDirsForFile = (file, root = "") => {
-  const dirs = file.split("/");
-  // Recursively generate directories if they don't exist
-  // Since we use reduce, we're always "one step behind", so we never generate
-  // a directory with the file basename.
-  dirs.reduce((acc, cur) => {
-    if (!fs.existsSync(path.resolve(root, acc))) {
-      fs.mkdirSync(path.resolve(root, acc));
+const makeDirs = (files, root = "") => {
+  for (let i = files.length - 1; i >= 0; --i) {
+    // Reverse iteration gives a greater chance of a directory hit with recursive mkdir, assuming the files array
+    // is sorted
+    const dir = path.resolve(root, path.dirname(files[i]));
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
     }
-    return path.join(acc, cur);
-  });
+  }
 };
 
 const transpileSources = (
@@ -61,11 +60,10 @@ const transpileSources = (
   const logLabel = logMessage.replace("{}", files.length);
   let i = 0;
 
+  makeDirs(files, outDir);
+
   console.time(logLabel);
   for (const file of files) {
-    // make sure that directories exist. if not, create them.
-    makeDirsForFile(file, outDir);
-
     promises[i] = babel
       .transformFileAsync(path.resolve(sourceDir, file))
       .then((result) => {
@@ -112,7 +110,7 @@ const libClient = async () => {
 
   // (1) remove the lib directories, if they exist
   if (fs.existsSync(clientLibPath)) {
-    fs.rmdirSync(clientLibPath, { recursive: true });
+    rimraf.sync(clientLibPath);
   }
   fs.mkdirSync(clientLibPath);
 
@@ -130,14 +128,14 @@ const libClient = async () => {
             (p) => !p.includes("__tests__") && !p.includes("__mocks__")
           );
 
+          makeDirs(files, clientLibPath);
+
           const promises = new Array(files.length);
           const logLabel = `Copied ${files.length} non-source files`;
           let i = 0;
 
           console.time(logLabel);
           for (const file of files) {
-            makeDirsForFile(file, clientLibPath);
-
             promises[i] = new Promise((res) => {
               fs.copyFile(
                 path.resolve(clientSrcPath, file),
@@ -257,7 +255,7 @@ const libServer = async () => {
 
   // (1) remove the lib directories, if they exist
   if (fs.existsSync(serverLibPath)) {
-    fs.rmdirSync(serverLibPath, { recursive: true });
+    rimraf.sync(serverLibPath);
   }
   fs.mkdirSync(serverLibPath);
 
