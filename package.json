@@ -54,40 +54,8 @@
     "build": "react-scripts build && node scripts/generate-manifest.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lib": "npm run lib:app && npm run lib:ssr",
-    "lib:app": "rm -rf lib/ && NODE_ENV=production npm run lib:app:babel && npm run lib:app:esm && SERVER=\"${SLUGLINE_SERVER-http://localhost:8000}\" npm run lib:app:api_root",
-    "lib:app:babel": "npm run lib:app:babel:jsx && npm run lib:app:babel:svg",
-    "lib:app:babel:jsx": "babel --extensions .tsx,.ts --ignore 'src/**/*.test.js' --copy-files src -d lib",
-    "lib:app:babel:svg": "babel --extensions .svg --keep-file-extension src -d lib",
-    "lib:app:esm": "find lib/ -type f -name *.js -exec sed -i'' -e 's|@babel/runtime/helpers/esm|@babel/runtime/helpers|g' {} +",
-    "lib:app:api_root": "find lib/api -name api.js -exec sed -i'' -e \"s|API_ROOT = \\\"|API_ROOT = \\\"$SERVER|\" {} +",
-    "lib:ssr": "rm -rf server/lib/ && npm run lib:ssr:babel && npm run lib:ssr:sed",
-    "lib:ssr:babel": "babel --extensions .tsx,.ts -d server/lib server/src",
-    "lib:ssr:sed": "find server/lib/ -type f -name *.js -exec sed -i'' -e 's|/src/|/lib/|g' {} +",
+    "lib": "NODE_ENV=production node scripts/generate-lib.js",
     "start-ssr": "node server/index.js"
-  },
-  "babel": {
-    "plugins": [
-      "@babel/plugin-transform-modules-commonjs",
-      [
-        "transform-assets",
-        {
-          "extensions": [
-            "css"
-          ],
-          "name": "static/media/[name].[hash:8].[ext]"
-        }
-      ]
-    ],
-    "presets": [
-      "react-app",
-      [
-        "@dr.pogodin/babel-preset-svgr",
-        {
-          "mimicCreateReactApp": true
-        }
-      ]
-    ]
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -117,6 +85,7 @@
     "core-js": "^3.6.5",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
+    "glob": "^7.1.6",
     "jest-mock-axios": "^4.0.0",
     "mutationobserver-shim": "^0.3.5",
     "prettier": "^2.0.5",

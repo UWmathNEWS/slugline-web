@@ -12,6 +12,8 @@ import {
 } from "../shared/types";
 import { ProfileFormVals } from "../profile/ProfileForm";
 
+// The following line is replaced in post-processing.
+// DO NOT EDIT THE WHITESPACE.
 export const API_ROOT = "/api/";
 
 type RequestConfig = Omit<AxiosRequestConfig, "baseURL" | "validateStatus">;
