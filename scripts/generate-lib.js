@@ -103,7 +103,10 @@ const libClient = async () => {
 
   // Set NODE_ENV manually if not set as babel-preset-react-app depends on it
   if (!process.env.NODE_ENV) {
-    log(console.log, "CLIENT: INFO: NODE_ENV was empty, setting NODE_ENV=production");
+    log(
+      console.log,
+      "CLIENT: INFO: NODE_ENV was empty, setting NODE_ENV=production"
+    );
     process.env.NODE_ENV = "production";
   }
 
@@ -181,8 +184,8 @@ const libClient = async () => {
           (code, file) => {
             // Replace calls to ESM exports with calls to CommonJS exports
             code = code.replace(
-              /@babel([\\/])runtime[\\/]helpers[\\/]esm/g,
-              "@babel$1runtime$1helpers"
+              /@babel(\\\\|\/)runtime(\\\\|\/)helpers(\\\\|\/)esm/g,
+              "@babel$1runtime$2helpers"
             );
 
             // Replace API root to point to backend
@@ -223,8 +226,8 @@ const libClient = async () => {
           (code) => {
             // Replace calls to ESM exports with calls to CommonJS exports
             code = code.replace(
-              /@babel([\\/])runtime[\\/]helpers[\\/]esm/g,
-              "@babel$1runtime$1helpers"
+              /@babel(\\\\|\/)runtime(\\\\|\/)helpers(\\\\|\/)esm/g,
+              "@babel$1runtime$2helpers"
             );
 
             return code;
@@ -278,7 +281,7 @@ const libServer = async () => {
           serverLibPath,
           files,
           "SERVER: Compiled {} source files",
-          (code) => code.replace(/(?<=require\(.+)([\\/])src[\\/]/g, "$1lib$1")
+          (code) => code.replace(/(?<=require\(.+)(\\\\|\/)src/g, "$1lib")
         ).then(() => {
           res();
         });
