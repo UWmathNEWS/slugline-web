@@ -54,7 +54,7 @@
     "build": "react-scripts build && node scripts/generate-manifest.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lib": "NODE_ENV=production node scripts/generate-lib.js",
+    "lib": "node scripts/generate-lib.js",
     "start-ssr": "node server/index.js"
   },
   "eslintConfig": {

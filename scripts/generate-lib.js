@@ -37,7 +37,7 @@ const log = (logMethod, ...message) => {
 };
 
 const makeDirsForFile = (file, root = "") => {
-  const dirs = file.split(path.sep);
+  const dirs = file.split("/");
   // Recursively generate directories if they don't exist
   // Since we use reduce, we're always "one step behind", so we never generate
   // a directory with the file basename.
@@ -101,12 +101,10 @@ const libClient = async () => {
 
   let steps = [];
 
+  // Set NODE_ENV manually if not set as babel-preset-react-app depends on it
   if (!process.env.NODE_ENV) {
-    log(
-      console.error,
-      `ERROR: process.env.NODE_ENV is not one of "development", "test", or "production".`
-    );
-    process.exit(1);
+    log(console.log, "CLIENT: INFO: NODE_ENV was empty, setting NODE_ENV=production");
+    process.env.NODE_ENV = "production";
   }
 
   // (1) remove the lib directories, if they exist
