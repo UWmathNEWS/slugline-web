@@ -37,7 +37,16 @@ const log = (logMethod, ...message) => {
   );
 };
 
-const makeDirs = (files, root = "") => {
+const asyncRimraf = (...args) => {
+  return new Promise((res, rej) => {
+    rimraf(...args, (err) => {
+      if (err) return rej(err);
+      res();
+    });
+  });
+};
+
+const makeDirs = async (files, root = "") => {
   for (let i = files.length - 1; i >= 0; --i) {
     // Reverse iteration gives a greater chance of a directory hit with recursive mkdir, assuming the files array
     // is sorted
@@ -48,7 +57,7 @@ const makeDirs = (files, root = "") => {
   }
 };
 
-const transpileSources = (
+const transpileSources = async (
   sourceDir,
   outDir,
   files,
@@ -60,7 +69,7 @@ const transpileSources = (
   const logLabel = logMessage.replace("{}", files.length);
   let i = 0;
 
-  makeDirs(files, outDir);
+  await makeDirs(files, outDir);
 
   console.time(logLabel);
   for (const file of files) {
@@ -110,9 +119,9 @@ const libClient = async () => {
 
   // (1) remove the lib directories, if they exist
   if (fs.existsSync(clientLibPath)) {
-    rimraf.sync(clientLibPath);
+    await asyncRimraf(clientLibPath);
   }
-  fs.mkdirSync(clientLibPath);
+  await fs.promises.mkdir(clientLibPath);
 
   // (2) copy non-source files, so imports don't error out
   steps.push(
@@ -120,7 +129,7 @@ const libClient = async () => {
       glob(
         "**/*.!(ts|tsx|svg)",
         { cwd: clientSrcPath, nodir: true },
-        (err, files) => {
+        async (err, files) => {
           if (err) throw err;
 
           // ignore test files
@@ -128,7 +137,7 @@ const libClient = async () => {
             (p) => !p.includes("__tests__") && !p.includes("__mocks__")
           );
 
-          makeDirs(files, clientLibPath);
+          await makeDirs(files, clientLibPath);
 
           const promises = new Array(files.length);
           const logLabel = `Copied ${files.length} non-source files`;
@@ -255,9 +264,9 @@ const libServer = async () => {
 
   // (1) remove the lib directories, if they exist
   if (fs.existsSync(serverLibPath)) {
-    rimraf.sync(serverLibPath);
+    await asyncRimraf(serverLibPath);
   }
-  fs.mkdirSync(serverLibPath);
+  await fs.promises.mkdir(serverLibPath);
 
   // (2) run babel on the typescript source files
   babel.loadPartialConfig({
