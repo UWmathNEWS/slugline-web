@@ -35,6 +35,7 @@
   },
   "size-limit": [
     {
+      "limit": 6,
       "path": "build/static/js/*.js"
     }
   ],
