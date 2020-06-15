@@ -1,7 +1,6 @@
 [
-	{
-		"path": "index.js",
-		"import": "{ createStore }",
-		"limit": "500 ms"
-	}
+  {
+    "path": "build/static/js/*.js",
+    "limit": "6 s"
+  }
 ]
