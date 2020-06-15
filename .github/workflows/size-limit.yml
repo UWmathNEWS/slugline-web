@@ -14,7 +14,20 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Cache node modules
+      id: npm-cache
+      uses: actions/cache@v1
+      env:
+        cache-name: size-limit
+      with:
+        path: node_modules
+        key:  ${{ runner.os }}-npm-cache-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-cache-${{ env.cache-name }}-
+          ${{ runner.os }}-npm-cache-
+
     - name: Install dependencies
+      if: steps.npm-cache.outputs.cache-hit != 'true'
       run: npm install --no-audit --no-fund
 
     - uses: andresz1/size-limit-action@v1.3.0
