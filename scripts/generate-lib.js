@@ -198,10 +198,10 @@ const libClient = async () => {
             // Replace API root to point to backend
             if (file === "api/api.ts") {
               code = code.replace(
-                'API_ROOT = "',
-                `API_ROOT = "${
+                "/*$ SLUGLINE_SERVER */",
+                `/* BEGIN INJECT */ "${
                   process.env.SLUGLINE_SERVER || "http://localhost:8000"
-                }`
+                }" + /* END INJECT */`
               );
             }
 

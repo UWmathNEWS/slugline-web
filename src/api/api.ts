@@ -13,8 +13,8 @@ import {
 import { ProfileFormVals } from "../profile/ProfileForm";
 
 // The following line is replaced in post-processing.
-// DO NOT EDIT THE WHITESPACE.
-export const API_ROOT = "/api/";
+// DO NOT EDIT THE COMMENT.
+export const API_ROOT = /*$ SLUGLINE_SERVER */ "/api/";
 
 type RequestConfig = Omit<AxiosRequestConfig, "baseURL" | "validateStatus">;
 
