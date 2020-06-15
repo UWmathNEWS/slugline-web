@@ -1,6 +1,7 @@
 [
   {
-    "path": "build/static/js/*.js",
-    "limit": "6 s"
+    "path": ["build/static/js/*.js", "build/static/css/*.css"],
+    "limit": "6 s",
+    "webpack": false
   }
 ]
