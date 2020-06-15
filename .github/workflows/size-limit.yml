@@ -24,7 +24,7 @@ jobs:
         key:  ${{ runner.os }}-npm-cache-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-npm-cache-${{ env.cache-name }}-
-          ${{ runner.os }}-npm-cache-
+          #${{ runner.os }}-npm-cache-
 
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
