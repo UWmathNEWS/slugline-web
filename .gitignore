@@ -31,3 +31,6 @@ src/fonts/
 
 # IDEA files
 .idea/
+
+# VS Code
+.vscode/
