@@ -73,8 +73,8 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
 ) => {
   const [volumes, dataInfo, fail] = useSSRData(
     api.issues.list,
-    issuesToVolumes,
-    props.staticContext?.data ? issuesToVolumes(props.staticContext.data) : []
+    props.staticContext?.data ? issuesToVolumes(props.staticContext.data) : [],
+    issuesToVolumes
   );
 
   if (fail) {

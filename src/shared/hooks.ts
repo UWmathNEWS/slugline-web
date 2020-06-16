@@ -54,30 +54,33 @@ export const useDebouncedCallback = <A extends any[], R>(
   return [callbackWithDebounce, callbackWithoutDebounce];
 };
 
+type UseSSRDataHook<TData> = [TData, RequestInfo, boolean];
+
 /**
  * Wraps a promise-based API call, executing it if and only if data is not passed to it from the server. Returns the
  * desired data, the state of the request, and a flag for whether an error occurred while fetching data or not.
  *
+ * This hook is meant solely for component-load data fetching, and as such does not expose entire response errors, only
+ * the status code.
+ *
  * @param dataMethod An async function like that passed to useAPI. Like with useAPI, if arguments need to be passed
  * to the function, it should be wrapped with useCallback.
+ * @param initialData The initial data passed from the server, usually StaticRouterContextWithData.data
  * @param transformer An optional function used to transform a response. If defined at the call site, must be wrapped
  * with useCallback to prevent infinite updates.
- * @param initialData The initial data passed from the server, usually StaticRouterContextWithData.data
  *
  * @example
  * useSSRData(
  *   useCallback(() => api.get({ id: propsId }), [propsId]),
- *   useCallback((resp) => resp.statusCode, []),
- *   props.staticContext.data || 200
+ *   props.staticContext?.data || 200,
+ *   useCallback((resp) => resp.statusCode, [])
  * )
  */
-type UseSSRDataHook<TData> = [TData, RequestInfo, boolean];
-
 export const useSSRData: {
   <TData, TResp, TError extends APIError = APIError>(
     dataMethod: () => Promise<APIResponse<TResp, TError>>,
+    initialData: TData | undefined,
     transformer: (resp: TResp) => TData,
-    initialData: TData | undefined
   ): UseSSRDataHook<TData>;
   <TData, TError extends APIError = APIError>(
     dataMethod: () => Promise<APIResponse<TData, TError>>,
@@ -85,15 +88,9 @@ export const useSSRData: {
   ): UseSSRDataHook<TData>;
 } = <TData, TResp, TArgs, TError>(
   dataMethod: (args?: any) => any,
-  transformer: any,
-  initialData?: any
+  initialData: any,
+  transformer?: any,
 ): any => {
-  // normalize params
-  if (typeof transformer !== "function") {
-    initialData = transformer;
-    transformer = undefined;
-  }
-
   const [data, setData] = useState<TData | undefined>(initialData);
   const [getData, getDataInfo] = useAPILazy(dataMethod);
   const [respInfo, setRespInfo] = useState<RequestInfo>(getDataInfo);
