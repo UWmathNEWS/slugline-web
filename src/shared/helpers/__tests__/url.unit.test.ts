@@ -1,6 +1,6 @@
 import * as url from "../url";
 
-describe("helper.url", () => {
+describe("helpers.url", () => {
   describe("resolve", () => {
     it("returns valid URLs verbatim", () => {
       expect(url.resolve("https://localhost:80/test")).toBe("https://localhost:80/test");
