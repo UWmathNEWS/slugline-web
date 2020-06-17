@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  size:
+  build:
     runs-on: ubuntu-16.04
     env:
       CI_JOB_NUMBER: 1
