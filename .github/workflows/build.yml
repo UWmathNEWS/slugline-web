@@ -15,6 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Echo OS
+      run: echo ${{ matrix.os }}
+
     - name: Cache node modules
       id: npm-cache
       uses: actions/cache@v1
