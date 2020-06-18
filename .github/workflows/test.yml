@@ -37,8 +37,8 @@ jobs:
     - name: Run tests and generate code coverage report
       run: npm test -- --coverage
 
-      #- uses: codecov/codecov-action@v1
-      #  with:
-      #    file: coverage/clover.xml
-      #    #name: codecov-umbrella # optional
-      #    #fail_ci_if_error: true # optional (default = false)
+    - uses: codecov/codecov-action@v1
+      with:
+        file: coverage/clover.xml
+        #name: codecov-umbrella # optional
+        #fail_ci_if_error: true # optional (default = false)
