@@ -13,7 +13,7 @@ jobs:
         os: [ubuntu-16.04, ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - name: Cache node modules
       id: npm-cache
