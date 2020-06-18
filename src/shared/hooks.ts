@@ -96,6 +96,11 @@ export const useSSRData: {
   const [respInfo, setRespInfo] = useState<RequestInfo>(getDataInfo);
   const [fail, setFail] = useState(false);
 
+  // This hook MUST appear first as we update respInfo in the next useEffect
+  useEffect(() => {
+    setRespInfo(getDataInfo);
+  }, [getDataInfo]);
+
   // useEffect doesn't run on the server
   useEffect(() => {
     if (window.__SSR_DIRECTIVES__.STATUS_CODE) {
@@ -127,10 +132,6 @@ export const useSSRData: {
       });
     }
   }, [getData, transformer]);
-
-  useEffect(() => {
-    setRespInfo(getDataInfo);
-  }, [getDataInfo]);
 
   return [data, respInfo, fail];
 };
