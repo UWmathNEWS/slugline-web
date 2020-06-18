@@ -7,12 +7,16 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-16.04
-    env:
-      CI_JOB_NUMBER: 1
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, ubuntu-latest, windows-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v1
+
+    - name: Echo OS
+      run: echo ${{ matrix.os }}
 
     - name: Cache node modules
       id: npm-cache
