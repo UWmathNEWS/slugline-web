@@ -1,5 +1,7 @@
 ![Build](https://github.com/UWmathNEWS/slugline-web/workflows/Build/badge.svg)
+![Test](https://github.com/UWmathNEWS/slugline-web/workflows/Test/badge.svg)
 ![Security checks](https://github.com/UWmathNEWS/slugline-web/workflows/Security%20checks/badge.svg)
+[![codecov](https://codecov.io/gh/UWmathNEWS/slugline-web/branch/master/graph/badge.svg)](https://codecov.io/gh/UWmathNEWS/slugline-web)
 
 ## slugline-web
 The front-end component of `slugline`, math**NEWS**'s best and only React/Django based publishing website.

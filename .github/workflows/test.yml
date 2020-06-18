@@ -1,5 +1,7 @@
-name: "Build"
+name: Test
 
+# Controls when the action will run.
+# Triggers the workflow on push or pull request events but only for the master branch
 on:
   push:
     branches: [ master ]
@@ -7,7 +9,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,7 +22,7 @@ jobs:
       id: npm-cache
       uses: actions/cache@v1
       env:
-        cache-name: build
+        cache-name: test
       with:
         path: node_modules
         key:  ${{ runner.os }}-npm-cache-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
@@ -31,12 +33,19 @@ jobs:
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
       run: npm install --no-audit --no-fund
+    
+    - name: Check type errors
+      run: npx tsc --noEmit
 
-    - name: Build
-      run: npm run build
+    - name: Run tests
+      if: matrix.os != 'ubuntu-16.04'
+      run: npm test
 
-    - uses: andresz1/size-limit-action@v1.3.2
-      if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-16.04'
+    - name: Run tests and generate code coverage report
+      if: matrix.os == 'ubuntu-16.04'
+      run: npm test -- --coverage
+
+    - uses: codecov/codecov-action@v1
+      if: matrix.os == 'ubuntu-16.04'
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        skip_step: build
+        file: coverage/clover.xml
