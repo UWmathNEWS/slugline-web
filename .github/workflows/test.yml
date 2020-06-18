@@ -39,7 +39,7 @@ jobs:
 
     - name: Run tests
       if: matrix.os != 'ubuntu-16.04'
-      run: npm test -- --coverage
+      run: npm test
 
     - name: Run tests and generate code coverage report
       if: matrix.os == 'ubuntu-16.04'
