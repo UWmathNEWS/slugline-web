@@ -1,12 +1,9 @@
-name: Build
+name: "Build"
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
-  push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build:
@@ -16,7 +13,7 @@ jobs:
         os: [ubuntu-16.04, ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v1
 
     - name: Cache node modules
       id: npm-cache
@@ -33,9 +30,11 @@ jobs:
     - name: Install dependencies
       if: steps.npm-cache.outputs.cache-hit != 'true'
       run: npm install --no-audit --no-fund
-    
-    - name: Check type errors
-      run: npx tsc --noEmit
 
-    - name: Run tests
-      run: npm test
+    - name: Build
+      run: npm run build
+
+    - uses: andresz1/size-limit-action@v1.3.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        skip_step: build
