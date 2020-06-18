@@ -37,11 +37,15 @@ jobs:
     - name: Check type errors
       run: npx tsc --noEmit
 
+    - name: Run tests
+      if: matrix.os != 'ubuntu-16.04'
+      run: npm test -- --coverage
+
     - name: Run tests and generate code coverage report
+      if: matrix.os == 'ubuntu-16.04'
       run: npm test -- --coverage
 
     - uses: codecov/codecov-action@v1
+      if: matrix.os == 'ubuntu-16.04'
       with:
         file: coverage/clover.xml
-        #name: codecov-umbrella # optional
-        #fail_ci_if_error: true # optional (default = false)
