@@ -4,7 +4,7 @@ import { Modal, Button } from "react-bootstrap";
 import { User } from "../shared/types";
 import { ProfileFormConsumer, useProfileForm } from "../profile/ProfileForm";
 
-import "./UserList.scss";
+import "./styles/UserList.scss";
 import { useAuth } from "../auth/Auth";
 import ERRORS from "../shared/errors";
 import {

@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/Auth";
 import { useToast } from "../shared/contexts/ToastContext";
 
-import "./SluglineNav.scss";
+import { ReactComponent as Logo } from "../logo.svg";
+import "./styles/SluglineNav.scss";
 
 const LoginLogoutLink = () => {
   const auth = useAuth();
@@ -24,17 +25,17 @@ const LoginLogoutLink = () => {
                   {
                     id: Math.random.toString(),
                     body: "Logout successful!",
-                    delay: 3000
-                  }
+                    delay: 3000,
+                  },
                 ]);
               },
               (errors: string[]) => {
                 toast.addToasts(
-                  errors.map(e => ({
+                  errors.map((e) => ({
                     id: Math.random.toString(),
                     title: "Logout error",
                     body: e,
-                    delay: 3000
+                    delay: 3000,
                   }))
                 );
               }
@@ -56,7 +57,7 @@ interface NavLinkProps {
 
 // React Router's links and Bootstrap's navbar links don't play together too nicely,
 // so try and mash them together here
-const NavLink: React.FC<NavLinkProps> = props => {
+const NavLink: React.FC<NavLinkProps> = (props) => {
   const { text, ...rest } = props;
   return (
     <Nav.Item>
@@ -74,7 +75,7 @@ const SluglineNav = () => {
     <Navbar bg="primary" expand="lg">
       <div className="container nav-container">
         <Navbar.Brand as={Link} to="/" href="/">
-          <span className="mathnews-logo" />
+          <Logo height={28} className="navbar-logo align-top" />
         </Navbar.Brand>
         <Navbar.Toggle
           className="custom-toggler"
@@ -85,8 +86,10 @@ const SluglineNav = () => {
             <NavLink text="Home" to="/" />
             <NavLink text="Issues" to="/issues" />
             {auth.isAuthenticated() && <NavLink text="Dash" to="/dash" />}
-            {auth.isAuthenticated() && <NavLink text="Profile" to="/profile" />}
-            {auth.isEditor() && <NavLink text="admin" to="/admin" />}
+            {auth.isAuthenticated() && (
+              <NavLink text="Profile" to="/dash/profile" />
+            )}
+            {auth.isEditor() && <NavLink text="admin" to="/dash/admin" />}
             <LoginLogoutLink />
           </Nav>
         </Navbar.Collapse>

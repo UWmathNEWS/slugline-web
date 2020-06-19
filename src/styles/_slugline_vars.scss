@@ -9,9 +9,9 @@ $headings-ff: "Headings Font", sans-serif;
 $font-family-sans-serif: $body-ff; //This is a misnomer, our body font is serif
 $headings-font-family: $headings-ff;
 
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
+@import "../../node_modules/bootstrap/scss/functions";
+@import "../../node_modules/bootstrap/scss/variables";
+@import "../../node_modules/bootstrap/scss/mixins";
 
 // Headers
 $headings-color: black;

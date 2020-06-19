@@ -1,13 +1,14 @@
 import React, { useEffect, useReducer, useRef } from "react";
 import { RouteProps, Route, useHistory } from "react-router-dom";
-import { Alert, Spinner } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import { useAuth } from "./Auth";
 import Error404 from "../shared/errors/Error404";
 import ERRORS from "../shared/errors";
+import Loader from "../shared/components/Loader";
 
 interface PrivateRouteProps extends RouteProps {
   admin?: boolean;
-  fallback?: React.ReactNode;
+  fallback?: React.ReactElement;
 }
 
 interface PrivateRouteState {
@@ -55,7 +56,7 @@ type PrivateRouteAction =
  */
 const PrivateRouteWrapper: React.FC<{
   admin?: boolean;
-  fallback?: React.ReactNode;
+  fallback?: React.ReactElement;
   children: React.ReactNode;
 }> = (props) => {
   const auth = useAuth();
@@ -105,6 +106,10 @@ const PrivateRouteWrapper: React.FC<{
 
   if (state.errors.length === 0) {
     if (authCheckCompleted.current && state.ready) {
+      if ("NO_PRELOAD_ROUTE" in window.__SSR_DIRECTIVES__) {
+        delete window.__SSR_DIRECTIVES__.NO_PRELOAD_ROUTE;
+      }
+
       if (
         auth.isAuthenticated() &&
         ((props.admin && auth.isEditor()) || !props.admin)
@@ -115,16 +120,20 @@ const PrivateRouteWrapper: React.FC<{
         return <Error404 />;
       }
     } else {
+      // Sometimes, the server may send a directive to not preload a route. When that happens, we only render the
+      // loader and skip mounting the child component.
+      if ("NO_PRELOAD_ROUTE" in window.__SSR_DIRECTIVES__) {
+        return props.fallback ?? <Loader variant="spinner" />;
+      }
+
       return (
         <>
-          {props.fallback ?? (
-            <Spinner animation="border" role="status">
-              <span className="sr-only">Loading...</span>
-            </Spinner>
-          )}
-          <div key="children" className="d-none" aria-hidden="true">
-            {props.children}
-          </div>
+          {props.fallback ?? <Loader variant="spinner" />}
+          {
+            <div key="children" className="d-none" aria-hidden="true">
+              {props.children}
+            </div>
+          }
         </>
       );
     }
@@ -133,7 +142,7 @@ const PrivateRouteWrapper: React.FC<{
       <>
         {state.errors.map((err) => (
           <Alert key={err} variant="danger">
-            {ERRORS[err] || err}
+            {ERRORS[err]}
           </Alert>
         ))}
       </>
@@ -141,15 +150,29 @@ const PrivateRouteWrapper: React.FC<{
   }
 };
 
-const PrivateRoute: React.FC<PrivateRouteProps> = (
-  props: PrivateRouteProps
-) => {
+const PrivateRoute: React.FC<PrivateRouteProps> = ({
+  admin,
+  fallback,
+  render,
+  component: Component,
+  children,
+  ...props
+}: PrivateRouteProps) => {
   return (
-    <Route {...props}>
-      <PrivateRouteWrapper admin={props.admin} fallback={props.fallback}>
-        {props.children}
-      </PrivateRouteWrapper>
-    </Route>
+    <Route
+      {...props}
+      render={(routeProps) => (
+        <PrivateRouteWrapper admin={admin} fallback={fallback}>
+          {render ? (
+            render(routeProps)
+          ) : Component ? (
+            <Component {...routeProps} />
+          ) : (
+            children
+          )}
+        </PrivateRouteWrapper>
+      )}
+    />
   );
 };
 

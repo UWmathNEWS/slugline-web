@@ -4,8 +4,10 @@ import { useAuth } from "./Auth";
 import { useHistory } from "react-router-dom";
 import { useToast } from "../shared/contexts/ToastContext";
 import ERRORS from "../shared/errors";
+import { RouteComponentProps } from "../shared/types";
+import Visor from "../shared/components/Visor";
 
-const Login: React.FC = () => {
+const Login: React.FC<RouteComponentProps> = (props) => {
   const auth = useAuth();
   const toast = useToast();
   const history = useHistory();
@@ -42,6 +44,8 @@ const Login: React.FC = () => {
 
   return (
     <>
+      <Visor title={props.route.title} location={props.location.pathname} />
+
       <h1>LOGIN:</h1>
 
       {errors.map((err) => (

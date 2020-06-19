@@ -3,11 +3,12 @@ import { Button, Modal, Form, Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { useForm, DeepPartial } from "react-hook-form";
 
-import "./DashIssuesPage.scss";
+import "./styles/DashIssuesPage.scss";
 import Field from "../../shared/form/Field";
 import NonFieldErrors from "../../shared/form/NonFieldErrors";
-import { Issue } from "../../shared/types";
+import { Issue, RouteComponentProps } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
+import Visor from "../../shared/components/Visor";
 import { useAPILazyUnsafe, useAPI } from "../../api/hooks";
 import api from "../../api/api";
 
@@ -167,7 +168,7 @@ const IssueCreateModal: React.FC<IssueCreateModalProps> = (
   );
 };
 
-const DashIssuesPage = () => {
+const DashIssuesPage: React.FC<RouteComponentProps> = (props) => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
   const [latestIssue] = useAPI(api.issues.latest);
@@ -178,6 +179,10 @@ const DashIssuesPage = () => {
 
   return (
     <>
+      <Visor
+        title={props.route.title}
+        location={props.location.pathname}
+      />
       <h1>Issues</h1>
       <Button
         variant="primary"

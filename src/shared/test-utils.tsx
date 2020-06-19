@@ -4,6 +4,9 @@ import {
   APIError,
   APIResponse,
 } from "./types";
+import { History } from "history";
+import { useAuth } from "../auth/Auth";
+import React from "react";
 
 export const testUser = {
   username: "test",
@@ -67,3 +70,20 @@ export const MOCK_PARAMS = {
   p: "p",
   q: 15,
 };
+
+export const ForceCheck = ({ history }: { history: History }) => {
+  const auth = useAuth();
+
+  React.useEffect(() => {
+    const unlisten = history.listen(() => {
+      auth.check(true).catch(() => {});
+    });
+
+    return () => {
+      unlisten();
+    };
+  }, [history, auth]);
+
+  return <></>;
+};
+

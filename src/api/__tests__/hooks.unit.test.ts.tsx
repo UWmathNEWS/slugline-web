@@ -252,6 +252,7 @@ describe("useAPILazy", () => {
 
 describe("useAPILazyUnsafe", () => {
   beforeAll(() => {
+    window.__SSR_DIRECTIVES__ = {};
     window.document.cookie = `${CSRF_COOKIE}=${MOCK_CSRF}`;
   });
 

@@ -2,11 +2,11 @@ import React from "react";
 import {
   ToggleMarkButton,
   LinkButton,
-  InlineLatexButton
+  InlineLatexButton,
 } from "./components/controls";
 import { Mark } from "./types";
 
-import "./EditorControls.scss";
+import "./styles/EditorControls.scss";
 
 const EditorControls: React.FC = () => {
   return (

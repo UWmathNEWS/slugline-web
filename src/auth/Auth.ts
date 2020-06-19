@@ -23,7 +23,7 @@ export interface AuthState {
 
 export type AuthAction = { type: "login"; user: User } | { type: "logout" };
 
-export const Auth = createContext<AuthContext>({
+export const defaultAuthContext: AuthContext = {
   user: null,
   csrfToken: null,
   check: () => Promise.resolve({ success: true, statusCode: 200, data: null }),
@@ -34,25 +34,26 @@ export const Auth = createContext<AuthContext>({
     Promise.resolve({ success: true, statusCode: 200, data: undefined }),
   logout: () =>
     Promise.resolve({ success: true, statusCode: 200, data: undefined }),
-});
+};
+
+export const Auth = createContext<AuthContext>(defaultAuthContext);
 
 export const CSRF_COOKIE = "csrftoken";
-export const USER_LOCALSTORAGE_KEY = "slugline-user";
 
 export const authReducer = (state: AuthState, action: AuthAction) => {
   switch (action.type) {
-    case "login":
-      localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(action.user));
+    case "login": {
       return {
         user: action.user,
         csrfToken: Cookie.get(CSRF_COOKIE) || null,
       };
-    case "logout":
-      localStorage.removeItem(USER_LOCALSTORAGE_KEY);
+    }
+    case "logout": {
       return {
         user: null,
         csrfToken: Cookie.get(CSRF_COOKIE) || null,
       };
+    }
   }
   return state;
 };

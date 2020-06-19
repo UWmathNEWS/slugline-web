@@ -6,7 +6,9 @@ import { Row, Col, Spinner } from "react-bootstrap";
 import { Node } from "slate";
 import { useDebouncedCallback } from "../shared/hooks";
 import EditorInfo from "../editor/EditorInfo";
-import { ErrorPage } from "../shared/errors/ErrorPage";
+import { RouteComponentProps } from "../shared/types";
+import Visor from "../shared/components/Visor";
+import ErrorPage from "../shared/errors/ErrorPage";
 import api from "../api/api";
 
 const getEditorRequestState = (
@@ -30,7 +32,7 @@ const getEditorRequestState = (
 
 const ARTICLE_SAVE_DELAY_MSECS = 10000;
 
-const EditorPage: React.FC = () => {
+const EditorPage: React.FC<RouteComponentProps> = (props) => {
   const { articleId } = useParams();
 
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
@@ -111,26 +113,33 @@ const EditorPage: React.FC = () => {
       : undefined;
 
   return (
-    <Row>
-      <Col sm={9}>
-        <SluglineEditor
-          title={article.title}
-          subtitle={article.sub_title}
-          content_raw={editorContent}
-          saveArticle={saveArticleDebounced}
-          saveArticleContent={saveArticleContentDebounced}
-        />
-      </Col>
-      <Col sm={3}>
-        <EditorInfo
-          lastSaveTime={lastSaved}
-          editorRequestState={getEditorRequestState(
-            updateArticleInfo.state,
-            updateArticleContentInfo.state
-          )}
-        />
-      </Col>
-    </Row>
+    <>
+      <Visor
+        title={props.route.title}
+        titleParams={[article.title || "Untitled"]}
+        location={props.location.pathname}
+      />
+      <Row>
+        <Col sm={9}>
+          <SluglineEditor
+            title={article.title}
+            subtitle={article.sub_title}
+            content_raw={editorContent}
+            saveArticle={saveArticleDebounced}
+            saveArticleContent={saveArticleContentDebounced}
+          />
+        </Col>
+        <Col sm={3}>
+          <EditorInfo
+            lastSaveTime={lastSaved}
+            editorRequestState={getEditorRequestState(
+              updateArticleInfo.state,
+              updateArticleContentInfo.state
+            )}
+          />
+        </Col>
+      </Row>
+    </>
   );
 };
 

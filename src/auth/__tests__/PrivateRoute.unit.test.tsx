@@ -1,13 +1,18 @@
 import "core-js";
 import React from "react";
-import { Router, Switch } from "react-router-dom";
+import { Router, Switch, Route, Link } from "react-router-dom";
 import { createMemoryHistory, History } from "history";
 import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { testUser, testAdmin, MOCK_ERROR } from "../../shared/test-utils";
+import {
+  testUser,
+  testAdmin,
+  MOCK_ERROR,
+  ForceCheck,
+} from "../../shared/test-utils";
 import mockAxios from "jest-mock-axios";
 import PrivateRoute from "../PrivateRoute";
-import { Auth, USER_LOCALSTORAGE_KEY } from "../Auth";
+import { Auth } from "../Auth";
 import { AuthProvider } from "../AuthProvider";
 import ERRORS from "../../shared/errors";
 
@@ -15,6 +20,7 @@ describe("Unit test for PrivateRoute", () => {
   let history: History;
 
   beforeEach(() => {
+    window.__SSR_DIRECTIVES__ = {};
     history = createMemoryHistory();
     history.push("/private");
   });
@@ -126,18 +132,25 @@ describe("Unit test for PrivateRoute", () => {
   });
 
   it("shows error page when admin has been downgraded to user", async () => {
-    localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testAdmin));
+    window.__SSR_DIRECTIVES__ = { USER: testAdmin };
 
     const { getByText } = render(
       <Router history={history}>
+        <ForceCheck history={history} />
+        <Link to="/admin">Go to admin</Link>
         <Switch>
-          <PrivateRoute admin path="/private">
+          <Route path="/private">Not so secret</Route>
+          <PrivateRoute admin path="/admin">
             Secret
           </PrivateRoute>
         </Switch>
       </Router>,
       { wrapper: AuthProvider }
     );
+
+    await act(async () => {
+      history.push("/admin");
+    });
 
     await act(async () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
@@ -147,16 +160,23 @@ describe("Unit test for PrivateRoute", () => {
   });
 
   it("shows error page when user has been logged out elsewhere", async () => {
-    localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
+    window.__SSR_DIRECTIVES__ = { USER: testUser };
 
     const { getByText } = render(
       <Router history={history}>
+        <ForceCheck history={history} />
+        <Link to="/admin">Go to admin</Link>
         <Switch>
-          <PrivateRoute path="/private">Secret</PrivateRoute>
+          <Route path="/private">Not so secret</Route>
+          <PrivateRoute path="/superprivate">Secret</PrivateRoute>
         </Switch>
       </Router>,
       { wrapper: AuthProvider }
     );
+
+    await act(async () => {
+      history.push("/superprivate");
+    });
 
     await act(async () => {
       mockAxios.mockResponse({ data: { success: true, data: null } });

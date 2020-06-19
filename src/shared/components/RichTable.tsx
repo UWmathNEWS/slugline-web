@@ -1,4 +1,4 @@
-import "./RichTable.scss";
+import "./styles/RichTable.scss";
 
 import React, {
   useEffect,

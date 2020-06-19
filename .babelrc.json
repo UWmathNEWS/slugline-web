@@ -1,0 +1,23 @@
+{
+  "plugins": [
+    "@babel/plugin-transform-modules-commonjs",
+    [
+      "transform-assets",
+      {
+        "extensions": [
+          "css"
+        ],
+        "name": "static/media/[name].[hash:8].[ext]"
+      }
+    ]
+  ],
+  "presets": [
+    "react-app",
+    [
+      "@dr.pogodin/babel-preset-svgr",
+      {
+        "mimicCreateReactApp": true
+      }
+    ]
+  ]
+}

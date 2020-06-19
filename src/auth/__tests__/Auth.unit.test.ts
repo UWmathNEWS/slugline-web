@@ -1,18 +1,19 @@
 import { User } from "../../shared/types";
 import { testAdmin, testUser } from "../../shared/test-utils";
-import { authReducer, CSRF_COOKIE, USER_LOCALSTORAGE_KEY } from "../Auth";
+import { authReducer, CSRF_COOKIE } from "../Auth";
 
 describe("authReducer", () => {
-  let authState: { user: User | null, csrfToken: string | null; };
+  let authState: { user: User | null; csrfToken: string | null };
 
   beforeAll(() => {
     window.document.cookie = `${CSRF_COOKIE}=csrf`;
   });
 
   beforeEach(() => {
+    window.__SSR_DIRECTIVES__ = {};
     authState = {
       user: null,
-      csrfToken: null
+      csrfToken: null,
     };
   });
 
@@ -43,16 +44,6 @@ describe("authReducer", () => {
 
       expect(csrfToken).toBe("csrf");
     });
-
-    it("updates the user in localStorage", () => {
-      localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
-      authReducer(authState, {
-        type: "login",
-        user: testAdmin,
-      });
-
-      expect(JSON.parse(localStorage.getItem(USER_LOCALSTORAGE_KEY) || "")).not.toEqual(testUser);
-    });
   });
 
   describe("action:logout", () => {
@@ -72,15 +63,5 @@ describe("authReducer", () => {
 
       expect(csrfToken).toBe("csrf");
     });
-
-    it("removes the user in localStorage", () => {
-      localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(testUser));
-      authReducer(authState, {
-        type: "logout",
-      });
-
-      expect(localStorage.getItem(USER_LOCALSTORAGE_KEY)).toBeNull();
-    });
   });
 });
-

@@ -1,8 +1,7 @@
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { render } from "@testing-library/react";
-import { ErrorPage } from "../ErrorPage";
-import ERRORS from "../../errors";
+import ErrorPage from "../ErrorPage";
 
 describe("ErrorPage", () => {
   it("returns the correct error page", () => {

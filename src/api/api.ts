@@ -12,7 +12,9 @@ import {
 } from "../shared/types";
 import { ProfileFormVals } from "../profile/ProfileForm";
 
-export const API_ROOT = "/api/";
+// The following line is replaced in post-processing.
+// DO NOT EDIT THE COMMENT.
+export const API_ROOT = /*$ SLUGLINE_SERVER */ "/api/";
 
 type RequestConfig = Omit<AxiosRequestConfig, "baseURL" | "validateStatus">;
 
@@ -42,6 +44,7 @@ export interface QueryParams {
  */
 export interface RequestArgs {
   params?: QueryParams;
+  headers?: Record<string, string>;
 }
 
 /**
@@ -61,7 +64,8 @@ export const listFactory = <TResp, TError extends APIError = APIError>(
     const config: RequestConfig = {
       url: endpoint,
       method: "GET",
-      params: args?.params || undefined,
+      params: args?.params,
+      headers: args?.headers,
     };
     const data: APIResponse<TResp, TError> = await axiosRequest(config);
     return data;
@@ -79,7 +83,8 @@ export const getFactory = <TResp, TError extends APIError = APIError>(
     const config: RequestConfig = {
       url: `${endpoint}${args.id}/`,
       method: "GET",
-      params: args.params || undefined,
+      params: args.params,
+      headers: args.headers,
     };
     const data: APIResponse<TResp, TError> = await axiosRequest(config);
     return data;
@@ -101,9 +106,10 @@ export const createFactory = <
     const config: AxiosRequestConfig = {
       url: endpoint,
       method: "POST",
-      params: args.params || undefined,
+      params: args.params,
       data: args.body,
       headers: {
+        ...args.headers,
         "X-CSRFToken": args.csrf,
       },
     };
@@ -128,9 +134,10 @@ export const patchFactory = <
     const config: AxiosRequestConfig = {
       url: `${endpoint}${args.id}/`,
       method: "PATCH",
-      params: args.params || undefined,
+      params: args.params,
       data: args.body,
       headers: {
+        ...args.headers,
         "X-CSRFToken": args.csrf,
       },
     };
@@ -150,8 +157,9 @@ export const deleteFactory = <TResp, TError extends APIError = APIError>(
     const config: AxiosRequestConfig = {
       url: `${endpoint}${args.id}/`,
       method: "DELETE",
-      params: args.params || undefined,
+      params: args.params,
       headers: {
+        ...args.headers,
         "X-CSRFToken": args.csrf,
       },
     };
@@ -202,6 +210,7 @@ const usernameQuery = async (
   const config: RequestConfig = {
     url: `users/${args.username}/query/`,
     method: "GET",
+    headers: args.headers,
   };
   const data = await axiosRequest<void>(config);
   return data;
@@ -219,6 +228,7 @@ const patchMe = async (
     method: "PATCH",
     data: args.body,
     headers: {
+      ...args.headers,
       "X-CSRFToken": args.csrf,
     },
   };
@@ -236,6 +246,7 @@ const issueArticles = async (
   const config: RequestConfig = {
     url: `issues/${args.id}/articles/`,
     method: "GET",
+    headers: args.headers,
   };
   const data = await axiosRequest<Pagination<Article>>(config);
   return data;
