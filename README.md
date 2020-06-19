@@ -19,7 +19,10 @@ Basic site configuration is found in `src/config.ts`. Edit that as you wish.
 - By default, the server runs at port 8000, and the `proxy` setting in `package.json` is designed to redirect requests from the dev server to there. If you change the server port, change the port in `package.json` as well.
 
 ## License
-Except for files which specify otherwise, this application is licensed under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).
+Except for files which specify otherwise, this application is licensed under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html) with the following [exception](https://www.gnu.org/licenses/gpl-faq.en.html#WMS):
+```
+As a special exception to the GPL, any HTML file which merely makes function calls to this code, and for that purpose includes it by reference shall be deemed a separate work for copyright law purposes. In addition, the copyright holders of this code give you permission to combine this code with free software libraries that are released under the GNU LGPL. You may copy and distribute such a system following the terms of the GNU GPL for this code and the LGPL for the libraries. If you modify this code, you may extend this exception to your version of the code, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.
+```
 
 ```
 <one line to give the program's name and a brief idea of what it does.>
