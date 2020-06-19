@@ -115,16 +115,16 @@ export interface RichTableRow<D extends object> {
   setSelected: (s: boolean) => void;
 }
 
-export interface RichTableHook<D extends object = {}> {
+export interface RichTableHookProps<D extends object = {}> {
   columns: Column<D>[];
-  list: (args: RequestArgs) => Promise<APIResponse<D | Pagination<D>>>;
+  list: (args: RequestArgs) => Promise<APIResponse<D[] | Pagination<D>>>;
   paginated: boolean;
   actions?: Action<D>[];
   selectable?: boolean;
 }
 
 export interface RichTableProps<D extends object = {}>
-  extends RichTableHook<D> {
+  extends RichTableHookProps<D> {
   className?: string;
   searchable?: boolean;
   ref?: React.Ref<Table & HTMLTableElement>;
@@ -141,6 +141,8 @@ export interface RichTableBag<D extends object = {}> {
   setPage: (page: number) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  sortColumn: [string, boolean] | null;
+  setSortColumn: (col: [string, boolean] | null) => void;
   count: number;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
@@ -151,13 +153,13 @@ export interface RichTableBag<D extends object = {}> {
  * Here, we define useRichTable, the main hook used to construct a rich table. It handles all data-related aspects; the
  * only way to interact with the data externally is through actions.
  */
-const useRichTable = <D extends object = {}>({
+export const useRichTable = <D extends object = {}>({
   columns,
   list: get,
   paginated,
   actions = [],
   selectable,
-}: RichTableHook<D>): RichTableBag<D> => {
+}: RichTableHookProps<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
   const [searchQuery, _setSearchQuery] = useState("");
@@ -183,6 +185,9 @@ const useRichTable = <D extends object = {}>({
       setPage(preSearchParams.current.page);
       setSortColumn(preSearchParams.current.sortColumn);
     }
+    if (query) {
+      setPage(1);
+    }
     _setSearchQuery(query);
   };
 
@@ -200,7 +205,7 @@ const useRichTable = <D extends object = {}>({
       if (sortColumn !== null) {
         params.sort = (sortColumn[1] ? "" : "-") + sortColumn[0];
       }
-      return get({ params: params });
+      return get({ params });
     },
     // We can ignore the warning about cuckooLoad being an unnecessary dependency, since it exists to trigger
     // refreshing without changing other state.
@@ -602,6 +607,8 @@ const useRichTable = <D extends object = {}>({
     totalCount,
     searchQuery,
     setSearchQuery,
+    sortColumn,
+    setSortColumn,
     executeAction,
     reqInfo,
   };

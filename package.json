@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "jest": {
-    "coverageReporters": ["json", "text"]
+    "coverageReporters": ["json", "text", "lcov"]
   },
   "dependencies": {
     "@babel/cli": "^7.10.1",
