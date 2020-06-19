@@ -2,6 +2,9 @@
   "name": "slugline-web",
   "version": "0.1.0",
   "private": true,
+  "jest": {
+    "coverageReporters": ["json", "text"]
+  },
   "dependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
