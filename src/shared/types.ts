@@ -1,3 +1,16 @@
+import {
+  RouteComponentProps as _RouteComponentProps,
+  RouteProps as _RouteProps,
+  StaticRouterContext,
+} from "react-router";
+import React from "react";
+
+declare global {
+  interface Window {
+    __SSR_DIRECTIVES__: any;
+  }
+}
+
 export enum ArticleType {
   Wordpress = "wordpress",
   Slate = "slate",
@@ -77,3 +90,35 @@ export interface UserAPIError extends APIError {
 export interface IssueAPIError extends APIError {
   non_field_errors?: string[];
 }
+
+export interface StaticRouterContextWithData<T = any>
+  extends StaticRouterContext {
+  data?: T;
+}
+
+interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
+  title: string;
+  key?: string | number;
+  routeComponent?: React.ComponentType;
+  routeProps?: any;
+  loadData?: (args: { params: any; headers: any }) => Promise<APIResponse<any>>;
+}
+
+export type RouteProps = RouteBaseProps &
+  (
+    | {
+        render: (props: RouteComponentProps) => React.ReactNode;
+      }
+    | {
+        component:
+          | React.ComponentType<RouteComponentProps>
+          | React.ComponentType<any>;
+      }
+  );
+
+export type RouteComponentProps<P = any, T = any> = _RouteComponentProps<
+  P,
+  StaticRouterContextWithData<T>
+> & {
+  route: RouteProps;
+};

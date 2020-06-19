@@ -29,24 +29,25 @@ export type UseAPIHook<TResp, TError extends APIError = APIError> = [
  * wrap it in a parameter-less `useCallback` that captures the props and pass that instead.
  * @example
  * useAPI(useCallback(() => {
- *  return api.get({ id: propsId })
+ *   return api.get({ id: propsId })
  * }, [propsId]))
  */
 export const useAPI = <TResp, TError extends APIError = APIError>(
   fn: () => Promise<APIResponse<TResp, TError>>
 ): UseAPIHook<TResp, TError> => {
-  const [requestState, setRequestState] = useState<RequestState>(
-    RequestState.NotStarted
-  );
-
   const [data, setData] = useState<TResp | undefined>(undefined);
   const [error, setError] = useState<TError | undefined>(undefined);
-  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
+  const [reqInfo, setReqInfo] = useState<RequestInfo>({
+    state: RequestState.NotStarted,
+    statusCode: undefined,
+  });
 
   useEffect(() => {
-    setRequestState(RequestState.Running);
+    setReqInfo((prev) => ({
+      ...prev,
+      state: RequestState.Running,
+    }));
     fn().then((resp) => {
-      setStatusCode(resp.statusCode);
       if (resp.success) {
         setData(resp.data);
         setError(undefined);
@@ -54,22 +55,19 @@ export const useAPI = <TResp, TError extends APIError = APIError>(
         setData(undefined);
         setError(resp.error);
       }
-      setRequestState(RequestState.Complete);
+      setReqInfo((prev) => ({
+        ...prev,
+        state: RequestState.Complete,
+        statusCode: resp.statusCode,
+      }));
     });
   }, [fn]);
 
-  return [
-    data,
-    error,
-    {
-      state: requestState,
-      statusCode: statusCode,
-    },
-  ];
+  return [data, error, reqInfo];
 };
 
 export type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
-  (args: TArgs) => Promise<APIResponse<TResp, TError>>,
+  (args?: TArgs) => Promise<APIResponse<TResp, TError>>,
   RequestInfo
 ];
 
@@ -79,37 +77,38 @@ export type UseAPILazyHook<TResp, TArgs, TError extends APIError = APIError> = [
  * @param fn An async function, similar to a useAPI argument. However, this function may take as an argument
  * an object extending `RequestArgs`.
  */
-export const useAPILazy = <
-  TResp,
-  TArgs extends RequestArgs,
-  TError extends APIError = APIError
->(
-  fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
-): UseAPILazyHook<TResp, TArgs> => {
-  const [requestState, setRequestState] = useState<RequestState>(
-    RequestState.NotStarted
-  );
-  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
+export const useAPILazy: {
+  <TResp, TArgs extends RequestArgs, TError extends APIError = APIError>(
+    fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
+  ): UseAPILazyHook<TResp, TArgs>;
+  <TResp, TError extends APIError = APIError>(
+    fn: () => Promise<APIResponse<TResp, TError>>
+  ): UseAPILazyHook<TResp, void>;
+} = <TResp, TArgs, TError>(fn: (args: any) => any): any => {
+  const [reqInfo, setReqInfo] = useState<RequestInfo>({
+    state: RequestState.NotStarted,
+    statusCode: undefined,
+  });
 
   const exec = useCallback(
-    (args: TArgs) => {
-      setRequestState(RequestState.Running);
-      return fn(args).then((resp) => {
-        setStatusCode(resp.statusCode);
-        setRequestState(RequestState.Complete);
+    (args?: TArgs) => {
+      setReqInfo((prev) => ({
+        ...prev,
+        state: RequestState.Running,
+      }));
+      return fn(args).then((resp: APIResponse<TResp, TError>) => {
+        setReqInfo((prev) => ({
+          ...prev,
+          state: RequestState.Complete,
+          statusCode: resp.statusCode,
+        }));
         return resp;
       });
     },
     [fn]
   );
 
-  return [
-    exec,
-    {
-      state: requestState,
-      statusCode: statusCode,
-    },
-  ];
+  return [exec, reqInfo];
 };
 
 export type UseAPILazyCSRFHook<
@@ -122,7 +121,9 @@ export type UseAPILazyCSRFHook<
 ];
 
 /**
- * A variant of useAPILazy that handles the CSRF token automatically.
+ * A variant of useAPILazy that handles the CSRF token automatically. A major difference is that an argument must be
+ * supplied to the returned callback, which will then be passed on to the supplied API call.
+ *
  * @see useApiLazy
  */
 export const useAPILazyUnsafe = <
@@ -132,35 +133,35 @@ export const useAPILazyUnsafe = <
 >(
   fn: (args: TArgs) => Promise<APIResponse<TResp, TError>>
 ): UseAPILazyCSRFHook<TResp, TArgs, TError> => {
-  const [requestState, setRequestState] = useState<RequestState>(
-    RequestState.NotStarted
-  );
-  const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
+  const [reqInfo, setReqInfo] = useState<RequestInfo>({
+    state: RequestState.NotStarted,
+    statusCode: undefined,
+  });
 
   const auth = useAuth();
 
   const exec = useCallback(
     (args: Omit<TArgs, "csrf">) => {
-      setRequestState(RequestState.Running);
+      setReqInfo((prev) => ({
+        ...prev,
+        state: RequestState.Running,
+      }));
       const argsWithCsrf = {
         ...args,
         csrf: auth.csrfToken || "",
       };
       // argsWithCsrf doesn't typecheck as TArgs, so we force the issue.
       return fn(argsWithCsrf as TArgs).then((resp) => {
-        setRequestState(RequestState.Complete);
-        setStatusCode(resp.statusCode);
+        setReqInfo((prev) => ({
+          ...prev,
+          state: RequestState.Complete,
+          statusCode: resp.statusCode,
+        }));
         return resp;
       });
     },
     [fn, auth]
   );
 
-  return [
-    exec,
-    {
-      state: requestState,
-      statusCode: statusCode,
-    },
-  ];
+  return [exec, reqInfo];
 };

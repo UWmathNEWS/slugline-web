@@ -1,10 +1,11 @@
 import React from "react";
 import { Button } from "react-bootstrap";
 
-import "./DashArticlesPage.scss";
+import "./styles/DashArticlesPage.scss";
 import { useHistory, Link } from "react-router-dom";
-import { Article, ArticleType } from "../../shared/types";
+import { Article, ArticleType, RouteComponentProps } from "../../shared/types";
 import { RichTable, Column } from "../../shared/components/RichTable";
+import Visor from "../../shared/components/Visor";
 import { useAPILazyUnsafe } from "../../api/hooks";
 import api from "../../api/api";
 
@@ -52,7 +53,7 @@ const columns: Column<Article>[] = [
   },
 ];
 
-const DashArticlesPage: React.FC = () => {
+const DashArticlesPage: React.FC<RouteComponentProps> = (props) => {
   const [createArticle] = useAPILazyUnsafe(api.articles.create);
 
   const history = useHistory();
@@ -66,6 +67,10 @@ const DashArticlesPage: React.FC = () => {
 
   return (
     <>
+      <Visor
+        title={props.route.title}
+        location={props.location.pathname}
+      />
       <h1>Articles</h1>
       <Button onClick={createNewArticle}>New Article</Button>
       <RichTable<Article>

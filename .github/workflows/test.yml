@@ -1,0 +1,51 @@
+name: Test
+
+# Controls when the action will run.
+# Triggers the workflow on push or pull request events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache node modules
+      id: npm-cache
+      uses: actions/cache@v1
+      env:
+        cache-name: test
+      with:
+        path: node_modules
+        key:  ${{ runner.os }}-npm-cache-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-cache-${{ env.cache-name }}-
+          ${{ runner.os }}-npm-cache-
+
+    - name: Install dependencies
+      if: steps.npm-cache.outputs.cache-hit != 'true'
+      run: npm install --no-audit --no-fund
+    
+    - name: Check type errors
+      run: npx tsc --noEmit
+
+    - name: Run tests
+      if: matrix.os != 'ubuntu-16.04'
+      run: npm test
+
+    - name: Run tests and generate code coverage report
+      if: matrix.os == 'ubuntu-16.04'
+      run: npm test -- --coverage
+
+    - uses: codecov/codecov-action@v1
+      if: matrix.os == 'ubuntu-16.04'
+      with:
+        file: coverage/coverage-final.json

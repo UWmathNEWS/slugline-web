@@ -1,9 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
+import Visor from "../components/Visor";
 
-const Error500: React.FC = () => {
+const Error500: React.FC<Partial<RouteComponentProps>> = ({
+  staticContext = {},
+}) => {
+  staticContext.statusCode = 500;
+
   return (
     <div>
+      <Visor title="Server Error" />
       <h1 className="display-1">500</h1>
       <h1>Server Error</h1>
       <p>

@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
-import "./IssuesList.scss";
+import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
-import { Issue } from "../shared/types";
-import { useAPI } from "../api/hooks";
+import { Issue, Pagination, RouteComponentProps } from "../shared/types";
+import Visor from "../shared/components/Visor";
+import { RequestState } from "../api/hooks";
 import api from "../api/api";
+import Loader from "../shared/components/Loader";
+import ErrorPage from "../shared/errors/ErrorPage";
+import { useSSRData } from "../shared/hooks";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -42,33 +46,59 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
   );
 };
 
-const IssuesList = () => {
-  const [issues] = useAPI(api.issues.list);
-  const [volumes, setVolumes] = useState<Issue[][]>([]);
+const issuesToVolumes = (paginatedIssues: Pagination<Issue>): Issue[][] => {
+  const issues = paginatedIssues.results;
 
-  useEffect(() => {
-    if (issues?.results === undefined || issues?.results.length === 0) {
-      return;
+  if (issues.length === 0) {
+    return [];
+  }
+
+  let vols: Issue[][] = [[]];
+  let volumeNum = issues[0].volume_num;
+
+  // split the issues into groups by volume num
+  issues.forEach((issue) => {
+    if (issue.volume_num !== volumeNum) {
+      vols.push([]);
     }
-    let vols: Issue[][] = [[]];
-    let volumeNum = issues.results[0].volume_num;
-    // split the issues into groups by volume num
-    issues.results.forEach((issue) => {
-      if (issue.volume_num !== volumeNum) {
-        vols.push([]);
-      }
-      vols[vols.length - 1].push(issue);
-      volumeNum = issue.volume_num;
-    });
-    setVolumes(vols);
-  }, [issues]);
+    vols[vols.length - 1].push(issue);
+    volumeNum = issue.volume_num;
+  });
+
+  return vols;
+};
+
+const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
+  props
+) => {
+  const [volumes, dataInfo, fail] = useSSRData(
+    api.issues.list,
+    props.staticContext?.data ? issuesToVolumes(props.staticContext.data) : [],
+    issuesToVolumes
+  );
+
+  if (fail) {
+    return <ErrorPage statusCode={dataInfo.statusCode || 500} />;
+  }
 
   return (
     <>
+      <Visor
+        title={
+          dataInfo.state === RequestState.Running
+            ? "Loading..."
+            : props.route.title
+        }
+        location={props.location.pathname}
+      />
       <h1>Issues</h1>
-      {volumes.map((volume) => {
-        return <VolumeIssues volume={volume} />;
-      })}
+      {dataInfo.state === RequestState.Running ? (
+        <Loader variant="spinner" />
+      ) : (
+        volumes.map((volume, i) => {
+          return <VolumeIssues key={i} volume={volume} />;
+        })
+      )}
     </>
   );
 };

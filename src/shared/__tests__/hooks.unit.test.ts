@@ -1,5 +1,7 @@
 import { renderHook } from "@testing-library/react-hooks";
 import * as h from "../hooks";
+import { MOCK_ERROR, MOCK_RESPONSE, withStatus } from "../test-utils";
+import { RequestState } from "../../api/hooks";
 
 jest.useFakeTimers();
 
@@ -90,5 +92,88 @@ describe("useDebouncedCallback", () => {
     jest.runAllTimers();
 
     expect(callback).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("useSSRData", () => {
+  const api = jest.fn(() => Promise.resolve(withStatus(200, MOCK_RESPONSE)));
+
+  beforeEach(() => {
+    window.__SSR_DIRECTIVES__ = {};
+  });
+
+  afterEach(() => {
+    api.mockClear();
+  });
+
+  it("does not make an API call when data has been provided", () => {
+    window.__SSR_DIRECTIVES__.DATA = "bingo bango bongo";
+
+    const { result } = renderHook(() => h.useSSRData(api, "bingo bango bongo"));
+    const [data, info, fail] = result.current;
+
+    expect(api).not.toHaveBeenCalled();
+    expect(data).toBe("bingo bango bongo");
+    expect(info.state).toBe(RequestState.NotStarted);
+    expect(info.statusCode).toBeUndefined();
+    expect(fail).toBeFalsy();
+
+    expect("DATA" in window.__SSR_DIRECTIVES__).toBeFalsy();
+  });
+
+  it("makes an API call when data has not been provided", async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      h.useSSRData(api, "bingo bango bongo")
+    );
+
+    expect(api).toHaveBeenCalled();
+
+    await waitForNextUpdate();
+
+    const [data, info, fail] = result.current;
+    expect(data).toBe("bingo bango bongo");
+    expect(info.state).toBe(RequestState.Complete);
+    expect(info.statusCode).toBe(200);
+    expect(fail).toBeFalsy();
+  });
+
+  it("uses the transformer if one is passed in", () => {
+    window.__SSR_DIRECTIVES__.DATA = "bingo bango bongo";
+
+    const transformer = () => "boo";
+    const { result } = renderHook(() => h.useSSRData(api, "blep", transformer));
+    const [data] = result.current;
+
+    expect(data).toBe("boo");
+  });
+
+  it("sets failure state on server error", () => {
+    window.__SSR_DIRECTIVES__.DATA = "bingo bango bongo";
+    window.__SSR_DIRECTIVES__.STATUS_CODE = 400;
+
+    const { result } = renderHook(() => h.useSSRData(api, "bad"));
+
+    const [data, info, fail] = result.current;
+
+    expect(data).toBe("bad");
+    expect(info.statusCode).toBe(400);
+    expect(fail).toBeTruthy();
+
+    expect("STATUS_CODE" in window.__SSR_DIRECTIVES__).toBeFalsy();
+  });
+
+  it("sets failure state on client-side fetch error", async () => {
+    const api = () => Promise.resolve(withStatus(400, MOCK_ERROR));
+    const { result, waitForNextUpdate } = renderHook(() =>
+      h.useSSRData(api, "bad")
+    );
+
+    await waitForNextUpdate();
+
+    const [data, info, fail] = result.current;
+
+    expect(data).toBe("bad");
+    expect(fail).toBeTruthy();
+    expect(info.statusCode).toBe(400);
   });
 });

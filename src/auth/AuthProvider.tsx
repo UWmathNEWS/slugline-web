@@ -2,17 +2,17 @@ import React, { useEffect, useReducer, useRef } from "react";
 
 import { User, APIResponse } from "../shared/types";
 import Cookie from "js-cookie";
-import { authReducer, USER_LOCALSTORAGE_KEY, Auth, CSRF_COOKIE } from "./Auth";
+import { authReducer, Auth, CSRF_COOKIE } from "./Auth";
 import api from "../api/api";
 
 export const AuthProvider: React.FC = (props) => {
-  const storedUser = localStorage.getItem(USER_LOCALSTORAGE_KEY);
+  const storedUser: User | null | undefined = window.__SSR_DIRECTIVES__.USER;
   const readyPromise = useRef<Promise<APIResponse<User | null>> | undefined>(
     undefined
   );
   const isWaiting = useRef<boolean>(false);
   const [user, dispatchUser] = useReducer(authReducer, {
-    user: storedUser !== null ? JSON.parse(storedUser) : null,
+    user: storedUser !== undefined ? storedUser : null,
     csrfToken: Cookie.get(CSRF_COOKIE) || null,
   });
 
@@ -25,6 +25,15 @@ export const AuthProvider: React.FC = (props) => {
   };
 
   const check = (force: boolean = false): Promise<APIResponse<User | null>> => {
+    if ("USER" in window.__SSR_DIRECTIVES__ && !force) {
+      readyPromise.current = Promise.resolve({
+        success: true,
+        statusCode: 200,
+        data: window.__SSR_DIRECTIVES__.USER,
+      });
+      delete window.__SSR_DIRECTIVES__.USER;
+    }
+
     if (readyPromise.current === undefined || (!isWaiting.current && force)) {
       // Ensure we don't end up with a race condition --- we now have an invariant that only one network request
       // will be made at any point in time
@@ -99,20 +108,7 @@ export const AuthProvider: React.FC = (props) => {
   };
 
   useEffect(() => {
-    check().then((resp) => {
-      if (!resp.success) {
-        // something went horribly wrong here, but we only alert users if they're logged in as otherwise it causes no harm
-        if (storedUser !== null) {
-          window.alert(
-            "An error occurred and we couldn't verify that you're logged in. Try refreshing the page, or check your network connection."
-          );
-        }
-        console.error(
-          "The following error was thrown while performing an auth check:\n",
-          resp.error
-        );
-      }
-    });
+    check().then();
     // We only need to call check on component mount, hence the empty dependency array. The patch that disables ESLint
     // yelling at us in this scenario hasn't landed in our toolchain yet, so we disable the warning for now.
     // eslint-disable-next-line react-hooks/exhaustive-deps
