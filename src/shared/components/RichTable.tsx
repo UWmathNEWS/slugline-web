@@ -331,15 +331,21 @@ export const useRichTable = <D extends object = {}>({
     [filteredSelected, memoizedActions]
   );
 
-  const header = useMemo<RichTableRow<{}>>(() => {
-    const onSelectAll = () => {
-      if (selectAllRef.current) {
-        setSelected((prevSelected) =>
-          new Array(data.length).fill(!prevSelected.some((d) => d))
-        );
-      }
-    };
+  const onSelectAll = useRef(() => {});
 
+  useEffect(() => {
+    if (selectable) {
+      onSelectAll.current = () => {
+        if (selectAllRef.current) {
+          setSelected((prevSelected) =>
+            new Array(data.length).fill(!prevSelected.some((d) => d))
+          );
+        }
+      };
+    }
+  }, [selectable, data.length]);
+
+  const header = useMemo<RichTableRow<{}>>(() => {
     let cells: RichTableCell[] = columns.map(
       ({ header, key, sortable, width }) => {
         let props: PropsBag = { key };
@@ -411,7 +417,7 @@ export const useRichTable = <D extends object = {}>({
               aria-label="select all"
               id={`RichTable-${id.current}-select-all`}
               checked={selected.length > 0 && selected.every((d) => d)}
-              onChange={onSelectAll}
+              onChange={onSelectAll.current}
               ref={selectAllRef}
             />
           );
@@ -428,7 +434,7 @@ export const useRichTable = <D extends object = {}>({
       isSelected: false,
       setSelected() {},
     };
-  }, [columns, selected, sortColumn, selectable, data.length]);
+  }, [columns, selected, sortColumn, selectable]);
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
