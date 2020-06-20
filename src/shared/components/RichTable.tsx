@@ -331,11 +331,15 @@ export const useRichTable = <D extends object = {}>({
     [filteredSelected, memoizedActions]
   );
 
+  // Impossible to test the following, since useEffect will immediately run
+  /* istanbul ignore next */
   const onSelectAll = useRef(() => {});
 
   useEffect(() => {
     if (selectable) {
       onSelectAll.current = () => {
+        // Infeasible to test else branch
+        /* istanbul ignore else */
         if (selectAllRef.current) {
           setSelected((prevSelected) =>
             new Array(data.length).fill(!prevSelected.some((d) => d))
@@ -587,7 +591,12 @@ export const useRichTable = <D extends object = {}>({
         data: row,
         cells,
         isSelected: selected[i],
-        setSelected: selectRow,
+        setSelected: (s) => {
+          setSelected((prevSelected) => {
+            prevSelected[i] = s;
+            return prevSelected.slice();
+          });
+        },
       };
     });
   }, [
