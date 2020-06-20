@@ -1,5 +1,6 @@
+import React from "react";
 import mockAxios from "jest-mock-axios";
-import { render, waitForDomChange } from "@testing-library/react";
+import { render, fireEvent, waitForDomChange } from "@testing-library/react";
 import { renderHook, act } from "@testing-library/react-hooks";
 import { listFactory } from "../../../api/api";
 import { useRichTable, RichTable } from "../RichTable";
@@ -35,9 +36,10 @@ const testData = ({ params }: any): TestData[] => {
   if (params.sort) {
     const sortName: keyof TestData =
       params.sort[0] === "-" ? params.sort.slice(1) : params.sort;
+    const sortDirection = params.sort[0] === "-" ? -1 : 1;
     data = data.sort((a, b) => {
-      if (a[sortName] < b[sortName]) return -1;
-      else if (a[sortName] > b[sortName]) return 1;
+      if (a[sortName] < b[sortName]) return -sortDirection;
+      else if (a[sortName] > b[sortName]) return sortDirection;
       else return 0;
     });
   }
@@ -186,8 +188,60 @@ describe("useRichTable", () => {
     expect(result.current.count).toBe(resultsPerPage);
   });
 
-  describe("searching", () => {
-    it("presents searches to the backend and refreshes the table", async () => {
+  describe("sorting", () => {
+    it("sends correct parameters to backend", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID", sortable: true }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      const expectAscData = testData({ params: { sort: "id" } });
+      const expectDscData = testData({ params: { sort: "-id" } });
+
+      act(() => {
+        result.current.setSortColumn(["id", true]);
+      });
+      await waitForNextUpdate();
+
+      expect(apiWithoutPagination.mock.calls[1][0].params.sort).toBe("id");
+      expect(result.current.sortColumn).toEqual(["id", true]);
+      expect(result.current.rows.map((row) => row.data)).toEqual(expectAscData);
+
+      act(() => {
+        result.current.setSortColumn(["id", false]);
+      });
+      await waitForNextUpdate();
+
+      expect(apiWithoutPagination.mock.calls[2][0].params.sort).toBe("-id");
+      expect(result.current.sortColumn).toEqual(["id", false]);
+      expect(result.current.rows.map((row) => row.data)).toEqual(expectDscData);
+    });
+
+    it("is not changed on pagination", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithPagination,
+          paginated: true,
+        })
+      );
+
+      act(() => {
+        result.current.setSortColumn(["id", true]);
+      });
+      await waitForNextUpdate();
+
+      act(() => {
+        result.current.setPage(2);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.sortColumn).toEqual(["id", true]);
+    });
+
+    it("does not display sorting icons for non-sortable fields", async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
         useRichTable<TestData>({
           columns: [{ key: "id", header: "ID" }],
@@ -195,8 +249,129 @@ describe("useRichTable", () => {
           paginated: false,
         })
       );
-      const expectData = testData({ params: { search: "a" } });
       await waitForNextUpdate();
+      const { queryAllByRole } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(queryAllByRole("img", { hidden: true }).length).toBe(0);
+    });
+
+    it("is updated by clicking headers", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [
+            { key: "id", header: "ID", sortable: true },
+            { key: "text", header: "TEXT", sortable: true },
+          ],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+      const { getByText, getAllByRole, rerender } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(
+        getAllByRole("img", { hidden: true }).filter(
+          (icon) => !icon.classList.contains("fa-sort")
+        ).length
+      ).toBe(0);
+
+      await act(async () => {
+        fireEvent.click(getByText("TEXT"));
+      });
+      rerender(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(result.current.sortColumn).toEqual(["text", true]);
+      expect(
+        getAllByRole("img", { hidden: true })[1].classList.contains(
+          "fa-caret-up"
+        )
+      ).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.click(getByText("ID"));
+      });
+      rerender(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(result.current.sortColumn).toEqual(["id", true]);
+      expect(
+        getAllByRole("img", { hidden: true })[0].classList.contains(
+          "fa-caret-up"
+        )
+      ).toBeTruthy();
+      expect(
+        getAllByRole("img", { hidden: true })[1].classList.contains("fa-sort")
+      ).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.click(getByText("ID"));
+      });
+      rerender(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(result.current.sortColumn).toEqual(["id", false]);
+      expect(
+        getAllByRole("img", { hidden: true })[0].classList.contains(
+          "fa-caret-down"
+        )
+      ).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.click(getByText("ID"));
+      });
+      rerender(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(result.current.sortColumn).toBeNull();
+      expect(
+        getAllByRole("img", { hidden: true })[0].classList.contains("fa-sort")
+      ).toBeTruthy();
+    });
+  });
+
+  describe("searching", () => {
+    it("presents searches to the backend and refreshes the table", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID", sortable: true }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      const expectData = testData({ params: { search: "a" } });
 
       act(() => {
         result.current.setSearchQuery("a");
@@ -226,7 +401,6 @@ describe("useRichTable", () => {
         })
       );
       const curSort = ["id", true];
-      await waitForNextUpdate();
 
       act(() => {
         result.current.setPage(2);
@@ -270,7 +444,6 @@ describe("useRichTable", () => {
       );
       const curPage = 2;
       const curSort = ["id", true];
-      await waitForNextUpdate();
 
       act(() => {
         result.current.setPage(curPage);
@@ -298,7 +471,7 @@ describe("useRichTable", () => {
       await waitForNextUpdate();
 
       expect(result.current.page).toBe(curPage);
-      expect(result.current.sortColumn).toEqual(curSort)
+      expect(result.current.sortColumn).toEqual(curSort);
     });
   });
 
