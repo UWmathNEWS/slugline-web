@@ -33,6 +33,7 @@ export const useDebouncedCallback = <A extends any[], R>(
 
         // start waiting again
         timeout.current = setTimeout(() => {
+          /* istanbul ignore else */
           if (argsRef.current) {
             resolve(callback(...argsRef.current));
           }
@@ -80,16 +81,16 @@ export const useSSRData: {
   <TData, TResp, TError extends APIError = APIError>(
     dataMethod: () => Promise<APIResponse<TResp, TError>>,
     initialData: TData | undefined,
-    transformer: (resp: TResp) => TData,
+    transformer: (resp: TResp) => TData
   ): UseSSRDataHook<TData>;
   <TData, TError extends APIError = APIError>(
     dataMethod: () => Promise<APIResponse<TData, TError>>,
     initialData: TData | undefined
   ): UseSSRDataHook<TData>;
-} = <TData, TResp, TArgs, TError>(
-  dataMethod: (args?: any) => any,
+} = <TData, TResp, TError>(
+  dataMethod: () => any,
   initialData: any,
-  transformer?: any,
+  transformer?: any
 ): any => {
   const [data, setData] = useState<TData | undefined>(initialData);
   const [getData, getDataInfo] = useAPILazy(dataMethod);
