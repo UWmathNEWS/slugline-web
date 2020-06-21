@@ -188,186 +188,6 @@ describe("useRichTable", () => {
     expect(result.current.count).toBe(resultsPerPage);
   });
 
-  describe("header", () => {
-    it("renders the column header", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID" }],
-          list: apiWithoutPagination,
-          paginated: false,
-        })
-      );
-      await waitForNextUpdate();
-
-      const { getByText } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
-      );
-
-      expect(getByText("ID")).toBeInTheDocument();
-    });
-
-    it("only renders provided columns", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID" }],
-          list: apiWithoutPagination,
-          paginated: false,
-        })
-      );
-      await waitForNextUpdate();
-
-      const { container } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
-      );
-
-      expect(container.querySelectorAll(".RichTable_cellHeader").length).toBe(
-        1
-      );
-    });
-
-    it("renders a checkbox when the table is selectable", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID" }],
-          list: apiWithoutPagination,
-          paginated: false,
-          selectable: true,
-        })
-      );
-      await waitForNextUpdate();
-
-      const { container } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
-      );
-
-      expect(
-        container.querySelector(".RichTable_selectCheckbox")
-      ).not.toBeNull();
-    });
-
-    it("sets the width of each column if provided", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID", width: 25 }],
-          list: apiWithoutPagination,
-          paginated: false,
-        })
-      );
-      await waitForNextUpdate();
-
-      const { container } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
-      );
-
-      expect(
-        container.querySelector<HTMLElement>("span[style]")?.style.width
-      ).toBe("25%");
-    });
-
-    it("returns a valid object for useRowProps()", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID" }],
-          list: apiWithoutPagination,
-          paginated: false,
-        })
-      );
-      await waitForNextUpdate();
-
-      render(<div {...result.current.header.useRowProps()} />);
-    });
-
-    it("cannot be selected", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID" }],
-          list: apiWithoutPagination,
-          paginated: false,
-        })
-      );
-      await waitForNextUpdate();
-
-      expect(result.current.header.isSelected).toBe(false);
-      const selected = result.current.selected;
-
-      act(() => {
-        result.current.header.setSelected(true);
-      });
-
-      expect(result.current.selected).toEqual(selected);
-    });
-
-    it("select all selects all on current page", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID" }],
-          list: apiWithoutPagination,
-          paginated: false,
-          selectable: true,
-        })
-      );
-      await waitForNextUpdate();
-
-      const { getByRole } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
-      );
-
-      act(() => {
-        fireEvent.click(getByRole("checkbox"));
-      });
-
-      expect(result.current.selected).toEqual(baseData);
-    });
-
-    it("select all is indeterminate when only some rows are selected", async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useRichTable<TestData>({
-          columns: [{ key: "id", header: "ID" }],
-          list: apiWithoutPagination,
-          paginated: false,
-          selectable: true,
-        })
-      );
-      await waitForNextUpdate();
-
-      const { getByRole } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
-      );
-
-      act(() => {
-        result.current.rows[0].setSelected(true);
-      });
-
-      expect((getByRole("checkbox") as HTMLInputElement).indeterminate).toBe(
-        true
-      );
-    });
-  });
-
   describe("sorting", () => {
     it("sends correct parameters to backend", async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
@@ -873,6 +693,186 @@ describe("useRichTable", () => {
           expect(result.current.page).toBe(1);
         });
       });
+    });
+  });
+
+  describe("header", () => {
+    it("renders the column header", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { getByText } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(getByText("ID")).toBeInTheDocument();
+    });
+
+    it("only renders provided columns", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { container } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(container.querySelectorAll(".RichTable_cellHeader").length).toBe(
+        1
+      );
+    });
+
+    it("renders a checkbox when the table is selectable", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+          selectable: true,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { container } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(
+        container.querySelector(".RichTable_selectCheckbox")
+      ).not.toBeNull();
+    });
+
+    it("sets the width of each column if provided", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID", width: 25 }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { container } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      expect(
+        container.querySelector<HTMLElement>("span[style]")?.style.width
+      ).toBe("25%");
+    });
+
+    it("returns a valid object for useRowProps()", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      render(<div {...result.current.header.useRowProps()} />);
+    });
+
+    it("cannot be selected", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      expect(result.current.header.isSelected).toBe(false);
+      const selected = result.current.selected;
+
+      act(() => {
+        result.current.header.setSelected(true);
+      });
+
+      expect(result.current.selected).toEqual(selected);
+    });
+
+    it("select all selects all on current page", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+          selectable: true,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { getByRole } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      act(() => {
+        fireEvent.click(getByRole("checkbox"));
+      });
+
+      expect(result.current.selected).toEqual(baseData);
+    });
+
+    it("select all is indeterminate when only some rows are selected", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+          selectable: true,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { getByRole } = render(
+        <div>
+          {result.current.header.cells.map((cell) => (
+            <span {...cell.useCellProps()}>{cell.render()}</span>
+          ))}
+        </div>
+      );
+
+      act(() => {
+        result.current.rows[0].setSelected(true);
+      });
+
+      expect((getByRole("checkbox") as HTMLInputElement).indeterminate).toBe(
+        true
+      );
     });
   });
 
