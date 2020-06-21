@@ -447,13 +447,28 @@ export const useRichTable = <D extends object = {}>({
     // Loading state
     if (reqInfo.state !== RequestState.Complete) {
       return new Array(data.length || 1).fill(null).map(
-        (_, i): RichTableRow<D> => ({
-          useRowProps() {
-            return { key: i };
-          },
-          data: {} as D,
-          cells: [
-            {
+        (_, i): RichTableRow<D> => {
+          let cells = columns.map(
+            ({ key }, j): RichTableCell => ({
+              useCellProps() {
+                return {
+                  key,
+                  className: "RichTable_loading",
+                };
+              },
+              render() {
+                return (
+                  <Loader
+                    variant="linear"
+                    hideFromScreenreaders={i > 0 || j > 0}
+                  />
+                );
+              },
+            })
+          );
+
+          if (selectable) {
+            cells.unshift({
               useCellProps() {
                 return {
                   key: 0,
@@ -463,29 +478,19 @@ export const useRichTable = <D extends object = {}>({
               render() {
                 return "";
               },
+            });
+          }
+
+          return {
+            useRowProps() {
+              return { key: i };
             },
-            ...columns.map(
-              ({ key }, j): RichTableCell => ({
-                useCellProps() {
-                  return {
-                    key,
-                    className: "RichTable_loading",
-                  };
-                },
-                render() {
-                  return (
-                    <Loader
-                      variant="linear"
-                      hideFromScreenreaders={i > 0 || j > 0}
-                    />
-                  );
-                },
-              })
-            ),
-          ],
-          isSelected: false,
-          setSelected() {},
-        })
+            data: {} as D,
+            cells,
+            isSelected: false,
+            setSelected() {},
+          };
+        }
       );
     }
 

@@ -3,8 +3,13 @@ import mockAxios from "jest-mock-axios";
 import { render, fireEvent, waitForDomChange } from "@testing-library/react";
 import { renderHook, act } from "@testing-library/react-hooks";
 import { listFactory } from "../../../api/api";
-import { useRichTable, RichTable } from "../RichTable";
-import { withStatus } from "../../test-utils";
+import {
+  useRichTable,
+  RichTable,
+  RichTableCell,
+  RichTableRow,
+} from "../RichTable";
+import { makeTestError, MOCK_ERROR, withStatus } from "../../test-utils";
 import { RequestState } from "../../../api/hooks";
 
 interface TestData {
@@ -594,6 +599,105 @@ describe("useRichTable", () => {
       ).rejects.toBeDefined();
     });
 
+    describe("triggers", () => {
+      describe("click", () => {
+        it("triggers only click actions whenever a row is clicked", async () => {
+          const mockAction = jest.fn((_, row) => Promise.resolve());
+          const mockAction2 = jest.fn();
+          const { result, waitForNextUpdate } = renderHook(() =>
+            useRichTable<TestData>({
+              columns: [{ key: "id", header: "ID" }],
+              list: apiWithoutPagination,
+              paginated: false,
+              actions: [
+                {
+                  name: "test",
+                  triggers: ["click"],
+                  bulk: false,
+                  call: mockAction,
+                },
+                {
+                  name: "test2",
+                  bulk: false,
+                  call: mockAction2,
+                },
+              ],
+            })
+          );
+          await waitForNextUpdate();
+
+          const { getAllByTestId } = render(
+            <table>
+              <tbody>
+                {result.current.rows.map((row) => (
+                  <tr data-testid="row" {...row.useRowProps()}>
+                    {row.cells.map((cell) => (
+                      <td data-testid="cell" {...cell.useCellProps()}>
+                        {cell.render()}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          );
+
+          await act(async () => {
+            fireEvent.click(getAllByTestId("row")[0]);
+          });
+
+          expect(mockAction).toHaveBeenCalled();
+          expect(mockAction.mock.calls[0][1]).toEqual(
+            result.current.rows[0].data
+          );
+          expect(mockAction2).not.toHaveBeenCalled();
+        });
+
+        it("does not run when the select checkbox is the target", async () => {
+          const mockAction = jest.fn((_, row) => Promise.resolve());
+          const { result, waitForNextUpdate } = renderHook(() =>
+            useRichTable<TestData>({
+              columns: [{ key: "id", header: "ID" }],
+              list: apiWithoutPagination,
+              paginated: false,
+              selectable: true,
+              actions: [
+                {
+                  name: "test",
+                  triggers: ["click"],
+                  bulk: false,
+                  call: mockAction,
+                },
+              ],
+            })
+          );
+          await waitForNextUpdate();
+
+          const { getAllByRole } = render(
+            <table>
+              <tbody>
+                {result.current.rows.map((row) => (
+                  <tr data-testid="row" {...row.useRowProps()}>
+                    {row.cells.map((cell) => (
+                      <td data-testid="cell" {...cell.useCellProps()}>
+                        {cell.render()}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          );
+
+          await act(async () => {
+            fireEvent.click(getAllByRole("checkbox")[0]);
+          });
+
+          expect(mockAction).not.toHaveBeenCalled();
+        });
+      });
+    });
+
     describe("default actions", () => {
       describe("_refresh", () => {
         it("refreshes the table", async () => {
@@ -697,6 +801,20 @@ describe("useRichTable", () => {
   });
 
   describe("header", () => {
+    const TestComponent = ({ cells }: { cells: RichTableCell[] }) => (
+      <table>
+        <thead>
+          <tr>
+            {cells.map((cell) => (
+              <th data-testid="cell" {...cell.useCellProps()}>
+                {cell.render()}
+              </th>
+            ))}
+          </tr>
+        </thead>
+      </table>
+    );
+
     it("renders the column header", async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
         useRichTable<TestData>({
@@ -708,11 +826,7 @@ describe("useRichTable", () => {
       await waitForNextUpdate();
 
       const { getByText } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
+        <TestComponent cells={result.current.header.cells} />
       );
 
       expect(getByText("ID")).toBeInTheDocument();
@@ -728,17 +842,11 @@ describe("useRichTable", () => {
       );
       await waitForNextUpdate();
 
-      const { container } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
+      const { queryAllByTestId } = render(
+        <TestComponent cells={result.current.header.cells} />
       );
 
-      expect(container.querySelectorAll(".RichTable_cellHeader").length).toBe(
-        1
-      );
+      expect(queryAllByTestId("cell").length).toBe(1);
     });
 
     it("renders a checkbox when the table is selectable", async () => {
@@ -752,17 +860,11 @@ describe("useRichTable", () => {
       );
       await waitForNextUpdate();
 
-      const { container } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
+      const { queryByRole } = render(
+        <TestComponent cells={result.current.header.cells} />
       );
 
-      expect(
-        container.querySelector(".RichTable_selectCheckbox")
-      ).not.toBeNull();
+      expect(queryByRole("checkbox")).not.toBeNull();
     });
 
     it("sets the width of each column if provided", async () => {
@@ -775,17 +877,11 @@ describe("useRichTable", () => {
       );
       await waitForNextUpdate();
 
-      const { container } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
+      const { getByTestId } = render(
+        <TestComponent cells={result.current.header.cells} />
       );
 
-      expect(
-        container.querySelector<HTMLElement>("span[style]")?.style.width
-      ).toBe("25%");
+      expect(getByTestId("cell")?.style.width).toBe("25%");
     });
 
     it("returns a valid object for useRowProps()", async () => {
@@ -833,11 +929,7 @@ describe("useRichTable", () => {
       await waitForNextUpdate();
 
       const { getByRole } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
+        <TestComponent cells={result.current.header.cells} />
       );
 
       act(() => {
@@ -859,11 +951,7 @@ describe("useRichTable", () => {
       await waitForNextUpdate();
 
       const { getByRole } = render(
-        <div>
-          {result.current.header.cells.map((cell) => (
-            <span {...cell.useCellProps()}>{cell.render()}</span>
-          ))}
-        </div>
+        <TestComponent cells={result.current.header.cells} />
       );
 
       act(() => {
@@ -876,10 +964,406 @@ describe("useRichTable", () => {
     });
   });
 
+  describe("data", () => {
+    const TestComponent = <T extends object>({
+      rows,
+    }: {
+      rows: RichTableRow<T>[];
+    }) => (
+      <table>
+        <tbody>
+          {rows.map((row) => (
+            <tr data-testid="row" {...row.useRowProps()}>
+              {row.cells.map((cell) => (
+                <td data-testid="cell" {...cell.useCellProps()}>
+                  {cell.render()}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+
+    it("uses accessors if defined", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [
+            { key: "a", header: "TEXT", accessor: "text" },
+            {
+              key: "b",
+              header: "RANDOM",
+              accessor(row) {
+                return 4 + row.id;
+              },
+            },
+          ],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { getAllByTestId } = render(
+        <TestComponent rows={result.current.rows} />
+      );
+
+      expect(getAllByTestId("cell")[0]).toHaveTextContent(baseData[0].text);
+      expect(getAllByTestId("cell")[1]).toHaveTextContent(
+        (baseData[0].id + 4).toString()
+      );
+    });
+
+    it("uses render function if defined", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [
+            {
+              key: "id",
+              header: "ID",
+              render(cell, row) {
+                return (
+                  <em data-testid="render">
+                    {cell}.{row.text}
+                  </em>
+                );
+              },
+            },
+          ],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { getAllByTestId } = render(
+        <TestComponent rows={result.current.rows} />
+      );
+
+      // [0] has an empty string, so we use [1] instead
+      expect(getAllByTestId("render")[1]).toHaveTextContent(
+        `${baseData[1].id}.${baseData[1].text}`
+      );
+    });
+
+    it("selecting rows changes their selection state", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+          selectable: true,
+        })
+      );
+      await waitForNextUpdate();
+
+      const { getAllByRole, rerender } = render(
+        <TestComponent rows={result.current.rows} />
+      );
+      const selected = result.current.selected;
+
+      await act(async () => {
+        fireEvent.click(getAllByRole("checkbox")[0]);
+      });
+      rerender(<TestComponent rows={result.current.rows} />);
+
+      expect(selected.length).not.toEqual(result.current.selected.length);
+      expect(result.current.selected[0]).toEqual(result.current.rows[0].data);
+      expect(
+        (getAllByRole("checkbox")[0] as HTMLInputElement).checked
+      ).toBeTruthy();
+    });
+
+    describe("displays a single row with message if no data is returned", () => {
+      it(".", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+
+        act(() => {
+          mockAxios.mockResponse({ data: null });
+        });
+        await waitForNextUpdate();
+
+        const { getAllByTestId } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        expect(getAllByTestId("row").length).toBe(1);
+        expect(getAllByTestId("cell").length).toBe(1);
+        expect(getAllByTestId("row")[0]).not.toHaveTextContent(/Error/);
+        expect(getAllByTestId("cell")[0].getAttribute("colspan")).toBe("1");
+      });
+
+      it("adds an extra column if selectable is on", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+            selectable: true,
+          })
+        );
+
+        act(() => {
+          mockAxios.mockResponse({ data: null });
+        });
+        await waitForNextUpdate();
+
+        const { getAllByTestId } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        expect(getAllByTestId("cell")[0].getAttribute("colspan")).toBe("2");
+      });
+
+      it("cannot be selected", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+        act(() => {
+          mockAxios.mockResponse({ status: 500, data: MOCK_ERROR });
+        });
+        await waitForNextUpdate();
+
+        const selected = result.current.selected;
+
+        act(() => {
+          result.current.rows[0].setSelected(true);
+        });
+
+        expect(result.current.selected).toEqual(selected);
+      });
+    });
+
+    describe("while loading", () => {
+      it("displays loaders for each row", () => {
+        const { result } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [
+              { key: "id", header: "ID" },
+              { key: "text", header: "TEXT" },
+            ],
+            list: api,
+            paginated: false,
+          })
+        );
+
+        const { getAllByRole } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        expect(getAllByRole("status").length % 2).toBe(0);
+      });
+
+      it("displays only one row on initial mount", () => {
+        const { result } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+
+        const { getAllByTestId } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        expect(getAllByTestId("row").length).toBe(1);
+      });
+
+      it("shows the same number of rows as the previous data had", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+
+        const { getAllByTestId, rerender } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        act(() => {
+          mockAxios.mockResponse({
+            data: {
+              success: true,
+              data: testData(mockAxios.lastReqGet().config),
+            },
+          });
+        });
+        await waitForNextUpdate();
+
+        rerender(<TestComponent rows={result.current.rows} />);
+
+        const len = getAllByTestId("row").length;
+
+        await act(async () => {
+          await result.current.executeAction("_refresh");
+        });
+
+        // Sanity check to make sure we're in a loading state
+        expect(result.current.reqInfo.state).not.toBe(RequestState.Complete);
+
+        rerender(<TestComponent rows={result.current.rows} />);
+
+        expect(getAllByTestId("row").length).toBe(len);
+      });
+
+      it("renders a placeholder for selects with selectable on", () => {
+        const { result } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+            selectable: true,
+          })
+        );
+
+        const { getAllByTestId, getAllByRole } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        expect(getAllByTestId("cell").length).toBe(2);
+        // should not render loader for select column
+        expect(getAllByRole("status").length).toBe(1);
+      });
+
+      it("does not render the select column with selectable off", () => {
+        const { result } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+
+        const { getAllByTestId } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        // Should only display one
+        expect(getAllByTestId("cell").length).toBe(1);
+      });
+
+      it("rows cannot be selected", () => {
+        const { result } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+        const selected = result.current.selected;
+
+        act(() => {
+          result.current.rows[0].setSelected(true);
+        });
+
+        expect(result.current.selected).toEqual(selected);
+      });
+    });
+
+    describe("on error state", () => {
+      it("passes on error as part of the bag", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+
+        act(() => {
+          mockAxios.mockResponse({ status: 500, data: MOCK_ERROR });
+        });
+        await waitForNextUpdate();
+
+        expect(result.current.error).not.toBeUndefined();
+      });
+
+      it("displays a single row with error message", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+
+        act(() => {
+          mockAxios.mockResponse({ status: 500, data: MOCK_ERROR });
+        });
+        await waitForNextUpdate();
+
+        const { getAllByTestId } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        expect(getAllByTestId("row").length).toBe(1);
+        expect(getAllByTestId("cell").length).toBe(1);
+        expect(getAllByTestId("row")[0]).toHaveTextContent(/500/);
+        expect(getAllByTestId("cell")[0].getAttribute("colspan")).toBe("1");
+      });
+
+      it("adds an extra column if selectable is on", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+            selectable: true,
+          })
+        );
+
+        act(() => {
+          mockAxios.mockResponse({ status: 500, data: MOCK_ERROR });
+        });
+        await waitForNextUpdate();
+
+        const { getAllByTestId } = render(
+          <TestComponent rows={result.current.rows} />
+        );
+
+        expect(getAllByTestId("cell")[0].getAttribute("colspan")).toBe("2");
+      });
+
+      it("cannot be selected", async () => {
+        const { result, waitForNextUpdate } = renderHook(() =>
+          useRichTable<TestData>({
+            columns: [{ key: "id", header: "ID" }],
+            list: api,
+            paginated: false,
+          })
+        );
+        act(() => {
+          mockAxios.mockResponse({ status: 500, data: MOCK_ERROR });
+        });
+        await waitForNextUpdate();
+
+        const selected = result.current.selected;
+
+        act(() => {
+          result.current.rows[0].setSelected(true);
+        });
+
+        expect(result.current.selected).toEqual(selected);
+      });
+    });
+  });
+
   /*
   TODO:
   - Uses accessor function
-  - Test on API error
   - Test actions (incl. default actions)
   - Test selecting
   - Returns loader when loading data
