@@ -288,7 +288,10 @@ export const useRichTable = <D extends object = {}>({
 
   const internalExecuteAction = useRef<
     (name: string, rows: D[]) => Promise<any>
-  >(() => Promise.resolve());
+  >(
+    /* istanbul ignore next */
+    () => Promise.resolve()
+  );
 
   useEffect(() => {
     internalExecuteAction.current = (name: string, rows: D[]) => {
@@ -315,7 +318,7 @@ export const useRichTable = <D extends object = {}>({
   const executeAction = useCallback(
     (name: string) => {
       if (!(name in memoizedActions)) {
-        throw new Error(
+        return Promise.reject(
           `Action ${name} does not exist or was improperly registered.`
         );
       }

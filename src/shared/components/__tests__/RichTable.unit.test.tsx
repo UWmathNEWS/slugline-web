@@ -655,6 +655,227 @@ describe("useRichTable", () => {
     });
   });
 
+  describe("actions", () => {
+    it("executes independent actions regardless of selection", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+          actions: [
+            {
+              name: "test",
+              call() {
+                return Promise.resolve("test");
+              },
+            },
+          ],
+        })
+      );
+      await waitForNextUpdate();
+
+      expect(await result.current.executeAction("test")).toBe("test");
+
+      act(() => {
+        result.current.rows[0].setSelected(true);
+      });
+
+      expect(await result.current.executeAction("test")).toBe("test");
+
+      act(() => {
+        result.current.rows[1].setSelected(true);
+        result.current.rows[2].setSelected(true);
+      });
+
+      expect(await result.current.executeAction("test")).toBe("test");
+    });
+
+    it("executes non-bulk actions if and only if exactly one element is selected", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+          actions: [
+            {
+              name: "test",
+              bulk: false,
+              call(_, row) {
+                return Promise.resolve(row);
+              },
+            },
+          ],
+        })
+      );
+      await waitForNextUpdate();
+
+      expect(await result.current.executeAction("test")).toBeUndefined();
+
+      act(() => {
+        result.current.rows[0].setSelected(true);
+      });
+
+      expect(await result.current.executeAction("test")).toEqual(
+        result.current.rows[0].data
+      );
+
+      act(() => {
+        result.current.rows[1].setSelected(true);
+        result.current.rows[2].setSelected(true);
+      });
+
+      await expect(result.current.executeAction("test")).rejects.toBeDefined();
+    });
+
+    it("executes bulk actions if and only if a selection is made", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+          actions: [
+            {
+              name: "test",
+              bulk: true,
+              call(_, rows) {
+                return Promise.resolve(rows);
+              },
+            },
+          ],
+        })
+      );
+      await waitForNextUpdate();
+
+      expect(await result.current.executeAction("test")).toBeUndefined();
+
+      act(() => {
+        result.current.rows[0].setSelected(true);
+        result.current.rows[1].setSelected(true);
+      });
+
+      expect(await result.current.executeAction("test")).toEqual([
+        result.current.rows[0].data,
+        result.current.rows[1].data,
+      ]);
+    });
+
+    it("returns a rejected promise if action does not exist", async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useRichTable<TestData>({
+          columns: [{ key: "id", header: "ID" }],
+          list: apiWithoutPagination,
+          paginated: false,
+        })
+      );
+      await waitForNextUpdate();
+
+      await expect(
+        result.current.executeAction("non-existent")
+      ).rejects.toBeDefined();
+    });
+
+    describe("default actions", () => {
+      describe("_refresh", () => {
+        it("refreshes the table", async () => {
+          const { result, waitForNextUpdate } = renderHook(() =>
+            useRichTable<TestData>({
+              columns: [{ key: "id", header: "ID" }],
+              list: api,
+              paginated: false,
+            })
+          );
+
+          act(() => {
+            mockAxios.mockResponse({
+              data: { success: true, data: baseData.slice(0, 5) },
+            });
+          });
+          await waitForNextUpdate();
+
+          const data = result.current.rows.map((row) => row.data);
+
+          await act(async () => {
+            await result.current.executeAction("_refresh");
+          });
+
+          act(() => {
+            mockAxios.mockResponse({
+              data: { success: true, data: baseData.slice(5) },
+            });
+          });
+          await waitForNextUpdate();
+
+          expect(data).not.toEqual(result.current.rows.map((row) => row.data));
+        });
+      });
+
+      describe("_previous and _next", () => {
+        it("paginates the table", async () => {
+          const { result, waitForNextUpdate } = renderHook(() =>
+            useRichTable<TestData>({
+              columns: [{ key: "id", header: "ID" }],
+              list: apiWithPagination,
+              paginated: true,
+            })
+          );
+          await waitForNextUpdate();
+          expect(result.current.page).toBe(1);
+
+          await act(async () => {
+            await result.current.executeAction("_next");
+          });
+
+          expect(result.current.page).toBe(2);
+
+          await act(async () => {
+            await result.current.executeAction("_previous");
+          });
+
+          expect(result.current.page).toBe(1);
+        });
+
+        it("_next does not go past the end of the table", async () => {
+          const { result, waitForNextUpdate } = renderHook(() =>
+            useRichTable<TestData>({
+              columns: [{ key: "id", header: "ID" }],
+              list: apiWithPagination,
+              paginated: true,
+            })
+          );
+          await waitForNextUpdate();
+          const numPages = result.current.numPages;
+
+          act(() => {
+            result.current.setPage(numPages);
+          });
+
+          await act(async () => {
+            await result.current.executeAction("_next");
+          });
+
+          expect(result.current.page).toBe(numPages);
+        });
+
+        it("_previous does not go past the beginning of the table", async () => {
+          const { result, waitForNextUpdate } = renderHook(() =>
+            useRichTable<TestData>({
+              columns: [{ key: "id", header: "ID" }],
+              list: apiWithPagination,
+              paginated: true,
+            })
+          );
+          await waitForNextUpdate();
+
+          await act(async () => {
+            await result.current.executeAction("_previous");
+          });
+
+          expect(result.current.page).toBe(1);
+        });
+      });
+    });
+  });
+
   /*
   TODO:
   - Uses accessor function
