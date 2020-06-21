@@ -1,6 +1,6 @@
 [
   {
     "path": ["build/static/js/*.js", "build/static/css/*.css"],
-    "limit": "512 KB"
+    "limit": "12 KB"
   }
 ]
