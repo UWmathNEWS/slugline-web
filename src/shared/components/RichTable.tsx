@@ -646,12 +646,14 @@ export const useRichTable = <D extends object = {}>({
 const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
   const { page, numPages, setPage, reqInfo, executeAction } = bag;
   const [newPage, setNewPage] = useState(page.toString());
-  // we need a ref to store the new page to get around the fake blur listener capturing outdated values of newPage
-  const newPageRef = useRef(page.toString());
-  const hasBlurListener = useRef(false);
+  // we need a ref to store the page to get around the fake blur listener capturing outdated values of page
+  const pageRef = useRef(page);
+  const fakeBlurListener = useRef<((e: MouseEvent) => void) | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setNewPage(page.toString());
+    pageRef.current = page;
   }, [page]);
 
   return (
@@ -661,14 +663,15 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
     >
       <Button
         variant="link"
+        title="Go to previous page"
         disabled={page <= 1 || reqInfo.state !== RequestState.Complete}
+        onClick={async () => {
+          await executeAction("_previous");
+        }}
       >
         <FontAwesomeIcon
           icon="chevron-left"
           className="RichTable_paginationIcon"
-          onClick={async () => {
-            await executeAction("_previous");
-          }}
         />
       </Button>
       <span className="RichTable_paginationText">
@@ -680,50 +683,55 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
               Math.max(1, Math.min(parseInt(newPage), numPages)) || page;
             setNewPage(requestedPage.toString());
             setPage(requestedPage);
+
+            if (fakeBlurListener.current) {
+              window.removeEventListener("click", fakeBlurListener.current);
+              fakeBlurListener.current = null;
+            }
+
+            inputRef.current?.blur();
           }}
         >
           <Form.Control
             className="d-inline-block d-lg-inline px-0 text-center"
+            title="Set page"
             value={newPage}
+            ref={inputRef}
             onChange={({ target }: React.ChangeEvent<HTMLInputElement>) => {
               setNewPage(target.value);
-              newPageRef.current = target.value;
             }}
-            onKeyDown={({
-              key,
-              currentTarget,
-            }: React.KeyboardEvent<HTMLInputElement>) => {
-              if (key === "Escape") {
-                currentTarget.blur();
+            onKeyDown={({ key }: React.KeyboardEvent) => {
+              if (key === "Escape" || key === "Tab") {
+                setNewPage(page.toString());
+
+                if (fakeBlurListener.current) {
+                  window.removeEventListener("click", fakeBlurListener.current);
+                  fakeBlurListener.current = null;
+                }
+
+                if (key === "Escape") {
+                  inputRef.current?.blur();
+                }
               }
             }}
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-            }}
-            onFocus={({
-              currentTarget,
-            }: React.FocusEvent<HTMLInputElement>) => {
-              currentTarget.select();
+            onFocus={() => {
+              inputRef.current?.select();
 
               // only submit if blur was the result of a click outside the control
-              if (!hasBlurListener.current) {
-                hasBlurListener.current = true;
-                window.addEventListener("click", function fakeBlurListener() {
-                  // no need to check the current target since we capture click events on this input anyways
-                  const requestedPage =
-                    Math.max(
-                      1,
-                      Math.min(parseInt(newPageRef.current), numPages)
-                    ) || page;
-                  setNewPage(requestedPage.toString());
-                  setPage(requestedPage);
-                  window.removeEventListener("click", fakeBlurListener);
-                  hasBlurListener.current = false;
-                });
+              if (!fakeBlurListener.current) {
+                fakeBlurListener.current = ({ target }: MouseEvent) => {
+                  if (fakeBlurListener.current && target !== inputRef.current) {
+                    setNewPage(pageRef.current.toString());
+                    window.removeEventListener(
+                      "click",
+                      fakeBlurListener.current
+                    );
+                    fakeBlurListener.current = null;
+                  }
+                };
+
+                window.addEventListener("click", fakeBlurListener.current);
               }
-            }}
-            onBlur={({ currentTarget }: React.FocusEvent<HTMLInputElement>) => {
-              currentTarget.value = page.toString();
             }}
             style={{
               height: "calc(2.0625rem - 1px)", // taken from bootstrap's height of a small input (1.5*.875rem + .75rem)
@@ -735,14 +743,15 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
       </span>
       <Button
         variant="link"
+        title="Go to next page"
         disabled={page >= numPages || reqInfo.state !== RequestState.Complete}
+        onClick={async () => {
+          await executeAction("_next");
+        }}
       >
         <FontAwesomeIcon
           icon="chevron-right"
           className="RichTable_paginationIcon"
-          onClick={async () => {
-            await executeAction("_next");
-          }}
         />
       </Button>
     </Col>
