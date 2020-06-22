@@ -38,7 +38,7 @@ jobs:
     - name: Build files for server
       run: npm run lib
 
-    - uses: andresz1/size-limit-action@v1.3.2
+    - uses: andresz1/size-limit-action@v1.4.0
       if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-16.04'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
