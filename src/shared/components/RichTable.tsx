@@ -704,6 +704,8 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
               if (key === "Escape" || key === "Tab") {
                 setNewPage(page.toString());
 
+                // We ignore the else case here as it's impossible to test an "internal state does not change" scenario.
+                /* istanbul ignore else */
                 if (fakeBlurListener.current) {
                   window.removeEventListener("click", fakeBlurListener.current);
                   fakeBlurListener.current = null;
@@ -779,6 +781,7 @@ const RichTableHeader = ({
           <FormControl
             type="text"
             placeholder="Search..."
+            title="Search"
             size="sm"
             className="RichTable_searchBox"
             onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {

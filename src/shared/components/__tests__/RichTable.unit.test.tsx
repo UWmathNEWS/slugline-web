@@ -1,16 +1,24 @@
 import React from "react";
 import mockAxios from "jest-mock-axios";
-import { render, fireEvent, waitForDomChange } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  waitFor,
+  act as actDom,
+} from "@testing-library/react";
 import { renderHook, act } from "@testing-library/react-hooks";
+import userEvent from "@testing-library/user-event";
 import { listFactory } from "../../../api/api";
 import {
   useRichTable,
   RichTable,
   RichTableCell,
   RichTableRow,
+  RichTableBag,
 } from "../RichTable";
-import { makeTestError, MOCK_ERROR, withStatus } from "../../test-utils";
+import { MOCK_ERROR, withStatus } from "../../test-utils";
 import { RequestState } from "../../../api/hooks";
+import { APIResponse, Pagination } from "../../types";
 
 interface TestData {
   id: number;
@@ -59,35 +67,50 @@ const testData = ({ params }: any): TestData[] => {
   return data;
 };
 
-describe("useRichTable", () => {
-  const apiWithoutPagination = jest.fn((params: any) =>
-    Promise.resolve(
-      withStatus(200, {
-        success: true,
-        data: testData(params),
-      })
-    )
-  );
-  const apiWithPagination = jest.fn((params: any) => {
-    const dataNotPaginated = testData({
-      params: { ...params.params, page: 0 },
-    });
-    return Promise.resolve(
-      withStatus(200, {
-        success: true,
-        data: {
-          count: dataNotPaginated.length,
-          page: params.params.page,
-          num_pages: Math.ceil(dataNotPaginated.length / resultsPerPage),
-          next: null,
-          previous: null,
-          results: testData(params),
-        },
-      })
-    );
-  });
-  const api = listFactory<TestData[]>("test/");
+const apiWithoutPagination = jest.fn((params: any) =>
+  Promise.resolve(
+    withStatus(200, {
+      success: true,
+      data: testData(params),
+    })
+  )
+);
 
+const apiWithPagination = jest.fn<
+  Promise<APIResponse<Pagination<TestData>>>,
+  any[]
+>((params: any) => {
+  const dataNotPaginated = testData({
+    params: { ...params.params, page: 0 },
+  });
+  return Promise.resolve(
+    withStatus(200, {
+      success: true,
+      data: {
+        count: dataNotPaginated.length,
+        page: params.params.page,
+        num_pages: Math.ceil(dataNotPaginated.length / resultsPerPage),
+        next: null,
+        previous: null,
+        results: testData(params),
+      },
+    })
+  );
+});
+
+const api = listFactory<TestData[]>("test/");
+
+function assertNonNullable<T extends any = any>(
+  val: T
+): asserts val is NonNullable<T> {
+  if (val === null || val === undefined) {
+    throw new Error("Expected val to be something");
+  }
+}
+
+jest.useFakeTimers();
+
+describe("useRichTable", () => {
   afterEach(() => {
     apiWithoutPagination.mockClear();
     apiWithPagination.mockClear();
@@ -293,7 +316,7 @@ describe("useRichTable", () => {
       ).toBe(0);
 
       await act(async () => {
-        fireEvent.click(getByText("TEXT"));
+        userEvent.click(getByText("TEXT"));
       });
       rerender(
         <div>
@@ -311,7 +334,7 @@ describe("useRichTable", () => {
       ).toBeTruthy();
 
       await act(async () => {
-        fireEvent.click(getByText("ID"));
+        userEvent.click(getByText("ID"));
       });
       rerender(
         <div>
@@ -332,7 +355,7 @@ describe("useRichTable", () => {
       ).toBeTruthy();
 
       await act(async () => {
-        fireEvent.click(getByText("ID"));
+        userEvent.click(getByText("ID"));
       });
       rerender(
         <div>
@@ -350,7 +373,7 @@ describe("useRichTable", () => {
       ).toBeTruthy();
 
       await act(async () => {
-        fireEvent.click(getByText("ID"));
+        userEvent.click(getByText("ID"));
       });
       rerender(
         <div>
@@ -643,7 +666,7 @@ describe("useRichTable", () => {
           );
 
           await act(async () => {
-            fireEvent.click(getAllByTestId("row")[0]);
+            userEvent.click(getAllByTestId("row")[0]);
           });
 
           expect(mockAction).toHaveBeenCalled();
@@ -690,7 +713,7 @@ describe("useRichTable", () => {
           );
 
           await act(async () => {
-            fireEvent.click(getAllByRole("checkbox")[0]);
+            userEvent.click(getAllByRole("checkbox")[0]);
           });
 
           expect(mockAction).not.toHaveBeenCalled();
@@ -933,7 +956,7 @@ describe("useRichTable", () => {
       );
 
       act(() => {
-        fireEvent.click(getByRole("checkbox"));
+        userEvent.click(getByRole("checkbox"));
       });
 
       expect(result.current.selected).toEqual(baseData);
@@ -1063,7 +1086,7 @@ describe("useRichTable", () => {
       const selected = result.current.selected;
 
       await act(async () => {
-        fireEvent.click(getAllByRole("checkbox")[0]);
+        userEvent.click(getAllByRole("checkbox")[0]);
       });
       rerender(<TestComponent rows={result.current.rows} />);
 
@@ -1360,13 +1383,710 @@ describe("useRichTable", () => {
       });
     });
   });
+});
 
-  /*
-  TODO:
-  - Uses accessor function
-  - Test actions (incl. default actions)
-  - Test selecting
-  - Returns loader when loading data
-  - Uses render function
-   */
+describe("RichTable", () => {
+  afterEach(() => {
+    apiWithPagination.mockClear();
+    mockAxios.reset();
+  });
+
+  it("renders all elements", async () => {
+    const { container } = render(
+      <RichTable
+        columns={[
+          { key: "id", header: "ID" },
+          { key: "text", header: "TEXT" },
+        ]}
+        list={apiWithPagination}
+        paginated={true}
+      />
+    );
+    await waitFor(() => {});
+
+    const th = Array.from(container.querySelectorAll("th"));
+    expect(th[0]).toHaveTextContent("ID");
+    expect(th[1]).toHaveTextContent("TEXT");
+
+    for (const [i, row] of Object.entries(
+      container.querySelectorAll("tbody tr")
+    )) {
+      const expectedRow = baseData[parseInt(i)];
+      const cells = row.querySelectorAll("td");
+      expect(cells[0]).toHaveTextContent(expectedRow.id.toString());
+      expect(cells[1]).toHaveTextContent(expectedRow.text);
+    }
+  });
+
+  describe("pagination", () => {
+    it("buttons paginate and update page", async () => {
+      let bag: RichTableBag;
+      const { getAllByTitle } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          bagRef={(ref) => {
+            bag = ref;
+          }}
+        />
+      );
+      await waitFor(() => {});
+
+      assertNonNullable(bag!);
+
+      await actDom(async () => {
+        userEvent.click(getAllByTitle(/next page/i)[0]);
+      });
+
+      expect((getAllByTitle(/set page/i)[0] as HTMLInputElement).value).toBe(
+        bag.page.toString()
+      );
+
+      await actDom(async () => {
+        userEvent.click(getAllByTitle(/previous page/i)[0]);
+      });
+
+      expect((getAllByTitle(/set page/i)[0] as HTMLInputElement).value).toBe(
+        bag.page.toString()
+      );
+    });
+
+    it("buttons are disabled when at page bounds", async () => {
+      let bag: RichTableBag;
+      const { getAllByTitle } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          bagRef={(ref) => {
+            bag = ref;
+          }}
+        />
+      );
+      await waitFor(() => {});
+
+      assertNonNullable(bag!);
+
+      expect(
+        (getAllByTitle(/previous page/i)[0] as HTMLInputElement).disabled
+      ).toBeTruthy();
+
+      await actDom(async () => {
+        bag.setPage(bag.numPages);
+      });
+
+      expect(
+        (getAllByTitle(/next page/i)[0] as HTMLInputElement).disabled
+      ).toBeTruthy();
+    });
+
+    it("buttons are disabled when loading", () => {
+      const { getAllByTitle } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={api}
+          paginated={true}
+        />
+      );
+
+      expect(
+        (getAllByTitle(/previous page/i)[0] as HTMLInputElement).disabled
+      ).toBeTruthy();
+      expect(
+        (getAllByTitle(/next page/i)[0] as HTMLInputElement).disabled
+      ).toBeTruthy();
+    });
+
+    describe("pagination input", () => {
+      it("navigates to supplied page", async () => {
+        let bag: RichTableBag;
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+            bagRef={(ref) => {
+              bag = ref;
+            }}
+          />
+        );
+        await waitFor(() => {});
+
+        assertNonNullable(bag!);
+
+        const input = getAllByTitle(/set page/i)[0];
+
+        await actDom(async () => {
+          await userEvent.type(input, "2");
+        });
+
+        await actDom(async () => {
+          fireEvent.submit(input);
+        });
+
+        await waitFor(() => {
+          expect(bag.page).toBe(2);
+        });
+      });
+
+      it("clamps values on submit", async () => {
+        let bag: RichTableBag;
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+            bagRef={(ref) => {
+              bag = ref;
+            }}
+          />
+        );
+        await waitFor(() => {});
+
+        assertNonNullable(bag!);
+
+        const input = getAllByTitle(/set page/i)[0];
+
+        await actDom(async () => {
+          await userEvent.type(input, "8");
+        });
+
+        await actDom(async () => {
+          fireEvent.submit(input);
+        });
+
+        await waitFor(() => {
+          expect(bag.page).toBe(bag.numPages);
+        });
+
+        await actDom(async () => {
+          userEvent.clear(input);
+        });
+
+        await actDom(async () => {
+          await userEvent.type(input, "-1");
+        });
+
+        await actDom(async () => {
+          fireEvent.submit(input);
+        });
+
+        await waitFor(() => {
+          expect(bag.page).toBe(1);
+        });
+      });
+
+      it("ignores invalid input", async () => {
+        let bag: RichTableBag;
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+            bagRef={(ref) => {
+              bag = ref;
+            }}
+          />
+        );
+        await waitFor(() => {});
+
+        assertNonNullable(bag!);
+
+        const input = getAllByTitle(/set page/i)[0] as HTMLInputElement;
+
+        // setup to make sure we don't just reset the default to 1 or whatever
+        await actDom(async () => {
+          await userEvent.type(input, "2");
+        });
+
+        await actDom(async () => {
+          fireEvent.submit(input);
+        });
+
+        // actual test
+        await actDom(async () => {
+          await fireEvent.change(input, { target: { value: "bbbbbb" } });
+        });
+
+        await actDom(async () => {
+          fireEvent.submit(input);
+        });
+
+        await waitFor(() => {
+          expect(bag.page).toBe(2);
+          expect(input.value).toBe("2");
+        });
+      });
+
+      it("blur event doesn't replace values", async () => {
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+          />
+        );
+        await waitFor(() => {});
+
+        const input = getAllByTitle(/set page/i)[0] as HTMLInputElement;
+
+        await actDom(async () => {
+          // FIXME: userEvent.type appears to trigger some sort of edge case here where React complains about
+          //        a state update on an unmounted component
+          await fireEvent.change(input, { target: { value: "2" } });
+        });
+
+        await actDom(async () => {
+          fireEvent.blur(input);
+        });
+
+        await waitFor(() => {
+          expect(input.value).toBe("2");
+        });
+      });
+
+      it("clicking outside resets", async () => {
+        let bag: RichTableBag;
+        const { container, getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+            bagRef={(ref) => {
+              bag = ref;
+            }}
+          />
+        );
+        await waitFor(() => {});
+
+        assertNonNullable(bag!);
+
+        const page = bag.page;
+        const input = getAllByTitle(/set page/i)[0] as HTMLInputElement;
+
+        await actDom(async () => {
+          await userEvent.type(input, "2");
+        });
+
+        await actDom(async () => {
+          fireEvent.click(container);
+        });
+
+        await waitFor(() => {
+          expect(input.value).toBe(page.toString());
+        });
+      });
+
+      it("pressing escape cancels input", async () => {
+        let bag: RichTableBag;
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+            bagRef={(ref) => {
+              bag = ref;
+            }}
+          />
+        );
+        await waitFor(() => {});
+
+        assertNonNullable(bag!);
+
+        const page = bag.page;
+        const input = getAllByTitle(/set page/i)[0] as HTMLInputElement;
+
+        await actDom(async () => {
+          await userEvent.type(input, "2{esc}");
+        });
+
+        await waitFor(() => {
+          expect(input.value).toBe(page.toString());
+        });
+      });
+
+      it("pressing tab cancels input", async () => {
+        let bag: RichTableBag;
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+            bagRef={(ref) => {
+              bag = ref;
+            }}
+          />
+        );
+        await waitFor(() => {});
+
+        assertNonNullable(bag!);
+
+        const page = bag.page;
+        const input = getAllByTitle(/set page/i)[0] as HTMLInputElement;
+
+        await actDom(async () => {
+          await userEvent.type(input, "2");
+        });
+
+        await actDom(async () => {
+          fireEvent.keyDown(input, { key: "Tab" });
+        });
+
+        await waitFor(() => {
+          expect(input.value).toBe(page.toString());
+        });
+      });
+
+      it("cleans up event listeners on non-visibilitychange blur or submit", async () => {
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+          />
+        );
+        await waitFor(() => {});
+
+        const spy = jest.spyOn(window, "removeEventListener");
+        const input = getAllByTitle(/set page/i)[0];
+
+        await actDom(async () => {
+          await userEvent.type(input, "2");
+        });
+
+        await actDom(async () => {
+          fireEvent.submit(input);
+        });
+
+        expect(
+          spy.mock.calls.filter((call) => call[0] === "click").length
+        ).toBe(1);
+
+        await actDom(async () => {
+          await userEvent.type(input, "2{esc}");
+        });
+
+        await waitFor(() => {
+          expect(
+            spy.mock.calls.filter((call) => call[0] === "click").length
+          ).toBe(2);
+        });
+
+        spy.mockRestore();
+      });
+
+      it("doesn't attach multiple event listeners", async () => {
+        const { getAllByTitle } = render(
+          <RichTable
+            columns={[{ key: "id", header: "ID" }]}
+            list={apiWithPagination}
+            paginated={true}
+          />
+        );
+        await waitFor(() => {});
+
+        const spy = jest.spyOn(window, "addEventListener");
+        const input = getAllByTitle(/set page/i)[0];
+
+        await actDom(async () => {
+          fireEvent.focus(input);
+        });
+
+        await actDom(async () => {
+          fireEvent.focus(input);
+        });
+
+        expect(
+          spy.mock.calls.filter((call) => call[0] === "click").length
+        ).toBe(1);
+
+        spy.mockRestore();
+      });
+    });
+  });
+
+  describe("searching", () => {
+    it("shows a search box if searchable is on", async () => {
+      const { queryByTitle } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          searchable={true}
+        />
+      );
+      await waitFor(() => {});
+
+      expect(queryByTitle("Search")).toBeInTheDocument();
+    });
+
+    it("passes on search queries to useRichTable", async () => {
+      let bag: RichTableBag;
+      const { getByTitle } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          searchable={true}
+          bagRef={(ref) => {
+            bag = ref;
+          }}
+        />
+      );
+      await waitFor(() => {});
+
+      assertNonNullable(bag!);
+
+      const search = getByTitle("Search");
+
+      await actDom(async () => {
+        await userEvent.type(search, "a");
+      });
+
+      actDom(() => {
+        jest.runOnlyPendingTimers();
+      });
+
+      await waitFor(() => {
+        expect(bag.searchQuery).toBe("a");
+      });
+
+      await actDom(async () => {
+        userEvent.clear(search);
+      });
+
+      await waitFor(() => {
+        expect(bag.searchQuery).toBe("");
+      });
+    });
+  });
+
+  describe("actions", () => {
+    it("shows actions if defined", async () => {
+      const { getByText } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          actions={[
+            {
+              name: "Test Action 123",
+              call() {
+                return Promise.resolve();
+              },
+            },
+            {
+              name: "asdf",
+              displayName: "Test Action 321",
+              call() {
+                return Promise.resolve();
+              },
+            },
+          ]}
+        />
+      );
+      await waitFor(() => {});
+
+      expect(getByText("Test Action 123")).toBeInTheDocument();
+      expect(getByText("Test Action 321")).toBeInTheDocument();
+    });
+
+    it("executes actions when clicked", async () => {
+      // spy is only to prevent error from being printed
+      const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const goodAction = jest.fn(() => Promise.resolve());
+      const badAction = jest.fn(() => Promise.reject());
+      const { getByText } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          actions={[
+            {
+              name: "Test Action 123",
+              call: goodAction,
+            },
+            {
+              name: "asdf",
+              displayName: "Test Action 321",
+              call: badAction,
+            },
+          ]}
+        />
+      );
+      await waitFor(() => {});
+
+      userEvent.click(getByText("Test Action 123"));
+
+      await waitFor(() => {
+        expect(goodAction).toHaveBeenCalled();
+      });
+
+      userEvent.click(getByText("Test Action 321"));
+
+      await waitFor(() => {
+        expect(badAction).toHaveBeenCalled();
+      });
+
+      spy.mockRestore();
+    });
+
+    it("disables non-independent actions when no rows are selected", async () => {
+      const { getByText } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          actions={[
+            {
+              name: "test actionable",
+              call() {
+                return Promise.resolve();
+              },
+            },
+            {
+              name: "Test Action 123",
+              bulk: false,
+              call() {
+                return Promise.resolve();
+              },
+            },
+            {
+              name: "asdf",
+              displayName: "Test Action 321",
+              bulk: true,
+              call() {
+                return Promise.resolve();
+              },
+            },
+          ]}
+        />
+      );
+      await waitFor(() => {});
+
+      expect(
+        (getByText("test actionable") as HTMLButtonElement).disabled
+      ).toBeFalsy();
+      expect(
+        (getByText("Test Action 123") as HTMLButtonElement).disabled
+      ).toBeTruthy();
+      expect(
+        (getByText("Test Action 321") as HTMLButtonElement).disabled
+      ).toBeTruthy();
+    });
+
+    it("enables non-bulk actions if one row is selected", async () => {
+      let bag: RichTableBag;
+      const { getByText } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          actions={[
+            {
+              name: "test actionable",
+              call() {
+                return Promise.resolve();
+              },
+            },
+            {
+              name: "Test Action 123",
+              bulk: false,
+              call() {
+                return Promise.resolve();
+              },
+            },
+            {
+              name: "asdf",
+              displayName: "Test Action 321",
+              bulk: true,
+              call() {
+                return Promise.resolve();
+              },
+            },
+          ]}
+          bagRef={(ref) => {
+            bag = ref;
+          }}
+        />
+      );
+      await waitFor(() => {});
+
+      assertNonNullable(bag!);
+
+      actDom(() => {
+        bag.rows[0].setSelected(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          (getByText("test actionable") as HTMLButtonElement).disabled
+        ).toBeFalsy();
+        expect(
+          (getByText("Test Action 123") as HTMLButtonElement).disabled
+        ).toBeFalsy();
+        expect(
+          (getByText("Test Action 321") as HTMLButtonElement).disabled
+        ).toBeFalsy();
+      });
+    });
+
+    it("disables non-bulk actions if multiple rows are selected", async () => {
+      let bag: RichTableBag;
+      const { getByText } = render(
+        <RichTable
+          columns={[{ key: "id", header: "ID" }]}
+          list={apiWithPagination}
+          paginated={true}
+          actions={[
+            {
+              name: "test actionable",
+              call() {
+                return Promise.resolve();
+              },
+            },
+            {
+              name: "Test Action 123",
+              bulk: false,
+              call() {
+                return Promise.resolve();
+              },
+            },
+            {
+              name: "asdf",
+              displayName: "Test Action 321",
+              bulk: true,
+              call() {
+                return Promise.resolve();
+              },
+            },
+          ]}
+          bagRef={(ref) => {
+            bag = ref;
+          }}
+        />
+      );
+      await waitFor(() => {});
+
+      assertNonNullable(bag!);
+
+      actDom(() => {
+        bag.rows[0].setSelected(true);
+        bag.rows[1].setSelected(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          (getByText("test actionable") as HTMLButtonElement).disabled
+        ).toBeFalsy();
+        expect(
+          (getByText("Test Action 123") as HTMLButtonElement).disabled
+        ).toBeTruthy();
+        expect(
+          (getByText("Test Action 321") as HTMLButtonElement).disabled
+        ).toBeFalsy();
+      });
+    });
+  });
 });
