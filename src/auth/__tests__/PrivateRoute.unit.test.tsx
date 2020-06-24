@@ -60,7 +60,7 @@ describe("Unit test for PrivateRoute", () => {
   });
 
   it("shows error page for anonymous users", async () => {
-    const { getByText } = render(
+    const { queryByRole, getByText } = render(
       <Router history={history}>
         <Switch>
           <PrivateRoute path="/private">Secret</PrivateRoute>
@@ -73,11 +73,12 @@ describe("Unit test for PrivateRoute", () => {
       mockAxios.mockResponse({ data: { success: true, data: null } });
     });
 
+    expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText("404")).toBeInTheDocument();
   });
 
   it("shows error page when on admin-only routes for logged-in non-admin users", async () => {
-    const { getByText } = render(
+    const { queryByRole, getByText } = render(
       <Router history={history}>
         <Switch>
           <PrivateRoute admin path="/private">
@@ -92,11 +93,12 @@ describe("Unit test for PrivateRoute", () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
     });
 
+    expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText("404")).toBeInTheDocument();
   });
 
   it("displays content for logged-in users", async () => {
-    const { getByText } = render(
+    const { queryByRole, getByText } = render(
       <Router history={history}>
         <Switch>
           <PrivateRoute path="/private">Secret</PrivateRoute>
@@ -109,11 +111,12 @@ describe("Unit test for PrivateRoute", () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
     });
 
+    expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText("Secret")).toBeInTheDocument();
   });
 
   it("displays admin content for admins", async () => {
-    const { getByText } = render(
+    const { queryByRole, getByText } = render(
       <Router history={history}>
         <Switch>
           <PrivateRoute admin path="/private">
@@ -128,13 +131,14 @@ describe("Unit test for PrivateRoute", () => {
       mockAxios.mockResponse({ data: { success: true, data: testAdmin } });
     });
 
+    expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText("Secret")).toBeInTheDocument();
   });
 
   it("shows error page when admin has been downgraded to user", async () => {
     window.__SSR_DIRECTIVES__ = { USER: testAdmin };
 
-    const { getByText } = render(
+    const { queryByRole, getByText } = render(
       <Router history={history}>
         <ForceCheck history={history} />
         <Link to="/admin">Go to admin</Link>
@@ -156,13 +160,14 @@ describe("Unit test for PrivateRoute", () => {
       mockAxios.mockResponse({ data: { success: true, data: testUser } });
     });
 
+    expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText("404")).toBeInTheDocument();
   });
 
   it("shows error page when user has been logged out elsewhere", async () => {
     window.__SSR_DIRECTIVES__ = { USER: testUser };
 
-    const { getByText } = render(
+    const { queryByRole, getByText } = render(
       <Router history={history}>
         <ForceCheck history={history} />
         <Link to="/admin">Go to admin</Link>
@@ -182,11 +187,12 @@ describe("Unit test for PrivateRoute", () => {
       mockAxios.mockResponse({ data: { success: true, data: null } });
     });
 
+    expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText("404")).toBeInTheDocument();
   });
 
   it("shows errors when auth check fails", async () => {
-    const { getByText } = render(
+    const { queryByRole, getByText } = render(
       <Router history={history}>
         <Switch>
           <PrivateRoute path="/private">Secret</PrivateRoute>
@@ -201,6 +207,7 @@ describe("Unit test for PrivateRoute", () => {
       });
     });
 
+    expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText(ERRORS.__TESTING)).toBeInTheDocument();
   });
 });
