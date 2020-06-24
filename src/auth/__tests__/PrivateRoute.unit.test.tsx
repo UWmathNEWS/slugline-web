@@ -59,6 +59,42 @@ describe("Unit test for PrivateRoute", () => {
     expect(mockAxios.get).toHaveBeenLastCalledWith("/api/me/");
   });
 
+  it("renders with render prop if given", async () => {
+    const { queryByRole, getByText } = render(
+      <Router history={history}>
+        <Switch>
+          <PrivateRoute path="/private" render={() => "Secret"} />
+        </Switch>
+      </Router>,
+      { wrapper: AuthProvider }
+    );
+
+    await act(async () => {
+      mockAxios.mockResponse({ data: { success: true, data: testUser } });
+    });
+
+    expect(queryByRole("status")).not.toBeInTheDocument();
+    expect(getByText("Secret")).toBeInTheDocument();
+  });
+
+  it("renders with component prop if given", async () => {
+    const { queryByRole, getByText } = render(
+      <Router history={history}>
+        <Switch>
+          <PrivateRoute path="/private" component={() => <>Secret</>} />
+        </Switch>
+      </Router>,
+      { wrapper: AuthProvider }
+    );
+
+    await act(async () => {
+      mockAxios.mockResponse({ data: { success: true, data: testUser } });
+    });
+
+    expect(queryByRole("status")).not.toBeInTheDocument();
+    expect(getByText("Secret")).toBeInTheDocument();
+  });
+
   it("shows error page for anonymous users", async () => {
     const { queryByRole, getByText } = render(
       <Router history={history}>
@@ -133,6 +169,27 @@ describe("Unit test for PrivateRoute", () => {
 
     expect(queryByRole("status")).not.toBeInTheDocument();
     expect(getByText("Secret")).toBeInTheDocument();
+  });
+
+  it("doesn't render content if NO_PRELOAD_ROUTE directive is given", async () => {
+    window.__SSR_DIRECTIVES__ = { NO_PRELOAD_ROUTE: 1 };
+    const { queryByRole, queryByText } = render(
+      <Router history={history}>
+        <Switch>
+          <PrivateRoute path="/private">Secret</PrivateRoute>
+        </Switch>
+      </Router>,
+      { wrapper: AuthProvider }
+    );
+
+    expect(queryByText("Secret")).not.toBeInTheDocument();
+
+    await act(async () => {
+      mockAxios.mockResponse({ data: { success: true, data: null } });
+    });
+
+    expect(queryByRole("status")).not.toBeInTheDocument();
+    expect(queryByText("Secret")).not.toBeInTheDocument();
   });
 
   it("shows error page when admin has been downgraded to user", async () => {
