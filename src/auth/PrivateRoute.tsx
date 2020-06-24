@@ -96,6 +96,7 @@ const PrivateRouteWrapper: React.FC<{
           data: Object.values(resp.error).flat() || ["REQUEST.DID_NOT_SUCCEED"],
         });
       }
+      authCheckCompleted.current = true;
     });
     authCheckCompleted.current = true;
 
