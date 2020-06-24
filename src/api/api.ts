@@ -26,6 +26,13 @@ const axiosRequest = async <TResp, TError extends APIError = APIError>(
     validateStatus: () => true,
   };
   return axios({ ...baseConfig, ...config }).then((resp) => {
+    if (typeof resp.data === "string")
+      return {
+        statusCode: resp.status,
+        success: false,
+        error: { detail: ["REQUEST.DID_NOT_SUCCEED"] },
+      };
+
     const success = resp.status >= 200 && resp.status <= 299;
     return {
       statusCode: resp.status,
