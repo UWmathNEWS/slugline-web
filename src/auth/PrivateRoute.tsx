@@ -71,7 +71,6 @@ const PrivateRouteWrapper: React.FC<{
         case "error":
           return { ready: false, errors: action.data };
       }
-      return state;
     },
     {
       ready: false,
@@ -93,9 +92,10 @@ const PrivateRouteWrapper: React.FC<{
       } else {
         dispatch({
           type: "error",
-          data: Object.values(resp.error).flat() || ["REQUEST.DID_NOT_SUCCEED"],
+          data: Object.values(resp.error).flat(),
         });
       }
+      authCheckCompleted.current = true;
     });
     authCheckCompleted.current = true;
 

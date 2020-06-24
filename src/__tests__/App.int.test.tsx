@@ -113,6 +113,22 @@ describe("Integration test for main app component", () => {
     expect(getByText("404")).toBeInTheDocument();
   });
 
+  it("doesn't hang on private routes", async () => {
+    const history = createMemoryHistory();
+    history.push("/dash/profile");
+    const { queryByRole } = render(<App history={history} />);
+
+    const checkInfo = mockAxios.lastReqGet();
+    await act(async () => {
+      mockAxios.mockResponse(
+        { data: { success: true, data: testUser } },
+        checkInfo
+      );
+    });
+
+    expect(queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("shouldn't crash if auth check fails", async () => {
     render(<App />);
 

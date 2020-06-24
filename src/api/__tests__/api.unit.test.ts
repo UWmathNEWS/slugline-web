@@ -18,6 +18,31 @@ import {
   withStatus,
 } from "../../shared/test-utils";
 
+describe("axiosRequest", () => {
+  it("returns a default error if server returns a string", async () => {
+    const list = listFactory("bingo/");
+    const resp = list();
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: "Error!!!!",
+        status: 500,
+      }
+    );
+    expect(await resp).toEqual(
+      withStatus(500, {
+        success: false,
+        error: {
+          detail: ["REQUEST.DID_NOT_SUCCEED"],
+        },
+      })
+    );
+  });
+});
+
 describe("listFactory", () => {
   afterEach(() => {
     mockAxios.reset();
