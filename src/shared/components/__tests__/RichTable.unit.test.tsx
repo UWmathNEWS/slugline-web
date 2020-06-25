@@ -917,6 +917,9 @@ describe("useRichTable", () => {
       );
       await waitForNextUpdate();
 
+      // check it's an object
+      expect(result.current.header.useRowProps()).toBeDefined();
+      // and check that it can render without crashing
       render(<div {...result.current.header.useRowProps()} />);
     });
 
