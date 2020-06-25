@@ -1,2 +1,2 @@
 # Code of Conduct
-Be nice.
+Strive to be nice.
