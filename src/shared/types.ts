@@ -48,7 +48,6 @@ export interface User {
   email: string;
   role: UserRole;
   is_staff: boolean;
-  is_editor: boolean;
   writer_name: string;
 }
 

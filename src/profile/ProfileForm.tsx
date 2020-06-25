@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { User, UserAPIError } from "../shared/types";
+import { User, UserAPIError, UserRole } from "../shared/types";
 import { Form, Row, Col, Button, Alert } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";
@@ -12,14 +12,9 @@ import { useDebouncedCallback } from "../shared/hooks";
 import NonFieldErrors from "../shared/form/NonFieldErrors";
 import api from "../api/api";
 import { useAuth } from "../auth/Auth";
+import AtLeast from "../shared/components/AtLeast";
 
-export interface ProfileFormVals {
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  is_editor?: boolean;
-  writer_name?: string;
+export interface ProfileFormVals extends Omit<Partial<User>, "is_staff"> {
   cur_password?: string;
   password?: string;
 }
@@ -34,7 +29,7 @@ export const useProfileForm = (user?: User) => {
       first_name: "",
       last_name: "",
       email: "",
-      is_editor: false,
+      role: "Contributor",
       writer_name: "",
       cur_password: "",
       password: "",
@@ -49,7 +44,7 @@ export const useProfileForm = (user?: User) => {
       first_name: user?.first_name,
       last_name: user?.last_name,
       email: user?.email,
-      is_editor: user?.is_editor || false,
+      role: user?.role || "Contributor",
       writer_name: user?.writer_name,
       cur_password: "",
       password: "",
@@ -95,10 +90,10 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
     undefined
   );
 
-  // manually register the is_editor field since we handle it with a select
+  // manually register the role field since we handle it with a select
   useEffect(() => {
     register({
-      name: "is_editor",
+      name: "role",
     });
   }, [register]);
 
@@ -106,10 +101,10 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   const newPasswordRequired = props.user === undefined;
   // require confirm if we're creating a new editor or changing password/role
   const passwordConfirmRequired =
-    (newPasswordRequired && props.context.getValues().is_editor) ||
+    (newPasswordRequired && props.context.getValues().role) ||
     (props.user &&
       (props.context.getValues().password ||
-        props.context.getValues().is_editor !== props.user?.is_editor));
+        props.context.getValues().role !== props.user?.role));
 
   const [validateUserNameDebounced] = useDebouncedCallback(
     validateUsernameAvailable,
@@ -290,8 +285,8 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             />
           </Col>
         </Form.Group>
-        {auth.isEditor() && (
-          <Form.Group as={Row} controlId="isEditor">
+        <AtLeast role="Editor">
+          <Form.Group as={Row} controlId="role">
             <Form.Label column sm={2}>
               Role
             </Form.Label>
@@ -299,23 +294,21 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
               <Form.Control
                 as="select"
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  if (e.currentTarget.value === "editor") {
-                    props.context.setValue("is_editor", true);
-                  } else if (e.currentTarget.value === "contributor") {
-                    props.context.setValue("is_editor", false);
-                  }
+                  props.context.setValue(
+                    "role",
+                    e.currentTarget.value as UserRole
+                  );
                 }}
-                value={
-                  props.context.getValues().is_editor ? "editor" : "contributor"
-                }
+                value={props.context.getValues().role}
                 custom
               >
-                <option value="contributor">Contributor</option>
-                <option value="editor">Editor</option>
+                <option value="Contributor">Contributor</option>
+                <option value="Copyeditor">Copyeditor</option>
+                <option value="Editor">Editor</option>
               </Form.Control>
             </Col>
           </Form.Group>
-        )}
+        </AtLeast>
         <Form.Group as={Form.Row} controlId="password">
           <Form.Label column sm={2}>
             New Password

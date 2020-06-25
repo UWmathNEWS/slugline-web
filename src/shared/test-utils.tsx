@@ -16,7 +16,6 @@ export const testUser: User = {
   email: "test@example.com",
   is_staff: false,
   role: "Contributor",
-  is_editor: false,
   writer_name: "testy mctestface",
 };
 
@@ -27,7 +26,6 @@ export const testAdmin: User = {
   email: "admin@example.com",
   is_staff: true,
   role: "Editor",
-  is_editor: true,
   writer_name: "ytsest ecaftsetcm",
 };
 

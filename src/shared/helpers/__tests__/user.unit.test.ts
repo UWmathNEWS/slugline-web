@@ -9,7 +9,6 @@ const testStaff: User = {
   email: "test@example.com",
   is_staff: true,
   role: "Contributor",
-  is_editor: false,
   writer_name: "testy mctestface",
 };
 
