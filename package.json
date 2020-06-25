@@ -4,7 +4,6 @@
   "private": true,
   "jest": {
     "coverageReporters": [
-      "json",
       "text",
       "lcov"
     ]
