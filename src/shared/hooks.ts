@@ -87,7 +87,7 @@ export const useSSRData: {
     dataMethod: () => Promise<APIResponse<TData, TError>>,
     initialData: TData | undefined
   ): UseSSRDataHook<TData>;
-} = <TData, TResp, TError>(
+} = <TData>(
   dataMethod: () => any,
   initialData: any,
   transformer?: any
