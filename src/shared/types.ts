@@ -46,10 +46,13 @@ export interface User {
   first_name: string;
   last_name: string;
   email: string;
+  role: UserRole;
   is_staff: boolean;
   is_editor: boolean;
   writer_name: string;
 }
+
+export type UserRole = "Editor" | "Copyeditor" | "Contributor";
 
 export interface APIError {
   detail?: string[];

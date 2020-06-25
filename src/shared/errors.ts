@@ -69,6 +69,9 @@ let errors = {
   AUTH: {
     CREDENTIALS_NONEXISTENT: "Username and password are required.",
     CREDENTIALS_INVALID: "Invalid username or password.",
+    THROTTLED: errorFactory((wait) =>
+      `You've tried logging in too many times. Please wait ${wait} seconds.`
+    )
   },
   ISSUE: {
     ALREADY_EXISTS: "This issue already exists.",
@@ -76,6 +79,9 @@ let errors = {
   REQUIRED: errorFactory((attr) =>
     `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`
   ),
+  RESET: {
+    TIMED_OUT: "Password reset timed out"
+  },
   USER: {
     DOES_NOT_EXIST: "User does not exist.",
     COULD_NOT_CREATE: "Could not create user.",

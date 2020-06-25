@@ -3,27 +3,30 @@ import {
   APIResponseSuccess,
   APIError,
   APIResponse,
+  User,
 } from "./types";
 import { History } from "history";
 import { useAuth } from "../auth/Auth";
 import React from "react";
 
-export const testUser = {
+export const testUser: User = {
   username: "test",
   first_name: "test",
   last_name: "tester",
   email: "test@example.com",
   is_staff: false,
+  role: "Contributor",
   is_editor: false,
   writer_name: "testy mctestface",
 };
 
-export const testAdmin = {
+export const testAdmin: User = {
   username: "tset",
   first_name: "tset",
   last_name: "retsest",
   email: "admin@example.com",
   is_staff: true,
+  role: "Editor",
   is_editor: true,
   writer_name: "ytsest ecaftsetcm",
 };
