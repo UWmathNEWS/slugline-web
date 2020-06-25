@@ -646,9 +646,12 @@ export const useRichTable = <D extends object = {}>({
 const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
   const { page, numPages, setPage, reqInfo, executeAction } = bag;
   const [newPage, setNewPage] = useState(page.toString());
+  // We want to reset the page input only on a blur that is the result of an intended user action, such as clicking or
+  // tabbing to lose focus. Since blur events fire when you switch windows or tabs, we implement a fake blur listener
+  // that listens to clicks globally and resets the input if it's fired, and implement no true blur listener.
+  const fakeBlurListener = useRef<((e: MouseEvent) => void) | null>(null);
   // we need a ref to store the page to get around the fake blur listener capturing outdated values of page
   const pageRef = useRef(page);
-  const fakeBlurListener = useRef<((e: MouseEvent) => void) | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -719,7 +722,7 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
             onFocus={() => {
               inputRef.current?.select();
 
-              // only submit if blur was the result of a click outside the control
+              // reset if blur was the result of a click outside the control
               if (!fakeBlurListener.current) {
                 fakeBlurListener.current = ({ target }: MouseEvent) => {
                   if (fakeBlurListener.current && target !== inputRef.current) {
