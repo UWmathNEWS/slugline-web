@@ -259,6 +259,24 @@ const issueArticles = async (
   return data;
 };
 
+interface GeneratePasswordResetTokenArgs extends UnsafeRequestArgs {
+  username: string;
+}
+
+const generatePasswordResetToken = async (
+  args: GeneratePasswordResetTokenArgs
+): Promise<APIResponse<string>> => {
+  const config: RequestConfig = {
+    url: `users/${args.username}/reset_password/`,
+    method: "POST",
+    headers: {
+      ...args.headers,
+      "X-CSRFToken": args.csrf,
+    },
+  };
+  return axiosRequest<string>(config);
+};
+
 const api = {
   me: {
     // this looks odd, but me/ gets with no parameters, which is equivalent to a list endpoint
@@ -290,6 +308,7 @@ const api = {
     query: usernameQuery,
     create: createFactory<User, UserAPIError, ProfileFormVals>("users/"),
     patch: patchFactory<User, UserAPIError, ProfileFormVals>("users/"),
+    resetPassword: generatePasswordResetToken,
   },
 };
 

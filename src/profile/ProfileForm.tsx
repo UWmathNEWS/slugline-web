@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { User, UserAPIError, UserRole } from "../shared/types";
-import { Form, Row, Col, Button, Alert } from "react-bootstrap";
+import { Alert, Button, Col, Form, Row } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";
 
@@ -13,6 +13,9 @@ import NonFieldErrors from "../shared/form/NonFieldErrors";
 import api from "../api/api";
 import { useAuth } from "../auth/Auth";
 import AtLeast from "../shared/components/AtLeast";
+import { RequestState, useAPILazyUnsafe } from "../api/hooks";
+import config from "../config";
+import { resolve } from "../shared/helpers/url";
 
 export interface ProfileFormVals extends Omit<Partial<User>, "is_staff"> {
   cur_password?: string;
@@ -88,6 +91,12 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   );
   const [generalErrors, setGeneralErrors] = useState<string[] | undefined>(
     undefined
+  );
+  const [passwordResetToken, setPasswordResetToken] = useState<string | null>(
+    null
+  );
+  const [generateToken, generateTokenInfo] = useAPILazyUnsafe(
+    api.users.resetPassword
   );
 
   // manually register the role field since we handle it with a select
@@ -309,70 +318,114 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             </Col>
           </Form.Group>
         </AtLeast>
-        <Form.Group as={Form.Row} controlId="password">
-          <Form.Label column sm={2}>
-            New Password
-          </Form.Label>
-          <Col sm={10}>
+        {(props.user === undefined ||
+          auth.user?.username === props.user.username) && (
+          <Form.Group as={Form.Row} controlId="password">
+            <Form.Label column sm={2}>
+              New Password
+            </Form.Label>
+            <Col sm={10}>
+              <Form.Row>
+                <Col sm="auto">
+                  <Button
+                    className="w-100"
+                    variant="secondary"
+                    onClick={() => {
+                      props.context.setValue("password", nanoid(), true);
+                      // set the password visible so you can see what you get
+                      setShowPassword(true);
+                    }}
+                  >
+                    Generate
+                  </Button>
+                </Col>
+                <Col>
+                  <Field
+                    errors={props.context.errors}
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    ref={props.context.register({
+                      minLength: {
+                        value: 8,
+                        message: "USER.PASSWORD.TOO_SHORT.8",
+                      },
+                      required: newPasswordRequired
+                        ? "USER.PASSWORD.NEW_REQUIRED"
+                        : undefined,
+                      validate: (password?: string) => {
+                        // the pattern argument doesn't let us return an error if the value FAILS a regex,
+                        // so we'll do it ourselves
+                        if (password && /^\d*$/.test(password)) {
+                          return "USER.PASSWORD.ENTIRELY_NUMERIC";
+                        }
+                      },
+                    })}
+                    onChange={async () => {
+                      await props.context.triggerValidation("password");
+                    }}
+                    append={
+                      <Button
+                        variant={
+                          showPassword ? "outline-primary" : "outline-secondary"
+                        }
+                        onClick={() => {
+                          setShowPassword((show) => !show);
+                        }}
+                      >
+                        {showPassword ? (
+                          <FontAwesomeIcon icon={faEyeSlash} />
+                        ) : (
+                          <FontAwesomeIcon icon={faEye} />
+                        )}
+                      </Button>
+                    }
+                  />
+                </Col>
+              </Form.Row>
+            </Col>
+          </Form.Group>
+        )}
+        {props.user && props.user.username !== auth.user?.username && (
+          <AtLeast role="Editor">
             <Form.Row>
-              <Col sm="auto">
+              <Form.Label column sm={2}>
+                Reset password
+              </Form.Label>
+              <Col sm={10}>
                 <Button
-                  className="w-100"
                   variant="secondary"
-                  onClick={() => {
-                    props.context.setValue("password", nanoid(), true);
-                    // set the password visible so you can see what you get
-                    setShowPassword(true);
+                  onClick={async () => {
+                    const data = await generateToken({
+                      username: props.user!.username,
+                    });
+                    if (data.success) {
+                      setPasswordResetToken(data.data);
+                    } else {
+                      setGeneralErrors(data.error.detail);
+                    }
                   }}
                 >
-                  Generate
+                  Generate password reset token
                 </Button>
-              </Col>
-              <Col>
-                <Field
-                  errors={props.context.errors}
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  ref={props.context.register({
-                    minLength: {
-                      value: 8,
-                      message: "USER.PASSWORD.TOO_SHORT.8",
-                    },
-                    required: newPasswordRequired
-                      ? "USER.PASSWORD.NEW_REQUIRED"
-                      : undefined,
-                    validate: (password?: string) => {
-                      // the pattern argument doesn't let us return an error if the value FAILS a regex,
-                      // so we'll do it ourselves
-                      if (password && /^\d*$/.test(password)) {
-                        return "USER.PASSWORD.ENTIRELY_NUMERIC";
-                      }
-                    },
-                  })}
-                  onChange={async () => {
-                    await props.context.triggerValidation("password");
-                  }}
-                  append={
-                    <Button
-                      variant={
-                        showPassword ? "outline-primary" : "outline-secondary"
-                      }
-                      onClick={() => {
-                        setShowPassword((show) => !show);
-                      }}
-                    >
-                      {showPassword ? (
-                        <FontAwesomeIcon icon={faEyeSlash} />
-                      ) : (
-                        <FontAwesomeIcon icon={faEye} />
-                      )}
-                    </Button>
-                  }
-                />
+                {generateTokenInfo.state === RequestState.Running && (
+                  <pre key="returned-token">Generating...</pre>
+                )}
+                {passwordResetToken && (
+                  <pre
+                    key="returned-token"
+                    className="user-select-all text-wrap text-break mt-1"
+                  >
+                    {resolve(
+                      config.baseurl,
+                      "reset_password",
+                      passwordResetToken
+                    )}
+                  </pre>
+                )}
               </Col>
             </Form.Row>
-          </Col>
-        </Form.Group>
+          </AtLeast>
+        )}
         {passwordConfirmRequired && (
           <>
             <hr />
