@@ -54,7 +54,7 @@ export const useDebouncedCallback = <A extends any[], R>(
   return [callbackWithDebounce, callbackWithoutDebounce];
 };
 
-type UseSSRDataHook<TData> = [TData, RequestInfo, boolean];
+type UseSSRDataHook<TData, TError> = [TData, RequestInfo, TError];
 
 /**
  * Wraps a promise-based API call, executing it if and only if data is not passed to it from the server. Returns the
@@ -80,21 +80,21 @@ export const useSSRData: {
   <TData, TResp, TError extends APIError = APIError>(
     dataMethod: () => Promise<APIResponse<TResp, TError>>,
     initialData: TData | undefined,
-    transformer: (resp: TResp) => TData,
-  ): UseSSRDataHook<TData>;
+    transformer: (resp: TResp) => TData
+  ): UseSSRDataHook<TData, TError>;
   <TData, TError extends APIError = APIError>(
     dataMethod: () => Promise<APIResponse<TData, TError>>,
     initialData: TData | undefined
-  ): UseSSRDataHook<TData>;
-} = <TData, TResp, TArgs, TError>(
+  ): UseSSRDataHook<TData, TError>;
+} = <TData, TError>(
   dataMethod: (args?: any) => any,
   initialData: any,
-  transformer?: any,
+  transformer?: any
 ): any => {
   const [data, setData] = useState<TData | undefined>(initialData);
   const [getData, getDataInfo] = useAPILazy(dataMethod);
   const [respInfo, setRespInfo] = useState<RequestInfo>(getDataInfo);
-  const [fail, setFail] = useState(false);
+  const [fail, setFail] = useState<TError | undefined>(undefined);
 
   // This hook MUST appear first as we update respInfo in the next useEffect
   useEffect(() => {
@@ -103,14 +103,15 @@ export const useSSRData: {
 
   // useEffect doesn't run on the server
   useEffect(() => {
-    if (window.__SSR_DIRECTIVES__.STATUS_CODE) {
+    if (window.__SSR_DIRECTIVES__.ERROR) {
       const statusCode = window.__SSR_DIRECTIVES__.STATUS_CODE;
       setRespInfo((prev) => ({
         ...prev,
         statusCode,
       }));
-      setFail(true);
+      setFail(window.__SSR_DIRECTIVES__.ERROR);
       delete window.__SSR_DIRECTIVES__.STATUS_CODE;
+      delete window.__SSR_DIRECTIVES__.ERROR;
       return;
     }
 
@@ -125,9 +126,9 @@ export const useSSRData: {
       getData().then((resp) => {
         if (resp.success) {
           setData(transformer ? transformer(resp.data) : resp.data);
-          setFail(false);
+          setFail(undefined);
         } else {
-          setFail(true);
+          setFail(resp.error as TError);
         }
       });
     }
