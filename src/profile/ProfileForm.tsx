@@ -96,7 +96,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
     null
   );
   const [generateToken, generateTokenInfo] = useAPILazyUnsafe(
-    api.users.resetPassword
+    api.users.resetPassword.create
   );
 
   // manually register the role field since we handle it with a select
@@ -127,14 +127,14 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
 
     const editingMe = props.user?.username === auth.user?.username;
     if (props.user === undefined) {
-      return await api.users.create({
+      return api.users.create({
         body: cleaned,
         csrf: auth.csrfToken || "",
       });
     } else {
       return editingMe
-        ? await api.me.patch({ body: cleaned, csrf: auth.csrfToken || "" })
-        : await api.users.patch({
+        ? api.me.patch({ body: cleaned, csrf: auth.csrfToken || "" })
+        : api.users.patch({
             id: props.user.username,
             body: cleaned,
             csrf: auth.csrfToken || "",
@@ -418,7 +418,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                     {resolve(
                       config.baseurl,
                       "reset_password",
-                      passwordResetToken
+                      `?token=${passwordResetToken}`
                     )}
                   </pre>
                 )}
