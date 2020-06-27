@@ -80,7 +80,7 @@ let errors = {
     `Must provide ${"aeiou".includes(attr[0]) ? "an" : "a"} ${attr}.`
   ),
   RESET: {
-    TIMED_OUT: "Password reset timed out"
+    INVALID_TOKEN: "Password reset token is invalid",
   },
   USER: {
     DOES_NOT_EXIST: "User does not exist.",

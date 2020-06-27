@@ -277,6 +277,11 @@ const generatePasswordResetToken = async (
   return axiosRequest<string>(config);
 };
 
+interface PasswordResetVals {
+  token: string;
+  password: string;
+}
+
 const api = {
   me: {
     // this looks odd, but me/ gets with no parameters, which is equivalent to a list endpoint
@@ -308,7 +313,13 @@ const api = {
     query: usernameQuery,
     create: createFactory<User, UserAPIError, ProfileFormVals>("users/"),
     patch: patchFactory<User, UserAPIError, ProfileFormVals>("users/"),
-    resetPassword: generatePasswordResetToken,
+    resetPassword: {
+      create: generatePasswordResetToken,
+      get: listFactory<User>("reset_password/"),
+      reset: createFactory<void, APIError, PasswordResetVals>(
+        "reset_password/"
+      ),
+    },
   },
 };
 
