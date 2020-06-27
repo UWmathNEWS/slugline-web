@@ -1,6 +1,6 @@
 import React from "react";
-import Visor from "../Visor";
-import { render, waitForDomChange } from "@testing-library/react";
+import Visor, { BaseVisor } from "../Visor";
+import { render, waitFor } from "@testing-library/react";
 
 jest.mock("../../../config", () => ({
   baseurl: "baseurl",
@@ -13,6 +13,9 @@ jest.mock("../../../config", () => ({
     favicon: {
       src: "test",
     },
+    touchIcon: {
+      src: "test",
+    },
   },
   seo: {
     image: "test",
@@ -21,22 +24,88 @@ jest.mock("../../../config", () => ({
       ste: "test",
     },
   },
+  googleSiteVerification: "abc",
 }));
+
+describe("BaseVisor", () => {
+  it("uses absolute URLs for icons", async () => {
+    render(<BaseVisor />);
+
+    await waitFor(() => {
+      expect(
+        document.querySelector<HTMLLinkElement>("[rel='icon']")!.href
+      ).toMatch(/^(\/|https?:\/\/)/);
+      expect(
+        document.querySelector<HTMLLinkElement>("[rel='apple-touch-icon']")!
+          .href
+      ).toMatch(/^(\/|https?:\/\/)/);
+    });
+  });
+
+  it("renders alternate locales if defined", async () => {
+    render(<BaseVisor />);
+
+    await waitFor(() => {
+      expect(
+        JSON.parse(
+          document.querySelector<HTMLMetaElement>(
+            "[property='og:locale:alternate']"
+          )!.content
+        )
+      ).toEqual(["1", "2"]);
+    });
+  });
+
+  it("renders Google site verification if defined", async () => {
+    render(<BaseVisor />);
+
+    await waitFor(() => {
+      expect(
+        document.querySelector<HTMLMetaElement>(
+          "[name='google-site-verification']"
+        )!.content
+      ).toBe("abc");
+    });
+  });
+});
 
 describe("Visor", () => {
   it("renders Open Graph and Twitter titles without site titles", async () => {
     render(<Visor title="test" />);
 
-    await waitForDomChange();
+    await waitFor(() => {
+      expect(
+        document.querySelector<HTMLMetaElement>("[property='og:title']")!
+          .content
+      ).toEqual("test");
+      expect(
+        document.querySelector<HTMLMetaElement>("[property='twitter:title']")!
+          .content
+      ).toEqual("test");
+    });
+  });
 
-    expect(
-      (document.querySelector("[property='og:title']") as HTMLMetaElement)
-        .content
-    ).toEqual("test");
-    expect(
-      (document.querySelector("[property='twitter:title']") as HTMLMetaElement)
-        .content
-    ).toEqual("test");
+  it("renders Open Graph and Twitter descriptions and images if provided", async () => {
+    const attrs = {
+      description: "a",
+      image: "b",
+    };
+
+    render(<Visor seo={attrs} />);
+
+    await waitFor(() => {
+      for (let [prop, value] of Object.entries(attrs)) {
+        expect(
+          document.querySelector<HTMLMetaElement>(`[property='og:${prop}']`)!
+            .content
+        ).toEqual(value);
+        expect(
+          document.querySelector<HTMLMetaElement>(
+            `[property='twitter:${prop}']`
+          )!.content
+        ).toEqual(value);
+      }
+    });
   });
 
   it("renders Open Graph and Twitter additional attributes", async () => {
@@ -54,19 +123,19 @@ describe("Visor", () => {
       />
     );
 
-    await waitForDomChange();
-
-    for (let [prop, value] of Object.entries(attrs)) {
-      expect(
-        (document.querySelector(`[property='og:${prop}']`) as HTMLMetaElement)
-          .content
-      ).toEqual(value);
-      expect(
-        (document.querySelector(
-          `[property='twitter:${prop}']`
-        ) as HTMLMetaElement).content
-      ).toEqual(value);
-    }
+    await waitFor(() => {
+      for (let [prop, value] of Object.entries(attrs)) {
+        expect(
+          document.querySelector<HTMLMetaElement>(`[property='og:${prop}']`)!
+            .content
+        ).toEqual(value);
+        expect(
+          document.querySelector<HTMLMetaElement>(
+            `[property='twitter:${prop}']`
+          )!.content
+        ).toEqual(value);
+      }
+    });
   });
 
   it("renders additional structured data", async () => {
@@ -81,18 +150,18 @@ describe("Visor", () => {
       />
     );
 
-    await waitForDomChange();
-
-    expect(
-      JSON.parse(
-        (document.querySelector(
-          "[type='application/ld+json']"
-        ) as HTMLScriptElement).text
-      )
-    ).toEqual({
-      "@context": "https://schema.org",
-      a: "a",
-      b: { c: "c" },
+    await waitFor(() => {
+      expect(
+        JSON.parse(
+          document.querySelector<HTMLScriptElement>(
+            "[type='application/ld+json']"
+          )!.text
+        )
+      ).toEqual({
+        "@context": "https://schema.org",
+        a: "a",
+        b: { c: "c" },
+      });
     });
   });
 });
