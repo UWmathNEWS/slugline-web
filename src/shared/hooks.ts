@@ -33,6 +33,7 @@ export const useDebouncedCallback = <A extends any[], R>(
 
         // start waiting again
         timeout.current = setTimeout(() => {
+          /* istanbul ignore else */
           if (argsRef.current) {
             resolve(callback(...argsRef.current));
           }
@@ -87,7 +88,7 @@ export const useSSRData: {
     initialData: TData | undefined
   ): UseSSRDataHook<TData, TError>;
 } = <TData, TError>(
-  dataMethod: (args?: any) => any,
+  dataMethod: () => any,
   initialData: any,
   transformer?: any
 ): any => {

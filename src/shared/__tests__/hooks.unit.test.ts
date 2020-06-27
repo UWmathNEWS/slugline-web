@@ -147,6 +147,18 @@ describe("useSSRData", () => {
     expect(data).toBe("boo");
   });
 
+  it("uses the transformer if one is passed in for the API call", async () => {
+    const transformer = () => "boo";
+    const { result, waitForNextUpdate } = renderHook(() =>
+      h.useSSRData(api, "blep", transformer)
+    );
+
+    await waitForNextUpdate();
+    const [data] = result.current;
+
+    expect(data).toBe("boo");
+  });
+
   it("sets error on server error", () => {
     window.__SSR_DIRECTIVES__.DATA = "bingo bango bongo";
     window.__SSR_DIRECTIVES__.ERROR = "error";

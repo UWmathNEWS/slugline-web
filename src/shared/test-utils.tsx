@@ -29,16 +29,6 @@ export const testAdmin: User = {
   writer_name: "ytsest ecaftsetcm",
 };
 
-export const makeTestError = (code: number, error: any) => ({
-  code,
-  response: {
-    data: {
-      success: false,
-      error,
-    },
-  },
-});
-
 export const MOCK_BODY = {
   data: "bingo bango bongo",
 };

@@ -1,5 +1,6 @@
 import "mutationobserver-shim"
 import "@testing-library/jest-dom/extend-expect";
+import { initLibrary } from "./shared/icons";
 
 // https://stackoverflow.com/a/32911774
 const localStorageMock = (function() {
@@ -22,3 +23,5 @@ const localStorageMock = (function() {
 })();
 
 Object.defineProperty(window, "localStorage", { value: localStorageMock });
+
+initLibrary();
