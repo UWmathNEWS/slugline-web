@@ -5,13 +5,13 @@ export enum Mark {
   Italic = "italic",
   Underline = "underline",
   Strikethrough = "strikethrough",
-  Code = "code"
+  Code = "code",
 }
 
 export enum ElementType {
   Default = "default",
   Link = "link",
-  InlineLatex = "inline-latex"
+  InlineLatex = "inline-latex",
 }
 
 export interface DefaultElement extends Element {
@@ -28,4 +28,10 @@ export interface InlineLatexElement extends Element {
   latex: string;
 }
 
-export type SluglineElement = DefaultElement | LinkElement | InlineLatexElement;
+export type InlineElement = LinkElement;
+export type InlineVoidElement = InlineLatexElement;
+
+export type SluglineElement =
+  | DefaultElement
+  | InlineElement
+  | InlineVoidElement;
