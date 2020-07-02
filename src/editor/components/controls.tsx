@@ -3,7 +3,7 @@ import { Mark, LinkElement, ElementType, InlineLatexElement } from "../types";
 import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { toggleMark, isMarkActive, toggleInline } from "../helpers";
+import { toggleMark, isMarkActive, createInline } from "../helpers";
 
 import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
@@ -45,9 +45,9 @@ export const LinkButton: React.FC = () => {
     const newLink: LinkElement = {
       type: ElementType.Link,
       href: href,
-      children: [{ text: href }],
+      children: [],
     };
-    toggleInline(editor, newLink);
+    createInline(editor, newLink);
   };
 
   return (
@@ -88,7 +88,7 @@ export const InlineLatexButton: React.FC = () => {
       latex: latex,
       children: [{ text: "" }],
     };
-    toggleInline(editor, newLatex);
+    createInline(editor, newLatex);
   };
 
   return (
