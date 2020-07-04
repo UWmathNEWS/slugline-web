@@ -1,4 +1,4 @@
-import { Editor, Transforms, Location, Range, Path, Text } from "slate";
+import { Editor, Transforms, Location, Range } from "slate";
 import isHotkey from "is-hotkey";
 
 import {
