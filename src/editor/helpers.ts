@@ -12,7 +12,7 @@ import {
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
   const marks = Editor.marks(editor);
   return marks !== null && marks[mark] === true;
-}
+};
 
 export const toggleMark = (editor: Editor, mark: Mark): void => {
   const active = isMarkActive(editor, mark);
@@ -21,7 +21,53 @@ export const toggleMark = (editor: Editor, mark: Mark): void => {
   } else {
     Editor.addMark(editor, mark, true);
   }
-}
+};
+
+const clearMarkIfActive = (editor: Editor, mark: Mark) => {
+  if (isMarkActive(editor, mark)) {
+    Editor.removeMark(editor, mark);
+  }
+};
+
+export const increaseStress = (editor: Editor) => {
+  // clear any emphasis first
+  clearMarkIfActive(editor, Mark.Emph1);
+  clearMarkIfActive(editor, Mark.Emph2);
+  clearMarkIfActive(editor, Mark.Emph3);
+  clearMarkIfActive(editor, Mark.Emph4);
+
+  if (isMarkActive(editor, Mark.Stress1)) {
+    editor.removeMark(Mark.Stress1);
+    editor.addMark(Mark.Stress2, true);
+  } else if (isMarkActive(editor, Mark.Stress2)) {
+    // if someone increases stress at the highest stress level, bring them back to normal
+    editor.removeMark(Mark.Stress2);
+  } else {
+    // no marks at all, add the first level
+    editor.addMark(Mark.Stress1, true);
+  }
+};
+
+export const increaseEmph = (editor: Editor) => {
+  // clear any stress first
+  clearMarkIfActive(editor, Mark.Stress1);
+  clearMarkIfActive(editor, Mark.Stress2);
+
+  if (isMarkActive(editor, Mark.Emph1)) {
+    editor.removeMark(Mark.Emph1);
+    editor.addMark(Mark.Emph2, true);
+  } else if (isMarkActive(editor, Mark.Emph2)) {
+    editor.removeMark(Mark.Emph2);
+    editor.addMark(Mark.Emph3, true);
+  } else if (isMarkActive(editor, Mark.Emph3)) {
+    editor.removeMark(Mark.Emph3);
+    editor.addMark(Mark.Emph4, true);
+  } else if (isMarkActive(editor, Mark.Emph4)) {
+    editor.removeMark(Mark.Emph4);
+  } else {
+    editor.addMark(Mark.Emph1, true);
+  }
+};
 
 /**
  * Returns true if `iterable` has no elements.
@@ -125,4 +171,10 @@ export function keyDown(editor: Editor, evt: React.KeyboardEvent): void {
       toggleMark(editor, mark);
     }
   });
+  if (isHotkey("mod+b", evt.nativeEvent)) {
+    increaseStress(editor);
+  }
+  if (isHotkey("mod+i", evt.nativeEvent)) {
+    increaseEmph(editor);
+  }
 }

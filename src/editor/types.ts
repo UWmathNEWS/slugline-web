@@ -1,9 +1,12 @@
 import { Element } from "slate";
 
 export enum Mark {
-  Bold = "bold",
-  Italic = "italic",
-  Underline = "underline",
+  Emph1 = "emph-1",
+  Emph2 = "emph-2",
+  Emph3 = "emph-3",
+  Emph4 = "emph-4",
+  Stress1 = "stress-1",
+  Stress2 = "stress-2",
   Strikethrough = "strikethrough",
   Code = "code",
 }

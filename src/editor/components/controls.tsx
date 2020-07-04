@@ -3,12 +3,47 @@ import { Mark, LinkElement, ElementType, InlineLatexElement } from "../types";
 import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { toggleMark, isMarkActive, createInline } from "../helpers";
+import {
+  toggleMark,
+  isMarkActive,
+  createInline,
+  increaseStress,
+  increaseEmph,
+} from "../helpers";
 
 import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "../../shared/PopoverWrapper";
+import { faBold, faItalic } from "@fortawesome/free-solid-svg-icons";
+
+export const IncreaseStressButton: React.FC = () => {
+  const editor = useSlate();
+  return (
+    <button
+      className="editor-control"
+      onClick={() => {
+        increaseStress(editor);
+      }}
+    >
+      <FontAwesomeIcon icon={faBold} />
+    </button>
+  );
+};
+
+export const IncreaseEmphButton: React.FC = () => {
+  const editor = useSlate();
+  return (
+    <button
+      className="editor-control"
+      onClick={() => {
+        increaseEmph(editor);
+      }}
+    >
+      <FontAwesomeIcon icon={faItalic} />
+    </button>
+  );
+};
 
 interface ToggleMarkButtonProps {
   icon: string;
