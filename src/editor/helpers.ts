@@ -9,12 +9,12 @@ import {
   InlineVoidElement,
 } from "./types";
 
-export function isMarkActive(editor: Editor, mark: Mark): boolean {
+export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
   const marks = Editor.marks(editor);
   return marks !== null && marks[mark] === true;
 }
 
-export function toggleMark(editor: Editor, mark: Mark): void {
+export const toggleMark = (editor: Editor, mark: Mark): void => {
   const active = isMarkActive(editor, mark);
   if (active) {
     Editor.removeMark(editor, mark);
@@ -115,9 +115,6 @@ export const createInline: {
 };
 
 const MARK_HOTKEYS: Array<[Mark, string]> = [
-  [Mark.Bold, "mod+b"],
-  [Mark.Italic, "mod+i"],
-  [Mark.Underline, "mod+u"],
   [Mark.Strikethrough, "mod+d"],
   [Mark.Code, "mod+`"],
 ];
