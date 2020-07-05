@@ -29,19 +29,26 @@ const clearMarkIfActive = (editor: Editor, mark: Mark) => {
   }
 };
 
+const clearAllStress = (editor: Editor) => {
+  Editor.removeMark(editor, Mark.Stress1);
+  Editor.removeMark(editor, Mark.Stress2);
+};
+
+const clearAllEmph = (editor: Editor) => {
+  Editor.removeMark(editor, Mark.Emph1);
+  Editor.removeMark(editor, Mark.Emph2);
+  Editor.removeMark(editor, Mark.Emph3);
+  Editor.removeMark(editor, Mark.Emph4);
+};
+
 export const increaseStress = (editor: Editor) => {
-  // clear any emphasis first
-  clearMarkIfActive(editor, Mark.Emph1);
-  clearMarkIfActive(editor, Mark.Emph2);
-  clearMarkIfActive(editor, Mark.Emph3);
-  clearMarkIfActive(editor, Mark.Emph4);
+  clearAllEmph(editor);
 
   if (isMarkActive(editor, Mark.Stress1)) {
-    editor.removeMark(Mark.Stress1);
+    clearAllStress(editor);
     editor.addMark(Mark.Stress2, true);
   } else if (isMarkActive(editor, Mark.Stress2)) {
-    // if someone increases stress at the highest stress level, bring them back to normal
-    editor.removeMark(Mark.Stress2);
+    clearAllStress(editor);
   } else {
     // no marks at all, add the first level
     editor.addMark(Mark.Stress1, true);
@@ -49,21 +56,19 @@ export const increaseStress = (editor: Editor) => {
 };
 
 export const increaseEmph = (editor: Editor) => {
-  // clear any stress first
-  clearMarkIfActive(editor, Mark.Stress1);
-  clearMarkIfActive(editor, Mark.Stress2);
+  clearAllStress(editor);
 
   if (isMarkActive(editor, Mark.Emph1)) {
-    editor.removeMark(Mark.Emph1);
+    clearAllEmph(editor);
     editor.addMark(Mark.Emph2, true);
   } else if (isMarkActive(editor, Mark.Emph2)) {
-    editor.removeMark(Mark.Emph2);
+    clearAllEmph(editor);
     editor.addMark(Mark.Emph3, true);
   } else if (isMarkActive(editor, Mark.Emph3)) {
-    editor.removeMark(Mark.Emph3);
+    clearAllEmph(editor);
     editor.addMark(Mark.Emph4, true);
   } else if (isMarkActive(editor, Mark.Emph4)) {
-    editor.removeMark(Mark.Emph4);
+    clearAllEmph(editor);
   } else {
     editor.addMark(Mark.Emph1, true);
   }
