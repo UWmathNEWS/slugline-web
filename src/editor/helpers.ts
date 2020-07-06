@@ -7,6 +7,7 @@ import {
   SluglineElement,
   ElementType,
   InlineVoidElement,
+  BlockElement,
 } from "./types";
 
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
@@ -110,6 +111,8 @@ export const getDefaultElementText = (element: SluglineElement) => {
       return element.href;
     case ElementType.InlineLatex:
       return "\\LaTeX";
+    case ElementType.Header:
+      return "HEADER";
     default:
       return "lorem ipsum";
   }
@@ -163,6 +166,24 @@ export const createInline: {
     } else if (text) {
       Transforms.insertText(editor, text);
     }
+  }
+};
+
+export const insertBlock = (editor: Editor, block: BlockElement) => {
+  // blocks can be nested, so don't if check if any already exist
+
+  if (editor.selection === null || Range.isCollapsed(editor.selection)) {
+    const blockWithText = {
+      ...block,
+      children: [
+        {
+          text: getDefaultElementText(block),
+        },
+      ],
+    };
+    Transforms.insertNodes(editor, blockWithText);
+  } else {
+    Transforms.wrapNodes(editor, block, { split: true });
   }
 };
 

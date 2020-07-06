@@ -30,6 +30,8 @@ const renderElement = (props: RenderElementProps) => {
       return <Link {...props} />;
     case ElementType.InlineLatex:
       return <InlineLatex {...props} />;
+    case ElementType.Header:
+      return <h6 {...props.attributes}>{props.children}</h6>;
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }

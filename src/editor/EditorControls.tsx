@@ -5,6 +5,7 @@ import {
   InlineLatexButton,
   IncreaseStressButton,
   IncreaseEmphButton,
+  HeaderButton,
 } from "./components/controls";
 import { Mark } from "./types";
 
@@ -20,6 +21,8 @@ const EditorControls: React.FC = () => {
       <div className="editor-separator" />
       <LinkButton />
       <InlineLatexButton />
+      <div className="editor-separator" />
+      <HeaderButton />
     </div>
   );
 };

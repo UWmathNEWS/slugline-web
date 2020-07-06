@@ -1,5 +1,11 @@
 import React, { useRef, useState } from "react";
-import { Mark, LinkElement, ElementType, InlineLatexElement } from "../types";
+import {
+  Mark,
+  LinkElement,
+  ElementType,
+  InlineLatexElement,
+  HeaderElement,
+} from "../types";
 import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -9,13 +15,14 @@ import {
   createInline,
   increaseStress,
   increaseEmph,
+  insertBlock,
 } from "../helpers";
 
 import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "../../shared/PopoverWrapper";
-import { faBold, faItalic } from "@fortawesome/free-solid-svg-icons";
+import { faBold, faItalic, faHeading } from "@fortawesome/free-solid-svg-icons";
 
 export const IncreaseStressButton: React.FC = () => {
   const editor = useSlate();
@@ -146,6 +153,28 @@ export const InlineLatexButton: React.FC = () => {
           <LatexPopover latex="" setLatex={setLatex} />
         </PopoverWrapper>
       )}
+    </>
+  );
+};
+
+const HEADER_PROTOTYPE: HeaderElement = {
+  type: ElementType.Header,
+  children: [],
+};
+
+export const HeaderButton: React.FC = () => {
+  const editor = useSlate();
+
+  return (
+    <>
+      <button
+        className="editor-control"
+        onClick={() => {
+          insertBlock(editor, HEADER_PROTOTYPE);
+        }}
+      >
+        <FontAwesomeIcon icon={faHeading} />
+      </button>
     </>
   );
 };
