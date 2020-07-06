@@ -110,6 +110,8 @@ export const getDefaultElementText = (element: SluglineElement) => {
       return element.href;
     case ElementType.InlineLatex:
       return "\\LaTeX";
+    default:
+      return "lorem ipsum";
   }
 };
 
@@ -136,12 +138,11 @@ export const createInline: {
   }
 
   if (editor.selection === null || Range.isCollapsed(editor.selection)) {
-    text = text ?? getDefaultElementText(inline);
     const inlineWithChildren = {
       ...inline,
       children: [
         {
-          text: text,
+          text: text ?? getDefaultElementText(inline),
         },
       ],
     };
