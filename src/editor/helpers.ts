@@ -24,12 +24,6 @@ export const toggleMark = (editor: Editor, mark: Mark): void => {
   }
 };
 
-const clearMarkIfActive = (editor: Editor, mark: Mark) => {
-  if (isMarkActive(editor, mark)) {
-    Editor.removeMark(editor, mark);
-  }
-};
-
 const clearAllStress = (editor: Editor) => {
   Editor.removeMark(editor, Mark.Stress1);
   Editor.removeMark(editor, Mark.Stress2);
