@@ -171,7 +171,7 @@ const MARK_HOTKEYS: Array<[Mark, string]> = [
   [Mark.Code, "mod+`"],
 ];
 
-export function keyDown(editor: Editor, evt: React.KeyboardEvent): void {
+export const keyDown = (editor: Editor, evt: React.KeyboardEvent): void => {
   MARK_HOTKEYS.forEach(([mark, hotkey]) => {
     if (isHotkey(hotkey, evt.nativeEvent)) {
       toggleMark(editor, mark);
@@ -183,4 +183,4 @@ export function keyDown(editor: Editor, evt: React.KeyboardEvent): void {
   if (isHotkey("mod+i", evt.nativeEvent)) {
     increaseEmph(editor);
   }
-}
+};
