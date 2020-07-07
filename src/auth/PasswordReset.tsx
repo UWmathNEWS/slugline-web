@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RouteComponentProps, User } from "../shared/types";
 import api from "../api/api";
 import { Alert, Button, Form } from "react-bootstrap";
-import Field from "../shared/form/Field";
 import { useForm } from "react-hook-form";
 import { RequestState, useAPILazy, useAPILazyUnsafe } from "../api/hooks";
 import { setServerErrors } from "../shared/form/util";
@@ -11,6 +10,7 @@ import { Link, Redirect } from "react-router-dom";
 import Loader from "../shared/components/Loader";
 import ERRORS from "../shared/errors";
 import { useAuth } from "./Auth";
+import PasswordField from "../shared/form/PasswordField";
 
 const PasswordResetForm: React.FC<{ token: string; user: User }> = ({
   token,
@@ -61,25 +61,7 @@ const PasswordResetForm: React.FC<{ token: string; user: User }> = ({
       >
         <Form.Group controlId="password">
           <Form.Label>New password</Form.Label>
-          <Field
-            name="password"
-            type="password"
-            errors={context.errors}
-            ref={context.register({
-              minLength: {
-                value: 8,
-                message: "USER.PASSWORD.TOO_SHORT.8",
-              },
-              required: "USER.PASSWORD.NEW_REQUIRED",
-              validate(password?: string) {
-                // the pattern argument doesn't let us return an error if the value FAILS a regex,
-                // so we'll do it ourselves
-                if (password && /^\d*$/.test(password)) {
-                  return "USER.PASSWORD.ENTIRELY_NUMERIC";
-                }
-              },
-            })}
-          />
+          <PasswordField name="password" context={context} />
         </Form.Group>
         <Button type="submit">
           {submitInfo.state !== RequestState.Running
@@ -93,7 +75,9 @@ const PasswordResetForm: React.FC<{ token: string; user: User }> = ({
 
 const PasswordReset: React.FC<RouteComponentProps> = ({ route, location }) => {
   const auth = useAuth();
-  const params = new URLSearchParams(location.search);
+  const params = useMemo(() => new URLSearchParams(location.search), [
+    location.search,
+  ]);
   const [token, setToken] = useState(params.get("token") || "");
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string[]>([]);

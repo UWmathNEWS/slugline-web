@@ -4,8 +4,6 @@ import { Alert, Button, Col, Form, Row } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
 import { cleanFormData, setServerErrors } from "../shared/form/util";
 import { useDebouncedCallback } from "../shared/hooks";
@@ -16,6 +14,7 @@ import AtLeast from "../shared/components/AtLeast";
 import { RequestState, useAPILazyUnsafe } from "../api/hooks";
 import config from "../config";
 import { resolve } from "../shared/helpers/url";
+import PasswordField, { validatePassword } from "../shared/form/PasswordField";
 
 export interface ProfileFormVals extends Omit<Partial<User>, "is_staff"> {
   cur_password?: string;
@@ -110,7 +109,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   const newPasswordRequired = props.user === undefined;
   // require confirm if we're creating a new editor or changing password/role
   const passwordConfirmRequired =
-    (newPasswordRequired && props.context.getValues().role) ||
+    (newPasswordRequired && props.context.getValues().role !== "Contributor") ||
     (props.user &&
       (props.context.getValues().password ||
         props.context.getValues().role !== props.user?.role));
@@ -340,45 +339,19 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                   </Button>
                 </Col>
                 <Col>
-                  <Field
-                    errors={props.context.errors}
-                    type={showPassword ? "text" : "password"}
+                  <PasswordField
                     name="password"
+                    context={props.context}
                     ref={props.context.register({
-                      minLength: {
-                        value: 8,
-                        message: "USER.PASSWORD.TOO_SHORT.8",
-                      },
                       required: newPasswordRequired
                         ? "USER.PASSWORD.NEW_REQUIRED"
                         : undefined,
-                      validate: (password?: string) => {
-                        // the pattern argument doesn't let us return an error if the value FAILS a regex,
-                        // so we'll do it ourselves
-                        if (password && /^\d*$/.test(password)) {
-                          return "USER.PASSWORD.ENTIRELY_NUMERIC";
-                        }
-                      },
+                      validate: validatePassword,
                     })}
-                    onChange={async () => {
-                      await props.context.triggerValidation("password");
+                    onChange={() => {
+                      props.context.triggerValidation("password").then();
                     }}
-                    append={
-                      <Button
-                        variant={
-                          showPassword ? "outline-primary" : "outline-secondary"
-                        }
-                        onClick={() => {
-                          setShowPassword((show) => !show);
-                        }}
-                      >
-                        {showPassword ? (
-                          <FontAwesomeIcon icon={faEyeSlash} />
-                        ) : (
-                          <FontAwesomeIcon icon={faEye} />
-                        )}
-                      </Button>
-                    }
+                    state={[showPassword, setShowPassword]}
                   />
                 </Col>
               </Form.Row>
@@ -441,7 +414,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                     : undefined,
                 })}
                 onChange={() => {
-                  props.context.triggerValidation("cur_password");
+                  props.context.triggerValidation("cur_password").then();
                 }}
               />
             </Form.Group>
