@@ -390,6 +390,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                   >
                     {resolve(
                       config.baseurl,
+                      "help",
                       "reset_password",
                       `?token=${passwordResetToken}`
                     )}
