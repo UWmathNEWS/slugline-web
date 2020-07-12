@@ -20,10 +20,10 @@ const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
       editor,
       {
         ...element,
-        href: href
+        href: href,
       },
       {
-        at: path
+        at: path,
       }
     );
   };
