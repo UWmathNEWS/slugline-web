@@ -1,11 +1,5 @@
 import React, { useRef, useState } from "react";
-import {
-  Mark,
-  LinkElement,
-  ElementType,
-  InlineLatexElement,
-  HeaderElement,
-} from "../types";
+import { Mark, LinkElement, ElementType, InlineLatexElement } from "../types";
 import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -23,8 +17,7 @@ import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "../../shared/PopoverWrapper";
-import { faBold, faItalic, faHeading } from "@fortawesome/free-solid-svg-icons";
-import { ToggleButton } from "react-bootstrap";
+import { faBold, faItalic } from "@fortawesome/free-solid-svg-icons";
 
 export const IncreaseStressButton: React.FC = () => {
   const editor = useSlate();

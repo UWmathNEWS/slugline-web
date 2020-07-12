@@ -1,7 +1,6 @@
 import React from "react";
-import { RenderLeafProps, useSlate } from "slate-react";
+import { RenderLeafProps } from "slate-react";
 import { Mark } from "../types";
-import nanoid from "nanoid";
 
 export const Leaf = (props: RenderLeafProps) => {
   let children = props.children;
