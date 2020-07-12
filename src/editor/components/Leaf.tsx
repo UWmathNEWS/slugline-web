@@ -4,12 +4,6 @@ import { Mark } from "../types";
 import nanoid from "nanoid";
 
 export const Leaf = (props: RenderLeafProps) => {
-  // we don't use this, but if we don't include this, the leaf
-  // won't re-render consistently
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ = useSlate();
-
   let children = props.children;
   if (props.leaf[Mark.Emph1]) {
     children = <i>{children}</i>;
@@ -55,9 +49,5 @@ export const Leaf = (props: RenderLeafProps) => {
   if (props.leaf[Mark.Code]) {
     children = <pre>{children}</pre>;
   }
-  return (
-    <span {...props.attributes} key={nanoid()}>
-      {children}
-    </span>
-  );
+  return <span {...props.attributes}>{children}</span>;
 };
