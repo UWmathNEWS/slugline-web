@@ -15,7 +15,8 @@ import {
   createInline,
   increaseStress,
   increaseEmph,
-  insertBlock,
+  toggleBlock,
+  isBlockActive,
 } from "../helpers";
 
 import "./styles/controls.scss";
@@ -23,6 +24,7 @@ import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "../../shared/PopoverWrapper";
 import { faBold, faItalic, faHeading } from "@fortawesome/free-solid-svg-icons";
+import { ToggleButton } from "react-bootstrap";
 
 export const IncreaseStressButton: React.FC = () => {
   const editor = useSlate();
@@ -157,24 +159,23 @@ export const InlineLatexButton: React.FC = () => {
   );
 };
 
-const HEADER_PROTOTYPE: HeaderElement = {
-  type: ElementType.Header,
-  children: [],
-};
+interface ToggleBlockButtonProps {
+  blockType: ElementType;
+  icon: string;
+}
 
-export const HeaderButton: React.FC = () => {
+export const ToggleBlockButton = (props: ToggleBlockButtonProps) => {
   const editor = useSlate();
-
+  const active = isBlockActive(editor, props.blockType);
+  const className = active ? "editor-control active" : "editor-control";
   return (
-    <>
-      <button
-        className="editor-control"
-        onClick={() => {
-          insertBlock(editor, HEADER_PROTOTYPE);
-        }}
-      >
-        <FontAwesomeIcon icon={faHeading} />
-      </button>
-    </>
+    <button
+      className={className}
+      onClick={() => {
+        toggleBlock(editor, props.blockType);
+      }}
+    >
+      <FontAwesomeIcon icon={props.icon as IconProp} />
+    </button>
   );
 };

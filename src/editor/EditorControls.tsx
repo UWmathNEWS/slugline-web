@@ -5,9 +5,9 @@ import {
   InlineLatexButton,
   IncreaseStressButton,
   IncreaseEmphButton,
-  HeaderButton,
+  ToggleBlockButton,
 } from "./components/controls";
-import { Mark } from "./types";
+import { Mark, ElementType } from "./types";
 
 import "./styles/EditorControls.scss";
 
@@ -22,7 +22,7 @@ const EditorControls: React.FC = () => {
       <LinkButton />
       <InlineLatexButton />
       <div className="editor-separator" />
-      <HeaderButton />
+      <ToggleBlockButton icon="heading" blockType={ElementType.Header} />
     </div>
   );
 };

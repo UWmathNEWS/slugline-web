@@ -7,7 +7,6 @@ import {
   SluglineElement,
   ElementType,
   InlineVoidElement,
-  BlockElement,
 } from "./types";
 
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
@@ -163,21 +162,19 @@ export const createInline: {
   }
 };
 
-export const insertBlock = (editor: Editor, block: BlockElement) => {
-  // blocks can be nested, so don't if check if any already exist
+export const isBlockActive = (editor: Editor, blockType: ElementType) => {
+  return !isIterableEmpty(
+    Editor.nodes(editor, {
+      match: (node) => (node as SluglineElement).type === blockType,
+    })
+  );
+};
 
-  if (editor.selection === null || Range.isCollapsed(editor.selection)) {
-    const blockWithText = {
-      ...block,
-      children: [
-        {
-          text: getDefaultElementText(block),
-        },
-      ],
-    };
-    Transforms.insertNodes(editor, blockWithText);
+export const toggleBlock = (editor: Editor, blockType: ElementType) => {
+  if (isBlockActive(editor, blockType)) {
+    Transforms.setNodes(editor, { type: "paragraph" });
   } else {
-    Transforms.wrapNodes(editor, block, { split: true });
+    Transforms.setNodes(editor, { type: blockType });
   }
 };
 
