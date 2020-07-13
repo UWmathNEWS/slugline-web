@@ -3,7 +3,7 @@ import { RenderElementProps, useEditor, ReactEditor } from "slate-react";
 import { LinkElement } from "../types";
 import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
-import PopoverWrapper from "../../shared/PopoverWrapper";
+import PopoverWrapper from "./PopoverWrapper";
 
 const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
   const element = props.element as LinkElement;

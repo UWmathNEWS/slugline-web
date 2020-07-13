@@ -16,7 +16,7 @@ import {
 import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
-import PopoverWrapper from "../../shared/PopoverWrapper";
+import PopoverWrapper from "./PopoverWrapper";
 import { faBold, faItalic } from "@fortawesome/free-solid-svg-icons";
 
 export const IncreaseStressButton: React.FC = () => {
