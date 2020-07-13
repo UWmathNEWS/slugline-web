@@ -12,7 +12,7 @@ export enum Mark {
 }
 
 export enum ElementType {
-  Default = "default",
+  Default = "paragraph",
   Link = "link",
   InlineLatex = "inline-latex",
   Header = "header",

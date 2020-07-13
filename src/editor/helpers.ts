@@ -172,7 +172,7 @@ export const isBlockActive = (editor: Editor, blockType: ElementType) => {
 
 export const toggleBlock = (editor: Editor, blockType: ElementType) => {
   if (isBlockActive(editor, blockType)) {
-    Transforms.setNodes(editor, { type: "paragraph" });
+    Transforms.setNodes(editor, { type: ElementType.Default });
   } else {
     Transforms.setNodes(editor, { type: blockType });
   }

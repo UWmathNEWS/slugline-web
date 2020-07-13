@@ -19,7 +19,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -37,7 +37,7 @@ describe("createInline", () => {
     // so we need these empty text nodes before and after it
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "",
@@ -62,7 +62,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -84,7 +84,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "v",
@@ -109,7 +109,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -126,7 +126,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "",
@@ -151,7 +151,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     const children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "hahaha",
@@ -192,7 +192,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "hahaha",
@@ -216,7 +216,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "",
@@ -241,7 +241,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "delete me",
@@ -265,7 +265,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "",
@@ -292,7 +292,7 @@ describe("increaseEmph", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -315,7 +315,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -328,7 +328,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -341,7 +341,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -354,7 +354,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -367,7 +367,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -381,7 +381,7 @@ describe("increaseEmph", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -405,7 +405,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -420,7 +420,7 @@ describe("increaseEmph", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -447,7 +447,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoovoodoo",
@@ -463,7 +463,7 @@ describe("increaseStress", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -485,7 +485,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -498,7 +498,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -511,7 +511,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -525,7 +525,7 @@ describe("increaseStress", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -548,7 +548,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -563,7 +563,7 @@ describe("increaseStress", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -590,7 +590,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: "paragraph",
+        type: ElementType.Default,
         children: [
           {
             text: "voodoovoodoo",
