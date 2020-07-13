@@ -42,6 +42,30 @@ a {
 }
 
 // Styles for article content
-u.double-underline {
-  text-decoration-style: double;
+span.underline-custom {
+  text-shadow: 1px 0px white, -1px 0px white;
+  background-image: linear-gradient(
+    to bottom,
+    black 0% 33%,
+    transparent 33% 100%
+  );
+  background-position: 0 1em;
+  background-size: 2px 0.2em;
+  padding-bottom: 0.2em;
+  background-repeat: repeat-x;
+}
+
+span.double-underline-custom {
+  text-shadow: 1px 0px white, -1px 0px white;
+  background-image: linear-gradient(
+    to bottom,
+    black 0%,
+    33%,
+    rgba(0, 0, 0, 0) 33% 66%,
+    black 66% 100%
+  );
+  background-position: 0 1em;
+  background-size: 2px 0.2em;
+  padding-bottom: 0.2em;
+  background-repeat: repeat-x;
 }

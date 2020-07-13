@@ -16,20 +16,20 @@ export const Leaf = (props: RenderLeafProps) => {
   }
   if (props.leaf[Mark.Emph3]) {
     children = (
-      <u>
+      <span className="underline-custom">
         <b>
           <i>{children}</i>
         </b>
-      </u>
+      </span>
     );
   }
   if (props.leaf[Mark.Emph4]) {
     children = (
-      <u className="double-underline">
+      <span className="double-underline-custom">
         <b>
           <i>{children}</i>
         </b>
-      </u>
+      </span>
     );
   }
   if (props.leaf[Mark.Stress1]) {
@@ -37,9 +37,9 @@ export const Leaf = (props: RenderLeafProps) => {
   }
   if (props.leaf[Mark.Stress2]) {
     children = (
-      <u>
+      <span className="underline-custom">
         <b>{children}</b>
-      </u>
+      </span>
     );
   }
   if (props.leaf[Mark.Strikethrough]) {
