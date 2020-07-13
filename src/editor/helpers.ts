@@ -166,15 +166,24 @@ export const isBlockActive = (editor: Editor, blockType: ElementType) => {
   return !isIterableEmpty(
     Editor.nodes(editor, {
       match: (node) => (node as SluglineElement).type === blockType,
+      mode: "all",
     })
   );
 };
 
 export const toggleBlock = (editor: Editor, blockType: ElementType) => {
   if (isBlockActive(editor, blockType)) {
-    Transforms.setNodes(editor, { type: ElementType.Default });
+    Transforms.setNodes(
+      editor,
+      { type: ElementType.Default },
+      { mode: "all", match: (node) => Editor.isBlock(editor, node) }
+    );
   } else {
-    Transforms.setNodes(editor, { type: blockType });
+    Transforms.setNodes(
+      editor,
+      { type: blockType },
+      { mode: "all", match: (node) => Editor.isBlock(editor, node) }
+    );
   }
 };
 
