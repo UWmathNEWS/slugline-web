@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, InputGroup } from "react-bootstrap";
 
 interface LatexPopoverProps {
   setLatex: (latex: string) => void;
@@ -19,17 +19,19 @@ const LatexPopover: React.FC<LatexPopoverProps> = (
           props.setLatex(latex);
         }}
       >
-        <Form.Group controlId="latex">
-          <Form.Label>LaTeX:</Form.Label>
+        <InputGroup>
           <Form.Control
             type="text"
             value={latex}
             onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
               setLatex(evt.currentTarget.value);
             }}
+            placeholder="LaTeX"
           />
-        </Form.Group>
-        <Button type="submit">Done</Button>
+          <InputGroup.Append>
+            <Button type="submit">Done</Button>
+          </InputGroup.Append>
+        </InputGroup>
       </Form>
     </div>
   );
