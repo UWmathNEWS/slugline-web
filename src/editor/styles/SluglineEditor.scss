@@ -1,8 +1,9 @@
 @import "../../styles/slugline_vars";
 
 .editor {
-  height: 100vh;
-  padding: spacing(1);
+  height: calc(
+    100vh - 5rem
+  ); // the navbar is about 5 rem tall, and we want the editor to fill the remaining space
   display: flex;
   flex-direction: column;
 }
