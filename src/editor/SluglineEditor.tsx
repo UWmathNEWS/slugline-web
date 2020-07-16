@@ -18,6 +18,7 @@ import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
+import { useDebouncedCallback } from "../shared/hooks";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -56,6 +57,8 @@ interface SluglineEditorProps {
   saveArticleContent: (content: Node[]) => void;
 }
 
+const SPELLCHECK_ENABLE_WAIT_MS = 500;
+
 const SluglineEditor: React.FC<SluglineEditorProps> = (
   props: SluglineEditorProps
 ) => {
@@ -65,6 +68,11 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
     props.content_raw || EDITOR_STATE_EMPTY
   );
   const [selection, setSelection] = useState<Range | null>(editor.selection);
+  const [spellcheck, setSpellcheck] = useState<boolean>(false);
+
+  const [enableSpellcheckDebounced] = useDebouncedCallback(() => {
+    setSpellcheck(true);
+  }, SPELLCHECK_ENABLE_WAIT_MS);
 
   const [title, setTitle] = useState<string>(props.title || "");
   const [subtitle, setSubtitle] = useState<string>(props.subtitle || "");
@@ -81,7 +89,17 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
   }, [saveArticleContent, value]);
 
   return (
-    <Slate value={value} onChange={setValue} editor={editor}>
+    <Slate
+      value={value}
+      onChange={(value) => {
+        setValue(value);
+        setSpellcheck(false);
+        // re enable it if there's been no change for SPELLCHECK_ENABLE_WAIT_MS
+        // milliseconds
+        enableSpellcheckDebounced();
+      }}
+      editor={editor}
+    >
       <div className="editor">
         <div className="editor-header">
           <input
@@ -109,6 +127,7 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
             placeholder="Start your masterpiece..."
             renderLeaf={renderLeaf}
             renderElement={renderElement}
+            spellCheck={spellcheck}
             onKeyDown={(evt: React.KeyboardEvent) => {
               EditorHelpers.keyDown(editor, evt);
             }}
