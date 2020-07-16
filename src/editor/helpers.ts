@@ -8,6 +8,7 @@ import {
   ElementType,
   InlineVoidElement,
 } from "./types";
+import { History, HistoryEditor } from "slate-history";
 
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
   const marks = Editor.marks(editor);
@@ -199,7 +200,10 @@ const MARK_HOTKEYS: Array<[Mark, string]> = [
   [Mark.Code, "mod+`"],
 ];
 
-export const keyDown = (editor: Editor, evt: React.KeyboardEvent): void => {
+export const keyDown = (
+  editor: HistoryEditor,
+  evt: React.KeyboardEvent
+): void => {
   MARK_HOTKEYS.forEach(([mark, hotkey]) => {
     if (isHotkey(hotkey, evt.nativeEvent)) {
       toggleMark(editor, mark);
@@ -210,5 +214,11 @@ export const keyDown = (editor: Editor, evt: React.KeyboardEvent): void => {
   }
   if (isHotkey("mod+i", evt.nativeEvent)) {
     increaseEmph(editor);
+  }
+  if (isHotkey("mod+z", evt.nativeEvent)) {
+    editor.undo();
+  }
+  if (isHotkey("mod+y", evt.nativeEvent)) {
+    editor.redo();
   }
 };

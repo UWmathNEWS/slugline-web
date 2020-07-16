@@ -8,6 +8,7 @@ import {
   RenderLeafProps,
   RenderElementProps,
 } from "slate-react";
+import { withHistory } from "slate-history";
 
 import { Leaf } from "./components/Leaf";
 import * as EditorHelpers from "./helpers";
@@ -62,7 +63,10 @@ const SPELLCHECK_ENABLE_WAIT_MS = 500;
 const SluglineEditor: React.FC<SluglineEditorProps> = (
   props: SluglineEditorProps
 ) => {
-  const editor = useMemo(() => withReact(createCustomEditor()), []);
+  const editor = useMemo(
+    () => withHistory(withReact(createCustomEditor())),
+    []
+  );
 
   const [value, setValue] = useState<Node[]>(
     props.content_raw || EDITOR_STATE_EMPTY
