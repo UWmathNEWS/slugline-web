@@ -171,6 +171,13 @@ export const isBlockActive = (editor: Editor, blockType: ElementType) => {
   );
 };
 
+/**
+ * If the selection does not contain a block of type `blockType`, set
+ * all blocks in the selection to type `blockType`. Otherwise, set all
+ * blocks in the selection to the default type.
+ * @param editor The editor to toggle the block on
+ * @param blockType The type of block to toggle
+ */
 export const toggleBlock = (editor: Editor, blockType: ElementType) => {
   if (isBlockActive(editor, blockType)) {
     Transforms.setNodes(
