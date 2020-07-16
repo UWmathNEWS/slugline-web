@@ -5,8 +5,9 @@ import {
   Mark,
   InlineElement,
   SluglineElement,
-  ElementType,
   InlineVoidElement,
+  BlockElementType,
+  InlineElementType,
 } from "./types";
 import { History, HistoryEditor } from "slate-history";
 
@@ -97,15 +98,15 @@ export const hasInlines = (editor: Editor, at?: Location) => {
   return !isIterableEmpty(inlines);
 };
 
-export const getDefaultElementText = (element: SluglineElement) => {
+export const getDefaultElementText = (element: SluglineElement): string => {
   switch (element.type) {
-    case ElementType.Default:
+    case BlockElementType.Default:
       return "lorem ipsum";
-    case ElementType.Link:
+    case InlineElementType.Link:
       return element.href;
-    case ElementType.InlineLatex:
+    case InlineElementType.InlineLatex:
       return "\\LaTeX";
-    case ElementType.Header:
+    case BlockElementType.Header:
       return "HEADER";
     default:
       return "lorem ipsum";
@@ -163,7 +164,7 @@ export const createInline: {
   }
 };
 
-export const isBlockActive = (editor: Editor, blockType: ElementType) => {
+export const isBlockActive = (editor: Editor, blockType: BlockElementType) => {
   return !isIterableEmpty(
     Editor.nodes(editor, {
       match: (node) => (node as SluglineElement).type === blockType,
@@ -179,11 +180,11 @@ export const isBlockActive = (editor: Editor, blockType: ElementType) => {
  * @param editor The editor to toggle the block on
  * @param blockType The type of block to toggle
  */
-export const toggleBlock = (editor: Editor, blockType: ElementType) => {
+export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
   if (isBlockActive(editor, blockType)) {
     Transforms.setNodes(
       editor,
-      { type: ElementType.Default },
+      { type: BlockElementType.Default },
       { mode: "all", match: (node) => Editor.isBlock(editor, node) }
     );
   } else {

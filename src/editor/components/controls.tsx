@@ -1,5 +1,11 @@
 import React, { useRef, useState } from "react";
-import { Mark, LinkElement, ElementType, InlineLatexElement } from "../types";
+import {
+  Mark,
+  LinkElement,
+  InlineLatexElement,
+  BlockElementType,
+  InlineElementType,
+} from "../types";
 import { useSlate, ReactEditor } from "slate-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -80,7 +86,7 @@ export const LinkButton: React.FC = () => {
     ReactEditor.focus(editor);
     setShowPopover(false);
     const newLink: LinkElement = {
-      type: ElementType.Link,
+      type: InlineElementType.Link,
       href: href,
       children: [],
     };
@@ -121,7 +127,7 @@ export const InlineLatexButton: React.FC = () => {
     ReactEditor.focus(editor);
     setShowPopover(false);
     const newLatex: InlineLatexElement = {
-      type: ElementType.InlineLatex,
+      type: InlineElementType.InlineLatex,
       latex: latex,
       children: [{ text: "" }],
     };
@@ -153,7 +159,7 @@ export const InlineLatexButton: React.FC = () => {
 };
 
 interface ToggleBlockButtonProps {
-  blockType: ElementType;
+  blockType: BlockElementType;
   icon: string;
 }
 

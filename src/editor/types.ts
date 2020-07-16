@@ -11,24 +11,27 @@ export enum Mark {
   Code = "code",
 }
 
-export enum ElementType {
-  Default = "paragraph",
+export enum InlineElementType {
   Link = "link",
   InlineLatex = "inline-latex",
+}
+
+export enum BlockElementType {
+  Default = "paragraph",
   Header = "header",
 }
 
 export interface DefaultElement extends Element {
-  type: ElementType.Default;
+  type: BlockElementType.Default;
 }
 
 export interface LinkElement extends Element {
-  type: ElementType.Link;
+  type: InlineElementType.Link;
   href: string;
 }
 
 export interface InlineLatexElement extends Element {
-  type: ElementType.InlineLatex;
+  type: InlineElementType.InlineLatex;
   latex: string;
 }
 
@@ -36,7 +39,7 @@ export type InlineElement = LinkElement;
 export type InlineVoidElement = InlineLatexElement;
 
 export interface HeaderElement extends Element {
-  type: ElementType.Header;
+  type: BlockElementType.Header;
 }
 
 export type BlockElement = HeaderElement;

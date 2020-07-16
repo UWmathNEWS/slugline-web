@@ -12,7 +12,7 @@ import { withHistory } from "slate-history";
 
 import { Leaf } from "./components/Leaf";
 import * as EditorHelpers from "./helpers";
-import { SluglineElement, ElementType } from "./types";
+import { SluglineElement, InlineElementType, BlockElementType } from "./types";
 
 import "./styles/SluglineEditor.scss";
 import Link from "./components/Link";
@@ -28,11 +28,11 @@ const renderLeaf = (props: RenderLeafProps) => {
 const renderElement = (props: RenderElementProps) => {
   const element = props.element as SluglineElement;
   switch (element.type) {
-    case ElementType.Link:
+    case InlineElementType.Link:
       return <Link {...props} />;
-    case ElementType.InlineLatex:
+    case InlineElementType.InlineLatex:
       return <InlineLatex {...props} />;
-    case ElementType.Header:
+    case BlockElementType.Header:
       return <h6 {...props.attributes}>{props.children}</h6>;
     default:
       return <p {...props.attributes}>{props.children}</p>;

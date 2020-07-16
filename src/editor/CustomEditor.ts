@@ -1,12 +1,12 @@
 import { createEditor, Element } from "slate";
-import { SluglineElement, ElementType } from "./types";
+import { SluglineElement, InlineElementType } from "./types";
 
 const isInline = (element: Element) => {
   const e = element as SluglineElement;
   switch (e.type) {
-    case ElementType.Link:
+    case InlineElementType.Link:
       return true;
-    case ElementType.InlineLatex:
+    case InlineElementType.InlineLatex:
       return true;
     default:
       return false;
@@ -16,7 +16,7 @@ const isInline = (element: Element) => {
 const isVoid = (element: Element) => {
   const e = element as SluglineElement;
   switch (e.type) {
-    case ElementType.InlineLatex:
+    case InlineElementType.InlineLatex:
       return true;
     default:
       return false;
