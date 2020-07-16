@@ -112,13 +112,13 @@ export const getDefaultElementText = (element: SluglineElement) => {
 };
 
 /**
- * Creates an inline, non-void element at the editor's current selection. Any children
+ * Creates an inline element at the editor's current selection. Any children
  * of this element will be overwritten.
  * @param editor The editor to add the inline to.
  * @param inline The inline to be added.
  * @param text The text to set as the child of the inline element. If this is undefined,
  * the existing text at the insert location will be used. If there is no text at that
- * location, the inline will have no text.
+ * location, the inline will have default text depending on its type.
  */
 export const createInline: {
   (editor: Editor, inline: InlineElement, text?: string): void;
