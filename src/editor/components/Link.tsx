@@ -5,6 +5,12 @@ import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
 import PopoverWrapper from "./PopoverWrapper";
 
+export const addProtocol = (href: string) => {
+  if (!href.startsWith("http://") && !href.startsWith("https://")) {
+    return "https://" + href;
+  }
+};
+
 const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
   const element = props.element as LinkElement;
   const editor = useEditor();
@@ -20,7 +26,7 @@ const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
       editor,
       {
         ...element,
-        href: href,
+        href: addProtocol(href),
       },
       {
         at: path,
