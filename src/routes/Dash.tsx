@@ -7,16 +7,22 @@ import Error404 from "../shared/errors/Error404";
 import { RouteProps } from "../shared/types";
 
 const DashArticlesPage = React.lazy(() =>
-  import(/* webpackChunkName: "dash-articles-page" */ "../dash/articles/DashArticlesPage")
+  import(
+    /* webpackChunkName: "dash-articles-page" */ "../dash/articles/DashArticlesPage"
+  )
 );
 const EditorPage = React.lazy(() =>
   import(/* webpackChunkName: "dash-editor-page" */ "../dash/EditorPage")
 );
 const DashIssuesPage = React.lazy(() =>
-  import(/* webpackChunkName: "dash-issues-page" */ "../dash/issues/DashIssuesPage")
+  import(
+    /* webpackChunkName: "dash-issues-page" */ "../dash/issues/DashIssuesPage"
+  )
 );
 const DashIssueDetail = React.lazy(() =>
-  import(/* webpackChunkName: "dash-issue-detail" */ "../dash/issues/DashIssueDetail")
+  import(
+    /* webpackChunkName: "dash-issue-detail" */ "../dash/issues/DashIssueDetail"
+  )
 );
 const Profile = React.lazy(() =>
   import(/* webpackChunkName: "dash-profile" */ "../profile/Profile")

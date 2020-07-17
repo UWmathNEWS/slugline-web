@@ -147,17 +147,30 @@ describe("useSSRData", () => {
     expect(data).toBe("boo");
   });
 
-  it("sets failure state on server error", () => {
+  it("uses the transformer if one is passed in for the API call", async () => {
+    const transformer = () => "boo";
+    const { result, waitForNextUpdate } = renderHook(() =>
+      h.useSSRData(api, "blep", transformer)
+    );
+
+    await waitForNextUpdate();
+    const [data] = result.current;
+
+    expect(data).toBe("boo");
+  });
+
+  it("sets error on server error", () => {
     window.__SSR_DIRECTIVES__.DATA = "bingo bango bongo";
+    window.__SSR_DIRECTIVES__.ERROR = "error";
     window.__SSR_DIRECTIVES__.STATUS_CODE = 400;
 
     const { result } = renderHook(() => h.useSSRData(api, "bad"));
 
-    const [data, info, fail] = result.current;
+    const [data, info, error] = result.current;
 
     expect(data).toBe("bad");
     expect(info.statusCode).toBe(400);
-    expect(fail).toBeTruthy();
+    expect(error).toBe("error");
 
     expect("STATUS_CODE" in window.__SSR_DIRECTIVES__).toBeFalsy();
   });
@@ -173,7 +186,7 @@ describe("useSSRData", () => {
     const [data, info, fail] = result.current;
 
     expect(data).toBe("bad");
-    expect(fail).toBeTruthy();
+    expect(fail).toEqual(MOCK_ERROR.error);
     expect(info.statusCode).toBe(400);
   });
 });

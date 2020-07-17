@@ -14,6 +14,7 @@ import SluglineNav from "./header/SluglineNav";
 import Public from "./routes/Public";
 import Dash from "./routes/Dash";
 import { BaseVisor } from "./shared/components/Visor";
+import Help from "./routes/Help";
 
 initLibrary();
 
@@ -44,13 +45,16 @@ const MainApp = () => (
     <PrivateRoute path="/dash">
       <Dash />
     </PrivateRoute>
+    <Route path="/help">
+      <Help />
+    </Route>
     <Route path="/">
       <Public />
     </Route>
   </Switch>
 );
 
-export const BaseApp: React.FC = appFactory(MainApp);
+const BaseApp: React.FC = appFactory(MainApp);
 
 const BaseAppWrapper: React.FC<Required<AppProps>> = ({ history }) => {
   const auth = useAuth();

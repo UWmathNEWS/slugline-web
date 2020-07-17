@@ -1,25 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { User, UserAPIError } from "../shared/types";
-import { Form, Row, Col, Button, Alert } from "react-bootstrap";
+import { User, UserAPIError, UserRole } from "../shared/types";
+import { Alert, Button, Col, Form, Row } from "react-bootstrap";
 import { FormContextValues, useForm } from "react-hook-form";
 import Field from "../shared/form/Field";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import nanoid from "nanoid";
 import { cleanFormData, setServerErrors } from "../shared/form/util";
 import { useDebouncedCallback } from "../shared/hooks";
 import NonFieldErrors from "../shared/form/NonFieldErrors";
 import api from "../api/api";
 import { useAuth } from "../auth/Auth";
+import AtLeast from "../shared/components/AtLeast";
+import { RequestState, useAPILazyUnsafe } from "../api/hooks";
+import config from "../config";
+import { resolve } from "../shared/helpers/url";
+import PasswordField, { validatePassword } from "../shared/form/PasswordField";
 
-export interface ProfileFormVals {
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  is_editor?: boolean;
-  writer_name?: string;
+export interface ProfileFormVals extends Omit<Partial<User>, "is_staff"> {
   cur_password?: string;
   password?: string;
 }
@@ -34,7 +31,7 @@ export const useProfileForm = (user?: User) => {
       first_name: "",
       last_name: "",
       email: "",
-      is_editor: false,
+      role: "Contributor",
       writer_name: "",
       cur_password: "",
       password: "",
@@ -49,7 +46,7 @@ export const useProfileForm = (user?: User) => {
       first_name: user?.first_name,
       last_name: user?.last_name,
       email: user?.email,
-      is_editor: user?.is_editor || false,
+      role: user?.role || "Contributor",
       writer_name: user?.writer_name,
       cur_password: "",
       password: "",
@@ -94,11 +91,17 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   const [generalErrors, setGeneralErrors] = useState<string[] | undefined>(
     undefined
   );
+  const [passwordResetToken, setPasswordResetToken] = useState<string | null>(
+    null
+  );
+  const [generateToken, generateTokenInfo] = useAPILazyUnsafe(
+    api.users.resetPassword.create
+  );
 
-  // manually register the is_editor field since we handle it with a select
+  // manually register the role field since we handle it with a select
   useEffect(() => {
     register({
-      name: "is_editor",
+      name: "role",
     });
   }, [register]);
 
@@ -106,10 +109,10 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
   const newPasswordRequired = props.user === undefined;
   // require confirm if we're creating a new editor or changing password/role
   const passwordConfirmRequired =
-    (newPasswordRequired && props.context.getValues().is_editor) ||
+    (newPasswordRequired && props.context.getValues().role !== "Contributor") ||
     (props.user &&
       (props.context.getValues().password ||
-        props.context.getValues().is_editor !== props.user?.is_editor));
+        props.context.getValues().role !== props.user?.role));
 
   const [validateUserNameDebounced] = useDebouncedCallback(
     validateUsernameAvailable,
@@ -123,14 +126,14 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
 
     const editingMe = props.user?.username === auth.user?.username;
     if (props.user === undefined) {
-      return await api.users.create({
+      return api.users.create({
         body: cleaned,
         csrf: auth.csrfToken || "",
       });
     } else {
       return editingMe
-        ? await api.me.patch({ body: cleaned, csrf: auth.csrfToken || "" })
-        : await api.users.patch({
+        ? api.me.patch({ body: cleaned, csrf: auth.csrfToken || "" })
+        : api.users.patch({
             id: props.user.username,
             body: cleaned,
             csrf: auth.csrfToken || "",
@@ -290,8 +293,8 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
             />
           </Col>
         </Form.Group>
-        {auth.isEditor() && (
-          <Form.Group as={Row} controlId="isEditor">
+        <AtLeast role="Editor">
+          <Form.Group as={Row} controlId="role">
             <Form.Label column sm={2}>
               Role
             </Form.Label>
@@ -299,87 +302,104 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
               <Form.Control
                 as="select"
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  if (e.currentTarget.value === "editor") {
-                    props.context.setValue("is_editor", true);
-                  } else if (e.currentTarget.value === "contributor") {
-                    props.context.setValue("is_editor", false);
-                  }
+                  props.context.setValue(
+                    "role",
+                    e.currentTarget.value as UserRole
+                  );
                 }}
-                value={
-                  props.context.getValues().is_editor ? "editor" : "contributor"
-                }
+                value={props.context.getValues().role}
                 custom
               >
-                <option value="contributor">Contributor</option>
-                <option value="editor">Editor</option>
+                <option value="Contributor">Contributor</option>
+                <option value="Copyeditor">Copyeditor</option>
+                <option value="Editor">Editor</option>
               </Form.Control>
             </Col>
           </Form.Group>
+        </AtLeast>
+        {(props.user === undefined ||
+          auth.user?.username === props.user.username) && (
+          <Form.Group as={Form.Row} controlId="password">
+            <Form.Label column sm={2}>
+              New Password
+            </Form.Label>
+            <Col sm={10}>
+              <Form.Row>
+                <Col sm="auto">
+                  <Button
+                    className="w-100"
+                    variant="secondary"
+                    onClick={() => {
+                      props.context.setValue("password", nanoid(), true);
+                      // set the password visible so you can see what you get
+                      setShowPassword(true);
+                    }}
+                  >
+                    Generate
+                  </Button>
+                </Col>
+                <Col>
+                  <PasswordField
+                    name="password"
+                    context={props.context}
+                    ref={props.context.register({
+                      required: newPasswordRequired
+                        ? "USER.PASSWORD.NEW_REQUIRED"
+                        : undefined,
+                      validate: validatePassword,
+                    })}
+                    onChange={() => {
+                      props.context.triggerValidation("password").then();
+                    }}
+                    state={[showPassword, setShowPassword]}
+                  />
+                </Col>
+              </Form.Row>
+            </Col>
+          </Form.Group>
         )}
-        <Form.Group as={Form.Row} controlId="password">
-          <Form.Label column sm={2}>
-            New Password
-          </Form.Label>
-          <Col sm={10}>
+        {props.user && props.user.username !== auth.user?.username && (
+          <AtLeast role="Editor">
             <Form.Row>
-              <Col sm="auto">
+              <Form.Label column sm={2}>
+                Reset password
+              </Form.Label>
+              <Col sm={10}>
                 <Button
-                  className="w-100"
                   variant="secondary"
-                  onClick={() => {
-                    props.context.setValue("password", nanoid(), true);
-                    // set the password visible so you can see what you get
-                    setShowPassword(true);
+                  onClick={async () => {
+                    const data = await generateToken({
+                      username: props.user!.username,
+                    });
+                    if (data.success) {
+                      setPasswordResetToken(data.data);
+                    } else {
+                      setGeneralErrors(data.error.detail);
+                    }
                   }}
                 >
-                  Generate
+                  Generate password reset token
                 </Button>
-              </Col>
-              <Col>
-                <Field
-                  errors={props.context.errors}
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  ref={props.context.register({
-                    minLength: {
-                      value: 8,
-                      message: "USER.PASSWORD.TOO_SHORT.8",
-                    },
-                    required: newPasswordRequired
-                      ? "USER.PASSWORD.NEW_REQUIRED"
-                      : undefined,
-                    validate: (password?: string) => {
-                      // the pattern argument doesn't let us return an error if the value FAILS a regex,
-                      // so we'll do it ourselves
-                      if (password && /^\d*$/.test(password)) {
-                        return "USER.PASSWORD.ENTIRELY_NUMERIC";
-                      }
-                    },
-                  })}
-                  onChange={async () => {
-                    await props.context.triggerValidation("password");
-                  }}
-                  append={
-                    <Button
-                      variant={
-                        showPassword ? "outline-primary" : "outline-secondary"
-                      }
-                      onClick={() => {
-                        setShowPassword((show) => !show);
-                      }}
-                    >
-                      {showPassword ? (
-                        <FontAwesomeIcon icon={faEyeSlash} />
-                      ) : (
-                        <FontAwesomeIcon icon={faEye} />
-                      )}
-                    </Button>
-                  }
-                />
+                {generateTokenInfo.state === RequestState.Running && (
+                  <pre key="returned-token">Generating...</pre>
+                )}
+                {passwordResetToken && (
+                  <pre
+                    key="returned-token"
+                    className="user-select-all text-wrap text-break mt-1"
+                  >
+                    {resolve(
+                      config.baseurl,
+                      "help",
+                      "reset_password",
+                      `?token=${passwordResetToken}`
+                    )}
+                  </pre>
+                )}
               </Col>
             </Form.Row>
-          </Col>
-        </Form.Group>
+          </AtLeast>
+        )}
         {passwordConfirmRequired && (
           <>
             <hr />
@@ -395,7 +415,7 @@ export const ProfileFormConsumer: React.FC<ProfileConsumerFormProps> = (
                     : undefined,
                 })}
                 onChange={() => {
-                  props.context.triggerValidation("cur_password");
+                  props.context.triggerValidation("cur_password").then();
                 }}
               />
             </Form.Group>

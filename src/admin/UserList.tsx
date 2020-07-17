@@ -41,8 +41,7 @@ const columns: Column<User>[] = [
   {
     header: "Role",
     key: "role",
-    accessor: (user: User) =>
-      user.is_staff ? "Staff" : user.is_editor ? "Editor" : "Contributor",
+    accessor: (user: User) => user.is_staff ? "Staff" : user.role,
   },
 ];
 
