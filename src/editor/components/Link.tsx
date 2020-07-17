@@ -5,7 +5,7 @@ import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
 import PopoverWrapper from "./PopoverWrapper";
 
-const formatHref = (href: string) => {
+export const formatHref = (href: string) => {
   if (href.includes("@")) {
     if (!href.startsWith("mailto:")) {
       return "mailto:" + href;
