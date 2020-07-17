@@ -115,16 +115,16 @@ export interface RichTableRow<D extends object> {
   setSelected: (s: boolean) => void;
 }
 
-export interface RichTableHook<D extends object = {}> {
+export interface RichTableHookProps<D extends object = {}> {
   columns: Column<D>[];
-  list: (args: RequestArgs) => Promise<APIResponse<D | Pagination<D>>>;
+  list: (args: RequestArgs) => Promise<APIResponse<D[] | Pagination<D>>>;
   paginated: boolean;
   actions?: Action<D>[];
   selectable?: boolean;
 }
 
 export interface RichTableProps<D extends object = {}>
-  extends RichTableHook<D> {
+  extends RichTableHookProps<D> {
   className?: string;
   searchable?: boolean;
   ref?: React.Ref<Table & HTMLTableElement>;
@@ -141,6 +141,8 @@ export interface RichTableBag<D extends object = {}> {
   setPage: (page: number) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  sortColumn: [string, boolean] | null;
+  setSortColumn: (col: [string, boolean] | null) => void;
   count: number;
   totalCount: number;
   executeAction: (name: string) => Promise<any>;
@@ -151,13 +153,13 @@ export interface RichTableBag<D extends object = {}> {
  * Here, we define useRichTable, the main hook used to construct a rich table. It handles all data-related aspects; the
  * only way to interact with the data externally is through actions.
  */
-const useRichTable = <D extends object = {}>({
+export const useRichTable = <D extends object = {}>({
   columns,
   list: get,
   paginated,
   actions = [],
   selectable,
-}: RichTableHook<D>): RichTableBag<D> => {
+}: RichTableHookProps<D>): RichTableBag<D> => {
   const id = useRef(nanoid());
   const [sortColumn, setSortColumn] = useState<[string, boolean] | null>(null);
   const [searchQuery, _setSearchQuery] = useState("");
@@ -183,6 +185,9 @@ const useRichTable = <D extends object = {}>({
       setPage(preSearchParams.current.page);
       setSortColumn(preSearchParams.current.sortColumn);
     }
+    if (query) {
+      setPage(1);
+    }
     _setSearchQuery(query);
   };
 
@@ -200,7 +205,7 @@ const useRichTable = <D extends object = {}>({
       if (sortColumn !== null) {
         params.sort = (sortColumn[1] ? "" : "-") + sortColumn[0];
       }
-      return get({ params: params });
+      return get({ params });
     },
     // We can ignore the warning about cuckooLoad being an unnecessary dependency, since it exists to trigger
     // refreshing without changing other state.
@@ -283,7 +288,10 @@ const useRichTable = <D extends object = {}>({
 
   const internalExecuteAction = useRef<
     (name: string, rows: D[]) => Promise<any>
-  >(() => Promise.resolve());
+  >(
+    /* istanbul ignore next */
+    () => Promise.resolve()
+  );
 
   useEffect(() => {
     internalExecuteAction.current = (name: string, rows: D[]) => {
@@ -310,7 +318,7 @@ const useRichTable = <D extends object = {}>({
   const executeAction = useCallback(
     (name: string) => {
       if (!(name in memoizedActions)) {
-        throw new Error(
+        return Promise.reject(
           `Action ${name} does not exist or was improperly registered.`
         );
       }
@@ -326,15 +334,25 @@ const useRichTable = <D extends object = {}>({
     [filteredSelected, memoizedActions]
   );
 
-  const header = useMemo<RichTableRow<{}>>(() => {
-    const onSelectAll = () => {
-      if (selectAllRef.current) {
-        setSelected((prevSelected) =>
-          new Array(data.length).fill(!prevSelected.some((d) => d))
-        );
-      }
-    };
+  // Impossible to test the following, since useEffect will immediately run
+  /* istanbul ignore next */
+  const onSelectAll = useRef(() => {});
 
+  useEffect(() => {
+    if (selectable) {
+      onSelectAll.current = () => {
+        // Infeasible to test else branch
+        /* istanbul ignore else */
+        if (selectAllRef.current) {
+          setSelected((prevSelected) =>
+            new Array(data.length).fill(!prevSelected.some((d) => d))
+          );
+        }
+      };
+    }
+  }, [selectable, data.length]);
+
+  const header = useMemo<RichTableRow<{}>>(() => {
     let cells: RichTableCell[] = columns.map(
       ({ header, key, sortable, width }) => {
         let props: PropsBag = { key };
@@ -406,7 +424,7 @@ const useRichTable = <D extends object = {}>({
               aria-label="select all"
               id={`RichTable-${id.current}-select-all`}
               checked={selected.length > 0 && selected.every((d) => d)}
-              onChange={onSelectAll}
+              onChange={onSelectAll.current}
               ref={selectAllRef}
             />
           );
@@ -423,19 +441,34 @@ const useRichTable = <D extends object = {}>({
       isSelected: false,
       setSelected() {},
     };
-  }, [columns, selected, sortColumn, selectable, data.length]);
+  }, [columns, selected, sortColumn, selectable]);
 
   const rows = useMemo<RichTableRow<D>[]>(() => {
     // Loading state
     if (reqInfo.state !== RequestState.Complete) {
       return new Array(data.length || 1).fill(null).map(
-        (_, i): RichTableRow<D> => ({
-          useRowProps() {
-            return { key: i };
-          },
-          data: {} as D,
-          cells: [
-            {
+        (_, i): RichTableRow<D> => {
+          let cells = columns.map(
+            ({ key }, j): RichTableCell => ({
+              useCellProps() {
+                return {
+                  key,
+                  className: "RichTable_loading",
+                };
+              },
+              render() {
+                return (
+                  <Loader
+                    variant="linear"
+                    hideFromScreenreaders={i > 0 || j > 0}
+                  />
+                );
+              },
+            })
+          );
+
+          if (selectable) {
+            cells.unshift({
               useCellProps() {
                 return {
                   key: 0,
@@ -445,29 +478,19 @@ const useRichTable = <D extends object = {}>({
               render() {
                 return "";
               },
+            });
+          }
+
+          return {
+            useRowProps() {
+              return { key: i };
             },
-            ...columns.map(
-              ({ key }, j): RichTableCell => ({
-                useCellProps() {
-                  return {
-                    key,
-                    className: "RichTable_loading",
-                  };
-                },
-                render() {
-                  return (
-                    <Loader
-                      variant="linear"
-                      hideFromScreenreaders={i > 0 || j > 0}
-                    />
-                  );
-                },
-              })
-            ),
-          ],
-          isSelected: false,
-          setSelected() {},
-        })
+            data: {} as D,
+            cells,
+            isSelected: false,
+            setSelected() {},
+          };
+        }
       );
     }
 
@@ -576,7 +599,12 @@ const useRichTable = <D extends object = {}>({
         data: row,
         cells,
         isSelected: selected[i],
-        setSelected: selectRow,
+        setSelected: (s) => {
+          setSelected((prevSelected) => {
+            prevSelected[i] = s;
+            return prevSelected.slice();
+          });
+        },
       };
     });
   }, [
@@ -602,6 +630,8 @@ const useRichTable = <D extends object = {}>({
     totalCount,
     searchQuery,
     setSearchQuery,
+    sortColumn,
+    setSortColumn,
     executeAction,
     reqInfo,
   };
@@ -616,12 +646,17 @@ const useRichTable = <D extends object = {}>({
 const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
   const { page, numPages, setPage, reqInfo, executeAction } = bag;
   const [newPage, setNewPage] = useState(page.toString());
-  // we need a ref to store the new page to get around the fake blur listener capturing outdated values of newPage
-  const newPageRef = useRef(page.toString());
-  const hasBlurListener = useRef(false);
+  // We want to reset the page input only on a blur that is the result of an intended user action, such as clicking or
+  // tabbing to lose focus. Since blur events fire when you switch windows or tabs, we implement a fake blur listener
+  // that listens to clicks globally and resets the input if it's fired, and implement no true blur listener.
+  const fakeBlurListener = useRef<((e: MouseEvent) => void) | null>(null);
+  // we need a ref to store the page to get around the fake blur listener capturing outdated values of page
+  const pageRef = useRef(page);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setNewPage(page.toString());
+    pageRef.current = page;
   }, [page]);
 
   return (
@@ -631,14 +666,15 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
     >
       <Button
         variant="link"
+        title="Go to previous page"
         disabled={page <= 1 || reqInfo.state !== RequestState.Complete}
+        onClick={async () => {
+          await executeAction("_previous");
+        }}
       >
         <FontAwesomeIcon
           icon="chevron-left"
           className="RichTable_paginationIcon"
-          onClick={async () => {
-            await executeAction("_previous");
-          }}
         />
       </Button>
       <span className="RichTable_paginationText">
@@ -650,50 +686,57 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
               Math.max(1, Math.min(parseInt(newPage), numPages)) || page;
             setNewPage(requestedPage.toString());
             setPage(requestedPage);
+
+            if (fakeBlurListener.current) {
+              window.removeEventListener("click", fakeBlurListener.current);
+              fakeBlurListener.current = null;
+            }
+
+            inputRef.current?.blur();
           }}
         >
           <Form.Control
             className="d-inline-block d-lg-inline px-0 text-center"
+            title="Set page"
             value={newPage}
+            ref={inputRef}
             onChange={({ target }: React.ChangeEvent<HTMLInputElement>) => {
               setNewPage(target.value);
-              newPageRef.current = target.value;
             }}
-            onKeyDown={({
-              key,
-              currentTarget,
-            }: React.KeyboardEvent<HTMLInputElement>) => {
-              if (key === "Escape") {
-                currentTarget.blur();
-              }
-            }}
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-            }}
-            onFocus={({
-              currentTarget,
-            }: React.FocusEvent<HTMLInputElement>) => {
-              currentTarget.select();
+            onKeyDown={({ key }: React.KeyboardEvent) => {
+              if (key === "Escape" || key === "Tab") {
+                setNewPage(page.toString());
 
-              // only submit if blur was the result of a click outside the control
-              if (!hasBlurListener.current) {
-                hasBlurListener.current = true;
-                window.addEventListener("click", function fakeBlurListener() {
-                  // no need to check the current target since we capture click events on this input anyways
-                  const requestedPage =
-                    Math.max(
-                      1,
-                      Math.min(parseInt(newPageRef.current), numPages)
-                    ) || page;
-                  setNewPage(requestedPage.toString());
-                  setPage(requestedPage);
-                  window.removeEventListener("click", fakeBlurListener);
-                  hasBlurListener.current = false;
-                });
+                // We ignore the else case here as it's impossible to test an "internal state does not change" scenario.
+                /* istanbul ignore else */
+                if (fakeBlurListener.current) {
+                  window.removeEventListener("click", fakeBlurListener.current);
+                  fakeBlurListener.current = null;
+                }
+
+                if (key === "Escape") {
+                  inputRef.current?.blur();
+                }
               }
             }}
-            onBlur={({ currentTarget }: React.FocusEvent<HTMLInputElement>) => {
-              currentTarget.value = page.toString();
+            onFocus={() => {
+              inputRef.current?.select();
+
+              // reset if blur was the result of a click outside the control
+              if (!fakeBlurListener.current) {
+                fakeBlurListener.current = ({ target }: MouseEvent) => {
+                  if (fakeBlurListener.current && target !== inputRef.current) {
+                    setNewPage(pageRef.current.toString());
+                    window.removeEventListener(
+                      "click",
+                      fakeBlurListener.current
+                    );
+                    fakeBlurListener.current = null;
+                  }
+                };
+
+                window.addEventListener("click", fakeBlurListener.current);
+              }
             }}
             style={{
               height: "calc(2.0625rem - 1px)", // taken from bootstrap's height of a small input (1.5*.875rem + .75rem)
@@ -705,14 +748,15 @@ const RichTablePagination = ({ bag }: { bag: RichTableBag<any> }) => {
       </span>
       <Button
         variant="link"
+        title="Go to next page"
         disabled={page >= numPages || reqInfo.state !== RequestState.Complete}
+        onClick={async () => {
+          await executeAction("_next");
+        }}
       >
         <FontAwesomeIcon
           icon="chevron-right"
           className="RichTable_paginationIcon"
-          onClick={async () => {
-            await executeAction("_next");
-          }}
         />
       </Button>
     </Col>
@@ -740,6 +784,7 @@ const RichTableHeader = ({
           <FormControl
             type="text"
             placeholder="Search..."
+            title="Search"
             size="sm"
             className="RichTable_searchBox"
             onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {

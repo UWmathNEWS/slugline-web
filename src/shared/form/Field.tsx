@@ -1,17 +1,12 @@
 import React from "react";
-import {
-  FormControl,
-  FormControlProps,
-  InputGroup,
-} from "react-bootstrap";
+import { FormControl, FormControlProps, InputGroup } from "react-bootstrap";
 import { NestDataObject, FieldError, ErrorMessage } from "react-hook-form";
 import { BsPrefixProps, ReplaceProps } from "react-bootstrap/helpers";
 import ERRORS from "../errors";
 
-type FormControlElement =
-  & HTMLInputElement
-  & HTMLSelectElement
-  & HTMLTextAreaElement;
+type FormControlElement = HTMLInputElement &
+  HTMLSelectElement &
+  HTMLTextAreaElement;
 
 interface FieldPropsExtra<T> extends FormControlProps {
   name: string;
@@ -24,7 +19,9 @@ interface FieldPropsExtra<T> extends FormControlProps {
 
 // This abomination combines our props with the Form.Control props
 // so we can forward them through
-type FieldProps<As extends React.ElementType = "input"> = FieldPropsExtra<any> &
+export type FieldProps<
+  As extends React.ElementType = "input"
+> = FieldPropsExtra<any> &
   Omit<ReplaceProps<As, BsPrefixProps<As> & FormControlProps>, "ref">;
 
 const Field = React.forwardRef<FormControl & FormControlElement, FieldProps>(
@@ -54,7 +51,7 @@ const Field = React.forwardRef<FormControl & FormControlElement, FieldProps>(
             <ErrorMessage name={name} errors={errors}>
               {({ message, messages }) => {
                 if (messages) {
-                  return Object.values(messages).map(msg =>
+                  return Object.values(messages).map((msg) =>
                     typeof msg === "string" ? (
                       <small key={msg} className="invalid-feedback d-block">
                         {ERRORS[msg]}
@@ -65,12 +62,10 @@ const Field = React.forwardRef<FormControl & FormControlElement, FieldProps>(
                   );
                 }
                 return typeof message === "string" ? (
-                  <small className="invalid-feedback">
-                    {ERRORS[message]}
-                  </small>
+                  <small className="invalid-feedback">{ERRORS[message]}</small>
                 ) : (
                   message
-                )
+                );
               }}
             </ErrorMessage>
           )}
