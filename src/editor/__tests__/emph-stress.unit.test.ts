@@ -1,5 +1,5 @@
 import createCustomEditor from "../CustomEditor";
-import { ElementType, Mark } from "../types";
+import { Mark, BlockElementType } from "../types";
 import { increaseEmph, increaseStress } from "../helpers";
 
 describe("increaseEmph", () => {
@@ -7,7 +7,7 @@ describe("increaseEmph", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -30,7 +30,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -43,7 +43,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -56,7 +56,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -69,7 +69,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -82,7 +82,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -96,7 +96,7 @@ describe("increaseEmph", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -120,7 +120,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -135,7 +135,7 @@ describe("increaseEmph", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -162,7 +162,7 @@ describe("increaseEmph", () => {
     increaseEmph(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoovoodoo",
@@ -178,7 +178,7 @@ describe("increaseStress", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -200,7 +200,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -213,7 +213,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -226,7 +226,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -240,7 +240,7 @@ describe("increaseStress", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -263,7 +263,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -278,7 +278,7 @@ describe("increaseStress", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -305,7 +305,7 @@ describe("increaseStress", () => {
     increaseStress(editor);
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoovoodoo",

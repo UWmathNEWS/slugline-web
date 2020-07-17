@@ -1,16 +1,21 @@
-import { LinkElement, ElementType, InlineLatexElement } from "../types";
+import {
+  LinkElement,
+  InlineLatexElement,
+  BlockElementType,
+  InlineElementType,
+} from "../types";
 import createCustomEditor from "../CustomEditor";
 import { createInline } from "../helpers";
 
 const TEST_LINK: LinkElement = {
   href: "www.test.com",
-  type: ElementType.Link,
+  type: InlineElementType.Link,
   children: [],
 };
 
 const TEST_LATEX_INLINE: InlineLatexElement = {
   latex: "\\LaTeX",
-  type: ElementType.InlineLatex,
+  type: InlineElementType.InlineLatex,
   children: [],
 };
 
@@ -19,7 +24,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -37,7 +42,7 @@ describe("createInline", () => {
     // so we need these empty text nodes before and after it
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "",
@@ -62,7 +67,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -84,7 +89,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "v",
@@ -109,7 +114,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "voodoo",
@@ -126,7 +131,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "",
@@ -151,7 +156,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     const children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "hahaha",
@@ -192,7 +197,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "hahaha",
@@ -216,7 +221,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "",
@@ -241,7 +246,7 @@ describe("createInline", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "delete me",
@@ -265,7 +270,7 @@ describe("createInline", () => {
 
     expect(editor.children).toEqual([
       {
-        type: ElementType.Default,
+        type: BlockElementType.Default,
         children: [
           {
             text: "",
