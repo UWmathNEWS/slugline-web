@@ -24,7 +24,7 @@ import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "./PopoverWrapper";
 import { faBold, faItalic } from "@fortawesome/free-solid-svg-icons";
-import { DropdownButton, Dropdown, Button } from "react-bootstrap";
+import { DropdownButton, Button } from "react-bootstrap";
 
 export const ExtrasDropdown: React.FC = () => {
   return (
@@ -100,7 +100,6 @@ export const ToggleMarkButtonText: React.FC<ToggleMarkButtonTextProps> = (
   props: ToggleMarkButtonTextProps
 ) => {
   const editor = useSlate();
-  const active = isMarkActive(editor, props.mark);
   return (
     <Button
       onClick={() => {

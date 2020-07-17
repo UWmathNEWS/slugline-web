@@ -9,7 +9,7 @@ import {
   BlockElementType,
   InlineElementType,
 } from "./types";
-import { History, HistoryEditor } from "slate-history";
+import { HistoryEditor } from "slate-history";
 
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
   const marks = Editor.marks(editor);
