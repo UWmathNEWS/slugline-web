@@ -24,6 +24,21 @@ import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "./PopoverWrapper";
 import { faBold, faItalic } from "@fortawesome/free-solid-svg-icons";
+import { DropdownButton, Dropdown, Button } from "react-bootstrap";
+
+export const ExtrasDropdown: React.FC = () => {
+  return (
+    <DropdownButton
+      className="extras-dropdown"
+      id="extrasDropdown"
+      title="More"
+      alignRight
+      variant="link"
+    >
+      <ToggleMarkButtonText mark={Mark.ArticleRef} text="Article Reference" />
+    </DropdownButton>
+  );
+};
 
 export const IncreaseStressButton: React.FC = () => {
   const editor = useSlate();
@@ -63,7 +78,7 @@ export const ToggleMarkButton: React.FC<ToggleMarkButtonProps> = (
 ) => {
   const editor = useSlate();
   const active = isMarkActive(editor, props.mark);
-  const className = active ? "editor-control active" : "editor-control";
+  const className = active ? `editor-control active` : "editor-control";
   return (
     <button
       className={className}
@@ -73,6 +88,28 @@ export const ToggleMarkButton: React.FC<ToggleMarkButtonProps> = (
     >
       <FontAwesomeIcon icon={props.icon as IconProp} />
     </button>
+  );
+};
+
+interface ToggleMarkButtonTextProps {
+  text: string;
+  mark: Mark;
+}
+
+export const ToggleMarkButtonText: React.FC<ToggleMarkButtonTextProps> = (
+  props: ToggleMarkButtonTextProps
+) => {
+  const editor = useSlate();
+  const active = isMarkActive(editor, props.mark);
+  return (
+    <Button
+      onClick={() => {
+        toggleMark(editor, props.mark);
+      }}
+      variant="link"
+    >
+      {props.text}
+    </Button>
   );
 };
 

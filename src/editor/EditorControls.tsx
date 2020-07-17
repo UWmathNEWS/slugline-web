@@ -6,6 +6,7 @@ import {
   IncreaseStressButton,
   IncreaseEmphButton,
   ToggleBlockButton,
+  ExtrasDropdown,
 } from "./components/controls";
 import { Mark, BlockElementType } from "./types";
 
@@ -23,6 +24,7 @@ const EditorControls: React.FC = () => {
       <InlineLatexButton />
       <div className="editor-separator" />
       <ToggleBlockButton icon="heading" blockType={BlockElementType.Header} />
+      <ExtrasDropdown />
     </div>
   );
 };

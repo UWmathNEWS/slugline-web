@@ -199,6 +199,7 @@ export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
 const MARK_HOTKEYS: Array<[Mark, string]> = [
   [Mark.Strikethrough, "mod+d"],
   [Mark.Code, "mod+`"],
+  [Mark.ArticleRef, "mod+q"],
 ];
 
 export const keyDown = (

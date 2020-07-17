@@ -48,5 +48,12 @@ export const Leaf = (props: RenderLeafProps) => {
   if (props.leaf[Mark.Code]) {
     children = <pre>{children}</pre>;
   }
+  if (props.leaf[Mark.ArticleRef]) {
+    children = (
+      <i>
+        <span className="dotted-underline-custom">{children}</span>
+      </i>
+    );
+  }
   return <span {...props.attributes}>{children}</span>;
 };

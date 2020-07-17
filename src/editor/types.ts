@@ -9,6 +9,7 @@ export enum Mark {
   Stress2 = "stress-2",
   Strikethrough = "strikethrough",
   Code = "code",
+  ArticleRef = "article-ref",
 }
 
 export enum InlineElementType {

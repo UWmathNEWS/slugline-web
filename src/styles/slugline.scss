@@ -69,3 +69,12 @@ span.double-underline-custom {
   padding-bottom: 0.2em;
   background-repeat: repeat-x;
 }
+
+span.dotted-underline-custom {
+  text-shadow: 1px 0px white, -1px 0px white;
+  background-image: linear-gradient(to right, black 50%, transparent 50%);
+  background-position: 0 1em;
+  background-size: 3px 2px;
+  padding-bottom: 0.2em;
+  background-repeat: repeat-x;
+}

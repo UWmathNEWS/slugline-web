@@ -31,6 +31,24 @@
   }
 }
 
+.extras-dropdown {
+  align-self: flex-end;
+  margin-left: auto;
+  // this pushes it away from the scroll bar, which looks nicer
+  margin-right: spacing(3);
+
+  & > button {
+    background: none;
+    font-family: "Headings Font";
+    border: none;
+
+    &:active,
+    &:hover {
+      background: none !important;
+    }
+  }
+}
+
 .control-popover {
   padding: $spacer;
   background: white;
