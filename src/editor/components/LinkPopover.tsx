@@ -6,14 +6,6 @@ interface LinkPopoverProps {
   href: string;
 }
 
-export const addProtocol = (href: string) => {
-  if (!href.startsWith("http://") && !href.startsWith("https://")) {
-    return "https://" + href;
-  } else {
-    return href;
-  }
-};
-
 const LinkPopover: React.FC<LinkPopoverProps> = (props: LinkPopoverProps) => {
   const [input, setInput] = useState<string>(props.href);
 
@@ -22,7 +14,7 @@ const LinkPopover: React.FC<LinkPopoverProps> = (props: LinkPopoverProps) => {
       <Form
         onSubmit={(evt: React.FormEvent) => {
           evt.preventDefault();
-          props.setHref(addProtocol(input));
+          props.setHref(input);
         }}
       >
         <InputGroup>

@@ -5,6 +5,18 @@ import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
 import PopoverWrapper from "./PopoverWrapper";
 
+const formatHref = (href: string) => {
+  if (href.includes("@")) {
+    if (!href.startsWith("mailto:")) {
+      return "mailto:" + href;
+    }
+  } else if (!href.startsWith("http://") && !href.startsWith("https://")) {
+    return "https://" + href;
+  }
+
+  return href;
+};
+
 const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
   const element = props.element as LinkElement;
   const editor = useEditor();
@@ -35,7 +47,7 @@ const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
         onClick={() => {
           setShow(true);
         }}
-        href={element.href}
+        href={formatHref(element.href)}
       >
         {props.children}
       </a>
