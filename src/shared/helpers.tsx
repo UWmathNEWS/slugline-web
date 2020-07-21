@@ -4,7 +4,10 @@ import { RouteProps } from "./types";
 import { Route, RouteComponentProps, Switch } from "react-router";
 
 import * as url from "./helpers/url";
+import * as user from "./helpers/user";
+
 export { url };
+export { user };
 
 /**
  * Formats a string using Python-style syntax.
@@ -40,7 +43,7 @@ export const format: {
     }
     return paramsObj[
       parseInt(paramName) in paramsObj ? parseInt(paramName) : paramName
-      ];
+    ];
   });
 };
 
@@ -110,7 +113,7 @@ export const renderRoutes: {
               "render" in route ? (
                 route.render({ ...props, ...extraProps, route: route })
               ) : (
-                <route.component {...props} {...extraProps} route={route}/>
+                <route.component {...props} {...extraProps} route={route} />
               )
             }
             {...routeProps}
