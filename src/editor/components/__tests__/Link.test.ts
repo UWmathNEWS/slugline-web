@@ -1,11 +1,11 @@
 import { formatHref } from "../Link";
 
 describe("formatHref", () => {
-  it("adds https to URLs", () => {
-    expect(formatHref("google.com")).toEqual("https://google.com");
+  it("adds http to URLs", () => {
+    expect(formatHref("google.com")).toEqual("http://google.com");
   });
 
-  it("doesn't add https:// when http:// or https:// already exists", () => {
+  it("doesn't add http:// when http:// or https:// already exists", () => {
     expect(formatHref("http://google.com")).toEqual("http://google.com");
     expect(formatHref("https://google.com")).toEqual("https://google.com");
   });
@@ -23,7 +23,7 @@ describe("formatHref", () => {
 
   it("doesn't add mailto: to URLS that have @ in them", () => {
     expect(formatHref("some.url.com/@lookwerefancy")).toEqual(
-      "https://some.url.com/@lookwerefancy"
+      "http://some.url.com/@lookwerefancy"
     );
   });
 

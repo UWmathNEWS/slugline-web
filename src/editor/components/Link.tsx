@@ -15,7 +15,7 @@ export const formatHref = (href: string) => {
       return "mailto:" + href;
     }
   } else if (!href.startsWith("http://") && !href.startsWith("https://")) {
-    return "https://" + href;
+    return "http://" + href;
   }
 
   return href;
