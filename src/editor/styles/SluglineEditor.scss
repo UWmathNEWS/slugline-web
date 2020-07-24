@@ -8,6 +8,11 @@
   flex-direction: column;
 }
 
+.editor-contenteditable {
+  // we want this to always take up the full height so we can click on the whole thing to focus it
+  height: 100%;
+}
+
 .editor-header,
 .editor-footer {
   margin-bottom: $spacer;

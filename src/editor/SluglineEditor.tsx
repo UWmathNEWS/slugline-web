@@ -113,6 +113,7 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
             placeholder="Start your masterpiece..."
             renderLeaf={renderLeaf}
             renderElement={renderElement}
+            className="editor-contenteditable"
             onKeyDown={(evt: React.KeyboardEvent) => {
               EditorHelpers.keyDown(editor, evt);
             }}
