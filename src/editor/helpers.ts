@@ -86,6 +86,7 @@ const isIterableEmpty = (iterable: Iterable<any>) => {
 
 /**
  * Returns true if the passed Location contains inlines, and false otherwise
+ * @param editor The editor to search in.
  * @param at The location to search at. If at is undefined, the current selection
  * will be used instead.
  */
