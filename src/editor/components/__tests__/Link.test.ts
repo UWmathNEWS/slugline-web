@@ -12,6 +12,19 @@ describe("formatHref", () => {
 
   it("adds mailto to emails", () => {
     expect(formatHref("bob@bob.com")).toEqual("mailto:bob@bob.com");
+    expect(
+      formatHref(
+        "long.obnoxious.email+someotherthing@long.obnoxious.domain123.com"
+      )
+    ).toEqual(
+      "mailto:long.obnoxious.email+someotherthing@long.obnoxious.domain123.com"
+    );
+  });
+
+  it("doesn't add mailto: to URLS that have @ in them", () => {
+    expect(formatHref("some.url.com/@lookwerefancy")).toEqual(
+      "https://some.url.com/@lookwerefancy"
+    );
   });
 
   it("doesn't add mailto: when it already exists", () => {

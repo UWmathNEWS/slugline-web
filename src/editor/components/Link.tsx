@@ -5,8 +5,12 @@ import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
 import PopoverWrapper from "./PopoverWrapper";
 
+// Taken from https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
+// Basically enforces <anything>@<anything>.<anything>
+const EMAIL_REGEX = /\S+@\S+\.\S+/;
+
 export const formatHref = (href: string) => {
-  if (href.includes("@")) {
+  if (href.match(EMAIL_REGEX)) {
     if (!href.startsWith("mailto:")) {
       return "mailto:" + href;
     }
