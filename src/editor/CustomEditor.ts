@@ -1,4 +1,4 @@
-import { createEditor, Element, Editor, Text, Transforms } from "slate";
+import { createEditor, Element, Text, Transforms } from "slate";
 import { SluglineElement, InlineElementType, Mark } from "./types";
 
 // the way to remove a property is to call setNodes with the property set to null
