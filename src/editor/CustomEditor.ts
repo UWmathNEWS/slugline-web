@@ -1,6 +1,5 @@
 import { createEditor, Element, Editor } from "slate";
-import { SluglineElement, InlineElementType, Mark } from "./types";
-import { isMarkActive } from "./helpers";
+import { SluglineElement, InlineElementType } from "./types";
 
 const createCustomEditor = () => {
   const editor = createEditor();
