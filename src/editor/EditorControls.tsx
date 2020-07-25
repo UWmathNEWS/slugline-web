@@ -25,9 +25,9 @@ const EditorControls: React.FC = () => {
         rootButton={<ToggleMarkButton icon="italic" mark={Mark.Emph1} />}
         id="emph-dropdown"
       >
-        <ToggleMarkButtonText text="Emph 2" mark={Mark.Emph2} />
-        <ToggleMarkButtonText text="Emph 3" mark={Mark.Emph3} />
-        <ToggleMarkButtonText text="Emph 4" mark={Mark.Emph4} />
+        <ToggleMarkButtonText text="Emphasis 2" mark={Mark.Emph2} />
+        <ToggleMarkButtonText text="Emphasis 3" mark={Mark.Emph3} />
+        <ToggleMarkButtonText text="Emphasis 4" mark={Mark.Emph4} />
       </EditorDropdown>
       <ToggleMarkButton icon="strikethrough" mark={Mark.Strikethrough} />
       <ToggleMarkButton icon="code" mark={Mark.Code} />
