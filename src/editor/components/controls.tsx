@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, PropsWithChildren } from "react";
 import {
   Mark,
   LinkElement,
@@ -13,8 +13,6 @@ import {
   toggleMark,
   isMarkActive,
   createInline,
-  increaseStress,
-  increaseEmph,
   toggleBlock,
   isBlockActive,
 } from "../helpers";
@@ -23,8 +21,7 @@ import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
 import PopoverWrapper from "./PopoverWrapper";
-import { faBold, faItalic } from "@fortawesome/free-solid-svg-icons";
-import { DropdownButton, Button } from "react-bootstrap";
+import { DropdownButton, Button, Dropdown, ButtonGroup } from "react-bootstrap";
 
 export const ExtrasDropdown: React.FC = () => {
   return (
@@ -40,31 +37,25 @@ export const ExtrasDropdown: React.FC = () => {
   );
 };
 
-export const IncreaseStressButton: React.FC = () => {
-  const editor = useSlate();
-  return (
-    <button
-      className="editor-control"
-      onClick={() => {
-        increaseStress(editor);
-      }}
-    >
-      <FontAwesomeIcon icon={faBold} />
-    </button>
-  );
-};
+interface EditorDropdownProps {
+  rootButton: React.ReactNode;
+  id: string;
+}
 
-export const IncreaseEmphButton: React.FC = () => {
-  const editor = useSlate();
+export const EditorDropdown: React.FC<EditorDropdownProps> = (
+  props: PropsWithChildren<EditorDropdownProps>
+) => {
   return (
-    <button
-      className="editor-control"
-      onClick={() => {
-        increaseEmph(editor);
-      }}
-    >
-      <FontAwesomeIcon icon={faItalic} />
-    </button>
+    <Dropdown as={ButtonGroup}>
+      {props.rootButton}
+      <Dropdown.Toggle
+        className="editor-control dropdown-toggle"
+        split
+        variant="link"
+        id={props.id}
+      />
+      <Dropdown.Menu alignRight>{props.children}</Dropdown.Menu>
+    </Dropdown>
   );
 };
 
@@ -102,6 +93,7 @@ export const ToggleMarkButtonText: React.FC<ToggleMarkButtonTextProps> = (
   const editor = useSlate();
   return (
     <Button
+      className="editor-control-text"
       onClick={() => {
         toggleMark(editor, props.mark);
       }}

@@ -22,13 +22,34 @@
   }
 
   &.active,
-  &:hover {
+  &:hover,
+  &:focus {
     background-color: black;
-
+    color: white;
     & > svg > path {
       fill: white;
     }
   }
+
+  &.dropdown-toggle {
+    border-top-right-radius: 5px !important;
+    border-bottom-right-radius: 5px !important;
+
+    vertical-align: middle;
+
+    &::after {
+      margin-left: -5px;
+    }
+  }
+}
+
+.btn-group > .editor-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.editor-control-text {
+  display: block;
 }
 
 .extras-dropdown {

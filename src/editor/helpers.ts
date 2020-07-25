@@ -25,51 +25,6 @@ export const toggleMark = (editor: Editor, mark: Mark): void => {
   }
 };
 
-const clearAllStress = (editor: Editor) => {
-  Editor.removeMark(editor, Mark.Stress1);
-  Editor.removeMark(editor, Mark.Stress2);
-};
-
-const clearAllEmph = (editor: Editor) => {
-  Editor.removeMark(editor, Mark.Emph1);
-  Editor.removeMark(editor, Mark.Emph2);
-  Editor.removeMark(editor, Mark.Emph3);
-  Editor.removeMark(editor, Mark.Emph4);
-};
-
-export const increaseStress = (editor: Editor) => {
-  clearAllEmph(editor);
-
-  if (isMarkActive(editor, Mark.Stress1)) {
-    clearAllStress(editor);
-    editor.addMark(Mark.Stress2, true);
-  } else if (isMarkActive(editor, Mark.Stress2)) {
-    clearAllStress(editor);
-  } else {
-    // no marks at all, add the first level
-    editor.addMark(Mark.Stress1, true);
-  }
-};
-
-export const increaseEmph = (editor: Editor) => {
-  clearAllStress(editor);
-
-  if (isMarkActive(editor, Mark.Emph1)) {
-    clearAllEmph(editor);
-    editor.addMark(Mark.Emph2, true);
-  } else if (isMarkActive(editor, Mark.Emph2)) {
-    clearAllEmph(editor);
-    editor.addMark(Mark.Emph3, true);
-  } else if (isMarkActive(editor, Mark.Emph3)) {
-    clearAllEmph(editor);
-    editor.addMark(Mark.Emph4, true);
-  } else if (isMarkActive(editor, Mark.Emph4)) {
-    clearAllEmph(editor);
-  } else {
-    editor.addMark(Mark.Emph1, true);
-  }
-};
-
 /**
  * Returns true if `iterable` has no elements.
  * @param iterable The iterable to check
@@ -201,6 +156,8 @@ const MARK_HOTKEYS: Array<[Mark, string]> = [
   [Mark.Strikethrough, "mod+d"],
   [Mark.Code, "mod+`"],
   [Mark.ArticleRef, "mod+q"],
+  [Mark.Stress1, "mod+b"],
+  [Mark.Emph1, "mod+i"],
 ];
 
 export const keyDown = (
@@ -212,12 +169,6 @@ export const keyDown = (
       toggleMark(editor, mark);
     }
   });
-  if (isHotkey("mod+b", evt.nativeEvent)) {
-    increaseStress(editor);
-  }
-  if (isHotkey("mod+i", evt.nativeEvent)) {
-    increaseEmph(editor);
-  }
   if (isHotkey("mod+z", evt.nativeEvent)) {
     editor.undo();
   }

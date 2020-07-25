@@ -3,10 +3,10 @@ import {
   ToggleMarkButton,
   LinkButton,
   InlineLatexButton,
-  IncreaseStressButton,
-  IncreaseEmphButton,
   ToggleBlockButton,
   ExtrasDropdown,
+  EditorDropdown,
+  ToggleMarkButtonText,
 } from "./components/controls";
 import { Mark, BlockElementType } from "./types";
 
@@ -15,8 +15,20 @@ import "./styles/EditorControls.scss";
 const EditorControls: React.FC = () => {
   return (
     <div className="editor-controls">
-      <IncreaseStressButton />
-      <IncreaseEmphButton />
+      <EditorDropdown
+        rootButton={<ToggleMarkButton icon="bold" mark={Mark.Stress1} />}
+        id="stress-dropdown"
+      >
+        <ToggleMarkButtonText text="Stress 2" mark={Mark.Stress2} />
+      </EditorDropdown>
+      <EditorDropdown
+        rootButton={<ToggleMarkButton icon="italic" mark={Mark.Emph1} />}
+        id="emph-dropdown"
+      >
+        <ToggleMarkButtonText text="Emph 2" mark={Mark.Emph2} />
+        <ToggleMarkButtonText text="Emph 3" mark={Mark.Emph3} />
+        <ToggleMarkButtonText text="Emph 4" mark={Mark.Emph4} />
+      </EditorDropdown>
       <ToggleMarkButton icon="strikethrough" mark={Mark.Strikethrough} />
       <ToggleMarkButton icon="code" mark={Mark.Code} />
       <div className="editor-separator" />
