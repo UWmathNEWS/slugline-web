@@ -74,6 +74,7 @@ export const ToggleMarkButton: React.FC<ToggleMarkButtonProps> = (
     <button
       className={className}
       onClick={() => {
+        ReactEditor.focus(editor);
         toggleMark(editor, props.mark);
       }}
     >
@@ -96,6 +97,7 @@ export const ToggleMarkButtonText: React.FC<ToggleMarkButtonTextProps> = (
     <Button
       className="editor-control-text"
       onClick={() => {
+        ReactEditor.focus(editor);
         toggleMark(editor, props.mark);
       }}
       variant="link"
@@ -204,6 +206,7 @@ export const ToggleBlockButton = (props: ToggleBlockButtonProps) => {
     <button
       className={className}
       onClick={() => {
+        ReactEditor.focus(editor);
         toggleBlock(editor, props.blockType);
       }}
     >
