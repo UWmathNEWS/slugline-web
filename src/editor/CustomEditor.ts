@@ -1,5 +1,11 @@
-import { createEditor, Element, Editor } from "slate";
-import { SluglineElement, InlineElementType } from "./types";
+import { createEditor, Element, Editor, Text, Transforms } from "slate";
+import { SluglineElement, InlineElementType, Mark } from "./types";
+
+// the way to remove a property is to call setNodes with the property set to null
+// so we create a object with all marks set to null so we can remove them all at once
+const REMOVE_ALL_MARKS_OBJ = Object.fromEntries(
+  Object.values(Mark).map((mark) => [mark, null])
+);
 
 const createCustomEditor = () => {
   const editor = createEditor();
@@ -29,12 +35,10 @@ const createCustomEditor = () => {
   };
 
   const addMarkMutuallyExclusive = (key: string, value: any) => {
-    const currentMarks = Editor.marks(editor);
-    if (currentMarks) {
-      for (const [mark] of Object.entries(currentMarks)) {
-        Editor.removeMark(editor, mark);
-      }
-    }
+    Transforms.setNodes(editor, REMOVE_ALL_MARKS_OBJ, {
+      split: true,
+      match: Text.isText,
+    });
     return addMark(key, value);
   };
 

@@ -129,4 +129,55 @@ describe("addMarkMutuallyExclusive", () => {
       },
     ]);
   });
+
+  it("clears marks over multiple nodes", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "some text",
+            [Mark.Emph3]: true,
+          },
+          {
+            text: "some more text",
+            [Mark.ArticleRef]: true,
+          },
+        ],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 5,
+      },
+      focus: {
+        path: [0, 1],
+        offset: 4,
+      },
+    };
+    editor.addMark(Mark.Emph1, true);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "some ",
+            [Mark.Emph3]: true,
+          },
+          {
+            text: "textsome",
+            [Mark.Emph1]: true,
+          },
+          {
+            text: " more text",
+            [Mark.ArticleRef]: true,
+          },
+        ],
+      },
+    ]);
+  });
 });
