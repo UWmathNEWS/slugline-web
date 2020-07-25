@@ -91,6 +91,7 @@ export const ToggleMarkButtonText: React.FC<ToggleMarkButtonTextProps> = (
   props: ToggleMarkButtonTextProps
 ) => {
   const editor = useSlate();
+  const active = isMarkActive(editor, props.mark);
   return (
     <Button
       className="editor-control-text"
@@ -99,7 +100,11 @@ export const ToggleMarkButtonText: React.FC<ToggleMarkButtonTextProps> = (
       }}
       variant="link"
     >
-      {props.text}
+      {active ? (
+        <span className="underline-custom">{props.text}</span>
+      ) : (
+        props.text
+      )}
     </Button>
   );
 };
