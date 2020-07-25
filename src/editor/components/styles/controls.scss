@@ -6,7 +6,7 @@
   font-size: 18px;
   border: none;
   background: none;
-  border-radius: 5px;
+  border-radius: $border-radius;
   margin: spacing(1) / 2;
 
   & > svg {
@@ -77,6 +77,6 @@
   padding: $spacer;
   background: white;
   border: solid 1px gray;
-  border-radius: 5px;
+  border-radius: $border-radius;
   width: auto;
 }
