@@ -15,6 +15,8 @@ import {
   createInline,
   toggleBlock,
   isBlockActive,
+  hasInlines,
+  unwrapInline,
 } from "../helpers";
 
 import "./styles/controls.scss";
@@ -128,13 +130,21 @@ export const LinkButton: React.FC = () => {
     createInline(editor, newLink);
   };
 
+  const active = hasInlines(editor, InlineElementType.Link);
+  const className = active ? "editor-control active" : "editor-control";
+
   return (
     <>
       <button
         ref={ref}
-        className="editor-control"
+        className={className}
         onClick={() => {
-          setShowPopover(true);
+          if (active) {
+            ReactEditor.focus(editor);
+            unwrapInline(editor, InlineElementType.Link);
+          } else {
+            setShowPopover(true);
+          }
         }}
       >
         <FontAwesomeIcon icon="link" />

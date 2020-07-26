@@ -5,8 +5,7 @@ import {
   InlineElementType,
 } from "../types";
 import createCustomEditor from "../CustomEditor";
-import { createInline } from "../helpers";
-import { create } from "domain";
+import { createInline, unwrapInline } from "../helpers";
 
 const TEST_LINK: LinkElement = {
   href: "www.test.com",
@@ -352,6 +351,128 @@ describe("createInline", () => {
         children: [
           {
             text: "second paragraph",
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("unwrapInline", () => {
+  it("unwraps inlines", () => {
+    const editor = createCustomEditor();
+
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "",
+          },
+          {
+            type: InlineElementType.Link,
+            href: "google.com",
+            children: [
+              {
+                text: "link text",
+              },
+            ],
+          },
+          {
+            text: "",
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 1, 0],
+        offset: 2,
+      },
+      focus: {
+        path: [0, 1, 0],
+        offset: 2,
+      },
+    };
+
+    unwrapInline(editor, InlineElementType.Link);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "link text",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("leaves other inlines alone", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "some other text",
+          },
+          {
+            type: InlineElementType.InlineLatex,
+            latex: "3",
+            children: [
+              {
+                text: "",
+              },
+            ],
+          },
+          {
+            type: InlineElementType.Link,
+            href: "google.com",
+            children: [
+              {
+                text: "link text",
+              },
+            ],
+          },
+          {
+            text: "",
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 2, 0],
+        offset: 3,
+      },
+    };
+
+    unwrapInline(editor, InlineElementType.Link);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "some other text",
+          },
+          {
+            type: InlineElementType.InlineLatex,
+            latex: "3",
+            children: [
+              {
+                text: "",
+              },
+            ],
+          },
+          {
+            text: "link text",
           },
         ],
       },

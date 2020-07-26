@@ -1,4 +1,4 @@
-import { Editor, Transforms, Location, Range } from "slate";
+import { Editor, Transforms, Range } from "slate";
 import isHotkey from "is-hotkey";
 
 import {
@@ -45,11 +45,12 @@ const isIterableEmpty = (iterable: Iterable<any>) => {
  * @param at The location to search at. If at is undefined, the current selection
  * will be used instead.
  */
-export const hasInlines = (editor: Editor, at?: Location) => {
+export const hasInlines = (editor: Editor, type?: InlineElementType) => {
   const inlines = Editor.nodes(editor, {
-    at: at,
     mode: "all",
-    match: (node) => Editor.isInline(editor, node),
+    match: (node) =>
+      Editor.isInline(editor, node) &&
+      (!type || (node as SluglineElement).type === type),
   });
   return !isIterableEmpty(inlines);
 };
@@ -125,6 +126,17 @@ export const createInline: {
       Transforms.insertText(editor, text);
     }
   }
+};
+
+/**
+ * Unwraps inlines of the type given to just normal text.
+ * @param editor The editor to operate on.
+ * @param type The type of inline to unwrap. Other types of inline will be unaffected.
+ */
+export const unwrapInline = (editor: Editor, type: InlineElementType) => {
+  Transforms.unwrapNodes(editor, {
+    match: (node) => (node as SluglineElement).type === type,
+  });
 };
 
 export const isBlockActive = (editor: Editor, blockType: BlockElementType) => {
