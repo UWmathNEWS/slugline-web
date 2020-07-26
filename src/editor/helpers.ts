@@ -91,6 +91,13 @@ export const createInline: {
     return;
   }
 
+  // triple-click creates a "hanging selection", which technically runs into the next
+  // paragraph, resulting in the selected paragraph and the following one being
+  // converted to a link. We "unhang" the selection to prevent this.
+  if (editor.selection) {
+    editor.selection = Editor.unhangRange(editor, editor.selection);
+  }
+
   if (editor.selection === null || Range.isCollapsed(editor.selection)) {
     const inlineWithChildren = {
       ...inline,

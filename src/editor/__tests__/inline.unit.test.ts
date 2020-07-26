@@ -6,6 +6,7 @@ import {
 } from "../types";
 import createCustomEditor from "../CustomEditor";
 import { createInline } from "../helpers";
+import { create } from "domain";
 
 const TEST_LINK: LinkElement = {
   href: "www.test.com",
@@ -285,6 +286,72 @@ describe("createInline", () => {
           },
           {
             text: " me",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("unhangs selections", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "first paragraph",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "second paragraph",
+          },
+        ],
+      },
+    ];
+
+    // this emulates a hanging selection
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [1, 0],
+        offset: 0,
+      },
+    };
+
+    createInline(editor, TEST_LINK);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "",
+          },
+          {
+            ...TEST_LINK,
+            children: [
+              {
+                text: "first paragraph",
+              },
+            ],
+          },
+          {
+            text: "",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "second paragraph",
           },
         ],
       },
