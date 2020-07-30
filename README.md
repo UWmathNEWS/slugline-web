@@ -20,25 +20,7 @@ Basic site configuration is found in `src/config.ts`. Edit that as you wish.
 
 ## License
 Except for files which specify otherwise, this application is licensed under the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).
-
-Please include the following license header in any new files you contribute:
-```
-goosePRESS is a news publishing platform.
-Copyright (C) 2020  <name of author>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-```
+See `CONTRIBUTING.md` for more details.
 
 ### Production
 

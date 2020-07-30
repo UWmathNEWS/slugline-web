@@ -1,6 +1,6 @@
 ---
 name: DevOps
-about: Propse changes to the DevOps pipeline
+about: Propose changes to the DevOps pipeline
 title: ''
 labels: 'devops'
 assignees: ''
