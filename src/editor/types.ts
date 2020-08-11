@@ -18,7 +18,8 @@ export enum InlineElementType {
 
 export enum BlockElementType {
   Default = "paragraph",
-  Header = "header",
+  Header1 = "header-1",
+  Header2 = "header-2",
   Code = "code",
 }
 
@@ -41,15 +42,19 @@ export interface InlineLatexElement extends Element {
 export type InlineElement = LinkElement;
 export type InlineVoidElement = InlineLatexElement;
 
-export interface HeaderElement extends Element {
-  type: BlockElementType.Header;
+export interface Header1Element extends Element {
+  type: BlockElementType.Header1;
+}
+
+export interface Header2Element extends Element {
+  type: BlockElementType.Header2;
 }
 
 export interface CodeElement extends Element {
   type: BlockElementType.Code;
 }
 
-export type BlockElement = HeaderElement | CodeElement;
+export type BlockElement = Header1Element | Header2Element | CodeElement;
 
 export type SluglineElement =
   | DefaultElement

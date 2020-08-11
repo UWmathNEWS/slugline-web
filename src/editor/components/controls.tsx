@@ -230,3 +230,31 @@ export const ToggleBlockButton = (props: ToggleBlockButtonProps) => {
     </button>
   );
 };
+
+interface ToggleBlockButtonTextProps {
+  text: string;
+  block: BlockElementType;
+}
+
+export const ToggleBlockButtonText: React.FC<ToggleBlockButtonTextProps> = (
+  props: ToggleBlockButtonTextProps
+) => {
+  const editor = useSlate();
+  const active = isBlockActive(editor, props.block);
+  return (
+    <Button
+      className="editor-control-text"
+      onClick={() => {
+        ReactEditor.focus(editor);
+        toggleBlock(editor, props.block);
+      }}
+      variant="link"
+    >
+      {active ? (
+        <span className="underline-custom">{props.text}</span>
+      ) : (
+        props.text
+      )}
+    </Button>
+  );
+};

@@ -7,6 +7,7 @@ import {
   ExtrasDropdown,
   EditorDropdown,
   ToggleMarkButtonText,
+  ToggleBlockButtonText,
 } from "./components/controls";
 import { Mark, BlockElementType } from "./types";
 
@@ -46,11 +47,21 @@ const EditorControls: React.FC = () => {
       <LinkButton />
       <InlineLatexButton />
       <div className="editor-separator" />
-      <ToggleBlockButton
-        icon="heading"
-        title="Heading"
-        blockType={BlockElementType.Header}
-      />
+      <EditorDropdown
+        rootButton={
+          <ToggleBlockButton
+            icon="heading"
+            title="Heading"
+            blockType={BlockElementType.Header1}
+          />
+        }
+        id="header-dropdown"
+      >
+        <ToggleBlockButtonText
+          text="Header 2"
+          block={BlockElementType.Header2}
+        />
+      </EditorDropdown>
       <ToggleBlockButton
         icon="code"
         title="Code Block"

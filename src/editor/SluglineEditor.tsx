@@ -31,7 +31,13 @@ const renderElement = (props: RenderElementProps) => {
       return <Link {...props} />;
     case InlineElementType.InlineLatex:
       return <InlineLatex {...props} />;
-    case BlockElementType.Header:
+    case BlockElementType.Header1:
+      return (
+        <h5 {...props.attributes}>
+          <strong>{props.children}</strong>
+        </h5>
+      );
+    case BlockElementType.Header2:
       return <h6 {...props.attributes}>{props.children}</h6>;
     case BlockElementType.Code:
       return (

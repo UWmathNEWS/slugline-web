@@ -26,11 +26,11 @@ describe("toggleBlock", () => {
       },
     };
 
-    toggleBlock(editor, BlockElementType.Header);
+    toggleBlock(editor, BlockElementType.Header1);
 
     expect(editor.children).toEqual([
       {
-        type: BlockElementType.Header,
+        type: BlockElementType.Header1,
         children: [
           {
             text: "fish",
@@ -72,11 +72,11 @@ describe("toggleBlock", () => {
       },
     };
 
-    toggleBlock(editor, BlockElementType.Header);
+    toggleBlock(editor, BlockElementType.Header1);
 
     expect(editor.children).toEqual([
       {
-        type: BlockElementType.Header,
+        type: BlockElementType.Header1,
         children: [
           {
             text: "fish",
@@ -84,7 +84,7 @@ describe("toggleBlock", () => {
         ],
       },
       {
-        type: BlockElementType.Header,
+        type: BlockElementType.Header1,
         children: [
           {
             text: "sticks",
@@ -131,11 +131,11 @@ describe("toggleBlock", () => {
       },
     };
 
-    toggleBlock(editor, BlockElementType.Header);
+    toggleBlock(editor, BlockElementType.Header1);
 
     expect(editor.children).toEqual([
       {
-        type: BlockElementType.Header,
+        type: BlockElementType.Header1,
         children: [
           {
             text: "This is a ",
@@ -156,7 +156,7 @@ describe("toggleBlock", () => {
       },
     ]);
 
-    toggleBlock(editor, BlockElementType.Header);
+    toggleBlock(editor, BlockElementType.Header1);
 
     expect(editor.children).toEqual([
       {
@@ -186,7 +186,7 @@ describe("toggleBlock", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: BlockElementType.Header,
+        type: BlockElementType.Header1,
         children: [
           {
             text: "Header",
@@ -214,7 +214,7 @@ describe("toggleBlock", () => {
       },
     };
 
-    toggleBlock(editor, BlockElementType.Header);
+    toggleBlock(editor, BlockElementType.Header1);
 
     expect(editor.children).toEqual([
       {
@@ -268,11 +268,11 @@ describe("toggleBlock", () => {
       },
     };
 
-    toggleBlock(editor, BlockElementType.Header);
+    toggleBlock(editor, BlockElementType.Header1);
 
     expect(editor.children).toEqual([
       {
-        type: BlockElementType.Header,
+        type: BlockElementType.Header1,
         children: [
           {
             text: "Header",
@@ -280,7 +280,7 @@ describe("toggleBlock", () => {
         ],
       },
       {
-        type: BlockElementType.Header,
+        type: BlockElementType.Header1,
         children: [
           {
             text: "Not Header",

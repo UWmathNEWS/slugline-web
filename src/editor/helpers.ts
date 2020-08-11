@@ -63,7 +63,8 @@ export const getDefaultElementText = (element: SluglineElement): string => {
       return element.href;
     case InlineElementType.InlineLatex:
       return "\\LaTeX";
-    case BlockElementType.Header:
+    case BlockElementType.Header1:
+    case BlockElementType.Header2:
       return "HEADER";
     default:
       return "lorem ipsum";
