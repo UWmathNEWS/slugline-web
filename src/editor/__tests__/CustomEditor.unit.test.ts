@@ -1,9 +1,5 @@
 import createCustomEditor from "../CustomEditor";
-import { InlineElementType, BlockElementType, Mark } from "../types";
-import { Children } from "react";
-import { Editor } from "slate";
-import { formatHref } from "../components/Link";
-import EditorPage from "../../dash/EditorPage";
+import { BlockElementType, Mark } from "../types";
 
 describe("addMarkMutuallyExclusive", () => {
   it("adds marks like normal", () => {
