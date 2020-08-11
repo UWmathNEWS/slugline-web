@@ -63,6 +63,7 @@ export const EditorDropdown: React.FC<EditorDropdownProps> = (
 
 interface ToggleMarkButtonProps {
   icon: string;
+  title: string;
   mark: Mark;
 }
 
@@ -75,6 +76,7 @@ export const ToggleMarkButton: React.FC<ToggleMarkButtonProps> = (
   return (
     <button
       className={className}
+      title={props.title}
       onClick={() => {
         ReactEditor.focus(editor);
         toggleMark(editor, props.mark);
@@ -138,6 +140,7 @@ export const LinkButton: React.FC = () => {
       <button
         ref={ref}
         className={className}
+        title="Link"
         onClick={() => {
           if (active) {
             ReactEditor.focus(editor);
@@ -183,6 +186,7 @@ export const InlineLatexButton: React.FC = () => {
     <>
       <button
         ref={ref}
+        title="Inline Latex"
         className="editor-control"
         onClick={() => {
           setShowPopover(true);
@@ -205,6 +209,7 @@ export const InlineLatexButton: React.FC = () => {
 
 interface ToggleBlockButtonProps {
   blockType: BlockElementType;
+  title: string;
   icon: string;
 }
 
@@ -215,6 +220,7 @@ export const ToggleBlockButton = (props: ToggleBlockButtonProps) => {
   return (
     <button
       className={className}
+      title={props.title}
       onClick={() => {
         ReactEditor.focus(editor);
         toggleBlock(editor, props.blockType);
