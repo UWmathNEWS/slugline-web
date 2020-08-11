@@ -22,6 +22,8 @@ export enum BlockElementType {
   Code = "code",
 }
 
+export type ElementType = InlineElementType | BlockElementType;
+
 export interface DefaultElement extends Element {
   type: BlockElementType.Default;
 }

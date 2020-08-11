@@ -1,5 +1,6 @@
 import createCustomEditor from "../CustomEditor";
 import { BlockElementType, Mark } from "../types";
+import { create } from "domain";
 
 describe("addMarkMutuallyExclusive", () => {
   it("adds marks like normal", () => {
@@ -171,6 +172,153 @@ describe("addMarkMutuallyExclusive", () => {
           {
             text: " more text",
             [Mark.ArticleRef]: true,
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("addBreakCustom", () => {
+  it("adds soft breaks in the right blocks", () => {
+    const editor = createCustomEditor();
+
+    editor.children = [
+      {
+        type: BlockElementType.Code,
+        children: [
+          {
+            text: "code code code",
+          },
+        ],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 4,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 4,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Code,
+        children: [
+          {
+            text: "code\n code code",
+          },
+        ],
+      },
+    ]);
+
+    editor.children = [
+      {
+        type: BlockElementType.Header,
+        children: [
+          {
+            text: "code code code",
+          },
+        ],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 4,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 4,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Header,
+        children: [
+          {
+            text: "code",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Header,
+        children: [
+          {
+            text: " code code",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("doesn't add soft breaks if multiple elements are selected", () => {
+    const editor = createCustomEditor();
+
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "first",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Code,
+        children: [
+          {
+            text: "second",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "third",
+          },
+        ],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 4,
+      },
+      focus: {
+        path: [2, 0],
+        offset: 1,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "firs",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "hird",
           },
         ],
       },

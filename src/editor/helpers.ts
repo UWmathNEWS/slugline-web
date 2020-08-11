@@ -29,7 +29,7 @@ export const toggleMark = (editor: Editor, mark: Mark): void => {
  * Returns true if `iterable` has no elements.
  * @param iterable The iterable to check
  */
-const isIterableEmpty = (iterable: Iterable<any>) => {
+export const isIterableEmpty = (iterable: Iterable<any>) => {
   // this is weird but its faster than converting the iterable to an array then
   // checking its length
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
