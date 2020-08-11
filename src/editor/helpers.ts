@@ -1,4 +1,4 @@
-import { Editor, Transforms, Range } from "slate";
+import { Editor, Transforms, Range, Text } from "slate";
 import isHotkey from "is-hotkey";
 
 import {
@@ -10,6 +10,7 @@ import {
   InlineElementType,
 } from "./types";
 import { HistoryEditor } from "slate-history";
+import { SOFT_BREAK_ELEMENTS } from "./CustomEditor";
 
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
   const marks = Editor.marks(editor);
@@ -171,6 +172,43 @@ export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
   }
 };
 
+export const attemptArrowOut = (editor: Editor) => {
+  if (!editor.selection) {
+    return;
+  }
+  const selectEnd = Range.end(editor.selection);
+  if (selectEnd.path[0] !== editor.children.length - 1) {
+    return;
+  }
+  const [node] = Editor.node(editor, selectEnd);
+  if (!Text.isText(node)) {
+    return;
+  }
+  const [parent] = Editor.parent(editor, selectEnd);
+  if (!SOFT_BREAK_ELEMENTS.includes((parent as SluglineElement).type)) {
+    return;
+  }
+
+  if (
+    Editor.string(editor, selectEnd.path).lastIndexOf("\n") < selectEnd.offset
+  ) {
+    Transforms.insertNodes(
+      editor,
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "",
+          },
+        ],
+      },
+      {
+        at: [selectEnd.path[0] + 1],
+      }
+    );
+  }
+};
+
 const MARK_HOTKEYS: Array<[Mark, string]> = [
   [Mark.Strikethrough, "mod+d"],
   [Mark.ArticleRef, "mod+q"],
@@ -192,5 +230,9 @@ export const keyDown = (
   }
   if (isHotkey("mod+y", evt.nativeEvent)) {
     editor.redo();
+  }
+  // allow arrowing out of soft break elements if they're the last element in the document
+  if (isHotkey("down", evt.nativeEvent)) {
+    attemptArrowOut(editor);
   }
 };

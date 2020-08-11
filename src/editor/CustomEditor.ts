@@ -15,7 +15,7 @@ const REMOVE_ALL_MARKS_OBJ = Object.fromEntries(
 );
 
 // Any element in this list will create a soft break on ENTER, instead of creating a new block
-const SOFT_BREAK_ELEMENTS: ElementType[] = [BlockElementType.Code];
+export const SOFT_BREAK_ELEMENTS: ElementType[] = [BlockElementType.Code];
 
 const createCustomEditor = () => {
   const editor = createEditor();
