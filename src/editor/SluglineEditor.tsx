@@ -33,6 +33,12 @@ const renderElement = (props: RenderElementProps) => {
       return <InlineLatex {...props} />;
     case BlockElementType.Header:
       return <h6 {...props.attributes}>{props.children}</h6>;
+    case BlockElementType.Code:
+      return (
+        <pre className="article-code-block" {...props.attributes}>
+          {props.children}
+        </pre>
+      );
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }

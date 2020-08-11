@@ -8,7 +8,6 @@ export enum Mark {
   Stress1 = "stress-1",
   Stress2 = "stress-2",
   Strikethrough = "strikethrough",
-  Code = "code",
   ArticleRef = "article-ref",
 }
 
@@ -20,6 +19,7 @@ export enum InlineElementType {
 export enum BlockElementType {
   Default = "paragraph",
   Header = "header",
+  Code = "code",
 }
 
 export interface DefaultElement extends Element {
@@ -43,7 +43,11 @@ export interface HeaderElement extends Element {
   type: BlockElementType.Header;
 }
 
-export type BlockElement = HeaderElement;
+export interface CodeElement extends Element {
+  type: BlockElementType.Code;
+}
+
+export type BlockElement = HeaderElement | CodeElement;
 
 export type SluglineElement =
   | DefaultElement

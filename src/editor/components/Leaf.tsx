@@ -45,9 +45,6 @@ export const Leaf = (props: RenderLeafProps) => {
   if (props.leaf[Mark.Strikethrough]) {
     children = <del>{children}</del>;
   }
-  if (props.leaf[Mark.Code]) {
-    children = <pre>{children}</pre>;
-  }
   if (props.leaf[Mark.ArticleRef]) {
     children = (
       <em>

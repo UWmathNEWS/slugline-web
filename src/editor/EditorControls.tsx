@@ -30,12 +30,12 @@ const EditorControls: React.FC = () => {
         <ToggleMarkButtonText text="Emphasis 4" mark={Mark.Emph4} />
       </EditorDropdown>
       <ToggleMarkButton icon="strikethrough" mark={Mark.Strikethrough} />
-      <ToggleMarkButton icon="code" mark={Mark.Code} />
       <div className="editor-separator" />
       <LinkButton />
       <InlineLatexButton />
       <div className="editor-separator" />
       <ToggleBlockButton icon="heading" blockType={BlockElementType.Header} />
+      <ToggleBlockButton icon="code" blockType={BlockElementType.Code} />
       <ExtrasDropdown />
     </div>
   );

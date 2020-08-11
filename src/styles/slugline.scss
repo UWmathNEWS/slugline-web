@@ -78,3 +78,9 @@ span.dotted-underline-custom {
   padding-bottom: 0.2em;
   background-repeat: repeat-x;
 }
+
+// make code blocks look more like code blocks
+pre.article-code-block {
+  background: $gray-200;
+  padding-left: 1em;
+}
