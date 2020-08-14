@@ -188,14 +188,20 @@ export const keyDown = (
       toggleMark(editor, mark);
     }
   });
+  if (isHotkey("shift+enter", evt.nativeEvent)) {
+    editor.insertText("\n");
+    evt.preventDefault();
+  }
+};
+
+export const keyPressed = (
+  editor: HistoryEditor,
+  evt: React.KeyboardEvent
+): void => {
   if (isHotkey("mod+z", evt.nativeEvent)) {
     editor.undo();
   }
   if (isHotkey("mod+y", evt.nativeEvent)) {
     editor.redo();
-  }
-  if (isHotkey("shift+enter", evt.nativeEvent)) {
-    editor.insertText("\n");
-    evt.preventDefault();
   }
 };

@@ -129,6 +129,9 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
             onKeyDown={(evt: React.KeyboardEvent) => {
               EditorHelpers.keyDown(editor, evt);
             }}
+            onKeyPress={(evt: React.KeyboardEvent) => {
+              EditorHelpers.keyDown(editor, evt);
+            }}
             onBlur={() => {
               setSelection(editor.selection);
             }}
