@@ -41,17 +41,30 @@ export const ExtrasDropdown: React.FC = () => {
 
 interface EditorDropdownProps {
   rootButton: React.ReactNode;
+  subBlocks?: BlockElementType[];
+  subInlines?: InlineElementType[];
+  subMarks?: Mark[];
   id: string;
 }
 
 export const EditorDropdown: React.FC<EditorDropdownProps> = (
   props: PropsWithChildren<EditorDropdownProps>
 ) => {
+  const editor = useSlate();
+
+  const dropdownActive =
+    props.subBlocks?.some((block) => isBlockActive(editor, block)) ||
+    props.subInlines?.some((inline) => hasInlines(editor, inline)) ||
+    props.subMarks?.some((mark) => isMarkActive(editor, mark));
+
+  const className = dropdownActive
+    ? "editor-control dropdown-toggle active"
+    : "editor-control dropdown-toggle";
   return (
     <Dropdown as={ButtonGroup}>
       {props.rootButton}
       <Dropdown.Toggle
-        className="editor-control dropdown-toggle"
+        className={className}
         split
         variant="link"
         id={props.id}

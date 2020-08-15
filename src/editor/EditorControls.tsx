@@ -20,6 +20,7 @@ const EditorControls: React.FC = () => {
         rootButton={
           <ToggleMarkButton icon="bold" title="Stress 1" mark={Mark.Stress1} />
         }
+        subMarks={[Mark.Stress2]}
         id="stress-dropdown"
       >
         <ToggleMarkButtonText text="Stress 2" mark={Mark.Stress2} />
@@ -32,6 +33,7 @@ const EditorControls: React.FC = () => {
             mark={Mark.Emph1}
           />
         }
+        subMarks={[Mark.Emph2, Mark.Emph3, Mark.Emph4]}
         id="emph-dropdown"
       >
         <ToggleMarkButtonText text="Emphasis 2" mark={Mark.Emph2} />
@@ -55,6 +57,7 @@ const EditorControls: React.FC = () => {
             blockType={BlockElementType.Header1}
           />
         }
+        subBlocks={[BlockElementType.Header2]}
         id="header-dropdown"
       >
         <ToggleBlockButtonText
