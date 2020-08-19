@@ -13,6 +13,8 @@ import {
   faCaretUp,
   faCaretDown,
   faHeading,
+  faListOl,
+  faListUl,
 } from "@fortawesome/free-solid-svg-icons";
 
 export const initLibrary = () => {
@@ -29,6 +31,8 @@ export const initLibrary = () => {
     faSort,
     faCaretUp,
     faCaretDown,
-    faHeading
+    faHeading,
+    faListOl,
+    faListUl
   );
 };
