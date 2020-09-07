@@ -1,6 +1,5 @@
 import createCustomEditor from "../CustomEditor";
 import { BlockElementType, Mark } from "../types";
-import { create } from "domain";
 
 describe("addMarkMutuallyExclusive", () => {
   it("adds marks like normal", () => {
@@ -172,6 +171,98 @@ describe("addMarkMutuallyExclusive", () => {
           {
             text: " more text",
             [Mark.ArticleRef]: true,
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("insertBreakWithReset", () => {
+  it("resets paragraph type after inserting a break at the end", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Header1,
+        children: [
+          {
+            text: "HEADER",
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 6,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 6,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Header1,
+        children: [
+          {
+            text: "HEADER",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("resets paragraph type after inserting a break in the middle", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Header1,
+        children: [
+          {
+            text: "HEADER",
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 3,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 3,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Header1,
+        children: [
+          {
+            text: "HEA",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "DER",
           },
         ],
       },

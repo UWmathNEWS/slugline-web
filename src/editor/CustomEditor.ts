@@ -1,5 +1,10 @@
 import { createEditor, Element, Text, Transforms } from "slate";
-import { SluglineElement, InlineElementType, Mark } from "./types";
+import {
+  SluglineElement,
+  InlineElementType,
+  Mark,
+  BlockElementType,
+} from "./types";
 
 // the way to remove a property is to call setNodes with the property set to null
 // so we create a object with all marks set to null so we can remove them all at once
@@ -10,7 +15,7 @@ const REMOVE_ALL_MARKS_OBJ = Object.fromEntries(
 const createCustomEditor = () => {
   const editor = createEditor();
 
-  const { addMark } = editor;
+  const { addMark, insertBreak } = editor;
 
   const isInline = (element: Element) => {
     const e = element as SluglineElement;
@@ -42,9 +47,16 @@ const createCustomEditor = () => {
     return addMark(key, value);
   };
 
+  const insertBreakWithReset = () => {
+    insertBreak();
+    // reset paragraph type when creating a new paragraph
+    Transforms.setNodes(editor, { type: BlockElementType.Default });
+  };
+
   editor.isInline = isInline;
   editor.isVoid = isVoid;
   editor.addMark = addMarkMutuallyExclusive;
+  editor.insertBreak = insertBreakWithReset;
   return editor;
 };
 
