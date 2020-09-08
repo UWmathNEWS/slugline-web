@@ -16,7 +16,7 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
   const { issue_id: issueId } = useParams<{ issue_id: string }>();
 
   const [issue, issueInfo, fail] = useSSRData(
-    useCallback(() => api.issues.get({ id: issueId }), [issueId]),
+    useCallback(() => api.published_issues.get({ id: issueId }), [issueId]),
     staticContext?.data
   );
 

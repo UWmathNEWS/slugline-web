@@ -277,6 +277,11 @@ const api = {
     latest: listFactory<Issue, APIError>("issues/latest/"),
     articles: issueArticles,
   },
+  published_issues: {
+    list: listFactory<Pagination<Issue>>("published_issues/"),
+    get: getFactory<Issue>("published_issues/"),
+    latest: listFactory<Issue>("published_issues/latest/"),
+  },
   articles: {
     ...endpointFactory<Article>("articles/"),
     create: createFactory<Article, APIError, void>("articles/"),
