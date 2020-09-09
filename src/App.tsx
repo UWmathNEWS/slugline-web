@@ -30,11 +30,7 @@ export const appFactory = <T extends any = {}>(
     <>
       <BaseVisor />
       <SluglineNav />
-      <div className="container">
-        <div>
-          <Component {...props} />
-        </div>
-      </div>
+      <Component {...props} />
     </>
   );
 };

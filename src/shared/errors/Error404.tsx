@@ -8,7 +8,7 @@ const Error404: React.FC<Partial<RouteComponentProps>> = ({
   staticContext.statusCode = 404;
 
   return (
-    <div>
+    <div className="container">
       <Visor title="Page Not Found" />
       <h1 className="display-1">404</h1>
       <h1>Page Not Found</h1>

@@ -33,12 +33,47 @@ export interface ArticleContent {
   content_raw: string;
 }
 
+export type Colour =
+  | "blastoff-blue"
+  | "celestial-blue"
+  | "cosmic-orange"
+  | "fireball-fuchsia"
+  | "galaxy-gold"
+  | "gamma-green"
+  | "gravity-grape"
+  | "liftoff-lemon"
+  | "lunar-blue"
+  | "martian-green"
+  | "orbit-orange"
+  | "outrageous-orchid"
+  | "planetary-purple"
+  | "pulsar-pink"
+  | "reentry-red"
+  | "rocket-red"
+  | "sunburst-yellow"
+  | "terra-green"
+  | "terrestrial-teal"
+  | "venus-violet"
+  | "pastel-blue"
+  | "pastel-buff"
+  | "pastel-canary"
+  | "pastel-goldenrod"
+  | "pastel-grey"
+  | "pastel-green"
+  | "pastel-orchid"
+  | "pastel-pink"
+  | "pastel-salmon";
+
 export interface Issue {
   id?: number;
   publish_date?: string;
   volume_num: number;
   issue_code: string;
   pdf?: string;
+  // TODO: make these required once we implement a form component for creating issues
+  title?: string;
+  description?: string;
+  colour?: Colour;
 }
 
 export interface User {
@@ -101,7 +136,11 @@ interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
   key?: string | number;
   routeComponent?: React.ComponentType;
   routeProps?: any;
-  loadData?: (args: { params: any; headers: any }) => Promise<APIResponse<any>>;
+  loadData?: (args: {
+    params: any;
+    query: Record<string, any>;
+    headers: any;
+  }) => Promise<APIResponse<any>>;
 }
 
 export type RouteProps = RouteBaseProps &

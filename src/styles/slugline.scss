@@ -35,3 +35,13 @@ h6 {
     }
   }
 }
+
+:root {
+  --black: #{$black};
+  --white: #{$white};
+
+  --paper-accent: #{$pink-150};
+  @each $name, $clr in $paper-colours {
+    --paper-#{$name}: #{$clr};
+  }
+}

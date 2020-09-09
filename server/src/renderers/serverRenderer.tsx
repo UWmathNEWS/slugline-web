@@ -32,6 +32,7 @@ const serverRenderer = (req: Request, res: Response) => {
     promises.push(
       currentRoute.loadData({
         params,
+        query: req.query,
         headers: { Cookie: req.header("cookie") || "" },
       })
     );
@@ -50,24 +51,20 @@ const serverRenderer = (req: Request, res: Response) => {
         const [userResp] = await Promise.all(promises);
         user = userResp.success ? userResp.data : null;
 
-        return res
-          .status(404)
-          .send(
-            html
-              .replace(
-                '<div id="root"></div>',
-                `<div id="root">${ReactDOMServer.renderToString(
-                  serverAppWrapper(ErrorApp, req.url, {}, { statusCode: 404 })
-                )}</div>`
-              )
-              .replace("<title>{{HELMET}}</title>", renderHelmet)
-              .replace(
-                "window.__SSR_DIRECTIVES__={}",
-                `window.__SSR_DIRECTIVES__={USER:${serialize(
-                  user
-                )}}`
-              )
-          );
+        return res.status(404).send(
+          html
+            .replace(
+              '<div id="root"></div>',
+              `<div id="root">${ReactDOMServer.renderToString(
+                serverAppWrapper(ErrorApp, req.url, {}, { statusCode: 404 })
+              )}</div>`
+            )
+            .replace("<title>{{HELMET}}</title>", renderHelmet)
+            .replace(
+              "window.__SSR_DIRECTIVES__={}",
+              `window.__SSR_DIRECTIVES__={USER:${serialize(user)}}`
+            )
+        );
       }
 
       const [userResp, ...additionalResps] = await Promise.all(promises);
@@ -93,11 +90,11 @@ const serverRenderer = (req: Request, res: Response) => {
               .replace("<title>{{HELMET}}</title>", renderHelmet)
               .replace(
                 "window.__SSR_DIRECTIVES__={}",
-                `window.__SSR_DIRECTIVES__={USER:${
-                  serialize(user)
-                },STATUS_CODE:${
-                  dataResp.statusCode
-                },ERROR:${serialize(dataResp.error)}}`
+                `window.__SSR_DIRECTIVES__={USER:${serialize(
+                  user
+                )},STATUS_CODE:${dataResp.statusCode},ERROR:${serialize(
+                  dataResp.error
+                )}}`
               )
           );
         }

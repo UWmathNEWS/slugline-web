@@ -1,36 +1,48 @@
 @import "../../styles/slugline_vars";
 
-a.nav-link {
-  margin: 0 $spacer;
-  font-weight: normal;
-  color: black !important;
-  text-transform: uppercase;
-}
+.SluglineNav {
+  --background-clr: #{$primary};
+  --foreground-clr: #{$black};
 
-.navbar-logo {
-  margin-top: .625rem; // height of navbar-brand is 3rem, and height of the logo is 1.75rem
-}
+  background-color: var(--background-clr);
 
-// some manual spacing to get the navbar to line up with the content
-.container.nav-container {
-  padding-left: $spacer;
-  padding-right: $spacer;
-}
-
-// in the extra small breakpoint, the content has no padding at all
-@include media-breakpoint-down(xs) {
-  .container.nav-container {
-    padding-left: 0;
-    padding-right: 0;
+  a.nav-link {
+    margin: 0 $spacer;
+    font-weight: normal;
+    color: var(--foreground-clr) !important;
+    text-transform: uppercase;
   }
-}
 
-.custom-toggler.navbar-toggler {
-  color: black;
-  border-color: black;
+  .navbar-brand {
+    color: var(--foreground-clr);
+  }
 
-  & > .navbar-toggler-icon {
-    //custom SVG image with the color we need
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='black' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  .navbar-logo {
+    margin-top: .625rem; // height of navbar-brand is 3rem, and height of the logo is 1.75rem
+    fill: currentColor;
+  }
+
+  // some manual spacing to get the navbar to line up with the content
+  .container.nav-container {
+    padding-left: $spacer;
+    padding-right: $spacer;
+  }
+
+  // in the extra small breakpoint, the content has no padding at all
+  @include media-breakpoint-down(xs) {
+    .container.nav-container {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .custom-toggler.navbar-toggler {
+    color: var(--foreground-clr);
+    border-color: var(--foreground-clr);
+
+    & > .navbar-toggler-icon {
+      //custom SVG image with the color we need
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='black' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
   }
 }

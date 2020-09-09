@@ -5,7 +5,7 @@ import IssueList from "../issues/IssuesList";
 import Error404 from "../shared/errors/Error404";
 import { renderRoutes } from "../shared/helpers";
 import { RouteProps } from "../shared/types";
-import api from "../api/api";
+import api, { combine } from "../api/api";
 
 export const routes: RouteProps[] = [
   {
@@ -13,6 +13,14 @@ export const routes: RouteProps[] = [
     exact: true,
     component: Home,
     title: "",
+    loadData: ({ query, headers }) =>
+      combine(
+        api.published_issues.list({
+          headers,
+          params: { page: query.name || 1 },
+        }),
+        api.published_issues.latest({ headers })
+      ),
   },
   {
     path: "/login",
@@ -24,7 +32,7 @@ export const routes: RouteProps[] = [
     component: IssuePage,
     title: "v{}i{}",
     loadData: ({ params, headers }) =>
-      api.issues.get({
+      api.published_issues.get({
         id: params.issue_id,
         headers,
       }),
@@ -34,7 +42,7 @@ export const routes: RouteProps[] = [
     exact: true,
     component: IssueList,
     title: "Issues",
-    loadData: ({ headers }) => api.issues.list({ headers }),
+    loadData: ({ headers }) => api.published_issues.list({ headers }),
   },
   {
     component: Error404,

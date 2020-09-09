@@ -22,7 +22,7 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
 
   if (!fail && issue && issueInfo.state !== RequestState.Running) {
     return (
-      <>
+      <div className="container">
         <Visor
           key="visor"
           title={route.title}
@@ -30,7 +30,7 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
           location={location.pathname}
         />
         <h1>{`Volume ${issue?.volume_num} Issue ${issue?.issue_code}`}</h1>
-      </>
+      </div>
     );
   } else if (fail) {
     return <ErrorPage statusCode={issueInfo.statusCode || 500} />;

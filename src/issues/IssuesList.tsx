@@ -72,7 +72,7 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
   props
 ) => {
   const [volumes, dataInfo, fail] = useSSRData(
-    api.issues.list,
+    api.published_issues.list,
     props.staticContext?.data ? issuesToVolumes(props.staticContext.data) : [],
     issuesToVolumes
   );
@@ -82,7 +82,7 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
   }
 
   return (
-    <>
+    <div className="container">
       <Visor
         title={
           dataInfo.state === RequestState.Running
@@ -99,7 +99,7 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
           return <VolumeIssues key={i} volume={volume} />;
         })
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,6 +1,9 @@
+$pink-150: #ffc2de;
+$pink-700: #8e1155;
+
 // These variables have to be before the import because they'll break otherwise
 
-$primary: #f2c0d9;
+$primary: $pink-150;
 
 // Use our custom fonts
 $body-ff: "Body Font", serif;
@@ -20,7 +23,7 @@ $headings-color: black;
 $link-color: black;
 
 // Navbar variables
-$navbar-light-color: $primary;
+$navbar-light-color: $pink-150;
 $navbar-brand-font-size: 2rem;
 
 // Forms
@@ -31,7 +34,7 @@ $input-border-width: 1px;
 $input-border-color: $gray-600;
 $input-padding-x: 0.5rem;
 $input-focus-box-shadow: none;
-$input-focus-border-color: $primary;
+$input-focus-border-color: $pink-150;
 $enable-validation-icons: false;
 
 // FUNCTIONS
