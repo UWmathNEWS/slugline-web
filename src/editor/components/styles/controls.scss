@@ -8,6 +8,9 @@
   background: none;
   border-radius: $border-radius;
   margin: spacing(1) / 2;
+  // Chrome gives buttons 6px of padding, while Firefox gives them 8px.
+  // This leads to inconsistent icon sizes, so we're standardizing
+  // on the objectively superior Chrome value.
   padding: 6px;
 
   & > svg {
