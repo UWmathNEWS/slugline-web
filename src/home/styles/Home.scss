@@ -4,12 +4,8 @@
   background-color: $primary;
   padding-top: spacing(3);
   padding-bottom: spacing(5);
-}
 
-.IssueEntry--light {
-  color: $black;
-}
-
-.IssueEntry--dark {
-  color: $white;
+  &_coverImg {
+    mix-blend-mode: multiply;
+  }
 }

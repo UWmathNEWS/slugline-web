@@ -1,6 +1,6 @@
 import React from "react";
 import config from "../config";
-import { RouteProps } from "./types";
+import { Issue, RouteProps } from "./types";
 import { Route, RouteComponentProps, Switch } from "react-router";
 
 import * as url from "./helpers/url";
@@ -40,7 +40,7 @@ export const format: {
     }
     return paramsObj[
       parseInt(paramName) in paramsObj ? parseInt(paramName) : paramName
-      ];
+    ];
   });
 };
 
@@ -110,7 +110,7 @@ export const renderRoutes: {
               "render" in route ? (
                 route.render({ ...props, ...extraProps, route: route })
               ) : (
-                <route.component {...props} {...extraProps} route={route}/>
+                <route.component {...props} {...extraProps} route={route} />
               )
             }
             {...routeProps}
@@ -120,3 +120,14 @@ export const renderRoutes: {
     </Switch>
   );
 };
+
+/**
+ * Returns the appropriate URL to the cover image of an issue
+ *
+ * @param issue The issue to return the cover image for
+ * @param size The size of image to link to
+ * @param type The type of image to link to
+ */
+export const cover_src = (issue: Issue, size: number, type?: "RGB" | "LA") =>
+  issue.pdf +
+  `.COVER-${type ?? (issue.colour === "paper" ? "RGB" : "LA")}-${size}x.png`;

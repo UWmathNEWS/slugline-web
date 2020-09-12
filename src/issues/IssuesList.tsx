@@ -9,13 +9,11 @@ import api from "../api/api";
 import Loader from "../shared/components/Loader";
 import ErrorPage from "../shared/errors/ErrorPage";
 import { useSSRData } from "../shared/hooks";
+import { cover_src } from "../shared/helpers";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
 }
-
-const IMG_DEFAULT =
-  "https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_1600/gynfui2kgjtnzdwlsxqy.jpg";
 
 const VolumeIssues = (props: VolumeIssuesProps) => {
   return (
@@ -34,7 +32,12 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
             >
               <img
                 className="volume-issue-img mb-1"
-                src={IMG_DEFAULT}
+                srcSet={`${cover_src(issue, 1, "RGB")}, ${cover_src(
+                  issue,
+                  2,
+                  "RGB"
+                )} 2x`}
+                src={cover_src(issue, 1, "RGB")}
                 alt={`Volume ${issue.volume_num} Issue ${issue.issue_code} cover`}
               />
               <h6 className="text-center">{`Issue ${issue.issue_code}`}</h6>

@@ -1,6 +1,11 @@
 import React, { useCallback, useMemo } from "react";
 import Visor from "../shared/components/Visor";
-import { Issue, Pagination, RouteComponentProps } from "../shared/types";
+import {
+  ForwardAttributes,
+  Issue,
+  Pagination,
+  RouteComponentProps,
+} from "../shared/types";
 import { useSSRData } from "../shared/hooks";
 import api, { combine } from "../api/api";
 import { RequestState } from "../api/hooks";
@@ -11,45 +16,17 @@ import Dateline from "../shared/components/Dateline";
 import "./styles/Home.scss";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
+import { cover_src } from "../shared/helpers";
 
-const colourMap = {
-  "blastoff-blue": "dark",
-  "celestial-blue": "light",
-  "cosmic-orange": "light",
-  "fireball-fuchsia": "light",
-  "galaxy-gold": "light",
-  "gamma-green": "light",
-  "gravity-grape": "dark",
-  "liftoff-lemon": "light",
-  "lunar-blue": "light",
-  "martian-green": "light",
-  "orbit-orange": "light",
-  "outrageous-orchid": "light",
-  "planetary-purple": "light",
-  "pulsar-pink": "light",
-  "reentry-red": "light",
-  "rocket-red": "light",
-  "sunburst-yellow": "light",
-  "terra-green": "light",
-  "terrestrial-teal": "light",
-  "venus-violet": "light",
-  "pastel-blue": "light",
-  "pastel-buff": "light",
-  "pastel-canary": "light",
-  "pastel-goldenrod": "light",
-  "pastel-grey": "light",
-  "pastel-green": "light",
-  "pastel-orchid": "light",
-  "pastel-pink": "light",
-  "pastel-salmon": "light",
-  accent: "light",
-};
-
-const IssueEntry: React.FC<{ issue: Issue }> = ({ issue }) => {
+const IssueEntry: React.FC<{ issue: Issue } & ForwardAttributes> = ({
+  issue,
+  className,
+}) => {
   return (
-    <div>
+    <div className={className}>
       <Dateline>
-        Volume {issue.volume_num} Issue {issue.issue_code}
+        Volume {issue.volume_num} Issue {issue.issue_code} &bull;{" "}
+        {issue.publish_date}
       </Dateline>
       <h2>
         <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
@@ -110,23 +87,38 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
           <Helmet>
             <style>
               {`.SluglineNav {
-              --background-clr: var(--paper-${latest_issue.colour});
-              --foreground-clr: var(--${
-                colourMap[latest_issue.colour || "accent"] === "light"
-                  ? "black"
-                  : "white"
-              });
+              --background-clr: var(--paper-${latest_issue.colour}-light) !important;
             }`}
             </style>
           </Helmet>
           <div
-            className={`Hero IssueEntry--${
-              colourMap[latest_issue.colour || "accent"]
-            }`}
-            style={{ backgroundColor: `var(--paper-${latest_issue.colour})` }}
+            className="Hero"
+            style={{
+              backgroundColor: `var(--paper-${latest_issue.colour}-light)`,
+            }}
           >
-            <div className="container">
-              <IssueEntry issue={latest_issue} />
+            <div className="container clearfix">
+              <IssueEntry issue={latest_issue} className="float-lg-left" />
+              {latest_issue.pdf && (
+                <div className="float-lg-right">
+                  <div
+                    className="d-inline-block"
+                    style={{
+                      backgroundColor: `var(--paper-${latest_issue.colour})`,
+                    }}
+                  >
+                    <img
+                      alt={`Cover of Volume ${latest_issue.volume_num} Issue ${latest_issue.issue_code}`}
+                      className="Hero_coverImg"
+                      srcSet={`${cover_src(latest_issue, 1)}, ${cover_src(
+                        latest_issue,
+                        2
+                      )} 2x`}
+                      src={cover_src(latest_issue, 1)}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="container">

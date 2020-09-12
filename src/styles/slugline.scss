@@ -40,8 +40,12 @@ h6 {
   --black: #{$black};
   --white: #{$white};
 
-  --paper-accent: #{$pink-150};
+  --paper-paper: var(--white);
+  --paper-paper-light: #{$pink-150};
+  --paper-paper-dark: #{$pink-700};
   @each $name, $clr in $paper-colours {
     --paper-#{$name}: #{$clr};
+    --paper-#{$name}-light: #{mix($clr, $white)};
+    --paper-#{$name}-dark: #{scale-color(mix($clr, $black), $saturation: -50%)};
   }
 }

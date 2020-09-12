@@ -11,6 +11,11 @@ declare global {
   }
 }
 
+export type ForwardAttributes = {
+  className?: any;
+  style?: any;
+};
+
 export enum ArticleType {
   Wordpress = "wordpress",
   Slate = "slate",
@@ -62,7 +67,8 @@ export type Colour =
   | "pastel-green"
   | "pastel-orchid"
   | "pastel-pink"
-  | "pastel-salmon";
+  | "pastel-salmon"
+  | "paper";
 
 export interface Issue {
   id?: number;
