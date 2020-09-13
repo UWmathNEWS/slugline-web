@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, InputGroup } from "react-bootstrap";
 
 interface LinkPopoverProps {
   setHref: (href: string) => void;
@@ -17,17 +17,19 @@ const LinkPopover: React.FC<LinkPopoverProps> = (props: LinkPopoverProps) => {
           props.setHref(input);
         }}
       >
-        <Form.Group controlId="linkHref">
-          <Form.Label>Link target:</Form.Label>
+        <InputGroup>
           <Form.Control
             type="text"
             value={input}
             onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
               setInput(evt.currentTarget.value);
             }}
+            placeholder="URL"
           />
-        </Form.Group>
-        <Button type="submit">Done</Button>
+          <InputGroup.Append>
+            <Button type="submit">Done</Button>
+          </InputGroup.Append>
+        </InputGroup>
       </Form>
     </div>
   );
