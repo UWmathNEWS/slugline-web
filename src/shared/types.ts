@@ -87,10 +87,12 @@ export interface User {
   first_name: string;
   last_name: string;
   email: string;
+  role: UserRole;
   is_staff: boolean;
-  is_editor: boolean;
   writer_name: string;
 }
+
+export type UserRole = "Editor" | "Copyeditor" | "Contributor";
 
 export interface APIError {
   detail?: string[];
@@ -143,6 +145,7 @@ interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
   routeComponent?: React.ComponentType;
   routeProps?: any;
   loadData?: (args: {
+    url: string;
     params: any;
     query: Record<string, any>;
     headers: any;

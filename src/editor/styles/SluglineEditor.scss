@@ -1,10 +1,16 @@
 @import "../../styles/slugline_vars";
 
 .editor {
-  height: 100vh;
-  padding: spacing(1);
+  height: calc(
+    100vh - 5rem
+  ); // the navbar is about 5 rem tall, and we want the editor to fill the remaining space
   display: flex;
   flex-direction: column;
+}
+
+.editor-contenteditable {
+  // we want this to always take up the full height so we can click on the whole thing to focus it
+  height: 100%;
 }
 
 .editor-header,
@@ -13,7 +19,7 @@
 }
 
 input.editor-header-input {
-  font-family: DIN Next;
+  font-family: "Headings Font";
   width: 100%;
   border: none;
   background: none;
@@ -40,7 +46,7 @@ input.editor-header-input {
   &.author-input {
     font-size: 1.5em;
     font-weight: bold;
-    font-family: Joanna Nova;
+    font-family: "Body Font";
   }
 }
 

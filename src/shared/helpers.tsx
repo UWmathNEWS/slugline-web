@@ -4,7 +4,10 @@ import { Issue, RouteProps } from "./types";
 import { Route, RouteComponentProps, Switch } from "react-router";
 
 import * as url from "./helpers/url";
+import * as user from "./helpers/user";
+
 export { url };
+export { user };
 
 /**
  * Formats a string using Python-style syntax.

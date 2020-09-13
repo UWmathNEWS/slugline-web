@@ -11,6 +11,7 @@
     font-weight: normal;
     color: var(--foreground-clr) !important;
     text-transform: uppercase;
+    text-decoration: none;
   }
 
   .navbar-brand {
@@ -18,7 +19,7 @@
   }
 
   .navbar-logo {
-    margin-top: .625rem; // height of navbar-brand is 3rem, and height of the logo is 1.75rem
+    margin-top: 0.625rem; // height of navbar-brand is 3rem, and height of the logo is 1.75rem
     fill: currentColor;
   }
 

@@ -4,6 +4,7 @@ import { User, APIResponse } from "../shared/types";
 import Cookie from "js-cookie";
 import { authReducer, Auth, CSRF_COOKIE } from "./Auth";
 import api from "../api/api";
+import { atLeast } from "../shared/helpers/user";
 
 export const AuthProvider: React.FC = (props) => {
   const storedUser: User | null | undefined = window.__SSR_DIRECTIVES__.USER;
@@ -72,9 +73,7 @@ export const AuthProvider: React.FC = (props) => {
     return user.user !== null;
   };
 
-  const isEditor = () => {
-    return user.user?.is_editor ?? false;
-  };
+  const isEditor = () => atLeast(user.user, "Editor");
 
   const login = (username: string, password: string) => {
     return api

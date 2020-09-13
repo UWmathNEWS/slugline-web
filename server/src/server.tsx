@@ -9,6 +9,7 @@ import morgan from "morgan";
 import React from "react";
 import { BUILD_DIR } from "./helpers";
 import dashRenderer from "./renderers/dashRenderer";
+import helpRenderer from "./renderers/helpRenderer";
 import serverRenderer from "./renderers/serverRenderer";
 
 const app = express();
@@ -39,6 +40,8 @@ router.use(
 );
 
 router.use("^/dash", dashRenderer);
+
+router.use("^/help", helpRenderer);
 
 router.use("^/", serverRenderer);
 

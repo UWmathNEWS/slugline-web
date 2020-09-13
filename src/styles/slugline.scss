@@ -12,6 +12,11 @@ h6 {
   text-transform: uppercase;
 }
 
+// Link styling
+a {
+  text-decoration: underline;
+}
+
 // Form styling
 .form-control {
   border-top: none;
@@ -48,4 +53,47 @@ h6 {
     --paper-#{$name}-light: #{mix($clr, $white)};
     --paper-#{$name}-dark: #{scale-color(mix($clr, $black), $saturation: -50%)};
   }
+}
+
+// Styles for article content
+span.underline-custom {
+  text-shadow: 1px 0px white, -1px 0px white;
+  background-image: linear-gradient(
+    to bottom,
+    black 0% 33%,
+    transparent 33% 100%
+  );
+  background-position: 0 1em;
+  background-size: 2px 0.2em;
+  padding-bottom: 0.2em;
+  background-repeat: repeat-x;
+}
+
+span.double-underline-custom {
+  text-shadow: 1px 0px white, -1px 0px white;
+  background-image: linear-gradient(
+    to bottom,
+    black 0%,
+    33%,
+    rgba(0, 0, 0, 0) 33% 66%,
+    black 66% 100%
+  );
+  background-position: 0 1em;
+  background-size: 2px 0.2em;
+  padding-bottom: 0.2em;
+  background-repeat: repeat-x;
+}
+
+span.dotted-underline-custom {
+  text-shadow: 1px 0px white, -1px 0px white;
+  background-image: linear-gradient(to right, black 50%, transparent 50%);
+  background-position: 0 1em;
+  background-size: 3px 2px;
+  padding-bottom: 0.2em;
+  background-repeat: repeat-x;
+}
+
+// make code blocks look more like code blocks
+pre.article-code-block {
+  padding: spacing(3);
 }

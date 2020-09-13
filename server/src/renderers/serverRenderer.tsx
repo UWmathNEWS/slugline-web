@@ -31,6 +31,7 @@ const serverRenderer = (req: Request, res: Response) => {
     const { params } = matchPath(req.url, currentRoute)!;
     promises.push(
       currentRoute.loadData({
+        url: req.url,
         params,
         query: req.query,
         headers: { Cookie: req.header("cookie") || "" },

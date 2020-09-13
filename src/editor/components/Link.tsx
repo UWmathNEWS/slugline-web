@@ -3,7 +3,23 @@ import { RenderElementProps, useEditor, ReactEditor } from "slate-react";
 import { LinkElement } from "../types";
 import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
-import PopoverWrapper from "../../shared/PopoverWrapper";
+import PopoverWrapper from "./PopoverWrapper";
+
+// Taken from https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
+// Basically enforces <anything>@<anything>.<anything>
+const EMAIL_REGEX = /\S+@\S+\.\S+/;
+
+export const formatHref = (href: string) => {
+  if (href.match(EMAIL_REGEX)) {
+    if (!href.startsWith("mailto:")) {
+      return "mailto:" + href;
+    }
+  } else if (!href.startsWith("http://") && !href.startsWith("https://")) {
+    return "http://" + href;
+  }
+
+  return href;
+};
 
 const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
   const element = props.element as LinkElement;
@@ -20,10 +36,10 @@ const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
       editor,
       {
         ...element,
-        href: href
+        href: href,
       },
       {
-        at: path
+        at: path,
       }
     );
   };
@@ -35,7 +51,7 @@ const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
         onClick={() => {
           setShow(true);
         }}
-        href={element.href}
+        href={formatHref(element.href)}
       >
         {props.children}
       </a>
