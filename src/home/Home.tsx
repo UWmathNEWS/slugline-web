@@ -20,13 +20,39 @@ import { cover_src } from "../shared/helpers";
 import ActionLink from "../shared/components/ActionLink";
 import { LinkButton } from "../shared/components/Button";
 
+const taglines = [
+  "Fresh off the press",
+  "Recently proved to exist",
+  "Newly conjectured",
+  "Hot and ready",
+  "Straight from the pizza oven",
+  "Our latest and greatest",
+  "Thank Mr. Goose it's here",
+  "Now with 100% less fibre",
+  "Start your addiction today",
+  "Comes with free bikini",
+  "Proof of Imprint's inferiority",
+  "Bring the editors pizza day",
+  "Pissing off Imprint since 1973",
+  "The issue you've been waiting for",
+  "Just pushed to master",
+  "This issue broke prod",
+  "#1 among Russian spambots",
+  "Your statistically significant other",
+  "P(You read this) = 1",
+  "This issue > last issue",
+  "Math is fun, but we are funnier",
+  "I ran out of jokes",
+];
+
 const HeroEntry: React.FC<
   { issue: Issue; tagline?: string } & ForwardAttributes
 > = ({ issue, tagline, className }) => {
   return (
     <div className={`IssueEntry IssueEntry--hero ${className || ""}`}>
       <Dateline>
-        {tagline ?? "Fresh off the press"} &bull; {issue.publish_date}
+        {tagline ?? taglines[Math.floor(Math.random() * taglines.length)]}{" "}
+        &bull; {issue.publish_date}
       </Dateline>
       <h2 className="IssueEntry_title">
         <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
