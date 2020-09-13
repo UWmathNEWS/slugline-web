@@ -17,7 +17,9 @@ export const routes: RouteProps[] = [
       combine(
         api.published_issues.list({
           headers,
-          params: { page: query.page || 1 },
+          // For compatibility with Wordpress, we use the paged key instead of
+          // the arguably more sensible page key
+          params: { page: query.paged || 1 },
         }),
         api.published_issues.latest({ headers })
       ),

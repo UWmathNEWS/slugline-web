@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo } from "react";
-import Visor from "../shared/components/Visor";
+import { Helmet } from "react-helmet";
+import { Link } from "react-router-dom";
+import { cover_src } from "../shared/helpers";
 import {
   ForwardAttributes,
   Issue,
@@ -10,15 +12,14 @@ import { useSSRData } from "../shared/hooks";
 import api, { combine } from "../api/api";
 import { RequestState } from "../api/hooks";
 import ErrorPage from "../shared/errors/ErrorPage";
+import Visor from "../shared/components/Visor";
 import Loader from "../shared/components/Loader";
 import Dateline from "../shared/components/Dateline";
-
-import "./styles/Home.scss";
-import { Helmet } from "react-helmet";
-import { Link } from "react-router-dom";
-import { cover_src } from "../shared/helpers";
 import ActionLink from "../shared/components/ActionLink";
 import { LinkButton } from "../shared/components/Button";
+
+import "./styles/Home.scss";
+import Paginator from "../shared/components/Paginator";
 
 const taglines = [
   "Fresh off the press",
@@ -54,10 +55,10 @@ const HeroEntry: React.FC<
         {tagline ?? taglines[Math.floor(Math.random() * taglines.length)]}{" "}
         &bull; {issue.publish_date}
       </Dateline>
-      <h2 className="IssueEntry_title">
+      <h2 className="IssueEntry_title mt-1">
         <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
       </h2>
-      <div className="IssueEntry_description">{issue.description}</div>
+      <div className="IssueEntry_description mt-3">{issue.description}</div>
     </div>
   );
 };
@@ -72,14 +73,16 @@ const IssueEntry: React.FC<{ issue: Issue } & ForwardAttributes> = ({
         Volume {issue.volume_num} Issue {issue.issue_code} &bull;{" "}
         {issue.publish_date}
       </Dateline>
-      <h2 className="IssueEntry_title">
+      <h2 className="IssueEntry_title mt-1">
         <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
       </h2>
-      <div className="IssueEntry_description">{issue.description}</div>
-      {/* TODO: When issue interface is changed, remove fallback */}
-      <ActionLink to={issue.pdf || ""} className="IssueEntry_cta">
-        Read Volume {issue.volume_num} Issue {issue.issue_code}
-      </ActionLink>
+      <div className="IssueEntry_description mt-3">{issue.description}</div>
+      <div className="mt-3">
+        {/* TODO: When issue interface is changed, remove fallback */}
+        <ActionLink to={issue.pdf || ""} className="IssueEntry_cta">
+          Read Volume {issue.volume_num} Issue {issue.issue_code}
+        </ActionLink>
+      </div>
     </div>
   );
 };
@@ -100,7 +103,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
   const search = useMemo(() => new URLSearchParams(location.search), [
     location.search,
   ]);
-  const page = parseInt(search.get("page") || "") || 1;
+  const page = parseInt(search.get("paged") || "") || 1;
   const [resp, reqInfo, fail] = useSSRData(
     useCallback(
       () =>
@@ -131,10 +134,10 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
       hero = (
         <div className="Hero Hero--full">
           <div className="container d-flex">
-            <div className="d-flex flex-column">
+            <div className="d-flex flex-column mr-5">
               <HeroEntry issue={latest_issue} />
               <div className="flex-fill" />
-              <div className="Hero_cta">
+              <div className="Hero_cta mt-3">
                 <LinkButton
                   to={`/issues/${latest_issue.id}`}
                   variant="dark"
@@ -178,7 +181,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
             <LinkButton
               to={`/issues/${latest_issue.id}`}
               variant="dark"
-              className="IssueEntry_cta"
+              className="IssueEntry_cta mt-3"
             >
               Read Volume {latest_issue.volume_num} Issue{" "}
               {latest_issue.issue_code}
@@ -198,10 +201,11 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
           </style>
         </Helmet>
         {hero}
-        <div className="container">
+        <div className="container mt-5">
           {issues.results.map((issue, i) => (
-            <IssueEntry key={i} issue={issue} />
+            <IssueEntry key={i} issue={issue} className="mb-5" />
           ))}
+          <Paginator pagination={issues} url={(page) => `/?paged=${page}`} />
         </div>
       </>
     );

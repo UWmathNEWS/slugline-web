@@ -17,6 +17,10 @@ $gp-btn-variants: (
   font-weight: bold;
   font-size: 0.9rem;
 
+  &.btn-sm {
+    font-size: 0.7875rem;
+  }
+
   &.btn-lg {
     font-size: 1.125rem;
   }
