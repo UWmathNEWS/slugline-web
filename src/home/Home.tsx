@@ -17,24 +17,43 @@ import "./styles/Home.scss";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { cover_src } from "../shared/helpers";
+import ActionLink from "../shared/components/ActionLink";
+import { LinkButton } from "../shared/components/Button";
+
+const HeroEntry: React.FC<
+  { issue: Issue; tagline?: string } & ForwardAttributes
+> = ({ issue, tagline, className }) => {
+  return (
+    <div className={`IssueEntry IssueEntry--hero ${className || ""}`}>
+      <Dateline>
+        {tagline ?? "Fresh off the press"} &bull; {issue.publish_date}
+      </Dateline>
+      <h2 className="IssueEntry_title">
+        <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
+      </h2>
+      <div className="IssueEntry_description">{issue.description}</div>
+    </div>
+  );
+};
 
 const IssueEntry: React.FC<{ issue: Issue } & ForwardAttributes> = ({
   issue,
   className,
 }) => {
   return (
-    <div className={className}>
+    <div className={`IssueEntry ${className || ""}`}>
       <Dateline>
         Volume {issue.volume_num} Issue {issue.issue_code} &bull;{" "}
         {issue.publish_date}
       </Dateline>
-      <h2>
+      <h2 className="IssueEntry_title">
         <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
       </h2>
-      <div>{issue.description}</div>
-      <a href={issue.pdf}>
+      <div className="IssueEntry_description">{issue.description}</div>
+      {/* TODO: When issue interface is changed, remove fallback */}
+      <ActionLink to={issue.pdf || ""} className="IssueEntry_cta">
         Read Volume {issue.volume_num} Issue {issue.issue_code}
-      </a>
+      </ActionLink>
     </div>
   );
 };
@@ -49,7 +68,6 @@ const IssueEntry: React.FC<{ issue: Issue } & ForwardAttributes> = ({
  */
 
 const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
-  route,
   location,
   staticContext,
 }) => {
@@ -72,74 +90,95 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
   );
 
   if (!fail && resp && reqInfo.state !== RequestState.Running) {
-    const [issues, latest_issue] = resp;
+    let issues = resp[0];
+    const latest_issue = resp[1];
+    let title = "";
+    let hero: React.ReactNode;
 
     // On the first page, we want a full latest issue hero. However, on subsequent pages, we want a more subtle hero.
     if (page === 1) {
-      const issues_rest = issues.results.filter(
+      issues.results = issues.results.filter(
         (issue) =>
           issue.volume_num !== latest_issue.volume_num &&
           issue.issue_code !== latest_issue.issue_code
       );
-      return (
-        <>
-          <Visor key="visor" title="" />
-          <Helmet>
-            <style>
-              {`.SluglineNav {
-              --background-clr: var(--paper-${latest_issue.colour}-light) !important;
-            }`}
-            </style>
-          </Helmet>
-          <div
-            className="Hero"
-            style={{
-              backgroundColor: `var(--paper-${latest_issue.colour}-light)`,
-            }}
-          >
-            <div className="container clearfix">
-              <IssueEntry issue={latest_issue} className="float-lg-left" />
-              {latest_issue.pdf && (
-                <div className="float-lg-right">
-                  <div
-                    className="d-inline-block"
-                    style={{
-                      backgroundColor: `var(--paper-${latest_issue.colour})`,
-                    }}
-                  >
-                    <img
-                      alt={`Cover of Volume ${latest_issue.volume_num} Issue ${latest_issue.issue_code}`}
-                      className="Hero_coverImg"
-                      srcSet={`${cover_src(latest_issue, 1)}, ${cover_src(
-                        latest_issue,
-                        2
-                      )} 2x`}
-                      src={cover_src(latest_issue, 1)}
-                    />
-                  </div>
-                </div>
-              )}
+      hero = (
+        <div className="Hero Hero--full">
+          <div className="container d-flex">
+            <div className="d-flex flex-column">
+              <HeroEntry issue={latest_issue} />
+              <div className="flex-fill" />
+              <div className="Hero_cta">
+                <LinkButton
+                  to={`/issues/${latest_issue.id}`}
+                  variant="dark"
+                  className="IssueEntry_cta"
+                >
+                  Read Volume {latest_issue.volume_num} Issue{" "}
+                  {latest_issue.issue_code}
+                </LinkButton>
+              </div>
             </div>
+            {latest_issue.pdf && (
+              <div className="ml-auto">
+                <Link
+                  to={`/issues/${latest_issue.id}`}
+                  className="d-inline-block"
+                  style={{
+                    backgroundColor: `var(--paper-${latest_issue.colour})`,
+                  }}
+                >
+                  <img
+                    alt={`Cover of Volume ${latest_issue.volume_num} Issue ${latest_issue.issue_code}`}
+                    className="Hero_coverImg"
+                    srcSet={`${cover_src(latest_issue, 1)}, ${cover_src(
+                      latest_issue,
+                      2
+                    )} 2x`}
+                    src={cover_src(latest_issue, 1)}
+                  />
+                </Link>
+              </div>
+            )}
           </div>
-          <div className="container">
-            {issues_rest.map((issue, i) => (
-              <IssueEntry key={i} issue={issue} />
-            ))}
-          </div>
-        </>
+        </div>
       );
     } else {
-      return (
-        <>
-          <Visor key="visor" title={`Page ${page}`} />
+      title = `Page ${page}`;
+      hero = (
+        <div className="Hero Hero--short">
           <div className="container">
-            {issues.results.map((issue, i) => (
-              <IssueEntry key={i} issue={issue} />
-            ))}
+            <HeroEntry issue={latest_issue} tagline="Latest Issue" />
+            <LinkButton
+              to={`/issues/${latest_issue.id}`}
+              variant="dark"
+              className="IssueEntry_cta"
+            >
+              Read Volume {latest_issue.volume_num} Issue{" "}
+              {latest_issue.issue_code}
+            </LinkButton>
           </div>
-        </>
+        </div>
       );
     }
+    return (
+      <>
+        <Visor key="visor" title={title} />
+        <Helmet>
+          <style key="nav-style">
+            {`.SluglineNav, .Hero {
+              --background-clr: var(--paper-${latest_issue.colour}-light) !important;
+            }`}
+          </style>
+        </Helmet>
+        {hero}
+        <div className="container">
+          {issues.results.map((issue, i) => (
+            <IssueEntry key={i} issue={issue} />
+          ))}
+        </div>
+      </>
+    );
   } else if (fail) {
     return <ErrorPage statusCode={reqInfo.statusCode || 500} />;
   } else {

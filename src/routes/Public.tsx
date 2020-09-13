@@ -17,7 +17,7 @@ export const routes: RouteProps[] = [
       combine(
         api.published_issues.list({
           headers,
-          params: { page: query.name || 1 },
+          params: { page: query.page || 1 },
         }),
         api.published_issues.latest({ headers })
       ),

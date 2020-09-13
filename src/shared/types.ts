@@ -12,7 +12,7 @@ declare global {
 }
 
 export type ForwardAttributes = {
-  className?: any;
+  className?: string;
   style?: any;
 };
 
