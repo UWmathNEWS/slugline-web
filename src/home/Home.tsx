@@ -44,6 +44,17 @@ const taglines = [
   "P(You read this) = 1",
   "This issue > last issue",
   "Math is fun, but we are funnier",
+  "Your assignment can wait",
+  "Now with less math and even less news",
+  "#1 cause of procrastination among mathematicians",
+  "What if you read this issue…haha jk…unless?",
+  "10/10 mathematicians recommend mathNEWS (n = 10)",
+  "The Dean loves us, apparently",
+  "Now with a chance of actual journalism",
+  "Please read, for the jar of dirt in the office",
+  "You came here for the profQUOTES, didn't you",
+  "Made with copious amounts of coffee",
+  "Proudly published from the 7th floor of MC",
   "I ran out of jokes",
 ];
 
@@ -103,10 +114,8 @@ const HeroEntry: React.FC<
 /**
  * The component for our home page.
  *
- * @param route
- * @param location
- * @param staticContext
- * @constructor
+ * @param location The Location object from react-router
+ * @param staticContext The static context passed from SSR
  */
 
 const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
@@ -207,6 +216,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
       <>
         <Visor key="visor" title={title} />
         <Helmet>
+          {/* We want the navbar to share the issue's colour */}
           <style key="nav-style">
             {`.SluglineNav, .Hero {
               --background-clr: var(--paper-${latest_issue.colour}-light) !important;
