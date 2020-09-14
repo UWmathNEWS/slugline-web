@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
 import { cover_src } from "../shared/helpers";
 import {
   ForwardAttributes,
@@ -46,20 +47,21 @@ const taglines = [
   "I ran out of jokes",
 ];
 
-const HeroEntry: React.FC<
-  { issue: Issue; tagline?: string } & ForwardAttributes
-> = ({ issue, tagline, className }) => {
+const IssueEntryBody: React.FC<{
+  issue: Issue;
+  dateline: string;
+}> = ({ issue, dateline }) => {
   return (
-    <div className={`IssueEntry IssueEntry--hero ${className || ""}`}>
+    <>
       <Dateline>
-        {tagline ?? taglines[Math.floor(Math.random() * taglines.length)]}{" "}
-        &bull; {issue.publish_date}
+        {dateline} &bull;{" "}
+        {format(new Date(issue.publish_date || Date.now()), "d MMM y")}
       </Dateline>
       <h2 className="IssueEntry_title mt-1">
         <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
       </h2>
       <div className="IssueEntry_description mt-3">{issue.description}</div>
-    </div>
+    </>
   );
 };
 
@@ -69,20 +71,31 @@ const IssueEntry: React.FC<{ issue: Issue } & ForwardAttributes> = ({
 }) => {
   return (
     <div className={`IssueEntry ${className || ""}`}>
-      <Dateline>
-        Volume {issue.volume_num} Issue {issue.issue_code} &bull;{" "}
-        {issue.publish_date}
-      </Dateline>
-      <h2 className="IssueEntry_title mt-1">
-        <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
-      </h2>
-      <div className="IssueEntry_description mt-3">{issue.description}</div>
+      <IssueEntryBody
+        issue={issue}
+        dateline={`Volume ${issue.volume_num} Issue ${issue.issue_code}`}
+      />
       <div className="mt-3">
         {/* TODO: When issue interface is changed, remove fallback */}
         <ActionLink to={issue.pdf || ""} className="IssueEntry_cta">
           Read Volume {issue.volume_num} Issue {issue.issue_code}
         </ActionLink>
       </div>
+    </div>
+  );
+};
+
+const HeroEntry: React.FC<
+  { issue: Issue; tagline?: string } & ForwardAttributes
+> = ({ issue, tagline, className }) => {
+  return (
+    <div className={`IssueEntry IssueEntry--hero ${className || ""}`}>
+      <IssueEntryBody
+        issue={issue}
+        dateline={
+          tagline ?? taglines[Math.floor(Math.random() * taglines.length)]
+        }
+      />
     </div>
   );
 };
@@ -133,7 +146,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
       );
       hero = (
         <div className="Hero Hero--full">
-          <div className="container d-flex">
+          <div className="container d-flex overflow-hidden">
             <div className="d-flex flex-column mr-5">
               <HeroEntry issue={latest_issue} />
               <div className="flex-fill" />
