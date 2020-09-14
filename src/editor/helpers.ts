@@ -41,6 +41,16 @@ export const isIterableEmpty = (iterable: Iterable<any>) => {
 };
 
 /**
+ * Returns the first item in `iterable`. Returns `undefined` for an empty iterable.
+ * @param iterable The iterable to return the first item of.
+ */
+export const getFirstFromIterable = <T>(iterable: Iterable<T>) => {
+  for (const i of iterable) {
+    return i;
+  }
+};
+
+/**
  * Returns true if the passed Location contains inlines, and false otherwise
  * @param editor The editor to search in.
  * @param at The location to search at. If at is undefined, the current selection

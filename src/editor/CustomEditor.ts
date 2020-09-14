@@ -1,10 +1,19 @@
-import { createEditor, Element, Text, Transforms } from "slate";
+import {
+  createEditor,
+  Element,
+  Text,
+  Transforms,
+  Editor,
+  Range,
+  Node,
+} from "slate";
 import {
   SluglineElement,
   InlineElementType,
   Mark,
   BlockElementType,
 } from "./types";
+import { isListActive, getFirstFromIterable } from "./helpers";
 
 // the way to remove a property is to call setNodes with the property set to null
 // so we create a object with all marks set to null so we can remove them all at once
@@ -48,9 +57,34 @@ const createCustomEditor = () => {
   };
 
   const insertBreakWithReset = () => {
+    const listActive = isListActive(editor);
+
+    if (listActive) {
+      if (editor.selection && Range.isCollapsed(editor.selection)) {
+        // since we're in a list and the selection is collapsed,
+        // there is one and only one ListItem that we're inside of
+        const [_, path] = getFirstFromIterable(
+          Editor.nodes(editor, {
+            match: (node) =>
+              (node as SluglineElement).type === BlockElementType.ListItem,
+          })
+        );
+        // if there's no text in this list item
+        if (Editor.string(editor, path) === "") {
+          // lift the node out of the list and set it to default type
+          Transforms.liftNodes(editor);
+          Transforms.setNodes(editor, { type: BlockElementType.Default });
+          // and do not add a break
+          return;
+        }
+      }
+    }
+
     insertBreak();
-    // reset paragraph type when creating a new paragraph
-    Transforms.setNodes(editor, { type: BlockElementType.Default });
+    // don't reset the type inside a list so a new list item will be created
+    if (!listActive) {
+      Transforms.setNodes(editor, { type: BlockElementType.Default });
+    }
   };
 
   editor.isInline = isInline;
