@@ -36,7 +36,7 @@ const IssuePage: React.FC<RouteComponentProps<any, Issue>> = ({
   } else {
     return (
       <>
-        <Visor key="visor" title="Loading..." location={location.pathname} />
+        <Visor key="visor" location={location.pathname} />
         <Loader variant="spinner" />
       </>
     );

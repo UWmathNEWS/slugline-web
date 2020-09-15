@@ -23,6 +23,7 @@ export const BaseVisor = () => {
       <title>{makeTitle()}</title>
 
       <meta name="description" content={config.description} />
+      <link rel="canonical" href={config.baseurl} />
 
       <link rel="icon" href={url.resolve("/", config.icons.favicon.src)} />
       <link
@@ -78,12 +79,12 @@ const Visor: React.FC<VisorProps> = (props) => {
   const location = url.resolve(config.baseurl, props.location || "");
   return (
     <Helmet>
-      <title>{makeTitle(title)}</title>
+      {"title" in props && <title>{makeTitle(title)}</title>}
 
-      <link rel="canonical" href={location} />
+      {"location" in props && <link rel="canonical" href={location} />}
 
-      <meta property="og:title" content={title} />
-      <meta property="og:url" content={location} />
+      {"title" in props && <meta property="og:title" content={title} />}
+      {"location" in props && <meta property="og:url" content={location} />}
       {props.seo?.description && (
         <meta property="og:description" content={props.seo.description} />
       )}
@@ -96,8 +97,10 @@ const Visor: React.FC<VisorProps> = (props) => {
           <meta key={key} property={`og:${prop}`} content={content} />
         ))}
 
-      <meta property="twitter:title" content={title} />
-      <meta property="twitter:url" content={location} />
+      {"title" in props && <meta property="twitter:title" content={title} />}
+      {"location" in props && (
+        <meta property="twitter:url" content={location} />
+      )}
       {props.seo?.description && (
         <meta property="twitter:description" content={props.seo.description} />
       )}

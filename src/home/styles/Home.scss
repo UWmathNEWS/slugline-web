@@ -6,6 +6,11 @@
   background-color: var(--background-clr);
   padding-top: spacing(3);
   padding-bottom: spacing(5);
+  overflow-x: hidden;
+
+  &--full &_content {
+    min-width: 14rem;
+  }
 
   &_coverImg {
     height: 20rem;

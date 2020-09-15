@@ -87,12 +87,7 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
 
   return (
     <div className="container">
-      <Visor
-        title={
-          dataInfo.state === RequestState.Running ? "Loading..." : route.title
-        }
-        location={location.pathname}
-      />
+      <Visor title={route.title} location={location.pathname} />
       <h1>Issues</h1>
       {dataInfo.state === RequestState.Running ? (
         <Loader variant="spinner" />

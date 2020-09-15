@@ -120,19 +120,39 @@ const HeroEntry: React.FC<
 
 const FullHero: React.FC<{ issue: Issue }> = ({ issue }) => {
   return (
-    <div className="d-flex flex-column mr-5">
-      <HeroEntry issue={issue} />
-      <div className="flex-fill" />
-      <div className="Hero_cta mt-3">
-        <LinkButton
-          to={`/issues/${issue.id}`}
-          variant="dark"
-          className="IssueEntry_cta"
-        >
-          Read Volume {issue.volume_num} Issue {issue.issue_code}
-        </LinkButton>
+    <>
+      <div className="Hero_content d-flex flex-column mr-5">
+        <HeroEntry issue={issue} />
+        <div className="flex-fill" />
+        <div className="Hero_cta mt-3">
+          <LinkButton
+            to={`/issues/${issue.id}`}
+            variant="dark"
+            className="IssueEntry_cta"
+          >
+            Read Volume {issue.volume_num} Issue {issue.issue_code}
+          </LinkButton>
+        </div>
       </div>
-    </div>
+      {issue.pdf && (
+        <div className="ml-auto">
+          <Link
+            to={`/issues/${issue.id}`}
+            className="d-inline-block"
+            style={{
+              backgroundColor: `var(--paper-${issue.colour})`,
+            }}
+          >
+            <img
+              alt={`Cover of Volume ${issue.volume_num} Issue ${issue.issue_code}`}
+              className="Hero_coverImg"
+              srcSet={`${cover_src(issue, 1)}, ${cover_src(issue, 2)} 2x`}
+              src={cover_src(issue, 1)}
+            />
+          </Link>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -210,29 +230,8 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
       );
       hero = (
         <div key="hero" className="Hero Hero--full">
-          <div className="container d-flex overflow-hidden">
+          <div className="Hero_container container d-flex">
             <FullHero issue={latest_issue} />
-            {latest_issue.pdf && (
-              <div className="ml-auto">
-                <Link
-                  to={`/issues/${latest_issue.id}`}
-                  className="d-inline-block"
-                  style={{
-                    backgroundColor: `var(--paper-${latest_issue.colour})`,
-                  }}
-                >
-                  <img
-                    alt={`Cover of Volume ${latest_issue.volume_num} Issue ${latest_issue.issue_code}`}
-                    className="Hero_coverImg"
-                    srcSet={`${cover_src(latest_issue, 1)}, ${cover_src(
-                      latest_issue,
-                      2
-                    )} 2x`}
-                    src={cover_src(latest_issue, 1)}
-                  />
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       );
@@ -240,7 +239,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
       title = `Page ${page}`;
       hero = (
         <div key="hero" className="Hero Hero--short">
-          <div className="container">
+          <div className="Hero_container container">
             <ShortHero issue={latest_issue} />
           </div>
         </div>
@@ -248,7 +247,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
     }
     return (
       <>
-        <Visor key="visor" title={title} />
+        <Visor key="visor" title={title} location={location.pathname} />
         <Helmet>
           {/* We want the navbar to share the issue's colour */}
           <style key="nav-style">
@@ -275,7 +274,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
   } else {
     return (
       <>
-        <Visor key="visor" title="Loading..." location={location.pathname} />
+        <Visor key="visor" location={location.pathname} />
         <Helmet>
           {/* We want to preserve the latest issue's colour */}
           <style key="nav-style">
@@ -287,7 +286,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
           </style>
         </Helmet>
         <div key="hero" className="Hero Hero--short">
-          <div className="container">
+          <div className="Hero_container container">
             {latestIssueRef.current ? (
               <ShortHero issue={latestIssueRef.current} />
             ) : (
