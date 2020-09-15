@@ -16,10 +16,10 @@ export const routes: RouteProps[] = [
     loadData: ({ query, headers }) =>
       combine(
         api.published_issues.list({
-          headers,
           // For compatibility with Wordpress, we use the paged key instead of
           // the arguably more sensible page key
-          params: { page: query.paged || 1 },
+          params: { page: query?.paged || 1 },
+          headers,
         }),
         api.published_issues.latest({ headers })
       ),
@@ -33,7 +33,7 @@ export const routes: RouteProps[] = [
     path: "/issues/:issue_id",
     component: IssuePage,
     title: "v{}i{}",
-    loadData: ({ params, headers }) =>
+    loadData: ({ params = {}, headers }) =>
       api.published_issues.get({
         id: params.issue_id,
         headers,

@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue, Pagination, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
 import { RequestState } from "../api/hooks";
-import api from "../api/api";
 import Loader from "../shared/components/Loader";
 import ErrorPage from "../shared/errors/ErrorPage";
 import { useSSRData } from "../shared/hooks";
@@ -71,12 +70,14 @@ const issuesToVolumes = (paginatedIssues: Pagination<Issue>): Issue[][] => {
   return vols;
 };
 
-const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
-  props
-) => {
+const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
+  route,
+  location,
+  staticContext,
+}) => {
   const [volumes, dataInfo, fail] = useSSRData(
-    api.published_issues.list,
-    props.staticContext?.data ? issuesToVolumes(props.staticContext.data) : [],
+    useCallback(() => route.loadData!({}), [route.loadData]),
+    staticContext?.data ? issuesToVolumes(staticContext.data) : [],
     issuesToVolumes
   );
 
@@ -88,11 +89,9 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
     <div className="container">
       <Visor
         title={
-          dataInfo.state === RequestState.Running
-            ? "Loading..."
-            : props.route.title
+          dataInfo.state === RequestState.Running ? "Loading..." : route.title
         }
-        location={props.location.pathname}
+        location={location.pathname}
       />
       <h1>Issues</h1>
       {dataInfo.state === RequestState.Running ? (

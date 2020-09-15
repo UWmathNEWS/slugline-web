@@ -139,27 +139,28 @@ export interface StaticRouterContextWithData<T = any>
   data?: T;
 }
 
-interface RouteBaseProps extends Omit<_RouteProps, "render" | "component"> {
+interface RouteBaseProps<T = any>
+  extends Omit<_RouteProps, "render" | "component"> {
   title: string;
   key?: string | number;
   routeComponent?: React.ComponentType;
   routeProps?: any;
   loadData?: (args: {
-    url: string;
-    params: any;
-    query: Record<string, any>;
-    headers: any;
-  }) => Promise<APIResponse<any>>;
+    url?: string;
+    params?: Record<string, string>;
+    query?: Record<string, any>;
+    headers?: any;
+  }) => Promise<APIResponse<T>>;
 }
 
-export type RouteProps = RouteBaseProps &
+export type RouteProps<T = any> = RouteBaseProps<T> &
   (
     | {
-        render: (props: RouteComponentProps) => React.ReactNode;
+        render: (props: RouteComponentProps<T>) => React.ReactNode;
       }
     | {
         component:
-          | React.ComponentType<RouteComponentProps>
+          | React.ComponentType<RouteComponentProps<T>>
           | React.ComponentType<any>;
       }
   );
@@ -168,5 +169,5 @@ export type RouteComponentProps<P = any, T = any> = _RouteComponentProps<
   P,
   StaticRouterContextWithData<T>
 > & {
-  route: RouteProps;
+  route: RouteProps<T>;
 };

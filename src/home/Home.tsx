@@ -10,7 +10,6 @@ import {
   RouteComponentProps,
 } from "../shared/types";
 import { useSSRData } from "../shared/hooks";
-import api, { combine } from "../api/api";
 import { RequestState } from "../api/hooks";
 import ErrorPage from "../shared/errors/ErrorPage";
 import Visor from "../shared/components/Visor";
@@ -114,11 +113,13 @@ const HeroEntry: React.FC<
 /**
  * The component for our home page.
  *
+ * @param route The route in Public for the homepage
  * @param location The Location object from react-router
  * @param staticContext The static context passed from SSR
  */
 
 const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
+  route,
   location,
   staticContext,
 }) => {
@@ -127,16 +128,10 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
   ]);
   const page = parseInt(search.get("paged") || "") || 1;
   const [resp, reqInfo, fail] = useSSRData(
-    useCallback(
-      () =>
-        combine(
-          api.published_issues.list({
-            params: { page },
-          }),
-          api.published_issues.latest()
-        ),
-      [page]
-    ),
+    useCallback(() => route.loadData!({ query: { paged: page } }), [
+      page,
+      route.loadData,
+    ]),
     staticContext?.data
   );
 
