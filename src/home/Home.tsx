@@ -22,11 +22,10 @@ import "./styles/Home.scss";
 import Paginator from "../shared/components/Paginator";
 
 const taglines = [
+  /* Contributed by terrifiED */
   "Fresh off the press",
   "Recently proved to exist",
   "Newly conjectured",
-  "Hot and ready",
-  "Straight from the pizza oven",
   "Our latest and greatest",
   "Thank Mr. Goose it's here",
   "Now with 100% less fibre",
@@ -50,11 +49,20 @@ const taglines = [
   "10/10 mathematicians recommend mathNEWS (n = 10)",
   "The Dean loves us, apparently",
   "Now with a chance of actual journalism",
-  "Please read, for the jar of dirt in the office",
+  // "Please read, for the jar of dirt in the office",
   "You came here for the profQUOTES, didn't you",
   "Made with copious amounts of coffee",
   "Proudly published from the 7th floor of MC",
-  "I ran out of jokes",
+  "I ran out of jokes to put here",
+  /* Contributed by god⚡peED */
+  "Hot and ready",
+  "Straight from the pizza oven",
+  "Putting the funny in mathematically-themed journalism",
+  /* Contributed by writer tendstofortytwo */
+  "The prime factor behind my existence",
+  "(cons mastHEAD insanity)",
+  "Freshly Imprinted for you",
+  "In a congruence class of its own",
 ];
 
 const IssueEntryBody: React.FC<{
