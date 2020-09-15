@@ -11,6 +11,26 @@
     height: 20rem;
     mix-blend-mode: multiply;
   }
+
+  .spinner-linear {
+    max-width: 600px;
+  }
+
+  &_loaderDateline {
+    width: 45%;
+  }
+
+  &_loaderTitle {
+    width: 30%;
+  }
+
+  &_loaderDesc {
+    width: 50%;
+  }
+
+  &_loaderCta {
+    max-width: 200px;
+  }
 }
 
 .IssueEntry {

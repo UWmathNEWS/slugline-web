@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -110,6 +110,54 @@ const HeroEntry: React.FC<
   );
 };
 
+const FullHero: React.FC<{ issue: Issue }> = ({ issue }) => {
+  return (
+    <div className="d-flex flex-column mr-5">
+      <HeroEntry issue={issue} />
+      <div className="flex-fill" />
+      <div className="Hero_cta mt-3">
+        <LinkButton
+          to={`/issues/${issue.id}`}
+          variant="dark"
+          className="IssueEntry_cta"
+        >
+          Read Volume {issue.volume_num} Issue {issue.issue_code}
+        </LinkButton>
+      </div>
+    </div>
+  );
+};
+
+const ShortHero: React.FC<{ issue: Issue }> = ({ issue }) => {
+  return (
+    <>
+      <HeroEntry issue={issue} tagline="Latest Issue" />
+      <LinkButton
+        to={`/issues/${issue.id}`}
+        variant="dark"
+        className="IssueEntry_cta mt-3"
+      >
+        Read Volume {issue.volume_num} Issue {issue.issue_code}
+      </LinkButton>
+    </>
+  );
+};
+
+const HeroLoader: React.FC = () => {
+  return (
+    <>
+      <Dateline>
+        <Loader variant="linear" className="Hero_loaderDateline" />
+      </Dateline>
+      <Loader variant="linear" className="Hero_loaderTitle h2 mt-1" />
+      <Loader variant="linear" className="Hero_loaderDesc mt-3" />
+      <Loader variant="linear" className="Hero_loaderDesc" />
+      <Loader variant="linear" className="Hero_loaderDesc" />
+      <Loader variant="linear" className="Hero_loaderCta mt-3" />
+    </>
+  );
+};
+
 /**
  * The component for our home page.
  *
@@ -134,12 +182,16 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
     ]),
     staticContext?.data
   );
+  // Store the latest issue so we don't show an unnecessary loader when changing pages
+  const latestIssueRef = useRef<Issue>();
 
   if (!fail && resp && reqInfo.state !== RequestState.Running) {
     let issues = resp[0];
     const latest_issue = resp[1];
     let title = "";
     let hero: React.ReactNode;
+
+    latestIssueRef.current = latest_issue;
 
     // On the first page, we want a full latest issue hero. However, on subsequent pages, we want a more subtle hero.
     if (page === 1) {
@@ -149,22 +201,9 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
           issue.issue_code !== latest_issue.issue_code
       );
       hero = (
-        <div className="Hero Hero--full">
+        <div key="hero" className="Hero Hero--full">
           <div className="container d-flex overflow-hidden">
-            <div className="d-flex flex-column mr-5">
-              <HeroEntry issue={latest_issue} />
-              <div className="flex-fill" />
-              <div className="Hero_cta mt-3">
-                <LinkButton
-                  to={`/issues/${latest_issue.id}`}
-                  variant="dark"
-                  className="IssueEntry_cta"
-                >
-                  Read Volume {latest_issue.volume_num} Issue{" "}
-                  {latest_issue.issue_code}
-                </LinkButton>
-              </div>
-            </div>
+            <FullHero issue={latest_issue} />
             {latest_issue.pdf && (
               <div className="ml-auto">
                 <Link
@@ -192,17 +231,9 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
     } else {
       title = `Page ${page}`;
       hero = (
-        <div className="Hero Hero--short">
+        <div key="hero" className="Hero Hero--short">
           <div className="container">
-            <HeroEntry issue={latest_issue} tagline="Latest Issue" />
-            <LinkButton
-              to={`/issues/${latest_issue.id}`}
-              variant="dark"
-              className="IssueEntry_cta mt-3"
-            >
-              Read Volume {latest_issue.volume_num} Issue{" "}
-              {latest_issue.issue_code}
-            </LinkButton>
+            <ShortHero issue={latest_issue} />
           </div>
         </div>
       );
@@ -219,7 +250,11 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
           </style>
         </Helmet>
         {hero}
-        <div className="container mt-5">
+        <div
+          key="content"
+          className="container mt-5"
+          data-testid="home-content"
+        >
           {issues.results.map((issue, i) => (
             <IssueEntry key={i} issue={issue} className="mb-5" />
           ))}
@@ -233,7 +268,32 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
     return (
       <>
         <Visor key="visor" title="Loading..." location={location.pathname} />
-        <Loader variant="spinner" />
+        <Helmet>
+          {/* We want to preserve the latest issue's colour */}
+          <style key="nav-style">
+            {`.SluglineNav, .Hero {
+              --background-clr: var(--paper-${
+                latestIssueRef.current?.colour || "paper"
+              }-light) !important;
+            }`}
+          </style>
+        </Helmet>
+        <div key="hero" className="Hero Hero--short">
+          <div className="container">
+            {latestIssueRef.current ? (
+              <ShortHero issue={latestIssueRef.current} />
+            ) : (
+              <HeroLoader />
+            )}
+          </div>
+        </div>
+        <div
+          key="content"
+          className="container mt-5"
+          data-testid="home-content"
+        >
+          <Loader variant="spinner" />
+        </div>
       </>
     );
   }
