@@ -1,9 +1,8 @@
 import React from "react";
-import { ForwardAttributes } from "../types";
 
 import "./styles/Dateline.scss";
 
-const Dateline: React.FC<ForwardAttributes> = ({
+const Dateline: React.FC<JSX.IntrinsicElements["span"]> = ({
   className,
   children,
   ...props

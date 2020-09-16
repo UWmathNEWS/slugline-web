@@ -134,3 +134,9 @@ export const renderRoutes: {
 export const cover_src = (issue: Issue, size: number, type?: "RGB" | "LA") =>
   issue.pdf +
   `.COVER-${type ?? (issue.colour === "paper" ? "RGB" : "LA")}-${size}x.png`;
+
+/**
+ * Does nothing.
+ */
+/* istanbul ignore next */
+export const noop = () => {};

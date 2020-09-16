@@ -55,12 +55,12 @@ class Paginator<T> extends React.Component<
                 page + 1 === pagination.page + 2
               ) {
                 return (
-                  <li className="Paginator_item">
-                    <span className="Paginator_link">...</span>
+                  <li key={page} className="Paginator_item">
+                    <span className="Paginator_link">&hellip;</span>
                   </li>
                 );
               } else {
-                return <></>;
+                return null;
               }
             } else {
               return (
@@ -70,6 +70,8 @@ class Paginator<T> extends React.Component<
                   className={
                     page + 1 === pagination.page ? "Paginator_current" : ""
                   }
+                  title={`Go to page ${page + 1}`}
+                  aria-label={`Go to page ${page + 1}`}
                 >
                   {page + 1}
                 </PaginatorItem>

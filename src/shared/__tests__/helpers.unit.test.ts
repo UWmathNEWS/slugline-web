@@ -1,4 +1,6 @@
-import { format, makeTitle } from "../helpers";
+import { format, makeTitle, cover_src } from "../helpers";
+import { testIssue } from "../test-utils";
+import { Issue } from "../types";
 
 jest.mock("../../config", () => ({
   title: "title",
@@ -56,5 +58,22 @@ describe("makeTitle", () => {
   it("returns the default title when called without parameters or when called with an empty string", () => {
     expect(makeTitle()).toBe("title - desc");
     expect(makeTitle("")).toBe("title - desc");
+  });
+});
+
+describe("coverSrc", () => {
+  it("returns a URL containing size and appropriate type", () => {
+    const src = cover_src(testIssue, 2);
+    expect(src).toMatch(testIssue.pdf!);
+    expect(src).toMatch("RGB");
+    expect(src).toMatch("2x");
+
+    // test LA return value on non-paper colour
+    const testIssue2: Issue = { ...testIssue, colour: "blastoff-blue" };
+    expect(cover_src(testIssue2, 2)).toMatch("LA");
+  });
+
+  it("returns a URL containing passed-in type", () => {
+    expect(cover_src(testIssue, 2, "LA")).toMatch("LA");
   });
 });
