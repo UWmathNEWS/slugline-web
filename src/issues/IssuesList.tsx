@@ -8,7 +8,7 @@ import { RequestState } from "../api/hooks";
 import Loader from "../shared/components/Loader";
 import ErrorPage from "../shared/errors/ErrorPage";
 import { useSSRData } from "../shared/hooks";
-import { cover_src } from "../shared/helpers";
+import { coverSrc } from "../shared/helpers";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -31,12 +31,12 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
             >
               <img
                 className="volume-issue-img mb-1"
-                srcSet={`${cover_src(issue, 1, "RGB")}, ${cover_src(
+                srcSet={`${coverSrc(issue, 1, "RGB")}, ${coverSrc(
                   issue,
                   2,
                   "RGB"
                 )} 2x`}
-                src={cover_src(issue, 1, "RGB")}
+                src={coverSrc(issue, 1, "RGB")}
                 alt={`Volume ${issue.volume_num} Issue ${issue.issue_code} cover`}
               />
               <h6 className="text-center">{`Issue ${issue.issue_code}`}</h6>

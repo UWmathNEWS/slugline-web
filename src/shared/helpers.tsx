@@ -131,7 +131,7 @@ export const renderRoutes: {
  * @param size The size of image to link to
  * @param type The type of image to link to
  */
-export const cover_src = (issue: Issue, size: number, type?: "RGB" | "LA") =>
+export const coverSrc = (issue: Issue, size: number, type?: "RGB" | "LA") =>
   issue.pdf +
   `.COVER-${type ?? (issue.colour === "paper" ? "RGB" : "LA")}-${size}x.png`;
 

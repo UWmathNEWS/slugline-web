@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { cover_src } from "../shared/helpers";
+import { coverSrc } from "../shared/helpers";
 import {
   ForwardAttributes,
   Issue,
@@ -63,7 +63,7 @@ const taglines = [
   "(cons mastHEAD insanity)",
   "Freshly Imprinted for you",
   "In a congruence class of its own",
-];
+] as const;
 
 const IssueEntryBody: React.FC<{
   issue: Issue;
@@ -146,8 +146,8 @@ const FullHero: React.FC<{ issue: Issue }> = ({ issue }) => {
             <img
               alt={`Cover of Volume ${issue.volume_num} Issue ${issue.issue_code}`}
               className="Hero_coverImg"
-              srcSet={`${cover_src(issue, 1)}, ${cover_src(issue, 2)} 2x`}
-              src={cover_src(issue, 1)}
+              srcSet={`${coverSrc(issue, 1)}, ${coverSrc(issue, 2)} 2x`}
+              src={coverSrc(issue, 1)}
             />
           </Link>
         </div>
@@ -215,23 +215,23 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
 
   if (!fail && resp && reqInfo.state !== RequestState.Running) {
     let issues = resp[0];
-    const latest_issue = resp[1];
+    const latestIssue = resp[1];
     let title = "";
     let hero: React.ReactNode;
 
-    latestIssueRef.current = latest_issue;
+    latestIssueRef.current = latestIssue;
 
     // On the first page, we want a full latest issue hero. However, on subsequent pages, we want a more subtle hero.
     if (page === 1) {
       issues.results = issues.results.filter(
         (issue) =>
-          issue.volume_num !== latest_issue.volume_num &&
-          issue.issue_code !== latest_issue.issue_code
+          issue.volume_num !== latestIssue.volume_num &&
+          issue.issue_code !== latestIssue.issue_code
       );
       hero = (
         <div key="hero" className="Hero Hero--full">
           <div className="Hero_container container d-flex">
-            <FullHero issue={latest_issue} />
+            <FullHero issue={latestIssue} />
           </div>
         </div>
       );
@@ -240,7 +240,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
       hero = (
         <div key="hero" className="Hero Hero--short">
           <div className="Hero_container container">
-            <ShortHero issue={latest_issue} />
+            <ShortHero issue={latestIssue} />
           </div>
         </div>
       );
@@ -252,7 +252,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
           {/* We want the navbar to share the issue's colour */}
           <style key="nav-style">
             {`.SluglineNav, .Hero {
-              --background-clr: var(--paper-${latest_issue.colour}-light) !important;
+              --background-clr: var(--paper-${latestIssue.colour}-light) !important;
             }`}
           </style>
         </Helmet>
