@@ -63,17 +63,29 @@ const createCustomEditor = () => {
       if (editor.selection && Range.isCollapsed(editor.selection)) {
         // since we're in a list and the selection is collapsed,
         // there is one and only one ListItem that we're inside of
-        const [_, path] = getFirstFromIterable(
-          Editor.nodes(editor, {
+        const entry = getFirstFromIterable(
+          Editor.nodes<SluglineElement>(editor, {
             match: (node) =>
               (node as SluglineElement).type === BlockElementType.ListItem,
           })
         );
+        if (!entry) {
+          // this means we're in a list but not in a ListItem, which should not happen
+          throw new Error("Could not locate selected ListItem");
+        }
+
+        const [, path] = entry;
         // if there's no text in this list item
         if (Editor.string(editor, path) === "") {
           // lift the node out of the list and set it to default type
           Transforms.liftNodes(editor);
           Transforms.setNodes(editor, { type: BlockElementType.Default });
+          // if the list is now empty, delete it
+          const parentPath = path.slice(0, -1);
+          const [parentList] = Editor.node(editor, parentPath);
+          if ((parentList as SluglineElement).children.length === 0) {
+            Transforms.removeNodes(editor, { at: parentPath });
+          }
           // and do not add a break
           return;
         }

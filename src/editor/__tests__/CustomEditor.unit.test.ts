@@ -386,4 +386,46 @@ describe("insertBreakWithReset", () => {
       },
     ]);
   });
+
+  it("deletes a list when removing the only item", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "",
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0, 0],
+        offset: 0,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "",
+          },
+        ],
+      },
+    ]);
+  });
 });
