@@ -268,4 +268,122 @@ describe("insertBreakWithReset", () => {
       },
     ]);
   });
+
+  it("doesn't reset paragraph type in a list", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 1",
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0, 0],
+        offset: 6,
+      },
+      focus: {
+        path: [0, 0, 0],
+        offset: 6,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 1",
+              },
+            ],
+          },
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "",
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("exits the list when in an empty list item", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 1",
+              },
+            ],
+          },
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "",
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 1, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 1, 0],
+        offset: 0,
+      },
+    };
+
+    editor.insertBreak();
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 1",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "",
+          },
+        ],
+      },
+    ]);
+  });
 });
