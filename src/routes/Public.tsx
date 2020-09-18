@@ -1,11 +1,11 @@
-import React from "react";
+import type React from "react";
 import Home from "../home/Home";
 import Login from "../auth/Login";
 import IssuePage from "../issues/IssuePage";
 import IssueList from "../issues/IssuesList";
 import Error404 from "../shared/errors/Error404";
 import { renderRoutes } from "../shared/helpers";
-import { RouteProps } from "../shared/types";
+import type { RouteProps } from "../shared/types";
 import api from "../api/api";
 
 export const routes: RouteProps[] = [
