@@ -1,3 +1,4 @@
+import React from "react";
 import Home from "../home/Home";
 import Login from "../auth/Login";
 import IssuePage from "../issues/IssuePage";
@@ -42,7 +43,7 @@ export const routes: RouteProps[] = [
   },
 ];
 
-const Public = () => {
+const Public: React.FC = () => {
   return renderRoutes(routes);
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Field, { FieldProps } from "./Field";
+import Field, { FormControlElement, FieldProps } from "./Field";
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -25,40 +25,40 @@ export const validatePassword = {
   },
 };
 
-const PasswordField = React.forwardRef<any, PasswordFieldProps<any>>(
-  ({ state = useState<boolean>(false), context, ...props }, ref) => {
-    const [showPassword, setShowPassword] = state;
-    return (
-      <Field
-        type={showPassword ? "text" : "password"}
-        name="password"
-        append={
-          <Button
-            title={showPassword ? "Mask password" : "Show password"}
-            variant={showPassword ? "outline-primary" : "outline-secondary"}
-            onClick={() => {
-              setShowPassword((show) => !show);
-            }}
-          >
-            {showPassword ? (
-              <FontAwesomeIcon icon={faEyeSlash} />
-            ) : (
-              <FontAwesomeIcon icon={faEye} />
-            )}
-          </Button>
-        }
-        errors={context.errors}
-        ref={
-          ref ||
-          context.register({
-            required: "USER.PASSWORD.NEW_REQUIRED",
-            validate: validatePassword,
-          })
-        }
-        {...props}
-      />
-    );
-  }
-);
+const PasswordField = React.forwardRef<
+  FormControlElement,
+  PasswordFieldProps<any>
+>(({ state = useState<boolean>(false), context, ...props }, ref) => {
+  const [showPassword, setShowPassword] = state;
+  return (
+    <Field
+      type={showPassword ? "text" : "password"}
+      append={
+        <Button
+          title={showPassword ? "Mask password" : "Show password"}
+          variant={showPassword ? "outline-primary" : "outline-secondary"}
+          onClick={() => {
+            setShowPassword((show) => !show);
+          }}
+        >
+          {showPassword ? (
+            <FontAwesomeIcon icon={faEyeSlash} />
+          ) : (
+            <FontAwesomeIcon icon={faEye} />
+          )}
+        </Button>
+      }
+      errors={context.errors}
+      ref={
+        ref ||
+        context.register({
+          required: "USER.PASSWORD.NEW_REQUIRED",
+          validate: validatePassword,
+        })
+      }
+      {...props}
+    />
+  );
+});
 
 export default PasswordField;
