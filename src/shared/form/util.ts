@@ -1,5 +1,5 @@
-import { FormContextValues } from "react-hook-form";
-import { APIError } from "../types";
+import type { FormContextValues } from "react-hook-form";
+import type { APIError } from "../types";
 
 export const cleanFormData = <T extends {}>(data: T): Partial<T> => {
   let ret: Partial<T> = {};

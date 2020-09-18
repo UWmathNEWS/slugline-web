@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import Field, { FormControlElement, FieldProps } from "./Field";
+import Field from "./Field";
+import type { FormControlElementType, FieldProps } from "./Field";
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { FormContextValues } from "react-hook-form";
+import type { FormContextValues } from "react-hook-form";
 
 type PasswordFieldProps<T> = Omit<FieldProps, "errors"> & {
   context: FormContextValues<T>;
@@ -26,7 +27,7 @@ export const validatePassword = {
 };
 
 const PasswordField = React.forwardRef<
-  FormControlElement,
+  FormControlElementType,
   PasswordFieldProps<any>
 >(({ state = useState<boolean>(false), context, ...props }, ref) => {
   const [showPassword, setShowPassword] = state;

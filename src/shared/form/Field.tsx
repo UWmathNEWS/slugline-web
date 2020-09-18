@@ -1,9 +1,11 @@
 import React from "react";
-import { FormControl, FormControlProps, InputGroup } from "react-bootstrap";
-import { NestDataObject, FieldError, ErrorMessage } from "react-hook-form";
+import { FormControl, InputGroup } from "react-bootstrap";
+import type { FormControlProps } from "react-bootstrap";
+import { ErrorMessage } from "react-hook-form";
+import type { NestDataObject, FieldError } from "react-hook-form";
 import ERRORS from "../errors";
 
-export type FormControlElement = HTMLInputElement &
+export type FormControlElementType = HTMLInputElement &
   HTMLSelectElement &
   HTMLTextAreaElement;
 
@@ -18,7 +20,7 @@ export interface FieldProps<T = any>
   append?: JSX.Element;
 }
 
-const Field = React.forwardRef<FormControlElement, FieldProps>(
+const Field = React.forwardRef<FormControlElementType, FieldProps>(
   (props, forwardedRef) => {
     const {
       name,
