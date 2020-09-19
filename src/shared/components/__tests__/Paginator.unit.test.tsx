@@ -1,15 +1,15 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Paginator from "../Paginator";
+import Paginator, { PaginatorItem } from "../Paginator";
 import { Pagination } from "../../types";
 
 describe("PaginatorItem", () => {
   it("renders added classes", () => {
     const { container } = render(
-      <Paginator.Item to="/test" className="bingo">
+      <PaginatorItem to="/test" className="bingo">
         Test
-      </Paginator.Item>,
+      </PaginatorItem>,
       { wrapper: MemoryRouter }
     );
 
@@ -20,9 +20,9 @@ describe("PaginatorItem", () => {
 
   it("forwards props", () => {
     const { getByRole } = render(
-      <Paginator.Item to="/test" role="button">
+      <PaginatorItem to="/test" role="button">
         Test
-      </Paginator.Item>,
+      </PaginatorItem>,
       { wrapper: MemoryRouter }
     );
 
