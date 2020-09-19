@@ -54,7 +54,7 @@
     "slate": "^0.58.3",
     "slate-history": "^0.58.4",
     "slate-react": "^0.58.4",
-    "typescript": "3.8.3"
+    "typescript": "~3.9.7"
   },
   "scripts": {
     "start": "react-scripts start",
