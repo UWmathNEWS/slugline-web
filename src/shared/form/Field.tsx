@@ -1,14 +1,17 @@
 import React from "react";
-import { FormControl, FormControlProps, InputGroup } from "react-bootstrap";
-import { NestDataObject, FieldError, ErrorMessage } from "react-hook-form";
-import { BsPrefixProps, ReplaceProps } from "react-bootstrap/helpers";
+import { FormControl, InputGroup } from "react-bootstrap";
+import type { FormControlProps } from "react-bootstrap";
+import { ErrorMessage } from "react-hook-form";
+import type { NestDataObject, FieldError } from "react-hook-form";
 import ERRORS from "../errors";
 
-type FormControlElement = HTMLInputElement &
+export type FormControlElementType = HTMLInputElement &
   HTMLSelectElement &
   HTMLTextAreaElement;
 
-interface FieldPropsExtra<T> extends FormControlProps {
+export interface FieldProps<T = any>
+  extends FormControlProps,
+    Omit<React.ComponentPropsWithoutRef<"input">, keyof FormControlProps> {
   name: string;
   errors: NestDataObject<T, FieldError>;
   hideErrorMessage?: boolean;
@@ -17,14 +20,7 @@ interface FieldPropsExtra<T> extends FormControlProps {
   append?: JSX.Element;
 }
 
-// This abomination combines our props with the Form.Control props
-// so we can forward them through
-export type FieldProps<
-  As extends React.ElementType = "input"
-> = FieldPropsExtra<any> &
-  Omit<ReplaceProps<As, BsPrefixProps<As> & FormControlProps>, "ref">;
-
-const Field = React.forwardRef<FormControl & FormControlElement, FieldProps>(
+const Field = React.forwardRef<FormControlElementType, FieldProps>(
   (props, forwardedRef) => {
     const {
       name,
