@@ -95,7 +95,7 @@ const IssueEntry: React.FC<{ issue: Issue } & ForwardAttributes> = ({
       />
       <div className="mt-3">
         {/* TODO: When issue interface is changed, remove fallback */}
-        <ActionLink to={issue.pdf || ""} className="IssueEntry_cta">
+        <ActionLink to={`/issues/${issue.id}`} className="IssueEntry_cta">
           Read Volume {issue.volume_num} Issue {issue.issue_code}
         </ActionLink>
       </div>
