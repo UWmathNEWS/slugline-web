@@ -6,8 +6,12 @@
   font-size: 18px;
   border: none;
   background: none;
-  border-radius: 5px;
+  border-radius: $border-radius;
   margin: spacing(1) / 2;
+  // Chrome gives buttons 6px of padding, while Firefox gives them 8px.
+  // This leads to inconsistent icon sizes, so we're standardizing
+  // on the objectively superior Chrome value.
+  padding: 6px;
 
   & > svg {
     display: block;
@@ -22,11 +26,53 @@
   }
 
   &.active,
-  &:hover {
+  &:hover,
+  &:focus {
     background-color: black;
-
+    color: white;
     & > svg > path {
       fill: white;
+    }
+  }
+
+  &.dropdown-toggle {
+    padding: 0;
+    width: 20px;
+
+    border-top-right-radius: 5px !important;
+    border-bottom-right-radius: 5px !important;
+
+    &::after {
+      vertical-align: middle;
+    }
+  }
+}
+
+.btn-group > .editor-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.editor-control-text {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.extras-dropdown {
+  align-self: flex-end;
+  margin-left: auto;
+  // this pushes it away from the scroll bar, which looks nicer
+  margin-right: spacing(3);
+
+  & > button {
+    background: none;
+    font-family: "Headings Font";
+    border: none;
+
+    &:active,
+    &:hover {
+      background: none !important;
     }
   }
 }
@@ -34,6 +80,7 @@
 .control-popover {
   padding: $spacer;
   background: white;
-  border: 1px solid black;
-  border-radius: 5px;
+  border: solid 1px gray;
+  border-radius: $border-radius;
+  width: auto;
 }

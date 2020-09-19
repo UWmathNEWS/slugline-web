@@ -6,12 +6,12 @@ interface PopoverProps extends OverlayProps {
   setShow: (show: boolean) => void;
 }
 
-const PopoverWrapper: React.FC<PopoverProps> = props => {
+const PopoverWrapper: React.FC<PopoverProps> = (props) => {
   return (
     <Overlay
       target={props.target}
       show={props.show}
-      placement="auto"
+      placement="bottom-start"
       rootClose
       onHide={() => {
         props.setShow(false);

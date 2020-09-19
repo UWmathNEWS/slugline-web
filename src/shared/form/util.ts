@@ -1,10 +1,14 @@
-import { FormContextValues } from "react-hook-form";
-import { APIError } from "../types";
+import type { FormContextValues } from "react-hook-form";
+import type { APIError } from "../types";
 
-export const cleanFormData = <T>(data: T): Partial<T> => {
-  return Object.fromEntries(
-    Object.entries(data).filter(([key, value]) => value !== "")
-  );
+export const cleanFormData = <T extends {}>(data: T): Partial<T> => {
+  let ret: Partial<T> = {};
+  for (const key in data) {
+    if (data.hasOwnProperty(key) && ((data[key] as unknown) as string) !== "") {
+      ret[key] = data[key];
+    }
+  }
+  return ret;
 };
 
 export const setServerErrors = <T, E extends APIError>(

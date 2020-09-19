@@ -124,6 +124,7 @@ const EditorPage: React.FC<RouteComponentProps> = (props) => {
           <SluglineEditor
             title={article.title}
             subtitle={article.sub_title}
+            author={article.author}
             content_raw={editorContent}
             saveArticle={saveArticleDebounced}
             saveArticleContent={saveArticleContentDebounced}

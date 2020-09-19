@@ -8,10 +8,11 @@ import {
   RenderLeafProps,
   RenderElementProps,
 } from "slate-react";
+import { withHistory } from "slate-history";
 
 import { Leaf } from "./components/Leaf";
 import * as EditorHelpers from "./helpers";
-import { SluglineElement, ElementType } from "./types";
+import { SluglineElement, InlineElementType, BlockElementType } from "./types";
 
 import "./styles/SluglineEditor.scss";
 import Link from "./components/Link";
@@ -26,10 +27,24 @@ const renderLeaf = (props: RenderLeafProps) => {
 const renderElement = (props: RenderElementProps) => {
   const element = props.element as SluglineElement;
   switch (element.type) {
-    case ElementType.Link:
+    case InlineElementType.Link:
       return <Link {...props} />;
-    case ElementType.InlineLatex:
+    case InlineElementType.InlineLatex:
       return <InlineLatex {...props} />;
+    case BlockElementType.Header1:
+      return (
+        <h5 {...props.attributes}>
+          <strong>{props.children}</strong>
+        </h5>
+      );
+    case BlockElementType.Header2:
+      return <h6 {...props.attributes}>{props.children}</h6>;
+    case BlockElementType.Code:
+      return (
+        <pre className="article-code-block" {...props.attributes}>
+          {props.children}
+        </pre>
+      );
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }
@@ -57,7 +72,10 @@ interface SluglineEditorProps {
 const SluglineEditor: React.FC<SluglineEditorProps> = (
   props: SluglineEditorProps
 ) => {
-  const editor = useMemo(() => withReact(createCustomEditor()), []);
+  const editor = useMemo(
+    () => withHistory(withReact(createCustomEditor())),
+    []
+  );
 
   const [value, setValue] = useState<Node[]>(
     props.content_raw || EDITOR_STATE_EMPTY
@@ -107,7 +125,11 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
             placeholder="Start your masterpiece..."
             renderLeaf={renderLeaf}
             renderElement={renderElement}
+            className="editor-contenteditable"
             onKeyDown={(evt: React.KeyboardEvent) => {
+              EditorHelpers.keyDown(editor, evt);
+            }}
+            onKeyPress={(evt: React.KeyboardEvent) => {
               EditorHelpers.keyDown(editor, evt);
             }}
             onBlur={() => {

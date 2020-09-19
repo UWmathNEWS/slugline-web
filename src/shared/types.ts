@@ -1,9 +1,9 @@
-import {
+import type {
   RouteComponentProps as _RouteComponentProps,
   RouteProps as _RouteProps,
   StaticRouterContext,
 } from "react-router";
-import React from "react";
+import type React from "react";
 
 declare global {
   interface Window {
