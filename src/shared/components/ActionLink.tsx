@@ -1,7 +1,8 @@
 import React from "react";
 
 import "./styles/ActionLink.scss";
-import { Link, LinkProps } from "react-router-dom";
+import { Link } from "react-router-dom";
+import type { LinkProps } from "react-router-dom";
 
 const ActionLink = React.forwardRef<HTMLAnchorElement, LinkProps>(
   ({ className, children, ...props }, ref) => {

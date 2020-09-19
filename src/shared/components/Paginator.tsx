@@ -1,9 +1,10 @@
 import React from "react";
-import { Link, LinkProps } from "react-router-dom";
-import { ForwardAttributes, Pagination } from "../types";
+import { Link } from "react-router-dom";
+import type { LinkProps } from "react-router-dom";
+import type { ForwardAttributes, Pagination } from "../types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./styles/Paginator.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export const PaginatorItem: React.FC<ForwardAttributes & LinkProps> = ({
   className,

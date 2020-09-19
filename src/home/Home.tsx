@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { coverSrc } from "../shared/helpers";
-import {
+import type {
   ForwardAttributes,
   Issue,
   Pagination,
@@ -15,11 +15,11 @@ import ErrorPage from "../shared/errors/ErrorPage";
 import Visor from "../shared/components/Visor";
 import Loader from "../shared/components/Loader";
 import Dateline from "../shared/components/Dateline";
+import Paginator from "../shared/components/Paginator";
 import ActionLink from "../shared/components/ActionLink";
 import { LinkButton } from "../shared/components/Button";
 
 import "./styles/Home.scss";
-import Paginator from "../shared/components/Paginator";
 
 const taglines = [
   /* Contributed by terrifiED */

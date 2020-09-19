@@ -1,9 +1,8 @@
 import React from "react";
-import {
-  Button as BsButton,
-  ButtonProps as BsButtonProps,
-} from "react-bootstrap";
-import { Link, LinkProps } from "react-router-dom";
+import { Button as BsButton } from "react-bootstrap";
+import type { ButtonProps as BsButtonProps } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import type { LinkProps } from "react-router-dom";
 
 import "./styles/Button.scss";
 
@@ -18,7 +17,7 @@ export interface ButtonProps {
 }
 
 const Button = React.forwardRef<
-  BsButton & HTMLButtonElement, // TODO: remove dependency on BsButton once we upgrade react-bootstrap
+  HTMLButtonElement,
   ButtonProps & Omit<BsButtonProps, "variant"> & JSX.IntrinsicElements["button"]
 >(({ variant, className, children, ...props }, ref) => {
   return (
