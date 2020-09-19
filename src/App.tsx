@@ -24,10 +24,10 @@ interface AppProps {
   history?: History;
 }
 
-export const appFactory = <T extends any = {}>(
-  Component: React.ComponentType<T>
-): React.FC<T> => {
-  return (props: T) => (
+export const appFactory = <P extends any = {}>(
+  Component: React.ComponentType<P>
+): React.FC<P> => {
+  return (props: React.PropsWithChildren<P>) => (
     <>
       <BaseVisor />
       <SluglineNav />
@@ -40,7 +40,7 @@ export const appFactory = <T extends any = {}>(
   );
 };
 
-const MainApp = () => (
+const MainApp: React.FC = () => (
   <Switch>
     <PrivateRoute path="/dash">
       <Dash />
