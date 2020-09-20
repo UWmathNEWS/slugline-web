@@ -8,6 +8,7 @@ import {
   EditorDropdown,
   ToggleMarkButtonText,
   ToggleBlockButtonText,
+  ImageButton,
 } from "./components/controls";
 import { Mark, BlockElementType } from "./types";
 
@@ -80,6 +81,7 @@ const EditorControls: React.FC = () => {
         title="Ordered List"
         blockType={BlockElementType.OrderedList}
       />
+      <ImageButton />
       <ExtrasDropdown />
     </div>
   );

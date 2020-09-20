@@ -55,6 +55,8 @@ const createCustomEditor = () => {
     switch (e.type) {
       case InlineElementType.InlineLatex:
         return true;
+      case BlockElementType.Image:
+        return true;
       default:
         return false;
     }

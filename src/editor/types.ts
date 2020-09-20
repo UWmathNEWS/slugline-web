@@ -24,6 +24,7 @@ export enum BlockElementType {
   UnorderedList = "unordered-list",
   OrderedList = "ordered-list",
   ListItem = "list-item",
+  Image = "image",
 }
 
 export type ElementType = InlineElementType | BlockElementType;
@@ -69,6 +70,11 @@ export interface ListItemElement extends Element {
   type: BlockElementType.ListItem;
 }
 
+export interface ImageElement extends Element {
+  type: BlockElementType.Image;
+  src: string;
+}
+
 export type BlockElement =
   | Header1Element
   | Header2Element
@@ -77,8 +83,11 @@ export type BlockElement =
   | OrderedListElement
   | ListItemElement;
 
+export type BlockVoidElement = ImageElement;
+
 export type SluglineElement =
   | DefaultElement
   | InlineElement
   | InlineVoidElement
-  | BlockElement;
+  | BlockElement
+  | BlockVoidElement;

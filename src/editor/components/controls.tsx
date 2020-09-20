@@ -17,11 +17,13 @@ import {
   isBlockActive,
   hasInlines,
   unwrapInline,
+  insertVoidBlock,
 } from "../helpers";
 
 import "./styles/controls.scss";
 import LinkPopover from "./LinkPopover";
 import LatexPopover from "./LatexPopover";
+import ImagePopover from "./ImagePopover";
 import PopoverWrapper from "./PopoverWrapper";
 import { DropdownButton, Button, Dropdown, ButtonGroup } from "react-bootstrap";
 
@@ -214,6 +216,47 @@ export const InlineLatexButton: React.FC = () => {
           setShow={setShowPopover}
         >
           <LatexPopover latex="" setLatex={setLatex} />
+        </PopoverWrapper>
+      )}
+    </>
+  );
+};
+
+export const ImageButton: React.FC = () => {
+  const editor = useSlate();
+  const ref = useRef<HTMLButtonElement>(null);
+
+  const [showPopover, setShowPopover] = useState<boolean>(false);
+
+  const submit = (src: string, hasCaption: boolean) => {
+    ReactEditor.focus(editor);
+    setShowPopover(false);
+    insertVoidBlock(editor, {
+      type: BlockElementType.Image,
+      src: src,
+      children: [{ text: "" }],
+    });
+  };
+
+  return (
+    <>
+      <button
+        ref={ref}
+        title="Image"
+        className="editor-control"
+        onClick={() => {
+          setShowPopover(true);
+        }}
+      >
+        <FontAwesomeIcon icon="image" />
+      </button>
+      {ref.current && (
+        <PopoverWrapper
+          target={ref.current}
+          show={showPopover}
+          setShow={setShowPopover}
+        >
+          <ImagePopover submit={submit} src={""} hasCaption={false} />
         </PopoverWrapper>
       )}
     </>

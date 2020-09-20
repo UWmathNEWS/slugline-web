@@ -9,6 +9,7 @@ import {
   BlockElementType,
   InlineElementType,
   ElementType,
+  BlockVoidElement,
 } from "./types";
 import { HistoryEditor } from "slate-history";
 
@@ -222,6 +223,15 @@ export const isListType = (blockType: ElementType) => {
   );
 };
 
+/**
+ * Inserts a void block element at the current selection.
+ * @param editor The editor to insert the block into
+ * @param block The block to insert. The `children` property will not be inserted.
+ */
+export const insertVoidBlock = (editor: Editor, block: BlockVoidElement) => {
+  Transforms.insertNodes(editor, block);
+};
+
 const MARK_HOTKEYS: Array<[Mark, string]> = [
   [Mark.Strikethrough, "mod+d"],
   [Mark.ArticleRef, "mod+q"],
@@ -241,6 +251,13 @@ export const keyDown = (
   if (isHotkey("shift+enter", evt.nativeEvent)) {
     editor.insertText("\n");
     evt.preventDefault();
+  }
+  if (isHotkey("shift+control+i", evt.nativeEvent)) {
+    insertVoidBlock(editor, {
+      type: BlockElementType.Image,
+      src: "https://i.kym-cdn.com/photos/images/newsfeed/001/207/210/b22.jpg",
+      children: [{ text: "" }],
+    });
   }
 };
 

@@ -19,6 +19,7 @@ import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
+import Image from "./components/Image";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -51,6 +52,8 @@ const renderElement = (props: RenderElementProps) => {
       return <ul>{props.children}</ul>;
     case BlockElementType.ListItem:
       return <li>{props.children}</li>;
+    case BlockElementType.Image:
+      return <Image {...props} />;
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }
