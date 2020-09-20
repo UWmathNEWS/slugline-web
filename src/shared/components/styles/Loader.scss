@@ -11,6 +11,7 @@
   color: transparent;
   overflow: hidden;
   border-radius: $border-radius;
+  mix-blend-mode: multiply;
 
   &::before {
     content: "";

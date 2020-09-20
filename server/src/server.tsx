@@ -31,6 +31,13 @@ router.use(
     changeOrigin: true,
   })
 );
+router.use(
+  "^/media",
+  proxy({
+    target: process.env.SLUGLINE_SERVER || "http://localhost:8000",
+    changeOrigin: true,
+  })
+);
 
 router.use("^/dash", dashRenderer);
 

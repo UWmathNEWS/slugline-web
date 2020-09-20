@@ -1,0 +1,41 @@
+@import "~bootstrap/scss/mixins/buttons";
+@import "../../../styles/slugline_vars";
+
+$gp-btn-variants: (
+  "dark": $black,
+  "light": $white,
+  "pink-dark": $pink-700,
+  "pink-light": $pink-150,
+  "grey-dark": $gray-700,
+  "grey-light": $gray-300,
+);
+
+.Button {
+  border-radius: 0;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-family: $headings-ff;
+  font-weight: bold;
+  font-size: 0.9rem;
+
+  &.btn-sm {
+    font-size: 0.7875rem;
+  }
+
+  &.btn-lg {
+    font-size: 1.125rem;
+  }
+}
+
+@each $variant, $clr in $gp-btn-variants {
+  .Button-#{$variant} {
+    @if $variant == "dark" {
+      @include button-variant($clr, $clr,
+                              $hover-background: lighten($clr, 17.5%),
+                              $active-background: lighten($clr, 25%));
+    } @else {
+      @include button-variant($clr, $clr);
+    }
+  }
+}
+

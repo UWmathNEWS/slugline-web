@@ -191,6 +191,44 @@ export const unwrap = async <TResp, TError extends APIError = APIError>(
 };
 
 /**
+ * Combines a list of APIResponse promises, returning a single APIResponse with statusCode 200 containing a list of
+ * the data returned by the input promises in order. If any of the promises throws, returns the error thrown by the
+ * first promise in the list to throw.
+ * @param ps List of promises to combine
+ */
+// This is a function and not a const as it makes our life easier with implementation, and also looks cleaner
+export async function combine<T extends Array<Promise<APIResponse<any, any>>>>(
+  ...ps: T
+): Promise<
+  APIResponse<
+    {
+      [K in keyof T]: T[K] extends Promise<APIResponse<infer TResp, any>>
+        ? TResp
+        : never;
+    }
+  >
+>;
+export async function combine(...ps: any[]): Promise<any> {
+  const resps = await Promise.all(ps);
+  const data: any[] = [];
+  for (const resp of resps) {
+    if (!resp.success) {
+      return {
+        success: false,
+        statusCode: resp.statusCode,
+        error: resp.error,
+      };
+    }
+    data.push(resp.data);
+  }
+  return {
+    success: true,
+    statusCode: 200,
+    data,
+  };
+}
+
+/**
  * A basic, all-defaults endpoint factory that assumes all API methods
  * have the same response/body types and all return the same error type.
  * @param endpoint The endpoint url, ending in a slash
@@ -298,6 +336,12 @@ const api = {
     ...endpointFactory<Issue>("issues/"),
     create: createFactory<Issue, IssueAPIError>("issues/"),
     latest: listFactory<Issue, APIError>("issues/latest/"),
+    articles: issueArticles,
+  },
+  published_issues: {
+    list: listFactory<Pagination<Issue>>("published_issues/"),
+    get: getFactory<Issue>("published_issues/"),
+    latest: listFactory<Issue>("published_issues/latest/"),
     articles: issueArticles,
   },
   articles: {

@@ -1,21 +1,18 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue, Pagination, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
 import { RequestState } from "../api/hooks";
-import api from "../api/api";
 import Loader from "../shared/components/Loader";
 import ErrorPage from "../shared/errors/ErrorPage";
 import { useSSRData } from "../shared/hooks";
+import { coverSrc } from "../shared/helpers";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
 }
-
-const IMG_DEFAULT =
-  "https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_1600/gynfui2kgjtnzdwlsxqy.jpg";
 
 const VolumeIssues = (props: VolumeIssuesProps) => {
   return (
@@ -34,7 +31,12 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
             >
               <img
                 className="volume-issue-img mb-1"
-                src={IMG_DEFAULT}
+                srcSet={`${coverSrc(issue, 1, "RGB")}, ${coverSrc(
+                  issue,
+                  2,
+                  "RGB"
+                )} 2x`}
+                src={coverSrc(issue, 1, "RGB")}
                 alt={`Volume ${issue.volume_num} Issue ${issue.issue_code} cover`}
               />
               <h6 className="text-center">{`Issue ${issue.issue_code}`}</h6>
@@ -68,12 +70,14 @@ const issuesToVolumes = (paginatedIssues: Pagination<Issue>): Issue[][] => {
   return vols;
 };
 
-const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
-  props
-) => {
+const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
+  route,
+  location,
+  staticContext,
+}) => {
   const [volumes, dataInfo, fail] = useSSRData(
-    api.issues.list,
-    props.staticContext?.data ? issuesToVolumes(props.staticContext.data) : [],
+    useCallback(() => route.loadData!({}), [route.loadData]),
+    staticContext?.data ? issuesToVolumes(staticContext.data) : [],
     issuesToVolumes
   );
 
@@ -82,15 +86,8 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
   }
 
   return (
-    <>
-      <Visor
-        title={
-          dataInfo.state === RequestState.Running
-            ? "Loading..."
-            : props.route.title
-        }
-        location={props.location.pathname}
-      />
+    <div className="container">
+      <Visor title={route.title} location={location.pathname} />
       <h1>Issues</h1>
       {dataInfo.state === RequestState.Running ? (
         <Loader variant="spinner" />
@@ -99,7 +96,7 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = (
           return <VolumeIssues key={i} volume={volume} />;
         })
       )}
-    </>
+    </div>
   );
 };
 

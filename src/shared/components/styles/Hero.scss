@@ -1,0 +1,20 @@
+@import "../../../styles/slugline_vars";
+
+.Hero {
+  background-color: var(--background-clr);
+  padding-top: spacing(3);
+  padding-bottom: spacing(5);
+  overflow-x: hidden;
+
+  &--primary {
+    --background-clr: #{$primary};
+  }
+
+  &--light {
+    --background-clr: #{$gray-100};
+  }
+
+  &--dark {
+    --background-clr: #{$gray-900};
+  }
+}
