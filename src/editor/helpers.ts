@@ -252,13 +252,6 @@ export const keyDown = (
     editor.insertText("\n");
     evt.preventDefault();
   }
-  if (isHotkey("shift+control+i", evt.nativeEvent)) {
-    insertVoidBlock(editor, {
-      type: BlockElementType.Image,
-      src: "https://i.kym-cdn.com/photos/images/newsfeed/001/207/210/b22.jpg",
-      children: [{ text: "" }],
-    });
-  }
 };
 
 export const keyPressed = (
