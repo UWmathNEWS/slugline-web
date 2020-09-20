@@ -23,6 +23,14 @@ export interface IssueEntryHeroProps extends IssueEntryPropsBase {
   showCover?: boolean;
 }
 
+/**
+ * Display an issue's metadata and link to its page.
+ *
+ * @param issue The issue to display
+ * @param tagline A short (50 characters or less) line of flavour text
+ * @param showFooter Show the footer?
+ * @param className Additional classes to attach
+ */
 const IssueEntry: React.FC<IssueEntryProps & ForwardAttributes> = ({
   issue,
   tagline,
@@ -50,6 +58,14 @@ const IssueEntry: React.FC<IssueEntryProps & ForwardAttributes> = ({
   );
 };
 
+/**
+ * Display an issue in a hero-friendly format. Parameters largely mirror that of IssueEntry.
+ *
+ * @param issue The issue to display
+ * @param tagline A short line of flavour text
+ * @param showCover Show the cover image to the right of the issue metadata?
+ * @param className Additional classes to forward to IssueEntry
+ */
 export const IssueEntryHero: React.FC<
   IssueEntryHeroProps & ForwardAttributes
 > = ({ issue, tagline, showCover, className }) => {

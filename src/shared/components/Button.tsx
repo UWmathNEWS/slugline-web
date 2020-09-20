@@ -16,6 +16,14 @@ export interface ButtonProps {
     | "grey-light";
 }
 
+/**
+ * A button is used to allow the user to perform an action.
+ *
+ * @param variant The theme of the button
+ * @param className Additional classes to attach to the button
+ * @param children The contents of the button
+ * @param props Additional props to forward to the button
+ */
 const Button = React.forwardRef<
   HTMLButtonElement,
   ButtonProps & Omit<BsButtonProps, "variant"> & JSX.IntrinsicElements["button"]
@@ -32,6 +40,9 @@ const Button = React.forwardRef<
   );
 });
 
+/**
+ * A LinkButton is used for links that *really* need to stand out. Use very, very sparingly.
+ */
 export const LinkButton = React.forwardRef<
   HTMLAnchorElement,
   ButtonProps & LinkProps
