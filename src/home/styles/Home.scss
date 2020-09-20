@@ -1,15 +1,12 @@
 @import "../../styles/slugline_vars";
 
 .Hero {
-  --background-clr: #{$primary};
-
-  background-color: var(--background-clr);
-  padding-top: spacing(3);
-  padding-bottom: spacing(5);
-  overflow-x: hidden;
-
-  &--full &_content {
+  &--full .IssueEntry {
     min-width: 14rem;
+  }
+
+  &--full &_container {
+    display: flex;
   }
 
   &_coverImg {
@@ -35,21 +32,5 @@
 
   &_loaderCta {
     max-width: 200px;
-  }
-}
-
-.IssueEntry {
-  &_title a {
-    color: $black;
-    text-decoration: none;
-
-    &:hover {
-      color: $black;
-      text-decoration: underline;
-    }
-  }
-
-  &--hero {
-    min-width: 200px;
   }
 }

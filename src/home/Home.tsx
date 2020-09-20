@@ -1,14 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet";
-import { Link } from "react-router-dom";
-import { format } from "date-fns";
-import { coverSrc } from "../shared/helpers";
-import type {
-  ForwardAttributes,
-  Issue,
-  Pagination,
-  RouteComponentProps,
-} from "../shared/types";
+import type { Issue, Pagination, RouteComponentProps } from "../shared/types";
 import { useSSRData } from "../shared/hooks";
 import { RequestState } from "../api/hooks";
 import ErrorPage from "../shared/errors/ErrorPage";
@@ -16,10 +8,10 @@ import Visor from "../shared/components/Visor";
 import Loader from "../shared/components/Loader";
 import Dateline from "../shared/components/Dateline";
 import Paginator from "../shared/components/Paginator";
-import ActionLink from "../shared/components/ActionLink";
-import { LinkButton } from "../shared/components/Button";
+import IssueEntry, { IssueEntryHero } from "../shared/components/IssueEntry";
 
 import "./styles/Home.scss";
+import Hero from "../shared/components/Hero";
 
 const taglines = [
   /* Contributed by terrifiED */
@@ -64,112 +56,6 @@ const taglines = [
   "Freshly Imprinted for you",
   "In a congruence class of its own",
 ] as const;
-
-const IssueEntryBody: React.FC<{
-  issue: Issue;
-  dateline: string;
-}> = ({ issue, dateline }) => {
-  return (
-    <>
-      <Dateline>
-        {dateline} &bull;{" "}
-        {format(new Date(issue.publish_date || Date.now()), "d MMM y")}
-      </Dateline>
-      <h2 className="IssueEntry_title mt-1">
-        <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
-      </h2>
-      <div className="IssueEntry_description mt-3">{issue.description}</div>
-    </>
-  );
-};
-
-const IssueEntry: React.FC<{ issue: Issue } & ForwardAttributes> = ({
-  issue,
-  className,
-}) => {
-  return (
-    <div className={`IssueEntry ${className || ""}`}>
-      <IssueEntryBody
-        issue={issue}
-        dateline={`Volume ${issue.volume_num} Issue ${issue.issue_code}`}
-      />
-      <div className="mt-3">
-        {/* TODO: When issue interface is changed, remove fallback */}
-        <ActionLink to={`/issues/${issue.id}`} className="IssueEntry_cta">
-          Read Volume {issue.volume_num} Issue {issue.issue_code}
-        </ActionLink>
-      </div>
-    </div>
-  );
-};
-
-const HeroEntry: React.FC<
-  { issue: Issue; tagline?: string } & ForwardAttributes
-> = ({ issue, tagline, className }) => {
-  return (
-    <div className={`IssueEntry IssueEntry--hero ${className || ""}`}>
-      <IssueEntryBody
-        issue={issue}
-        dateline={
-          tagline ?? taglines[Math.floor(Math.random() * taglines.length)]
-        }
-      />
-    </div>
-  );
-};
-
-const FullHero: React.FC<{ issue: Issue }> = ({ issue }) => {
-  return (
-    <>
-      <div className="Hero_content d-flex flex-column mr-5">
-        <HeroEntry issue={issue} />
-        <div className="flex-fill" />
-        <div className="Hero_cta mt-3">
-          <LinkButton
-            to={`/issues/${issue.id}`}
-            variant="dark"
-            className="IssueEntry_cta"
-          >
-            Read Volume {issue.volume_num} Issue {issue.issue_code}
-          </LinkButton>
-        </div>
-      </div>
-      {issue.pdf && (
-        <div className="ml-auto">
-          <Link
-            to={`/issues/${issue.id}`}
-            className="d-inline-block"
-            style={{
-              backgroundColor: `var(--paper-${issue.colour})`,
-            }}
-          >
-            <img
-              alt={`Cover of Volume ${issue.volume_num} Issue ${issue.issue_code}`}
-              className="Hero_coverImg"
-              srcSet={`${coverSrc(issue, 1)}, ${coverSrc(issue, 2)} 2x`}
-              src={coverSrc(issue, 1)}
-            />
-          </Link>
-        </div>
-      )}
-    </>
-  );
-};
-
-const ShortHero: React.FC<{ issue: Issue }> = ({ issue }) => {
-  return (
-    <>
-      <HeroEntry issue={issue} tagline="Latest Issue" />
-      <LinkButton
-        to={`/issues/${issue.id}`}
-        variant="dark"
-        className="IssueEntry_cta mt-3"
-      >
-        Read Volume {issue.volume_num} Issue {issue.issue_code}
-      </LinkButton>
-    </>
-  );
-};
 
 const HeroLoader: React.FC = () => {
   return (
@@ -217,6 +103,7 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
     let issues = resp[0];
     const latestIssue = resp[1];
     let title = "";
+    let heroType: string;
     let hero: React.ReactNode;
 
     latestIssueRef.current = latestIssue;
@@ -228,22 +115,18 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
           issue.volume_num !== latestIssue.volume_num &&
           issue.issue_code !== latestIssue.issue_code
       );
+      heroType = "full";
       hero = (
-        <div key="hero" className="Hero Hero--full">
-          <div className="Hero_container container d-flex">
-            <FullHero issue={latestIssue} />
-          </div>
-        </div>
+        <IssueEntryHero
+          issue={latestIssue}
+          tagline={taglines[Math.floor(Math.random() * taglines.length)]}
+          showCover
+        />
       );
     } else {
       title = `Page ${page}`;
-      hero = (
-        <div key="hero" className="Hero Hero--short">
-          <div className="Hero_container container">
-            <ShortHero issue={latestIssue} />
-          </div>
-        </div>
-      );
+      heroType = "short";
+      hero = <IssueEntryHero issue={latestIssue} tagline="Latest Issue" />;
     }
     return (
       <>
@@ -256,7 +139,9 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
             }`}
           </style>
         </Helmet>
-        {hero}
+        <Hero key="hero" variant="custom" className={`Hero--${heroType}`}>
+          {hero}
+        </Hero>
         <div
           key="content"
           className="container mt-5"
@@ -285,21 +170,25 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
             }`}
           </style>
         </Helmet>
-        <div key="hero" className="Hero Hero--short">
-          <div className="Hero_container container">
-            {latestIssueRef.current ? (
-              <ShortHero issue={latestIssueRef.current} />
-            ) : (
-              <HeroLoader />
-            )}
-          </div>
-        </div>
+        <Hero key="hero" variant="custom" className="Hero--short">
+          {latestIssueRef.current ? (
+            <IssueEntryHero
+              issue={latestIssueRef.current}
+              tagline="Latest Issue"
+            />
+          ) : (
+            <HeroLoader />
+          )}
+        </Hero>
         <div
           key="content"
           className="container mt-5"
           data-testid="home-content"
         >
           <Loader variant="spinner" />
+          {resp && (
+            <Paginator pagination={resp[0]} url={(page) => `/?paged=${page}`} />
+          )}
         </div>
       </>
     );

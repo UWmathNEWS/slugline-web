@@ -1,0 +1,17 @@
+@import "../../../styles/slugline_vars";
+
+.IssueEntry {
+  &_title a {
+    color: $black;
+    text-decoration: none;
+
+    &:hover {
+      color: $black;
+      text-decoration: underline;
+    }
+  }
+
+  &--hero {
+    min-width: 200px;
+  }
+}
