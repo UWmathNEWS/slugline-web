@@ -1,6 +1,6 @@
 import createCustomEditor from "../CustomEditor";
-import { BlockElementType, InlineElementType } from "../types";
-import { toggleBlock } from "../helpers";
+import { BlockElementType, ImageElement, InlineElementType } from "../types";
+import { insertVoidBlock, toggleBlock } from "../helpers";
 
 describe("toggleBlock", () => {
   it("changes the block type", () => {
@@ -284,6 +284,198 @@ describe("toggleBlock", () => {
         children: [
           {
             text: "Not Header",
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("insertVoidBlock", () => {
+  const VOID_BLOCK: ImageElement = {
+    type: BlockElementType.Image,
+    src: "www.image.com",
+    children: [{ text: "" }],
+  };
+
+  it("inserts void blocks", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "word",
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 2,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 2,
+      },
+    };
+
+    insertVoidBlock(editor, VOID_BLOCK);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "wo",
+          },
+        ],
+      },
+      {
+        ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "rd",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("works in lists", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 1",
+              },
+            ],
+          },
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 2",
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0, 0],
+        offset: 2,
+      },
+      focus: {
+        path: [0, 0, 0],
+        offset: 2,
+      },
+    };
+
+    insertVoidBlock(editor, VOID_BLOCK);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "it",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "em 1",
+              },
+            ],
+          },
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 2",
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("replaces selected text", () => {
+    const editor = createCustomEditor();
+
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "paragraph 1",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "paragraph 2",
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 9,
+      },
+      focus: {
+        path: [1, 0],
+        offset: 10,
+      },
+    };
+
+    insertVoidBlock(editor, VOID_BLOCK);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "paragraph",
+          },
+        ],
+      },
+      {
+        ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "2",
           },
         ],
       },

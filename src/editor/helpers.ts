@@ -229,7 +229,9 @@ export const isListType = (blockType: ElementType) => {
  * @param block The block to insert. The `children` property will not be inserted.
  */
 export const insertVoidBlock = (editor: Editor, block: BlockVoidElement) => {
-  Transforms.insertNodes(editor, block);
+  Transforms.insertNodes(editor, block, {
+    mode: "highest",
+  });
 };
 
 const MARK_HOTKEYS: Array<[Mark, string]> = [
