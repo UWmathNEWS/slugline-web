@@ -69,10 +69,6 @@ export interface ListItemElement extends Element {
   type: BlockElementType.ListItem;
 }
 
-export type ListElementType =
-  | BlockElementType.UnorderedList
-  | BlockElementType.UnorderedList;
-
 export type BlockElement =
   | Header1Element
   | Header2Element
