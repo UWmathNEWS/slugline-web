@@ -8,7 +8,7 @@ const Error500: React.FC<Partial<RouteComponentProps>> = ({
   staticContext.statusCode = 500;
 
   return (
-    <div>
+    <div className="container">
       <Visor title="Server Error" />
       <h1 className="display-1">500</h1>
       <h1>Server Error</h1>

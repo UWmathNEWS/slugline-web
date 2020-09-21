@@ -33,6 +33,7 @@ const serverRenderer = (req: Request, res: Response) => {
       currentRoute.loadData({
         url: req.url,
         params,
+        query: req.query,
         headers: { Cookie: req.header("cookie") || "" },
       })
     );

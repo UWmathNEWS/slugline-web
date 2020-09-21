@@ -1,6 +1,6 @@
 import React from "react";
 import config from "../config";
-import { RouteProps } from "./types";
+import { Issue, RouteProps } from "./types";
 import { Route, RouteComponentProps, Switch } from "react-router";
 
 import * as url from "./helpers/url";
@@ -123,3 +123,20 @@ export const renderRoutes: {
     </Switch>
   );
 };
+
+/**
+ * Returns the appropriate URL to the cover image of an issue
+ *
+ * @param issue The issue to return the cover image for
+ * @param size The size of image to link to
+ * @param type The type of image to link to
+ */
+export const coverSrc = (issue: Issue, size: number, type?: "RGB" | "LA") =>
+  issue.pdf +
+  `.COVER-${type ?? (issue.colour === "paper" ? "RGB" : "LA")}-${size}x.png`;
+
+/**
+ * Does nothing.
+ */
+/* istanbul ignore next */
+export const noop = () => {};

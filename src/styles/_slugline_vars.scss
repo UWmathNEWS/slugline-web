@@ -1,6 +1,9 @@
+$pink-150: #ffc2de;
+$pink-700: #8e1155;
+
 // These variables have to be before the import because they'll break otherwise
 
-$primary: #f2c0d9;
+$primary: $pink-150;
 
 // Use our custom fonts
 $body-ff: "Body Font", serif;
@@ -20,7 +23,7 @@ $headings-color: black;
 $link-color: black;
 
 // Navbar variables
-$navbar-light-color: $primary;
+$navbar-light-color: $pink-150;
 $navbar-brand-font-size: 2rem;
 
 // Forms
@@ -31,10 +34,73 @@ $input-border-width: 1px;
 $input-border-color: $gray-600;
 $input-padding-x: 0.5rem;
 $input-focus-box-shadow: none;
-$input-focus-border-color: $primary;
+$input-focus-border-color: $pink-150;
 $enable-validation-icons: false;
 
 // FUNCTIONS
 @function spacing($n) {
   @return map-get($map: $spacers, $key: $n);
 }
+
+// Paper colors
+$paper-blastoff-blue: #4c6494;
+$paper-celestial-blue: #0fa3ce;
+$paper-cosmic-orange: #ff7c21;
+$paper-fireball-fuchsia: #ff3ca5;
+$paper-galaxy-gold: #ffb61c;
+$paper-gamma-green: #3d9e57;
+$paper-gravity-grape: #8e57aa;
+$paper-liftoff-lemon: #d9f115;
+$paper-lunar-blue: #64bbb3;
+$paper-martian-green: #7dea4e;
+$paper-orbit-orange: #fd6534;
+$paper-outrageous-orchid: #e363ae;
+$paper-planetary-purple: #be6a9e;
+$paper-pulsar-pink: #ff7a97;
+$paper-reentry-red: #d52a39;
+$paper-rocket-red: #ff5e63;
+$paper-sunburst-yellow: #fed000;
+$paper-terra-green: #abe720;
+$paper-terrestrial-teal: #28a89b;
+$paper-venus-violet: #867bc7;
+$paper-pastel-blue: #abd2d7;
+$paper-pastel-buff: #f6e7c3;
+$paper-pastel-canary: #fff28f;
+$paper-pastel-goldenrod: #f2cb62;
+$paper-pastel-grey: #ddd8d2;
+$paper-pastel-green: #add9b5;
+$paper-pastel-orchid: #b6c2d0;
+$paper-pastel-pink: #f7aeb9;
+$paper-pastel-salmon: #f3a090;
+
+$paper-colours: (
+  "blastoff-blue": $paper-blastoff-blue,
+  "celestial-blue": $paper-celestial-blue,
+  "cosmic-orange": $paper-cosmic-orange,
+  "fireball-fuchsia": $paper-fireball-fuchsia,
+  "galaxy-gold": $paper-galaxy-gold,
+  "gamma-green": $paper-gamma-green,
+  "gravity-grape": $paper-gravity-grape,
+  "liftoff-lemon": $paper-liftoff-lemon,
+  "lunar-blue": $paper-lunar-blue,
+  "martian-green": $paper-martian-green,
+  "orbit-orange": $paper-orbit-orange,
+  "outrageous-orchid": $paper-outrageous-orchid,
+  "planetary-purple": $paper-planetary-purple,
+  "pulsar-pink": $paper-pulsar-pink,
+  "reentry-red": $paper-reentry-red,
+  "rocket-red": $paper-rocket-red,
+  "sunburst-yellow": $paper-sunburst-yellow,
+  "terra-green": $paper-terra-green,
+  "terrestrial-teal": $paper-terrestrial-teal,
+  "venus-violet": $paper-venus-violet,
+  "pastel-blue": $paper-pastel-blue,
+  "pastel-buff": $paper-pastel-buff,
+  "pastel-canary": $paper-pastel-canary,
+  "pastel-goldenrod": $paper-pastel-goldenrod,
+  "pastel-grey": $paper-pastel-grey,
+  "pastel-green": $paper-pastel-green,
+  "pastel-orchid": $paper-pastel-orchid,
+  "pastel-pink": $paper-pastel-pink,
+  "pastel-salmon": $paper-pastel-salmon,
+)

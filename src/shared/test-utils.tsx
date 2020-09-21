@@ -4,12 +4,13 @@ import {
   APIError,
   APIResponse,
   User,
+  Issue,
 } from "./types";
 import { History } from "history";
 import { useAuth } from "../auth/Auth";
 import React from "react";
 
-export const testUser: User = {
+export const testUser: User = Object.freeze({
   username: "test",
   first_name: "test",
   last_name: "tester",
@@ -17,9 +18,9 @@ export const testUser: User = {
   is_staff: false,
   role: "Contributor",
   writer_name: "testy mctestface",
-};
+});
 
-export const testAdmin: User = {
+export const testAdmin: User = Object.freeze({
   username: "tset",
   first_name: "tset",
   last_name: "retsest",
@@ -27,25 +28,34 @@ export const testAdmin: User = {
   is_staff: true,
   role: "Editor",
   writer_name: "ytsest ecaftsetcm",
-};
+});
 
-export const MOCK_BODY = {
+export const testIssue: Issue = Object.freeze({
+  volume_num: 0,
+  issue_code: "0",
+  pdf: "test.pdf",
+  title: "Testanus",
+  description: "Testy testanus",
+  colour: "paper",
+});
+
+export const MOCK_BODY = Object.freeze({
   data: "bingo bango bongo",
-};
+});
 
 export const MOCK_CSRF = "bingobangobongo";
 
-export const MOCK_RESPONSE: APIResponseSuccess<string> = {
+export const MOCK_RESPONSE: APIResponseSuccess<string> = Object.freeze({
   success: true,
   data: "bingo bango bongo",
-};
+});
 
-export const MOCK_ERROR: APIResponseFailure<APIError> = {
+export const MOCK_ERROR: APIResponseFailure<APIError> = Object.freeze({
   success: false,
   error: {
     detail: ["__TESTING"],
   },
-};
+});
 
 export const withStatus = <TResp, TError extends APIError = APIError>(
   statusCode: number,
@@ -57,10 +67,10 @@ export const withStatus = <TResp, TError extends APIError = APIError>(
   };
 };
 
-export const MOCK_PARAMS = {
+export const MOCK_PARAMS = Object.freeze({
   p: "p",
   q: 15,
-};
+});
 
 export const ForceCheck = ({ history }: { history: History }) => {
   const auth = useAuth();
@@ -75,6 +85,5 @@ export const ForceCheck = ({ history }: { history: History }) => {
     };
   }, [history, auth]);
 
-  return <></>;
+  return null;
 };
-

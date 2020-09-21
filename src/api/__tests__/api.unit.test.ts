@@ -8,6 +8,7 @@ import {
   deleteFactory,
   endpointFactory,
   unwrap,
+  combine,
 } from "../api";
 import {
   MOCK_RESPONSE,
@@ -422,5 +423,92 @@ describe("unwrap", () => {
     } catch (err) {
       expect(err).toEqual(MOCK_ERROR.error);
     }
+  });
+});
+
+describe("combine", () => {
+  const test1 = listFactory("bingo/");
+  const test2 = listFactory("bango/");
+  const test3 = listFactory("bongo/");
+  const mockResp1 = { ...MOCK_RESPONSE, data: "bingo" };
+  const mockResp2 = { ...MOCK_RESPONSE, data: "bango" };
+  const mockResp3 = { ...MOCK_RESPONSE, data: "bongo" };
+
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
+  it("returns an array of data if all given methods succeeded", async () => {
+    const resp = combine(test1(), test2(), test3());
+
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: mockResp1,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bango/",
+      },
+      {
+        data: mockResp2,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bongo/",
+      },
+      {
+        data: mockResp3,
+      }
+    );
+
+    expect(await resp).toEqual(
+      withStatus(200, {
+        success: true,
+        data: [mockResp1, mockResp2, mockResp3].map((r) => r.data),
+      })
+    );
+  });
+
+  it("produces the error returned by the first failing method", async () => {
+    const resp = combine(test1(), test2(), test3());
+
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bingo/",
+      },
+      {
+        data: mockResp1,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bango/",
+      },
+      {
+        status: 500,
+        data: MOCK_ERROR,
+      }
+    );
+    mockAxios.mockResponseFor(
+      {
+        method: "GET",
+        url: "bongo/",
+      },
+      {
+        data: mockResp3,
+      }
+    );
+
+    expect(await resp).toEqual(withStatus(500, MOCK_ERROR));
   });
 });

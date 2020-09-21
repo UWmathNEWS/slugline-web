@@ -1,11 +1,12 @@
+import type React from "react";
 import Home from "../home/Home";
 import Login from "../auth/Login";
 import IssuePage from "../issues/IssuePage";
 import IssueList from "../issues/IssuesList";
 import Error404 from "../shared/errors/Error404";
 import { renderRoutes } from "../shared/helpers";
-import { RouteProps } from "../shared/types";
-import api from "../api/api";
+import type { RouteProps } from "../shared/types";
+import api, { combine } from "../api/api";
 
 export const routes: RouteProps[] = [
   {
@@ -13,6 +14,16 @@ export const routes: RouteProps[] = [
     exact: true,
     component: Home,
     title: "",
+    loadData: ({ query, headers }) =>
+      combine(
+        api.published_issues.list({
+          // For compatibility with Wordpress, we use the paged key instead of
+          // the arguably more sensible page key
+          params: { page: query?.paged || 1 },
+          headers,
+        }),
+        api.published_issues.latest({ headers })
+      ),
   },
   {
     path: "/login",
@@ -23,8 +34,8 @@ export const routes: RouteProps[] = [
     path: "/issues/:issue_id",
     component: IssuePage,
     title: "v{}i{}",
-    loadData: ({ params, headers }) =>
-      api.issues.get({
+    loadData: ({ params = {}, headers }) =>
+      api.published_issues.get({
         id: params.issue_id,
         headers,
       }),
@@ -34,7 +45,7 @@ export const routes: RouteProps[] = [
     exact: true,
     component: IssueList,
     title: "Issues",
-    loadData: ({ headers }) => api.issues.list({ headers }),
+    loadData: ({ headers }) => api.published_issues.list({ headers }),
   },
   {
     component: Error404,
@@ -42,7 +53,7 @@ export const routes: RouteProps[] = [
   },
 ];
 
-const Public = () => {
+const Public: React.FC = () => {
   return renderRoutes(routes);
 };
 

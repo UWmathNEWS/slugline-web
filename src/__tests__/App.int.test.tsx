@@ -26,7 +26,7 @@ describe("Integration test for main app component", () => {
   });
 
   it("changes routes correctly", async () => {
-    const { container, getByRole } = render(<App />);
+    const { container, getByRole, getByTestId } = render(<App />);
     const nav = container.querySelector(".navbar") as HTMLElement;
     expect(container.querySelector(".navbar")).toBeInTheDocument();
 
@@ -35,7 +35,7 @@ describe("Integration test for main app component", () => {
     // const aboutLink = getByText(nav, /about/i);
     const loginLink = getByText(nav, /login/i);
 
-    expect(getByText(container, "HOME CONTENT")).toBeInTheDocument();
+    expect(getByTestId("home-content")).toBeInTheDocument();
 
     // need to await here as navigating to some paths also mounts components that may change their state on mount.
     // by awaiting navigation, we only continue once rendering finishes, thus avoiding race conditions.
@@ -57,7 +57,8 @@ describe("Integration test for main app component", () => {
     await act(async () => {
       fireEvent.click(homeLink!);
     });
-    expect(getByText(container, "HOME CONTENT")).toBeInTheDocument();
+
+    expect(getByTestId("home-content")).toBeInTheDocument();
   });
 
   it("has correct header when logged in", () => {
@@ -73,13 +74,14 @@ describe("Integration test for main app component", () => {
   it("does auth check on startup", () => {
     render(<App />);
 
-    expect(mockAxios).toHaveBeenCalledTimes(1);
     expect(mockAxios.lastReqGet().url).toEqual("me/");
   });
 
   it("does auth check on switching to protected routes", async () => {
     window.__SSR_DIRECTIVES__ = { USER: testUser };
     const { getByText } = render(<App />);
+
+    mockAxios.mockClear();
 
     await act(async () => {
       fireEvent.click(getByText(/profile/i));

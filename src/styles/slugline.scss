@@ -41,6 +41,20 @@ a {
   }
 }
 
+:root {
+  --black: #{$black};
+  --white: #{$white};
+
+  --paper-paper: var(--white);
+  --paper-paper-light: #{$pink-150};
+  --paper-paper-dark: #{$pink-700};
+  @each $name, $clr in $paper-colours {
+    --paper-#{$name}: #{$clr};
+    --paper-#{$name}-light: #{mix($clr, $white)};
+    --paper-#{$name}-dark: #{scale-color(mix($clr, $black), $saturation: -50%)};
+  }
+}
+
 // Styles for article content
 span.underline-custom {
   text-shadow: 1px 0px white, -1px 0px white;

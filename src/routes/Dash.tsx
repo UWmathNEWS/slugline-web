@@ -82,9 +82,11 @@ const Dash = () => {
   const match = useRouteMatch();
 
   return (
-    <React.Suspense fallback={<Loader variant="spinner" />}>
-      {renderRoutes(match.path, routes)}
-    </React.Suspense>
+    <div className="container">
+      <React.Suspense fallback={<Loader variant="spinner" />}>
+        {renderRoutes(match.path, routes)}
+      </React.Suspense>
+    </div>
   );
 };
 
