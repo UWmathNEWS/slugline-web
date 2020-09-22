@@ -8,6 +8,7 @@ import {
   InlineVoidElement,
   BlockElementType,
   InlineElementType,
+  ElementType,
 } from "./types";
 import { HistoryEditor } from "slate-history";
 
@@ -37,6 +38,16 @@ export const isIterableEmpty = (iterable: Iterable<any>) => {
     return false;
   }
   return true;
+};
+
+/**
+ * Returns the first item in `iterable`. Returns `undefined` for an empty iterable.
+ * @param iterable The iterable to return the first item of.
+ */
+export const getFirstFromIterable = <T>(iterable: Iterable<T>) => {
+  for (const i of iterable) {
+    return i;
+  }
 };
 
 /**
@@ -157,7 +168,32 @@ export const isBlockActive = (editor: Editor, blockType: BlockElementType) => {
  * @param blockType The type of block to toggle
  */
 export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
-  if (isBlockActive(editor, blockType)) {
+  const isActive = isBlockActive(editor, blockType);
+
+  // first, unwrap any lists
+  if (isListActive(editor)) {
+    Transforms.unwrapNodes(editor, {
+      split: true,
+      match: (elem) => isListType((elem as SluglineElement).type),
+    });
+    Transforms.setNodes(
+      editor,
+      { type: BlockElementType.Default },
+      {
+        match: (elem) =>
+          (elem as SluglineElement).type === BlockElementType.ListItem,
+      }
+    );
+  }
+
+  // if the requested block is a list and that list is currently not active,
+  // we are toggling a list ON, and we have to do some wrapping
+  if (isListType(blockType) && !isActive) {
+    Transforms.setNodes(editor, { type: BlockElementType.ListItem });
+    Transforms.wrapNodes(editor, { type: blockType, children: [] });
+  }
+  // otherwise, toggle as usual
+  else if (isActive) {
     Transforms.setNodes(
       editor,
       { type: BlockElementType.Default },
@@ -170,6 +206,20 @@ export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
       { mode: "all", match: (node) => Editor.isBlock(editor, node) }
     );
   }
+};
+
+export const isListActive = (editor: Editor) => {
+  return (
+    isBlockActive(editor, BlockElementType.OrderedList) ||
+    isBlockActive(editor, BlockElementType.UnorderedList)
+  );
+};
+
+export const isListType = (blockType: ElementType) => {
+  return (
+    blockType === BlockElementType.UnorderedList ||
+    blockType === BlockElementType.OrderedList
+  );
 };
 
 const MARK_HOTKEYS: Array<[Mark, string]> = [
