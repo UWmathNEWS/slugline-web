@@ -27,6 +27,10 @@ export enum BlockElementType {
   Image = "image",
 }
 
+export type ListElementType =
+  | BlockElementType.OrderedList
+  | BlockElementType.UnorderedList;
+
 export type ElementType = InlineElementType | BlockElementType;
 
 export interface DefaultElement extends Element {

@@ -10,6 +10,7 @@ import {
   InlineElementType,
   ElementType,
   BlockVoidElement,
+  ListElementType,
 } from "./types";
 import { HistoryEditor } from "slate-history";
 
@@ -190,23 +191,77 @@ export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
   // if the requested block is a list and that list is currently not active,
   // we are toggling a list ON, and we have to do some wrapping
   if (isListType(blockType) && !isActive) {
-    Transforms.setNodes(editor, { type: BlockElementType.ListItem });
-    Transforms.wrapNodes(editor, { type: blockType, children: [] });
+    wrapListItems(editor, blockType);
   }
   // otherwise, toggle as usual
   else if (isActive) {
     Transforms.setNodes(
       editor,
       { type: BlockElementType.Default },
-      { mode: "all", match: (node) => Editor.isBlock(editor, node) }
+      {
+        mode: "all",
+        match: (node) =>
+          !editor.isVoid(node as SluglineElement) &&
+          Editor.isBlock(editor, node),
+      }
     );
   } else {
     Transforms.setNodes(
       editor,
       { type: blockType },
-      { mode: "all", match: (node) => Editor.isBlock(editor, node) }
+      {
+        mode: "all",
+        match: (node) =>
+          !editor.isVoid(node as SluglineElement) &&
+          Editor.isBlock(editor, node),
+      }
     );
   }
+};
+
+/**
+ * Wraps the currently selected blocks into a list, skipping void blocks
+ * @param editor The editor to wrap blocks in
+ * @param listType The type of list to wrap the blocks with
+ */
+const wrapListItems = (editor: Editor, listType: ListElementType) => {
+  Transforms.setNodes(
+    editor,
+    { type: BlockElementType.ListItem },
+    {
+      match: (elem) =>
+        !editor.isVoid(elem as SluglineElement) && Editor.isBlock(editor, elem),
+    }
+  );
+  // we do not want to wrap void blocks, so we have to divide the selection
+  // into non void ranges and wrap them individually
+  if (!editor.selection) {
+    return;
+  }
+
+  const selectEnd = Editor.pointRef(editor, Range.end(editor.selection));
+  let wrapStart = Range.start(editor.selection);
+  let wrapEnd = Editor.end(editor, wrapStart.path);
+
+  while (wrapEnd.path[0] < selectEnd.current!.path[0]) {
+    const [nextBlock, nextPath] = Editor.node(editor, [wrapEnd.path[0] + 1]);
+    if (editor.isVoid(nextBlock as SluglineElement)) {
+      Transforms.wrapNodes(
+        editor,
+        { type: listType, children: [] },
+        { at: { anchor: wrapStart, focus: wrapEnd } }
+      );
+      wrapStart = wrapEnd;
+    } else {
+      wrapEnd = Editor.end(editor, nextPath);
+    }
+  }
+  // wrap the final range
+  Transforms.wrapNodes(
+    editor,
+    { type: listType, children: [] },
+    { at: { anchor: wrapStart, focus: selectEnd.current! } }
+  );
 };
 
 export const isListActive = (editor: Editor) => {
@@ -216,7 +271,9 @@ export const isListActive = (editor: Editor) => {
   );
 };
 
-export const isListType = (blockType: ElementType) => {
+export const isListType = (
+  blockType: ElementType
+): blockType is ListElementType => {
   return (
     blockType === BlockElementType.UnorderedList ||
     blockType === BlockElementType.OrderedList
