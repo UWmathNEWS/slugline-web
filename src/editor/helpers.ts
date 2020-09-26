@@ -233,35 +233,15 @@ const wrapListItems = (editor: Editor, listType: ListElementType) => {
         !editor.isVoid(elem as SluglineElement) && Editor.isBlock(editor, elem),
     }
   );
-  // we do not want to wrap void blocks, so we have to divide the selection
-  // into non void ranges and wrap them individually
-  if (!editor.selection) {
-    return;
-  }
 
-  const selectEnd = Editor.pointRef(editor, Range.end(editor.selection));
-  let wrapStart = Range.start(editor.selection);
-  let wrapEnd = Editor.end(editor, wrapStart.path);
+  Transforms.wrapNodes(editor, { type: listType, children: [] });
 
-  while (wrapEnd.path[0] < selectEnd.current!.path[0]) {
-    const [nextBlock, nextPath] = Editor.node(editor, [wrapEnd.path[0] + 1]);
-    if (editor.isVoid(nextBlock as SluglineElement)) {
-      Transforms.wrapNodes(
-        editor,
-        { type: listType, children: [] },
-        { at: { anchor: wrapStart, focus: wrapEnd } }
-      );
-      wrapStart = wrapEnd;
-    } else {
-      wrapEnd = Editor.end(editor, nextPath);
-    }
+  // we don't want to wrap void nodes, so pull them out after the fact
+  for (const [, voidPath] of Editor.nodes(editor, {
+    match: (elem) => editor.isVoid(elem as SluglineElement),
+  })) {
+    Transforms.liftNodes(editor, { at: voidPath });
   }
-  // wrap the final range
-  Transforms.wrapNodes(
-    editor,
-    { type: listType, children: [] },
-    { at: { anchor: wrapStart, focus: selectEnd.current! } }
-  );
 };
 
 export const isListActive = (editor: Editor) => {
