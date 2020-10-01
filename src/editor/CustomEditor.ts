@@ -22,18 +22,6 @@ const REMOVE_ALL_MARKS_OBJ = Object.fromEntries(
   Object.values(Mark).map((mark) => [mark, null])
 );
 
-const breakOutOfList = (editor: Editor, path: Path) => {
-  // lift the node out of the list and set it to default type
-  Transforms.liftNodes(editor);
-  Transforms.setNodes(editor, { type: BlockElementType.Default });
-  // if the list is now empty, delete it
-  const parentPath = path.slice(0, -1);
-  const [parentList] = Editor.node(editor, parentPath);
-  if ((parentList as SluglineElement).children.length === 0) {
-    Transforms.removeNodes(editor, { at: parentPath });
-  }
-};
-
 const createCustomEditor = () => {
   const editor = createEditor();
 
@@ -88,7 +76,9 @@ const createCustomEditor = () => {
       const [, path] = entry;
       // if there's no text in this list item
       if (Editor.string(editor, path) === "") {
-        breakOutOfList(editor, path);
+        // lift the node out of the list and set it to default type
+        Transforms.liftNodes(editor);
+        Transforms.setNodes(editor, { type: BlockElementType.Default });
         // don't insert another break after breaking out of a list
         return;
       }
