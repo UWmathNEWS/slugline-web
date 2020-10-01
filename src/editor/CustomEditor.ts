@@ -5,7 +5,6 @@ import {
   Transforms,
   Editor,
   Range,
-  Path,
   NodeEntry,
 } from "slate";
 import {
@@ -14,7 +13,12 @@ import {
   Mark,
   BlockElementType,
 } from "./types";
-import { isListActive, getFirstFromIterable, isListType } from "./helpers";
+import {
+  isListActive,
+  getFirstFromIterable,
+  isListType,
+  isIterableEmpty,
+} from "./helpers";
 
 // the way to remove a property is to call setNodes with the property set to null
 // so we create a object with all marks set to null so we can remove them all at once
@@ -82,6 +86,26 @@ const createCustomEditor = () => {
         // don't insert another break after breaking out of a list
         return;
       }
+    }
+
+    // if a void block is currently active, create a new paragraph after instead of deleting
+    if (
+      !isIterableEmpty(
+        Editor.nodes(editor, {
+          match: (elem) =>
+            editor.isVoid(elem as SluglineElement) &&
+            Editor.isBlock(editor, elem),
+        })
+      )
+    ) {
+      Transforms.insertNodes(
+        editor,
+        { type: BlockElementType.Default, children: [{ text: "" }] },
+        {
+          mode: "highest",
+        }
+      );
+      return;
     }
 
     insertBreak();
