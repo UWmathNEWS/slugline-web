@@ -1,5 +1,9 @@
+@import "../../../styles/slugline_vars";
+
 .Image {
   width: 100%;
+  // match the spacing for paragraphs
+  margin-bottom: 1rem;
 
   &__img {
     display: block;
@@ -11,11 +15,19 @@
 
     height: auto;
 
-    // match the spacing for paragraphs
-    margin-bottom: 1rem;
-
     &--selected {
       box-shadow: 0px 0px 0px 2px lightblue;
     }
+  }
+
+  &__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: spacing(3);
+    background: lightgrey;
+    text-align: center;
+    min-height: 10em;
+    font-size: 1em;
   }
 }
