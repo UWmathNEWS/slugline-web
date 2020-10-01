@@ -25,6 +25,7 @@ export enum BlockElementType {
   OrderedList = "ordered-list",
   ListItem = "list-item",
   Image = "image",
+  ImageCaption = "image-caption",
 }
 
 export type ListElementType =
@@ -79,13 +80,18 @@ export interface ImageElement extends Element {
   src: string;
 }
 
+export interface ImageCaptionElement extends Element {
+  type: BlockElementType.ImageCaption;
+}
+
 export type BlockElement =
   | Header1Element
   | Header2Element
   | CodeElement
   | UnorderedListElement
   | OrderedListElement
-  | ListItemElement;
+  | ListItemElement
+  | ImageCaptionElement;
 
 export type BlockVoidElement = ImageElement;
 

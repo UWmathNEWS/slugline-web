@@ -20,6 +20,7 @@ import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
 import Image from "./components/Image";
+import ImageCaption from "./components/ImageCaption";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -54,6 +55,8 @@ const renderElement = (props: RenderElementProps) => {
       return <li {...props.attributes}>{props.children}</li>;
     case BlockElementType.Image:
       return <Image {...props} />;
+    case BlockElementType.ImageCaption:
+      return <ImageCaption {...props} />;
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }

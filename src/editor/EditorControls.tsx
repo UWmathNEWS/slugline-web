@@ -81,7 +81,16 @@ const EditorControls: React.FC = () => {
         title="Ordered List"
         blockType={BlockElementType.OrderedList}
       />
-      <ImageButton />
+      <EditorDropdown
+        rootButton={<ImageButton />}
+        subBlocks={[BlockElementType.ImageCaption]}
+        id="image-dropdown"
+      >
+        <ToggleBlockButtonText
+          block={BlockElementType.ImageCaption}
+          text="Image Caption"
+        />
+      </EditorDropdown>
       <ExtrasDropdown />
     </div>
   );
