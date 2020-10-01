@@ -228,7 +228,7 @@ export const ImageButton: React.FC = () => {
 
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
-  const submit = (src: string, hasCaption: boolean) => {
+  const submit = (src: string) => {
     ReactEditor.focus(editor);
     setShowPopover(false);
     insertVoidBlock(editor, {
@@ -256,7 +256,7 @@ export const ImageButton: React.FC = () => {
           show={showPopover}
           setShow={setShowPopover}
         >
-          <ImagePopover submit={submit} src={""} hasCaption={false} />
+          <ImagePopover submit={submit} src={""} />
         </PopoverWrapper>
       )}
     </>
