@@ -6,6 +6,7 @@ import {
   Editor,
   Range,
   Path,
+  NodeEntry,
 } from "slate";
 import {
   SluglineElement,
@@ -13,7 +14,7 @@ import {
   Mark,
   BlockElementType,
 } from "./types";
-import { isListActive, getFirstFromIterable } from "./helpers";
+import { isListActive, getFirstFromIterable, isListType } from "./helpers";
 
 // the way to remove a property is to call setNodes with the property set to null
 // so we create a object with all marks set to null so we can remove them all at once
@@ -36,7 +37,7 @@ const breakOutOfList = (editor: Editor, path: Path) => {
 const createCustomEditor = () => {
   const editor = createEditor();
 
-  const { addMark, insertBreak } = editor;
+  const { addMark, insertBreak, normalizeNode } = editor;
 
   const isInline = (element: Element) => {
     const e = element as SluglineElement;
@@ -100,10 +101,28 @@ const createCustomEditor = () => {
     }
   };
 
+  const normalizeCustom = (entry: NodeEntry) => {
+    const [node, path] = entry;
+
+    // normalization for block elements
+    if (Editor.isBlock(editor, node)) {
+      const elem = node as SluglineElement;
+      // remove lists with no children
+      if (isListType(elem.type) && elem.children.length === 0) {
+        Transforms.removeNodes(editor, { at: path });
+        return;
+      }
+    }
+
+    // fallback to default normalization
+    normalizeNode(entry);
+  };
+
   editor.isInline = isInline;
   editor.isVoid = isVoid;
   editor.addMark = addMarkMutuallyExclusive;
   editor.insertBreak = insertBreakWithReset;
+  editor.normalizeNode = normalizeCustom;
   return editor;
 };
 

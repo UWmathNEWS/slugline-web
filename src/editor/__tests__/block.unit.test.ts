@@ -481,4 +481,65 @@ describe("insertVoidBlock", () => {
       },
     ]);
   });
+
+  it("doesn't leave empty paragraphs", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [{ text: "" }],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 0,
+      },
+    };
+
+    insertVoidBlock(editor, VOID_BLOCK);
+
+    expect(editor.children).toEqual([
+      {
+        ...VOID_BLOCK,
+      },
+    ]);
+  });
+
+  it("doesn't leave empty paragraphs in lists", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [{ text: "" }],
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0, 0],
+        offset: 0,
+      },
+    };
+
+    insertVoidBlock(editor, VOID_BLOCK);
+
+    expect(editor.children).toEqual([
+      {
+        ...VOID_BLOCK,
+      },
+    ]);
+  });
 });
