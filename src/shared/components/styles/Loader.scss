@@ -1,28 +1,50 @@
 @import "../../../styles/slugline_vars";
 
-.spinner-linear {
-  position: relative;
-  display: inline-block;
-  height: .6em;
-  min-height: .6rem;
-  width: 70%;
-  max-width: 350px;
-  background: $gray-300;
-  color: transparent;
-  overflow: hidden;
-  border-radius: $border-radius;
-  mix-blend-mode: multiply;
+.Loader {
+  &--display, &--block {
+    display: block;
+  }
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 350px;
-    background: linear-gradient(to right, $gray-300, $gray-200 20%, $gray-300 40%);
-    transform: translateX(-50%);
-    animation: spinner-linear linear 2s infinite;
+  &--inline {
+    display: inline-block;
+  }
+
+  &--spinner#{&}--block {
+    display: flex;
+    justify-content: center;
+  }
+
+  &--linear &_item {
+    position: relative;
+    display: inline-block;
+    height: .6em;
+    min-height: .6rem;
+    width: 70%;
+    background: $gray-300;
+    color: transparent;
+    overflow: hidden;
+    border-radius: $border-radius;
+    mix-blend-mode: multiply;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 350px;
+      background: linear-gradient(to right, $gray-300, $gray-200 20%, $gray-300 40%);
+      transform: translateX(-50%);
+      animation: spinner-linear linear 2s infinite;
+    }
+
+    &:last-child:not(:first-child) {
+      width: calc(70% - 40px);
+    }
+  }
+
+  &--linear#{&}--display &_item {
+    max-width: 200px;
   }
 }
 

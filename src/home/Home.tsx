@@ -9,9 +9,9 @@ import Loader from "../shared/components/Loader";
 import Dateline from "../shared/components/Dateline";
 import Paginator from "../shared/components/Paginator";
 import IssueEntry, { IssueEntryHero } from "../shared/components/IssueEntry";
+import Hero from "../shared/components/Hero";
 
 import "./styles/Home.scss";
-import Hero from "../shared/components/Hero";
 
 const taglines = [
   /* Contributed by terrifiED */
@@ -63,10 +63,12 @@ const HeroLoader: React.FC = () => {
       <Dateline>
         <Loader variant="linear" className="Hero_loaderDateline" />
       </Dateline>
-      <Loader variant="linear" className="Hero_loaderTitle h2 mt-1" />
-      <Loader variant="linear" className="Hero_loaderDesc mt-3" />
-      <Loader variant="linear" className="Hero_loaderDesc" />
-      <Loader variant="linear" className="Hero_loaderDesc" />
+      <Loader
+        variant="linear"
+        layout="display"
+        className="Hero_loaderTitle h2 mt-1"
+      />
+      <Loader variant="linear" lines={3} className="Hero_loaderDesc mt-3" />
       <Loader variant="linear" className="Hero_loaderCta mt-3" />
     </>
   );

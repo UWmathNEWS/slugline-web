@@ -53,6 +53,25 @@ describe("Loader", () => {
 
       expect(container.querySelector(".testing.abcd")).toBeInTheDocument();
     });
+
+    it("renders with multiple lines if given", () => {
+      const { queryAllByText, getAllByRole } = render(
+        <Loader variant="linear" lines={3} />
+      );
+
+      expect(getAllByRole("status").length).toBe(3);
+      expect(queryAllByText(/Loading/).length).toBe(1);
+    });
+  });
+
+  it("renders with layouts", () => {
+    const { container, rerender } = render(<Loader variant="linear" />);
+
+    expect(container.querySelector(".Loader--block")).toBeInTheDocument();
+
+    rerender(<Loader variant="linear" layout="inline" />);
+
+    expect(container.querySelector(".Loader--inline")).toBeInTheDocument();
   });
 
   it("renders nothing if invalid variant provided", () => {
