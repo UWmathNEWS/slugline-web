@@ -18,7 +18,8 @@ import "./styles/Image.scss";
 const Image: React.FC<RenderElementProps> = (props) => {
   const [show, setShow] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const errorDivRef = useRef<HTMLDivElement>(null);
   const editor = useEditor();
   const selected = useSelected();
   const focused = useFocused();
@@ -37,13 +38,17 @@ const Image: React.FC<RenderElementProps> = (props) => {
     <div className="Image" {...props.attributes}>
       <div
         contentEditable={false}
-        ref={ref}
         onClick={() => {
           setShow(true);
         }}
       >
         {hasError ? (
-          <div className="Image__error">
+          <div
+            className={`Image_error ${
+              selected && focused ? "Image_error--selected" : ""
+            }`}
+            ref={errorDivRef}
+          >
             <div>
               <FontAwesomeIcon icon={faExclamationTriangle} />
               <p className="mb-0">That image could not be found.</p>
@@ -51,14 +56,15 @@ const Image: React.FC<RenderElementProps> = (props) => {
           </div>
         ) : (
           <img
+            ref={imgRef}
             onError={() => {
               setHasError(true);
             }}
             onLoad={() => {
               setHasError(false);
             }}
-            className={`Image__img ${
-              selected && focused ? "Image__img--selected" : ""
+            className={`Image_img ${
+              selected && focused ? "Image_img--selected" : ""
             }`}
             src={element.src}
             alt="mathNEWS content"
@@ -66,7 +72,11 @@ const Image: React.FC<RenderElementProps> = (props) => {
         )}
       </div>
       {props.children}
-      <PopoverWrapper show={show} setShow={setShow} target={ref}>
+      <PopoverWrapper
+        show={show}
+        setShow={setShow}
+        target={() => imgRef.current || errorDivRef.current}
+      >
         <ImagePopover src={element.src} submit={submit} />
       </PopoverWrapper>
     </div>
