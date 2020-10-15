@@ -26,6 +26,7 @@ export enum BlockElementType {
   ListItem = "list-item",
   Image = "image",
   ImageCaption = "image-caption",
+  VoidSpacer = "void-spacer",
 }
 
 export type ListElementType =
@@ -84,6 +85,10 @@ export interface ImageCaptionElement extends Element {
   type: BlockElementType.ImageCaption;
 }
 
+export interface VoidSpacerElement extends Element {
+  type: BlockElementType.VoidSpacer;
+}
+
 export type BlockElement =
   | Header1Element
   | Header2Element
@@ -91,7 +96,8 @@ export type BlockElement =
   | UnorderedListElement
   | OrderedListElement
   | ListItemElement
-  | ImageCaptionElement;
+  | ImageCaptionElement
+  | VoidSpacerElement;
 
 export type BlockVoidElement = ImageElement;
 
