@@ -6,7 +6,6 @@ import {
   ReactEditor,
   RenderElementProps,
   useEditor,
-  useFocused,
   useSelected,
 } from "slate-react";
 import { ImageElement } from "../types";
@@ -22,7 +21,6 @@ const Image: React.FC<RenderElementProps> = (props) => {
   const errorDivRef = useRef<HTMLDivElement>(null);
   const editor = useEditor();
   const selected = useSelected();
-  const focused = useFocused();
 
   const element = props.element as ImageElement;
 
@@ -44,9 +42,7 @@ const Image: React.FC<RenderElementProps> = (props) => {
       >
         {hasError ? (
           <div
-            className={`Image_error ${
-              selected && focused ? "Image_error--selected" : ""
-            }`}
+            className={`Image_error ${selected ? "Image_error--selected" : ""}`}
             ref={errorDivRef}
           >
             <div>
@@ -63,9 +59,7 @@ const Image: React.FC<RenderElementProps> = (props) => {
             onLoad={() => {
               setHasError(false);
             }}
-            className={`Image_img ${
-              selected && focused ? "Image_img--selected" : ""
-            }`}
+            className={`Image_img ${selected ? "Image_img--selected" : ""}`}
             src={element.src}
             alt="mathNEWS content"
           />
