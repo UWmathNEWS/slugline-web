@@ -14,12 +14,7 @@ import {
   BlockElementType,
   BlockElement,
 } from "./types";
-import {
-  isListActive,
-  getFirstFromIterable,
-  isListType,
-  isIterableEmpty,
-} from "./helpers";
+import { isListActive, getFirstFromIterable, isIterableEmpty } from "./helpers";
 import { normalizeBlock, normalizeEditor } from "./normalize";
 
 // the way to remove a property is to call setNodes with the property set to null

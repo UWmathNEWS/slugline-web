@@ -71,8 +71,6 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
     pathRef.current &&
     Editor.next(editor, { at: pathRef.current, mode: "highest" });
 
-  console.log(nextEntry);
-
   if (!nextEntry) {
     // insert a void spacer at the end of the document
     Transforms.insertNodes(
