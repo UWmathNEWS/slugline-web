@@ -16,26 +16,19 @@ const normalizeVoidSpacer = (editor: Editor, path: Path) => {
     Editor.isVoid(editor, prevElem) &&
     prevElem.type !== BlockElementType.VoidSpacer
   ) {
-    console.log("before found");
     return;
   }
 
   if (
-    Editor.isBlock(editor, prevElem) &&
+    Editor.isBlock(editor, nextElem) &&
     Editor.isVoid(editor, nextElem) &&
     nextElem.type !== BlockElementType.VoidSpacer
   ) {
-    console.log("after found");
     return;
   }
 
   // otherwise, remove the node
   Transforms.removeNodes(editor, { at: path });
-};
-
-const VOID_SPACER = {
-  type: BlockElementType.VoidSpacer,
-  children: [{ text: "" }],
 };
 
 const normalizeVoidBlock = (editor: Editor, path: Path) => {
@@ -49,14 +42,28 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
     });
 
   if (!prevEntry) {
-    // insert a spacer at the beginning of the document
-    Transforms.insertNodes(editor, VOID_SPACER, {
-      at: Editor.start(editor, []),
-    });
+    Transforms.insertNodes(
+      editor,
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        at: [0],
+        mode: "highest",
+      }
+    );
   } else {
     const [prevNode, prevPath] = prevEntry;
     if ((prevNode as SluglineElement).type !== BlockElementType.VoidSpacer) {
-      Transforms.insertNodes(editor, VOID_SPACER, { at: prevPath });
+      Transforms.insertNodes(
+        editor,
+        {
+          type: BlockElementType.VoidSpacer,
+          children: [{ text: "" }],
+        },
+        { at: Editor.end(editor, prevPath), mode: "highest" }
+      );
     }
   }
 
@@ -64,11 +71,20 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
     pathRef.current &&
     Editor.next(editor, { at: pathRef.current, mode: "highest" });
 
+  console.log(nextEntry);
+
   if (!nextEntry) {
     // insert a void spacer at the end of the document
-    Transforms.insertNodes(editor, VOID_SPACER, {
-      at: Editor.end(editor, []),
-    });
+    Transforms.insertNodes(
+      editor,
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        at: Editor.end(editor, []),
+      }
+    );
   } else {
     const [nextNode, nextPath] = nextEntry;
     if ((nextNode as SluglineElement).type !== BlockElementType.VoidSpacer) {
@@ -78,7 +94,7 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
           type: BlockElementType.VoidSpacer,
           children: [{ text: "" }],
         },
-        { at: nextPath }
+        { at: Editor.before(editor, nextPath), mode: "highest" }
       );
     }
   }
@@ -91,15 +107,12 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
  */
 export const normalizeEditor = (editor: Editor) => {
   for (const [node, path] of Node.children(editor, [])) {
-    console.log(node);
     if (Editor.isBlock(editor, node) && Editor.isVoid(editor, node)) {
       const elem = node as SluglineElement;
       if (elem.type === BlockElementType.VoidSpacer) {
         normalizeVoidSpacer(editor, path);
-        return;
       } else {
         normalizeVoidBlock(editor, path);
-        return;
       }
     }
   }

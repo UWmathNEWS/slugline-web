@@ -266,19 +266,21 @@ export const isListType = (
  * @param block The block to insert. The `children` property will not be inserted.
  */
 export const insertVoidBlock = (editor: Editor, block: BlockVoidElement) => {
-  if (!editor.selection) {
-    return;
-  }
-  const selectionRef = Editor.rangeRef(editor, editor.selection);
-  Transforms.insertNodes(editor, block, {
-    mode: "highest",
+  Editor.withoutNormalizing(editor, () => {
+    if (!editor.selection) {
+      return;
+    }
+    const selectionRef = Editor.rangeRef(editor, editor.selection);
+    Transforms.insertNodes(editor, block, {
+      mode: "highest",
+    });
+    if (
+      Range.isCollapsed(selectionRef.current!) &&
+      Editor.string(editor, selectionRef.current!.anchor.path) === ""
+    ) {
+      Transforms.removeNodes(editor, { at: selectionRef.current! });
+    }
   });
-  if (
-    Range.isCollapsed(selectionRef.current!) &&
-    Editor.string(editor, selectionRef.current!.anchor.path) === ""
-  ) {
-    Transforms.removeNodes(editor, { at: selectionRef.current! });
-  }
 };
 
 const MARK_HOTKEYS: Array<[Mark, string]> = [
