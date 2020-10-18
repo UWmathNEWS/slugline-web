@@ -12,6 +12,7 @@ import {
   InlineElementType,
   Mark,
   BlockElementType,
+  BlockElement,
 } from "./types";
 import {
   isListActive,
@@ -19,6 +20,7 @@ import {
   isListType,
   isIterableEmpty,
 } from "./helpers";
+import { normalizeBlock, normalizeEditor } from "./normalize";
 
 // the way to remove a property is to call setNodes with the property set to null
 // so we create a object with all marks set to null so we can remove them all at once
@@ -119,61 +121,17 @@ const createCustomEditor = () => {
 
   const normalizeCustom = (entry: NodeEntry) => {
     const [node, path] = entry;
+
+    if (Editor.isEditor(node)) {
+      normalizeEditor(node);
+      return;
+    }
+
     const elem = node as SluglineElement;
 
     // normalization for block elements
-    if (Editor.isBlock(editor, node)) {
-      // remove lists with no children
-      if (isListType(elem.type) && elem.children.length === 0) {
-        Transforms.removeNodes(editor, { at: path });
-        return;
-      }
-
-      // add void spacers
-      if (editor.isVoid(elem)) {
-        const pathRef = Editor.pathRef(editor, path);
-        const before =
-          pathRef.current &&
-          Editor.before(editor, pathRef.current, { unit: "block" });
-
-        if (before) {
-          const [beforeNode] = Editor.node(editor, before);
-          if (
-            (beforeNode as SluglineElement).type !== BlockElementType.VoidSpacer
-          ) {
-            Transforms.insertNodes(
-              editor,
-              {
-                type: BlockElementType.VoidSpacer,
-                children: [{ text: "" }],
-              },
-              { at: before }
-            );
-          }
-        }
-
-        const after =
-          pathRef.current &&
-          Editor.after(editor, pathRef.current, { unit: "block" });
-
-        if (after) {
-          const [afterNode] = Editor.node(editor, after);
-          if (
-            (afterNode as SluglineElement).type !== BlockElementType.VoidSpacer
-          ) {
-            Transforms.insertNodes(
-              editor,
-              {
-                type: BlockElementType.VoidSpacer,
-                children: [{ text: "" }],
-              },
-              { at: after }
-            );
-          }
-        }
-
-        return;
-      }
+    if (Editor.isBlock(editor, elem)) {
+      normalizeBlock(editor, elem as BlockElement, path);
     }
 
     // fallback to default normalization
