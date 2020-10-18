@@ -21,6 +21,7 @@ import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
 import Image from "./components/Image";
 import ImageCaption from "./components/ImageCaption";
+import VoidSpacer from "./components/VoidSpacer";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -53,6 +54,8 @@ const renderElement = (props: RenderElementProps) => {
       return <ul {...props.attributes}>{props.children}</ul>;
     case BlockElementType.ListItem:
       return <li {...props.attributes}>{props.children}</li>;
+    case BlockElementType.VoidSpacer:
+      return <VoidSpacer {...props} />;
     case BlockElementType.Image:
       return <Image {...props} />;
     case BlockElementType.ImageCaption:
