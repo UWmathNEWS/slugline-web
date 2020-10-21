@@ -127,6 +127,7 @@ const createCustomEditor = () => {
     // normalization for block elements
     if (Editor.isBlock(editor, elem)) {
       normalizeBlock(editor, elem as BlockElement, path);
+      return;
     }
 
     // fallback to default normalization
