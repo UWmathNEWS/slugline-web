@@ -87,26 +87,6 @@ const createCustomEditor = () => {
       }
     }
 
-    // if a void block is currently active, create a new paragraph after instead of deleting
-    if (
-      !isIterableEmpty(
-        Editor.nodes(editor, {
-          match: (elem) =>
-            editor.isVoid(elem as SluglineElement) &&
-            Editor.isBlock(editor, elem),
-        })
-      )
-    ) {
-      Transforms.insertNodes(
-        editor,
-        { type: BlockElementType.Default, children: [{ text: "" }] },
-        {
-          mode: "highest",
-        }
-      );
-      return;
-    }
-
     insertBreak();
     // don't reset the type inside a list so a new list item will be created
     if (!listActive) {

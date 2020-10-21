@@ -428,39 +428,4 @@ describe("insertBreakWithReset", () => {
       },
     ]);
   });
-
-  it("creates new paragraphs when a void block is selected", () => {
-    const editor = createCustomEditor();
-    editor.children = [
-      {
-        type: BlockElementType.Image,
-        src: "www.image.com",
-        children: [{ text: "" }],
-      },
-    ];
-    editor.selection = {
-      anchor: {
-        path: [0, 0],
-        offset: 0,
-      },
-      focus: {
-        path: [0, 0],
-        offset: 0,
-      },
-    };
-
-    editor.insertBreak();
-
-    expect(editor.children).toEqual([
-      {
-        type: BlockElementType.Image,
-        src: "www.image.com",
-        children: [{ text: "" }],
-      },
-      {
-        type: BlockElementType.Default,
-        children: [{ text: "" }],
-      },
-    ]);
-  });
 });
