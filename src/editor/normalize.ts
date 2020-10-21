@@ -20,6 +20,7 @@ const normalizeVoidSpacer = (editor: Editor, path: Path) => {
   }
 
   if (
+    nextElem &&
     Editor.isBlock(editor, nextElem) &&
     Editor.isVoid(editor, nextElem) &&
     nextElem.type !== BlockElementType.VoidSpacer
@@ -53,6 +54,7 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
         mode: "highest",
       }
     );
+    return;
   } else {
     const [prevNode, prevPath] = prevEntry;
     if ((prevNode as SluglineElement).type !== BlockElementType.VoidSpacer) {
@@ -64,6 +66,7 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
         },
         { at: Editor.end(editor, prevPath), mode: "highest" }
       );
+      return;
     }
   }
 
@@ -80,9 +83,10 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
         children: [{ text: "" }],
       },
       {
-        at: Editor.end(editor, []),
+        at: [editor.children.length],
       }
     );
+    return;
   } else {
     const [nextNode, nextPath] = nextEntry;
     if ((nextNode as SluglineElement).type !== BlockElementType.VoidSpacer) {
@@ -94,6 +98,7 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
         },
         { at: Editor.before(editor, nextPath), mode: "highest" }
       );
+      return;
     }
   }
 };
@@ -104,13 +109,14 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
  * @param editor The editor to normalize
  */
 export const normalizeEditor = (editor: Editor) => {
-  for (const [node, path] of Node.children(editor, [])) {
+  for (let idx = 0; idx < editor.children.length; idx++) {
+    const node = editor.children[idx];
     if (Editor.isBlock(editor, node) && Editor.isVoid(editor, node)) {
       const elem = node as SluglineElement;
       if (elem.type === BlockElementType.VoidSpacer) {
-        normalizeVoidSpacer(editor, path);
+        normalizeVoidSpacer(editor, [idx]);
       } else {
-        normalizeVoidBlock(editor, path);
+        normalizeVoidBlock(editor, [idx]);
       }
     }
   }
