@@ -1,4 +1,4 @@
-import { Editor, Node, Path, Transforms } from "slate";
+import { Editor, Path, Transforms } from "slate";
 import { isListType } from "./helpers";
 import { BlockElement, BlockElementType, SluglineElement } from "./types";
 
