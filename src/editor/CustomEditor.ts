@@ -99,7 +99,6 @@ const createCustomEditor = () => {
 
     if (Editor.isEditor(node)) {
       normalizeEditor(node);
-      return;
     }
 
     const elem = node as SluglineElement;
@@ -107,7 +106,6 @@ const createCustomEditor = () => {
     // normalization for block elements
     if (Editor.isBlock(editor, elem)) {
       normalizeBlock(editor, elem as BlockElement, path);
-      return;
     }
 
     // fallback to default normalization
