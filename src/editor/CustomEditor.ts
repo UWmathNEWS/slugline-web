@@ -14,7 +14,7 @@ import {
   BlockElementType,
   BlockElement,
 } from "./types";
-import { isListActive, getFirstFromIterable, isIterableEmpty } from "./helpers";
+import { isListActive, getFirstFromIterable, isBlockActive } from "./helpers";
 import { normalizeBlock, normalizeEditor } from "./normalize";
 
 // the way to remove a property is to call setNodes with the property set to null
@@ -26,7 +26,13 @@ const REMOVE_ALL_MARKS_OBJ = Object.fromEntries(
 const createCustomEditor = () => {
   const editor = createEditor();
 
-  const { addMark, insertBreak, normalizeNode } = editor;
+  const {
+    addMark,
+    insertBreak,
+    normalizeNode,
+    deleteForward,
+    deleteBackward,
+  } = editor;
 
   const isInline = (element: Element) => {
     const e = element as SluglineElement;
@@ -94,6 +100,48 @@ const createCustomEditor = () => {
     }
   };
 
+  const deleteForwardCustom: typeof deleteForward = (unit) => {
+    if (
+      editor.selection &&
+      Range.isCollapsed(editor.selection) &&
+      isBlockActive(editor, BlockElementType.VoidSpacer)
+    ) {
+      const nextEntry = Editor.next(editor);
+      if (nextEntry) {
+        const [nextNode, nextPath] = nextEntry;
+        if (
+          Editor.isBlock(editor, nextNode) &&
+          Editor.isVoid(editor, nextNode)
+        ) {
+          Transforms.removeNodes(editor, { at: nextPath });
+          return;
+        }
+      }
+    }
+    deleteForward(unit);
+  };
+
+  const deleteBackwardCustom: typeof deleteBackward = (unit) => {
+    if (
+      editor.selection &&
+      Range.isCollapsed(editor.selection) &&
+      isBlockActive(editor, BlockElementType.VoidSpacer)
+    ) {
+      const prevEntry = Editor.previous(editor);
+      if (prevEntry) {
+        const [prevNode, prevPath] = prevEntry;
+        if (
+          Editor.isBlock(editor, prevNode) &&
+          Editor.isVoid(editor, prevNode)
+        ) {
+          Transforms.removeNodes(editor, { at: prevPath });
+          return;
+        }
+      }
+    }
+    deleteBackward(unit);
+  };
+
   const normalizeCustom = (entry: NodeEntry) => {
     const [node, path] = entry;
 
@@ -116,6 +164,8 @@ const createCustomEditor = () => {
   editor.isVoid = isVoid;
   editor.addMark = addMarkMutuallyExclusive;
   editor.insertBreak = insertBreakWithReset;
+  editor.deleteForward = deleteForwardCustom;
+  editor.deleteBackward = deleteBackwardCustom;
   editor.normalizeNode = normalizeCustom;
   return editor;
 };
