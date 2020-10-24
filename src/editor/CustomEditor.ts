@@ -127,16 +127,13 @@ const createCustomEditor = () => {
       Range.isCollapsed(editor.selection) &&
       isBlockActive(editor, BlockElementType.VoidSpacer)
     ) {
-      const nextEntry = Editor.next(editor);
-      if (nextEntry) {
-        const [nextNode, nextPath] = nextEntry;
-        if (
-          Editor.isBlock(editor, nextNode) &&
-          Editor.isVoid(editor, nextNode)
-        ) {
-          Transforms.removeNodes(editor, { at: nextPath });
-          return;
-        }
+      const [nextNode, nextPath] = Editor.next(editor) ?? [
+        undefined,
+        undefined,
+      ];
+      if (Editor.isBlock(editor, nextNode) && Editor.isVoid(editor, nextNode)) {
+        Transforms.removeNodes(editor, { at: nextPath });
+        return;
       }
     }
 
@@ -154,16 +151,13 @@ const createCustomEditor = () => {
       Range.isCollapsed(editor.selection) &&
       isBlockActive(editor, BlockElementType.VoidSpacer)
     ) {
-      const prevEntry = Editor.previous(editor);
-      if (prevEntry) {
-        const [prevNode, prevPath] = prevEntry;
-        if (
-          Editor.isBlock(editor, prevNode) &&
-          Editor.isVoid(editor, prevNode)
-        ) {
-          Transforms.removeNodes(editor, { at: prevPath });
-          return;
-        }
+      const [prevNode, prevPath] = Editor.previous(editor) ?? [
+        undefined,
+        undefined,
+      ];
+      if (Editor.isBlock(editor, prevNode) && Editor.isVoid(editor, prevNode)) {
+        Transforms.removeNodes(editor, { at: prevPath });
+        return;
       }
     }
 
