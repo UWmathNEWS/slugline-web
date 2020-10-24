@@ -429,3 +429,73 @@ describe("insertBreakWithReset", () => {
     ]);
   });
 });
+
+describe("deleteForward", () => {
+  it("deletes the void block when a void spacer is selected", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteForward("character");
+
+    expect(editor.children).toEqual([]);
+  });
+});
+
+describe("deleteBackward", () => {
+  it("deletes the void block when a void spacer is selected", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [2, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [2, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteBackward("character");
+
+    expect(editor.children).toEqual([]);
+  });
+});
