@@ -373,8 +373,16 @@ describe("lists", () => {
         ],
       },
       {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
         type: BlockElementType.Image,
         src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
         children: [{ text: "" }],
       },
       {
@@ -392,7 +400,7 @@ describe("lists", () => {
         offset: 0,
       },
       focus: {
-        path: [2, 0],
+        path: [4, 0],
         offset: 6,
       },
     };
@@ -414,8 +422,16 @@ describe("lists", () => {
         ],
       },
       {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
         type: BlockElementType.Image,
         src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
         children: [{ text: "" }],
       },
       {
@@ -438,13 +454,25 @@ describe("lists", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: BlockElementType.Image,
-        src: "www.image.com",
+        type: BlockElementType.VoidSpacer,
         children: [{ text: "" }],
       },
       {
         type: BlockElementType.Image,
         src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
         children: [{ text: "" }],
       },
       {
@@ -459,7 +487,7 @@ describe("lists", () => {
         offset: 0,
       },
       focus: {
-        path: [2, 0],
+        path: [5, 0],
         offset: 0,
       },
     };
@@ -468,13 +496,25 @@ describe("lists", () => {
 
     expect(editor.children).toEqual([
       {
-        type: BlockElementType.Image,
-        src: "www.image.com",
+        type: BlockElementType.VoidSpacer,
         children: [{ text: "" }],
       },
       {
         type: BlockElementType.Image,
         src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
         children: [{ text: "" }],
       },
       {

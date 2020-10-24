@@ -172,51 +172,53 @@ export const isBlockActive = (editor: Editor, blockType: BlockElementType) => {
 export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
   const isActive = isBlockActive(editor, blockType);
 
-  // first, unwrap any lists
-  if (isListActive(editor)) {
-    Transforms.unwrapNodes(editor, {
-      split: true,
-      match: (elem) => isListType((elem as SluglineElement).type),
-    });
-    Transforms.setNodes(
-      editor,
-      { type: BlockElementType.Default },
-      {
-        match: (elem) =>
-          (elem as SluglineElement).type === BlockElementType.ListItem,
-      }
-    );
-  }
+  Editor.withoutNormalizing(editor, () => {
+    // first, unwrap any lists
+    if (isListActive(editor)) {
+      Transforms.unwrapNodes(editor, {
+        split: true,
+        match: (elem) => isListType((elem as SluglineElement).type),
+      });
+      Transforms.setNodes(
+        editor,
+        { type: BlockElementType.Default },
+        {
+          match: (elem) =>
+            (elem as SluglineElement).type === BlockElementType.ListItem,
+        }
+      );
+    }
 
-  // if the requested block is a list and that list is currently not active,
-  // we are toggling a list ON, and we have to do some wrapping
-  if (isListType(blockType) && !isActive) {
-    wrapListItems(editor, blockType);
-  }
-  // otherwise, toggle as usual
-  else if (isActive) {
-    Transforms.setNodes(
-      editor,
-      { type: BlockElementType.Default },
-      {
-        mode: "all",
-        match: (node) =>
-          !editor.isVoid(node as SluglineElement) &&
-          Editor.isBlock(editor, node),
-      }
-    );
-  } else {
-    Transforms.setNodes(
-      editor,
-      { type: blockType },
-      {
-        mode: "all",
-        match: (node) =>
-          !editor.isVoid(node as SluglineElement) &&
-          Editor.isBlock(editor, node),
-      }
-    );
-  }
+    // if the requested block is a list and that list is currently not active,
+    // we are toggling a list ON, and we have to do some wrapping
+    if (isListType(blockType) && !isActive) {
+      wrapListItems(editor, blockType);
+    }
+    // otherwise, toggle as usual
+    else if (isActive) {
+      Transforms.setNodes(
+        editor,
+        { type: BlockElementType.Default },
+        {
+          mode: "all",
+          match: (node) =>
+            !editor.isVoid(node as SluglineElement) &&
+            Editor.isBlock(editor, node),
+        }
+      );
+    } else {
+      Transforms.setNodes(
+        editor,
+        { type: blockType },
+        {
+          mode: "all",
+          match: (node) =>
+            !editor.isVoid(node as SluglineElement) &&
+            Editor.isBlock(editor, node),
+        }
+      );
+    }
+  });
 };
 
 /**
@@ -237,11 +239,10 @@ const wrapListItems = (editor: Editor, listType: ListElementType) => {
   Transforms.wrapNodes(editor, { type: listType, children: [] });
 
   // we don't want to wrap void nodes, so pull them out after the fact
-  for (const [, voidPath] of Editor.nodes(editor, {
+  Transforms.liftNodes(editor, {
+    mode: "all",
     match: (elem) => editor.isVoid(elem as SluglineElement),
-  })) {
-    Transforms.liftNodes(editor, { at: voidPath });
-  }
+  });
 };
 
 export const isListActive = (editor: Editor) => {
