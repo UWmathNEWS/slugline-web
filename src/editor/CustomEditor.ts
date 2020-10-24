@@ -100,6 +100,27 @@ const createCustomEditor = () => {
     }
   };
 
+  /**
+   * This function returns true if the currently selected block is a void orphan,
+   * that is, an empty paragraph at the very beginning or end of the document
+   * before or after a void block and its spacers.
+   */
+  const isVoidOrphan = () => {
+    if (!editor.selection || !Range.isCollapsed(editor.selection)) {
+      return false;
+    }
+    if (
+      !Editor.isStart(editor, editor.selection.anchor, []) &&
+      !Editor.isEnd(editor, editor.selection.anchor, [])
+    ) {
+      return false;
+    }
+    if (Editor.string(editor, editor.selection.anchor.path) !== "") {
+      return false;
+    }
+    return true;
+  };
+
   const deleteForwardCustom: typeof deleteForward = (unit) => {
     if (
       editor.selection &&
@@ -118,6 +139,12 @@ const createCustomEditor = () => {
         }
       }
     }
+
+    if (isVoidOrphan()) {
+      Transforms.removeNodes(editor);
+      return;
+    }
+
     deleteForward(unit);
   };
 
@@ -139,6 +166,12 @@ const createCustomEditor = () => {
         }
       }
     }
+
+    if (isVoidOrphan()) {
+      Transforms.removeNodes(editor);
+      return;
+    }
+
     deleteBackward(unit);
   };
 
