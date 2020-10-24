@@ -96,10 +96,9 @@ export type BlockElement =
   | UnorderedListElement
   | OrderedListElement
   | ListItemElement
-  | ImageCaptionElement
-  | VoidSpacerElement;
+  | ImageCaptionElement;
 
-export type BlockVoidElement = ImageElement;
+export type BlockVoidElement = ImageElement | VoidSpacerElement;
 
 export type SluglineElement =
   | DefaultElement
