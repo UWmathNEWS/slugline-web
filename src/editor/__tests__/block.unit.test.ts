@@ -333,7 +333,15 @@ describe("insertVoidBlock", () => {
         ],
       },
       {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
         ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
       },
       {
         type: BlockElementType.Default,
@@ -399,7 +407,15 @@ describe("insertVoidBlock", () => {
         ],
       },
       {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
         ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
       },
       {
         type: BlockElementType.OrderedList,
@@ -469,7 +485,15 @@ describe("insertVoidBlock", () => {
         ],
       },
       {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
         ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
       },
       {
         type: BlockElementType.Default,
@@ -505,7 +529,15 @@ describe("insertVoidBlock", () => {
 
     expect(editor.children).toEqual([
       {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
         ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
       },
     ]);
   });
@@ -538,7 +570,15 @@ describe("insertVoidBlock", () => {
 
     expect(editor.children).toEqual([
       {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
         ...VOID_BLOCK,
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
       },
     ]);
   });
