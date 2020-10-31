@@ -1,0 +1,7 @@
+@import "./slugline_vars";
+
+@mixin slugline-dek {
+  text-transform: uppercase;
+  font-family: $headings-ff;
+  font-weight: 300;
+}

@@ -1,0 +1,16 @@
+@import "../../../styles/slugline_vars";
+@import "../../../styles/slugline_mixins";
+
+.Breadcrumbs {
+  @include slugline-dek;
+
+  &_itemList {
+    display: flex;
+    list-style: none;
+    padding: 0;
+  }
+
+  &_sep {
+    margin: 0 spacing(1);
+  }
+}

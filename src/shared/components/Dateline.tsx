@@ -9,14 +9,14 @@ import "./styles/Dateline.scss";
  * @param children The contents of the component
  * @param props Additional props to forward
  */
-const Dateline: React.FC<JSX.IntrinsicElements["span"]> = ({
+const Dateline: React.FC<JSX.IntrinsicElements["div"]> = ({
   className,
   children,
   ...props
 }) => (
-  <span className={`Dateline ${className || ""}`} {...props}>
+  <div className={`Dateline ${className || ""}`} {...props}>
     {children}
-  </span>
+  </div>
 );
 
 export default Dateline;

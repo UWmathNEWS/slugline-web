@@ -1,8 +1,7 @@
-@import "../../../styles/slugline_vars";
+@import "../../../styles/slugline_mixins";
 
 .Dateline {
-  text-transform: uppercase;
-  font-family: $headings-ff;
-  font-weight: 300;
+  @include slugline-dek;
+
   font-size: 1rem;
 }

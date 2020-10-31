@@ -9,6 +9,8 @@ import Loader from "../shared/components/Loader";
 import ErrorPage from "../shared/errors/ErrorPage";
 import { useSSRData } from "../shared/hooks";
 import { coverSrc } from "../shared/helpers";
+import Hero from "../shared/components/Hero";
+import Breadcrumbs from "../shared/components/Breadcrumbs";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -86,17 +88,29 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
   }
 
   return (
-    <div className="container">
+    <>
       <Visor title={route.title} location={location.pathname} />
-      <h1>Issues</h1>
-      {dataInfo.state === RequestState.Running ? (
-        <Loader variant="spinner" />
-      ) : (
-        volumes.map((volume, i) => {
-          return <VolumeIssues key={i} volume={volume} />;
-        })
-      )}
-    </div>
+      <Hero variant="primary">
+        <Breadcrumbs
+          items={[
+            {
+              content: "Home",
+              to: "/",
+            },
+          ]}
+        />
+        <h1>Issues</h1>
+      </Hero>
+      <div className="container mt-5">
+        {dataInfo.state === RequestState.Running ? (
+          <Loader variant="spinner" />
+        ) : (
+          volumes.map((volume, i) => {
+            return <VolumeIssues key={i} volume={volume} />;
+          })
+        )}
+      </div>
+    </>
   );
 };
 
