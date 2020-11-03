@@ -1,4 +1,3 @@
-import { create } from "domain";
 import { Editor } from "slate";
 import createCustomEditor from "../CustomEditor";
 import { BlockElementType } from "../types";
