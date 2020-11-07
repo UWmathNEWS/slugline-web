@@ -173,11 +173,6 @@ const createCustomEditor = () => {
   const normalizeCustom = (entry: NodeEntry) => {
     const [node, path] = entry;
 
-    if (!Node.has(editor, path)) {
-      // this node has been removed during a prior normalization
-      return;
-    }
-
     if (Editor.isEditor(node)) {
       normalizeEditor(node);
     }
@@ -187,11 +182,12 @@ const createCustomEditor = () => {
     // normalization for block elements
     if (Editor.isBlock(editor, elem)) {
       normalizeBlock(editor, elem as BlockElement, path);
-      return;
     }
 
-    // fallback to default normalization
-    normalizeNode(entry);
+    if (Node.has(editor, path)) {
+      // fallback to default normalization
+      normalizeNode(entry);
+    }
   };
 
   editor.isInline = isInline;
