@@ -72,7 +72,7 @@ const SluglineNav = () => {
   const auth = useAuth();
 
   return (
-    <Navbar bg="primary" expand="lg">
+    <Navbar className="SluglineNav" expand="lg">
       <div className="container nav-container">
         <Navbar.Brand as={Link} to="/" href="/">
           <Logo height={28} className="navbar-logo align-top" />

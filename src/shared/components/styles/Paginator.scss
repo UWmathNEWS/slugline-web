@@ -1,0 +1,26 @@
+@import "../../../styles/slugline_vars";
+
+.Paginator {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding-left: 0;
+  font-family: $headings-ff;
+
+  &_item {
+    line-height: 1rem;
+  }
+
+  &_link {
+    padding: spacing(2);
+    text-decoration: none;
+
+    &:hover {
+      color: $black;
+    }
+  }
+
+  &_current {
+    font-weight: bold;
+  }
+}

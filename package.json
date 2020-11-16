@@ -33,6 +33,7 @@
     "axios": "^0.19.2",
     "babel-plugin-transform-assets": "^1.0.2",
     "bootstrap": "^4.5.0",
+    "date-fns": "^2.16.1",
     "express": "^4.17.1",
     "http-proxy-middleware": "^0.19.1",
     "ignore-styles": "^5.0.1",
