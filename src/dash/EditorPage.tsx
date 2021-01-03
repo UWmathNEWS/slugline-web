@@ -30,10 +30,14 @@ const getEditorRequestState = (
   }
 };
 
+interface EditorPageRouteParams {
+  articleId: string
+}
+
 const ARTICLE_SAVE_DELAY_MSECS = 10000;
 
 const EditorPage: React.FC<RouteComponentProps> = (props) => {
-  const { articleId } = useParams();
+  const { articleId } = useParams<EditorPageRouteParams>();
 
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
