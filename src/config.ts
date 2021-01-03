@@ -1,4 +1,4 @@
-export default {
+const config = {
   baseurl: "http://mathnews.uwaterloo.ca",
   title: "mathNEWS",
   description: "UWaterloo's Bastion of Erudite Thought",
@@ -37,3 +37,5 @@ export default {
   },
   googleSiteVerification: "",
 };
+
+export default config;
