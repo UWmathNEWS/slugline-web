@@ -6,7 +6,8 @@
     "coverageReporters": [
       "text",
       "lcov"
-    ]
+    ],
+    "resetMocks": false
   },
   "dependencies": {
     "@babel/cli": "^7.10.1",
