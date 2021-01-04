@@ -1,4 +1,5 @@
-const config = {
+// eslint-disable-next-line import/no-anonymous-default-export
+export default {
   baseurl: "http://mathnews.uwaterloo.ca",
   title: "mathNEWS",
   description: "UWaterloo's Bastion of Erudite Thought",
@@ -37,5 +38,3 @@ const config = {
   },
   googleSiteVerification: "",
 };
-
-export default config;
