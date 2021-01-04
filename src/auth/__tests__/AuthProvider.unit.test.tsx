@@ -14,13 +14,14 @@ import { APIResponseFailure, APIError } from "../../shared/types";
 
 // for spies
 import * as _a from "../Auth";
+import Cookies from "js-cookie";
 
 describe("AuthProvider", () => {
   let result: HookResult<AuthContext>;
   let auth: AuthContext;
 
   beforeAll(() => {
-    window.document.cookie = `${CSRF_COOKIE}=csrf`;
+    Cookies.set(CSRF_COOKIE, 'csrf')
   });
 
   beforeEach(() => {
@@ -36,7 +37,7 @@ describe("AuthProvider", () => {
   });
 
   afterAll(() => {
-    delete window.document.cookie;
+    Cookies.remove(CSRF_COOKIE)
   });
 
   it("provides access to all fields in interface (sanity check)", () => {
