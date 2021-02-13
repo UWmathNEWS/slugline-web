@@ -33,4 +33,4 @@ const Loader: React.FC<LoaderProps> = (props: LoaderProps) => {
   return <></>;
 };
 
-export default Loader
+export default Loader;
