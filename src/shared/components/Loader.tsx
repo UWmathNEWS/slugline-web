@@ -8,7 +8,7 @@ interface LoaderProps {
   hideFromScreenreaders?: boolean;
 }
 
-export default (props: LoaderProps) => {
+const Loader: React.FC<LoaderProps> = (props: LoaderProps) => {
   if (props.variant === "spinner") {
     return (
       <div className={`d-flex justify-content-center ${props.className}`}>
@@ -32,3 +32,5 @@ export default (props: LoaderProps) => {
   }
   return <></>;
 };
+
+export default Loader;

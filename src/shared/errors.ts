@@ -16,6 +16,11 @@ const errorsProxyFactory = (errors: { [key: string]: any }): ErrorsProxy => {
   return new Proxy(proxiedErrors, {
     get(_, prop: string) {
       if (prop === "__typeof__") return "proxy";
+      // HACK: react-refresh scans every export and uses $$typeof to determine
+      // if it's a React component that it needs to process. Without this, we'll
+      // throw an error here which breaks initialization.
+      // TODO: Consider returning undefined instead of throwing an error in the "not found" case.
+      if (prop === "$$typeof") return undefined;
       if (prop.includes(" ")) return prop;
       if (prop in memo) return memo[prop];
 

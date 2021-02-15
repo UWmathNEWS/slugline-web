@@ -49,7 +49,7 @@ export const LinkButton = React.forwardRef<
 >(({ variant, className, children, ...props }, ref) => {
   return (
     <Link
-      ref={ref as React.Ref<Link>}
+      ref={ref}
       {...(props as LinkProps)}
       className={`btn btn-primary Button Button-${variant} ${className || ""}`}
     >
