@@ -23,8 +23,12 @@ const columns: Column<Article>[] = [
   },
 ];
 
+interface DashIssueDetailRouteParams {
+  issueId: string
+}
+
 const DashIssueDetail: React.FC<RouteComponentProps> = (props) => {
-  const { issueId } = useParams();
+  const { issueId } = useParams<DashIssueDetailRouteParams>();
 
   const [issue, issueError, issueReqInfo] = useAPI(
     useCallback(() => {

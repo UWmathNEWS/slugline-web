@@ -20,7 +20,7 @@ export interface ToastManager {
   addToasts: (toasts: ToastMessage[]) => void;
 }
 
-const ToastManager = createContext<ToastManager>({
+const ToastManagerContext = createContext<ToastManager>({
   toasts: [],
   setToasts: () => {},
   setToastsHeuristically: () => {},
@@ -67,10 +67,10 @@ export const ToastProvider: React.FC = props => {
     }).filter(t => t._delay === undefined || t._delay > 100))); // 150ms is the default bootstrap anim duration
 
   return (
-    <ToastManager.Provider value={{ toasts, setToasts, setToastsHeuristically, addToasts }}>
+    <ToastManagerContext.Provider value={{ toasts, setToasts, setToastsHeuristically, addToasts }}>
       {props.children}
-    </ToastManager.Provider>
+    </ToastManagerContext.Provider>
   )
 };
 
-export const useToast = () => useContext(ToastManager);
+export const useToast = () => useContext(ToastManagerContext);
