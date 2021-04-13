@@ -21,6 +21,9 @@ export enum BlockElementType {
   Header1 = "header-1",
   Header2 = "header-2",
   Code = "code",
+  UnorderedList = "unordered-list",
+  OrderedList = "ordered-list",
+  ListItem = "list-item",
 }
 
 export type ElementType = InlineElementType | BlockElementType;
@@ -54,7 +57,25 @@ export interface CodeElement extends Element {
   type: BlockElementType.Code;
 }
 
-export type BlockElement = Header1Element | Header2Element | CodeElement;
+export interface UnorderedListElement extends Element {
+  type: BlockElementType.UnorderedList;
+}
+
+export interface OrderedListElement extends Element {
+  type: BlockElementType.OrderedList;
+}
+
+export interface ListItemElement extends Element {
+  type: BlockElementType.ListItem;
+}
+
+export type BlockElement =
+  | Header1Element
+  | Header2Element
+  | CodeElement
+  | UnorderedListElement
+  | OrderedListElement
+  | ListItemElement;
 
 export type SluglineElement =
   | DefaultElement

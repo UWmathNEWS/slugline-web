@@ -29,8 +29,9 @@ export const validatePassword = {
 const PasswordField = React.forwardRef<
   FormControlElementType,
   PasswordFieldProps<any>
->(({ state = useState<boolean>(false), context, ...props }, ref) => {
-  const [showPassword, setShowPassword] = state;
+>(({ state, context, ...props }, ref) => {
+  const defaultState = useState<boolean>(false)
+  const [showPassword, setShowPassword] = state ?? defaultState;
   return (
     <Field
       type={showPassword ? "text" : "password"}

@@ -70,6 +70,16 @@ const EditorControls: React.FC = () => {
         title="Code Block"
         blockType={BlockElementType.Code}
       />
+      <ToggleBlockButton
+        icon="list-ul"
+        title="Unordered List"
+        blockType={BlockElementType.UnorderedList}
+      />
+      <ToggleBlockButton
+        icon="list-ol"
+        title="Ordered List"
+        blockType={BlockElementType.OrderedList}
+      />
       <ExtrasDropdown />
     </div>
   );

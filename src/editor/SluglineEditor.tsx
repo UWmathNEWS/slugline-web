@@ -45,6 +45,12 @@ const renderElement = (props: RenderElementProps) => {
           {props.children}
         </pre>
       );
+    case BlockElementType.OrderedList:
+      return <ol>{props.children}</ol>;
+    case BlockElementType.UnorderedList:
+      return <ul>{props.children}</ul>;
+    case BlockElementType.ListItem:
+      return <li>{props.children}</li>;
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }

@@ -9,7 +9,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const configPath = path.resolve(__dirname, "..", "src", "config.ts");
+const configPath = path.resolve(__dirname, "..", "src", "config", "config.json");
 const manifestPath = path.resolve(
   __dirname,
   "..",
@@ -21,11 +21,7 @@ console.log("Loading config from", configPath);
 
 // Because TypeScript uses ES6 modules, we can't exactly load the contents of the config file
 // So instead, we read the source and evaluate it.
-const config = Function(
-  `"use strict"; return ${fs
-    .readFileSync(configPath, "utf-8")
-    .replace("export default", "")}`
-)();
+const config = JSON.parse(fs.readFileSync(configPath, "utf-8"))
 
 console.log("Loaded config:");
 console.dir(config);

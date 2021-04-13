@@ -1,12 +1,13 @@
 import { User } from "../../shared/types";
 import { testAdmin, testUser } from "../../shared/test-utils";
 import { authReducer, CSRF_COOKIE } from "../Auth";
+import Cookies from "js-cookie";
 
 describe("authReducer", () => {
   let authState: { user: User | null; csrfToken: string | null };
 
   beforeAll(() => {
-    window.document.cookie = `${CSRF_COOKIE}=csrf`;
+    Cookies.set(CSRF_COOKIE, 'csrf')
   });
 
   beforeEach(() => {
@@ -22,7 +23,7 @@ describe("authReducer", () => {
   });
 
   afterAll(() => {
-    delete window.document.cookie;
+    Cookies.remove(CSRF_COOKIE)
   });
 
   describe("action:login", () => {
