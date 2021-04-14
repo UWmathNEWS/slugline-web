@@ -1,6 +1,4 @@
 import React, { useCallback } from "react";
-
-import "./styles/IssuesList.scss";
 import { Link } from "react-router-dom";
 import { Issue, Pagination, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
@@ -12,15 +10,17 @@ import { coverSrc } from "../shared/helpers";
 import Hero from "../shared/components/Hero";
 import Breadcrumbs from "../shared/components/Breadcrumbs";
 
+import "./styles/IssuesList.scss";
+
 export interface VolumeIssuesProps {
   volume: Issue[];
 }
 
-const VolumeIssues = (props: VolumeIssuesProps) => {
+const VolumeIssues: React.FC<VolumeIssuesProps> = (props) => {
   return (
     <>
-      <h5 className="blackbox">Volume {props.volume[0].volume_num}</h5>
-      <div className="volume-issue-list d-flex overflow-auto">
+      <h2 className="h5 mb-3">Volume {props.volume[0].volume_num}</h2>
+      <div className="VolumeIssues_list mb-4">
         {props.volume.map((issue) => {
           return (
             <Link
@@ -28,20 +28,23 @@ const VolumeIssues = (props: VolumeIssuesProps) => {
                 pathname: `/issues/${issue.id}`,
                 state: issue,
               }}
-              className="volume-issue flex-shrink-1"
+              className="VolumeIssue"
               key={issue.id}
             >
-              <img
-                className="volume-issue-img mb-1"
-                srcSet={`${coverSrc(issue, 1, "RGB")}, ${coverSrc(
-                  issue,
-                  2,
-                  "RGB"
-                )} 2x`}
-                src={coverSrc(issue, 1, "RGB")}
-                alt={`Volume ${issue.volume_num} Issue ${issue.issue_code} cover`}
-              />
-              <h6 className="text-center">{`Issue ${issue.issue_code}`}</h6>
+              <div
+                className="VolumeIssue_imgWrapper mb-2"
+                style={{
+                  backgroundColor: `var(--paper-${issue.colour})`,
+                }}
+              >
+                <img
+                  className="VolumeIssue_img"
+                  srcSet={`${coverSrc(issue, 1)}, ${coverSrc(issue, 2)} 2x`}
+                  src={coverSrc(issue, 1)}
+                  alt={`Volume ${issue.volume_num} Issue ${issue.issue_code} cover`}
+                />
+              </div>
+              <p className="VolumeIssue_number h6 text-center">{`Issue ${issue.issue_code}`}</p>
             </Link>
           );
         })}
@@ -91,14 +94,7 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
     <>
       <Visor title={route.title} location={location.pathname} />
       <Hero variant="primary">
-        <Breadcrumbs
-          items={[
-            {
-              content: "Home",
-              to: "/",
-            },
-          ]}
-        />
+        <Breadcrumbs items={[]} />
         <h1>Issues</h1>
       </Hero>
       <div className="container mt-5">

@@ -13,4 +13,13 @@
   &_sep {
     margin: 0 spacing(1);
   }
+
+  &_link {
+    text-decoration: none;
+
+    &:hover {
+      color: $link-color;
+      text-decoration: underline;
+    }
+  }
 }
