@@ -193,9 +193,8 @@ export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
     // we are toggling a list ON, and we have to do some wrapping
     if (isListType(blockType) && !isActive) {
       wrapListItems(editor, blockType);
-    }
-    // otherwise, toggle as usual
-    else if (isActive) {
+    } else if (isActive) {
+      // otherwise, toggle as usual
       Transforms.setNodes(
         editor,
         { type: BlockElementType.Default },
