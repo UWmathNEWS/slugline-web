@@ -102,7 +102,7 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
 };
 
 /**
- * Normalizes the editor, i.e.,q the top-level container that holds all blocks.
+ * Normalizes the editor, i.e., the top-level container that holds all blocks.
  * This handles top-level layout.
  * @param editor The editor to normalize
  */
