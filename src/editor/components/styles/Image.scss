@@ -1,4 +1,5 @@
 @import "../../../styles/slugline_vars";
+@import "./controls.scss";
 
 .Image {
   width: 100%;
@@ -16,7 +17,7 @@
     height: auto;
 
     &--selected {
-      box-shadow: 0px 0px 0px 2px lightblue;
+      @include node-selected;
     }
   }
 
@@ -31,7 +32,7 @@
     font-size: 1em;
 
     &--selected {
-      box-shadow: 0px 0px 0px 2px lightblue;
+      @include node-selected;
     }
   }
 }
