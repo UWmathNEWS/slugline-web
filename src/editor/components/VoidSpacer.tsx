@@ -1,5 +1,4 @@
 import React from "react";
-import { Range } from "slate";
 import { RenderElementProps, useSelected, useSlate } from "slate-react";
 import { isSelectionCollapsed } from "../helpers";
 
