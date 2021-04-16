@@ -316,3 +316,6 @@ export const keyPressed = (
     editor.redo();
   }
 };
+
+export const isSelectionCollapsed = (editor: Editor) =>
+  editor.selection && Range.isCollapsed(editor.selection);

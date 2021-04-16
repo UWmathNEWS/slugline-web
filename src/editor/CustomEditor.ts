@@ -15,7 +15,12 @@ import {
   BlockElementType,
   BlockElement,
 } from "./types";
-import { isListActive, getFirstFromIterable, isBlockActive } from "./helpers";
+import {
+  isListActive,
+  getFirstFromIterable,
+  isBlockActive,
+  isSelectionCollapsed,
+} from "./helpers";
 import { normalizeBlock, normalizeEditor } from "./normalize";
 
 // the way to remove a property is to call setNodes with the property set to null
@@ -72,7 +77,7 @@ const createCustomEditor = () => {
   const insertBreakWithReset = () => {
     const listActive = isListActive(editor);
 
-    if (listActive && editor.selection && Range.isCollapsed(editor.selection)) {
+    if (listActive && isSelectionCollapsed(editor)) {
       // since we're in a list and the selection is collapsed,
       // there is one and only one ListItem that we're inside of
       // and we can assert that this entry exists
@@ -124,8 +129,7 @@ const createCustomEditor = () => {
 
   const deleteForwardCustom: typeof deleteForward = (unit) => {
     if (
-      editor.selection &&
-      Range.isCollapsed(editor.selection) &&
+      isSelectionCollapsed(editor) &&
       isBlockActive(editor, BlockElementType.VoidSpacer)
     ) {
       const [nextNode, nextPath] = Editor.next(editor) ?? [
@@ -148,8 +152,7 @@ const createCustomEditor = () => {
 
   const deleteBackwardCustom: typeof deleteBackward = (unit) => {
     if (
-      editor.selection &&
-      Range.isCollapsed(editor.selection) &&
+      isSelectionCollapsed(editor) &&
       isBlockActive(editor, BlockElementType.VoidSpacer)
     ) {
       const [prevNode, prevPath] = Editor.previous(editor) ?? [

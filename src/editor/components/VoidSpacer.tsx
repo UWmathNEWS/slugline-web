@@ -1,6 +1,7 @@
 import React from "react";
 import { Range } from "slate";
 import { RenderElementProps, useSelected, useSlate } from "slate-react";
+import { isSelectionCollapsed } from "../helpers";
 
 import "./styles/VoidSpacer.scss";
 
@@ -12,9 +13,7 @@ const VoidSpacer: React.FC<RenderElementProps> = (props) => {
     <span
       {...props.attributes}
       className={`VoidSpacer ${
-        selected && editor.selection && Range.isCollapsed(editor.selection)
-          ? "VoidSpacer--selected"
-          : ""
+        selected && isSelectionCollapsed(editor) ? "VoidSpacer--selected" : ""
       }`}
     >
       {props.children}
