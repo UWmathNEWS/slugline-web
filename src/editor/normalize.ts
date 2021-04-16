@@ -102,12 +102,13 @@ const normalizeVoidBlock = (editor: Editor, path: Path) => {
 };
 
 /**
- * Normalizes the editor, i.e., the top-level container that holds all blocks.
+ * Normalizes the editor, i.e.,q the top-level container that holds all blocks.
  * This handles top-level layout.
  * @param editor The editor to normalize
  */
 export const normalizeEditor = (editor: Editor) => {
-  for (const [idx, node] of editor.children.entries()) {
+  for (let idx = 0; idx < editor.children.length; idx++) {
+    const node = editor.children[idx];
     if (Editor.isBlock(editor, node) && Editor.isVoid(editor, node)) {
       const elem = node as SluglineElement;
       if (elem.type === BlockElementType.VoidSpacer) {
