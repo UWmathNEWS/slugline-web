@@ -44,7 +44,6 @@ const createCustomEditor = () => {
     const e = element as SluglineElement;
     switch (e.type) {
       case InlineElementType.Link:
-        return true;
       case InlineElementType.InlineLatex:
         return true;
       default:
@@ -56,9 +55,7 @@ const createCustomEditor = () => {
     const e = element as SluglineElement;
     switch (e.type) {
       case InlineElementType.InlineLatex:
-        return true;
       case BlockElementType.Image:
-        return true;
       case BlockElementType.VoidSpacer:
         return true;
       default:
