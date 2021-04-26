@@ -79,9 +79,9 @@ const SluglineNav = () => {
         </Navbar.Brand>
         <Navbar.Toggle
           className="custom-toggler"
-          aria-controls="slugline-nav"
+          aria-controls="header-nav"
         />
-        <Navbar.Collapse id="slugline-nav">
+        <Navbar.Collapse id="header-nav">
           <Nav>
             <NavLink text="Home" to="/" />
             <NavLink text="Issues" to="/issues" />
