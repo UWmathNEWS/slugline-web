@@ -278,7 +278,10 @@ export const insertVoidBlock = (editor: Editor, block: BlockVoidElement) => {
       Range.isCollapsed(selectionRef.current!) &&
       Editor.string(editor, selectionRef.current!.anchor.path) === ""
     ) {
-      Transforms.removeNodes(editor, { at: selectionRef.current! });
+      Transforms.removeNodes(editor, {
+        at: selectionRef.current!,
+        mode: "highest",
+      });
     }
   });
 };

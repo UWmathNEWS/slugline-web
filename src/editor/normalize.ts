@@ -1,4 +1,4 @@
-import { Editor, Path, Transforms } from "slate";
+import { Editor, Element, Path, Transforms } from "slate";
 import { isListType } from "./helpers";
 import { BlockElement, BlockElementType, SluglineElement } from "./types";
 
@@ -125,8 +125,15 @@ export const normalizeBlock = (
   block: BlockElement,
   path: Path
 ) => {
-  // remove lists with no children
-  if (isListType(block.type) && block.children.length === 0) {
-    Transforms.removeNodes(editor, { at: path });
+  // remove lists with no list items as children
+  const hasListItems =
+    block.children.filter(
+      (c) => Element.isElement(c) && c.type === BlockElementType.ListItem
+    ).length !== 0;
+
+  if (isListType(block.type) && !hasListItems) {
+    console.log(block);
+    console.log(path);
+    Transforms.removeNodes(editor, { at: path, mode: "highest" });
   }
 };
