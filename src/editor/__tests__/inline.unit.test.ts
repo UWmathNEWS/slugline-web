@@ -16,7 +16,7 @@ const TEST_LINK: LinkElement = {
 const TEST_LATEX_INLINE: InlineLatexElement = {
   latex: "\\LaTeX",
   type: InlineElementType.InlineLatex,
-  children: [],
+  children: [{ text: "" }],
 };
 
 describe("createInline", () => {
@@ -154,7 +154,7 @@ describe("createInline", () => {
 
   it("does not create new inlines over existing ones", () => {
     const editor = createCustomEditor();
-    const children = [
+    editor.children = [
       {
         type: BlockElementType.Default,
         children: [
@@ -175,7 +175,6 @@ describe("createInline", () => {
         ],
       },
     ];
-    editor.children = children;
 
     editor.selection = {
       anchor: {
@@ -190,7 +189,27 @@ describe("createInline", () => {
 
     createInline(editor, TEST_LINK, undefined);
 
-    expect(editor.children).toEqual(children);
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "hahaha",
+          },
+          {
+            ...TEST_LINK,
+            children: [
+              {
+                text: "voodoo",
+              },
+            ],
+          },
+          {
+            text: "hehehe",
+          },
+        ],
+      },
+    ]);
   });
 
   it("creates new inlines from collapsed ranges", () => {

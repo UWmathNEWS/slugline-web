@@ -67,6 +67,7 @@ const renderElement = (props: RenderElementProps) => {
 
 const EDITOR_STATE_EMPTY: Node[] = [
   {
+    type: BlockElementType.Default,
     children: [
       {
         text: "",

@@ -240,7 +240,7 @@ describe("toggleBlock", () => {
     const editor = createCustomEditor();
     editor.children = [
       {
-        type: "overwrite-me",
+        type: BlockElementType.Default,
         children: [
           {
             text: "Header",

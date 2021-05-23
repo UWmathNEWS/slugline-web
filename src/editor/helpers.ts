@@ -9,8 +9,8 @@ import {
   BlockElementType,
   InlineElementType,
   ElementType,
-  BlockVoidElement,
   ListElementType,
+  BlockVoidElement,
 } from "./types";
 import { HistoryEditor } from "slate-history";
 
@@ -114,7 +114,7 @@ export const createInline: {
   }
 
   if (editor.selection === null || Range.isCollapsed(editor.selection)) {
-    const inlineWithChildren = {
+    const inlineWithChildren: InlineElement | InlineVoidElement = {
       ...inline,
       children: [
         {
@@ -125,10 +125,10 @@ export const createInline: {
     Transforms.insertNodes(editor, inlineWithChildren);
   } else {
     // we have an expanded range, wrap the existing nodes
-    // since we're wrapping existing nodes, no children allowed
-    const inlineWithoutChildren = {
+    // since we're wrapping existing nodes, the children property will be ignored
+    const inlineWithoutChildren: InlineElement | InlineVoidElement = {
       ...inline,
-      children: [],
+      children: [{ text: "" }],
     };
     Transforms.wrapNodes(editor, inlineWithoutChildren, {
       split: true,
