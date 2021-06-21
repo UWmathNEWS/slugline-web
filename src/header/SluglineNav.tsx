@@ -1,4 +1,22 @@
-import React from "react";
+/**
+ * goosePRESS is a news publishing platform.
+ * Copyright (C) 2021 Yang Zhong
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+ import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -79,9 +97,9 @@ const SluglineNav = () => {
         </Navbar.Brand>
         <Navbar.Toggle
           className="custom-toggler"
-          aria-controls="slugline-nav"
+          aria-controls="header-nav"
         />
-        <Navbar.Collapse id="slugline-nav">
+        <Navbar.Collapse id="header-nav">
           <Nav>
             <NavLink text="Home" to="/" />
             <NavLink text="Issues" to="/issues" />

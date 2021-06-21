@@ -1,5 +1,5 @@
 import React from "react";
-import "./styles/slugline.scss";
+import "./styles/primary_style.scss";
 import { Router, Switch, Route } from "react-router-dom";
 import { createBrowserHistory, History } from "history";
 

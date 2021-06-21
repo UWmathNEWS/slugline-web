@@ -64,6 +64,7 @@ const UserEditModal: React.FC<UserEditModalProps> = (
     <Modal
       show={props.show}
       onHide={() => {
+        context.reset({});
         props.setShow(false);
       }}
       size="lg"
@@ -86,6 +87,7 @@ const UserEditModal: React.FC<UserEditModalProps> = (
         <Button
           variant="secondary"
           onClick={() => {
+            context.reset({});
             props.setShow(false);
           }}
         >
