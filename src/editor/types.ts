@@ -1,5 +1,3 @@
-import { Element } from "slate";
-
 export enum Mark {
   Emph1 = "emph-1",
   Emph2 = "emph-2",
@@ -10,6 +8,12 @@ export enum Mark {
   Strikethrough = "strikethrough",
   ArticleRef = "article-ref",
 }
+
+export type CustomText = {
+  [MarkName in Mark]?: boolean;
+} & {
+  text: string;
+};
 
 export enum InlineElementType {
   Link = "link",
@@ -24,20 +28,33 @@ export enum BlockElementType {
   UnorderedList = "unordered-list",
   OrderedList = "ordered-list",
   ListItem = "list-item",
+  Image = "image",
+  ImageCaption = "image-caption",
+  VoidSpacer = "void-spacer",
 }
+
+export type ListElementType =
+  | BlockElementType.OrderedList
+  | BlockElementType.UnorderedList;
 
 export type ElementType = InlineElementType | BlockElementType;
 
-export interface DefaultElement extends Element {
-  type: BlockElementType.Default;
+export interface BaseInlineElement {
+  type: InlineElementType;
+  children: CustomText[];
 }
 
-export interface LinkElement extends Element {
+export interface BaseInlineVoidElement {
+  type: InlineElementType;
+  children: [CustomText];
+}
+
+export interface LinkElement extends BaseInlineElement {
   type: InlineElementType.Link;
   href: string;
 }
 
-export interface InlineLatexElement extends Element {
+export interface InlineLatexElement extends BaseInlineVoidElement {
   type: InlineElementType.InlineLatex;
   latex: string;
 }
@@ -45,40 +62,78 @@ export interface InlineLatexElement extends Element {
 export type InlineElement = LinkElement;
 export type InlineVoidElement = InlineLatexElement;
 
-export interface Header1Element extends Element {
+export interface BaseBlockElement {
+  type: BlockElementType;
+  children: (SluglineElement | CustomText)[];
+}
+
+export interface BaseBlockVoidElement {
+  type: BlockElementType;
+  children: [CustomText];
+}
+
+export interface DefaultElement extends BaseBlockElement {
+  type: BlockElementType.Default;
+}
+
+export interface Header1Element extends BaseBlockElement {
   type: BlockElementType.Header1;
 }
 
-export interface Header2Element extends Element {
+export interface Header2Element extends BaseBlockElement {
   type: BlockElementType.Header2;
 }
 
-export interface CodeElement extends Element {
+export interface CodeElement extends BaseBlockElement {
   type: BlockElementType.Code;
 }
 
-export interface UnorderedListElement extends Element {
+export interface UnorderedListElement extends BaseBlockElement {
   type: BlockElementType.UnorderedList;
 }
 
-export interface OrderedListElement extends Element {
+export interface OrderedListElement extends BaseBlockElement {
   type: BlockElementType.OrderedList;
 }
 
-export interface ListItemElement extends Element {
+export interface ListItemElement extends BaseBlockElement {
   type: BlockElementType.ListItem;
 }
 
+export interface ImageElement extends BaseBlockVoidElement {
+  type: BlockElementType.Image;
+  src: string;
+}
+
+export interface ImageCaptionElement extends BaseBlockElement {
+  type: BlockElementType.ImageCaption;
+}
+
+export interface VoidSpacerElement extends BaseBlockVoidElement {
+  type: BlockElementType.VoidSpacer;
+}
+
 export type BlockElement =
+  | DefaultElement
   | Header1Element
   | Header2Element
   | CodeElement
   | UnorderedListElement
   | OrderedListElement
-  | ListItemElement;
+  | ListItemElement
+  | ImageCaptionElement;
+
+export type BlockVoidElement = ImageElement | VoidSpacerElement;
 
 export type SluglineElement =
-  | DefaultElement
   | InlineElement
   | InlineVoidElement
-  | BlockElement;
+  | BlockElement
+  | BlockVoidElement;
+
+declare module "slate" {
+  interface CustomTypes {
+    Element: SluglineElement;
+    Text: CustomText;
+  }
+}

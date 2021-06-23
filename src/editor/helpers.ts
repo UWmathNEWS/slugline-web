@@ -9,6 +9,8 @@ import {
   BlockElementType,
   InlineElementType,
   ElementType,
+  ListElementType,
+  BlockVoidElement,
 } from "./types";
 import { HistoryEditor } from "slate-history";
 
@@ -112,7 +114,7 @@ export const createInline: {
   }
 
   if (editor.selection === null || Range.isCollapsed(editor.selection)) {
-    const inlineWithChildren = {
+    const inlineWithChildren: InlineElement | InlineVoidElement = {
       ...inline,
       children: [
         {
@@ -123,10 +125,10 @@ export const createInline: {
     Transforms.insertNodes(editor, inlineWithChildren);
   } else {
     // we have an expanded range, wrap the existing nodes
-    // since we're wrapping existing nodes, no children allowed
-    const inlineWithoutChildren = {
+    // since we're wrapping existing nodes, the children property will be ignored
+    const inlineWithoutChildren: InlineElement | InlineVoidElement = {
       ...inline,
-      children: [],
+      children: [{ text: "" }],
     };
     Transforms.wrapNodes(editor, inlineWithoutChildren, {
       split: true,
@@ -170,42 +172,76 @@ export const isBlockActive = (editor: Editor, blockType: BlockElementType) => {
 export const toggleBlock = (editor: Editor, blockType: BlockElementType) => {
   const isActive = isBlockActive(editor, blockType);
 
-  // first, unwrap any lists
-  if (isListActive(editor)) {
-    Transforms.unwrapNodes(editor, {
-      split: true,
-      match: (elem) => isListType((elem as SluglineElement).type),
-    });
-    Transforms.setNodes(
-      editor,
-      { type: BlockElementType.Default },
-      {
-        match: (elem) =>
-          (elem as SluglineElement).type === BlockElementType.ListItem,
-      }
-    );
-  }
+  Editor.withoutNormalizing(editor, () => {
+    // first, unwrap any lists
+    if (isListActive(editor)) {
+      Transforms.unwrapNodes(editor, {
+        split: true,
+        match: (elem) => isListType((elem as SluglineElement).type),
+      });
+      Transforms.setNodes(
+        editor,
+        { type: BlockElementType.Default },
+        {
+          match: (elem) =>
+            (elem as SluglineElement).type === BlockElementType.ListItem,
+        }
+      );
+    }
 
-  // if the requested block is a list and that list is currently not active,
-  // we are toggling a list ON, and we have to do some wrapping
-  if (isListType(blockType) && !isActive) {
-    Transforms.setNodes(editor, { type: BlockElementType.ListItem });
-    Transforms.wrapNodes(editor, { type: blockType, children: [] });
-  }
-  // otherwise, toggle as usual
-  else if (isActive) {
-    Transforms.setNodes(
-      editor,
-      { type: BlockElementType.Default },
-      { mode: "all", match: (node) => Editor.isBlock(editor, node) }
-    );
-  } else {
-    Transforms.setNodes(
-      editor,
-      { type: blockType },
-      { mode: "all", match: (node) => Editor.isBlock(editor, node) }
-    );
-  }
+    // if the requested block is a list and that list is currently not active,
+    // we are toggling a list ON, and we have to do some wrapping
+    if (isListType(blockType) && !isActive) {
+      wrapListItems(editor, blockType);
+    } else if (isActive) {
+      // otherwise, toggle as usual
+      Transforms.setNodes(
+        editor,
+        { type: BlockElementType.Default },
+        {
+          mode: "all",
+          match: (node) =>
+            !editor.isVoid(node as SluglineElement) &&
+            Editor.isBlock(editor, node),
+        }
+      );
+    } else {
+      Transforms.setNodes(
+        editor,
+        { type: blockType },
+        {
+          mode: "all",
+          match: (node) =>
+            !editor.isVoid(node as SluglineElement) &&
+            Editor.isBlock(editor, node),
+        }
+      );
+    }
+  });
+};
+
+/**
+ * Wraps the currently selected blocks into a list, skipping void blocks
+ * @param editor The editor to wrap blocks in
+ * @param listType The type of list to wrap the blocks with
+ */
+const wrapListItems = (editor: Editor, listType: ListElementType) => {
+  Transforms.setNodes(
+    editor,
+    { type: BlockElementType.ListItem },
+    {
+      match: (elem) =>
+        !editor.isVoid(elem as SluglineElement) && Editor.isBlock(editor, elem),
+    }
+  );
+
+  Transforms.wrapNodes(editor, { type: listType, children: [] });
+
+  // we don't want to wrap void nodes, so pull them out after the fact
+  Transforms.liftNodes(editor, {
+    mode: "all",
+    match: (elem) => editor.isVoid(elem as SluglineElement),
+  });
 };
 
 export const isListActive = (editor: Editor) => {
@@ -215,11 +251,39 @@ export const isListActive = (editor: Editor) => {
   );
 };
 
-export const isListType = (blockType: ElementType) => {
+export const isListType = (
+  blockType: ElementType
+): blockType is ListElementType => {
   return (
     blockType === BlockElementType.UnorderedList ||
     blockType === BlockElementType.OrderedList
   );
+};
+
+/**
+ * Inserts a void block element at the current selection.
+ * @param editor The editor to insert the block into
+ * @param block The block to insert. The `children` property will not be inserted.
+ */
+export const insertVoidBlock = (editor: Editor, block: BlockVoidElement) => {
+  Editor.withoutNormalizing(editor, () => {
+    if (!editor.selection) {
+      return;
+    }
+    const selectionRef = Editor.rangeRef(editor, editor.selection);
+    Transforms.insertNodes(editor, block, {
+      mode: "highest",
+    });
+    if (
+      Range.isCollapsed(selectionRef.current!) &&
+      Editor.string(editor, selectionRef.current!.anchor.path) === ""
+    ) {
+      Transforms.removeNodes(editor, {
+        at: selectionRef.current!,
+        mode: "highest",
+      });
+    }
+  });
 };
 
 const MARK_HOTKEYS: Array<[Mark, string]> = [
@@ -255,3 +319,6 @@ export const keyPressed = (
     editor.redo();
   }
 };
+
+export const isSelectionCollapsed = (editor: Editor) =>
+  editor.selection && Range.isCollapsed(editor.selection);

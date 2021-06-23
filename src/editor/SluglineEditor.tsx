@@ -19,6 +19,9 @@ import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
+import Image from "./components/Image";
+import ImageCaption from "./components/ImageCaption";
+import VoidSpacer from "./components/VoidSpacer";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -46,11 +49,17 @@ const renderElement = (props: RenderElementProps) => {
         </pre>
       );
     case BlockElementType.OrderedList:
-      return <ol>{props.children}</ol>;
+      return <ol {...props.attributes}>{props.children}</ol>;
     case BlockElementType.UnorderedList:
-      return <ul>{props.children}</ul>;
+      return <ul {...props.attributes}>{props.children}</ul>;
     case BlockElementType.ListItem:
-      return <li>{props.children}</li>;
+      return <li {...props.attributes}>{props.children}</li>;
+    case BlockElementType.VoidSpacer:
+      return <VoidSpacer {...props} />;
+    case BlockElementType.Image:
+      return <Image {...props} />;
+    case BlockElementType.ImageCaption:
+      return <ImageCaption {...props} />;
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }
@@ -58,6 +67,7 @@ const renderElement = (props: RenderElementProps) => {
 
 const EDITOR_STATE_EMPTY: Node[] = [
   {
+    type: BlockElementType.Default,
     children: [
       {
         text: "",

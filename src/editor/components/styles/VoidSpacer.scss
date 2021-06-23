@@ -1,0 +1,11 @@
+@import "./controls.scss";
+
+.VoidSpacer {
+  display: block;
+  width: 100%;
+  height: 0px;
+
+  &--selected {
+    @include node-selected;
+  }
+}

@@ -360,4 +360,168 @@ describe("lists", () => {
       },
     ]);
   });
+
+  it("doesn't wrap void blocks in the middle", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "item 1",
+          },
+        ],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [
+          {
+            text: "item 3",
+          },
+        ],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [4, 0],
+        offset: 6,
+      },
+    };
+
+    toggleBlock(editor, BlockElementType.OrderedList);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 1",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.OrderedList,
+        children: [
+          {
+            type: BlockElementType.ListItem,
+            children: [
+              {
+                text: "item 3",
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("doesn't wrap all void blocks", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [5, 0],
+        offset: 0,
+      },
+    };
+
+    toggleBlock(editor, BlockElementType.ListItem);
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        src: "www.image.com",
+        children: [{ text: "" }],
+      },
+    ]);
+  });
 });

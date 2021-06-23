@@ -15,6 +15,8 @@ import {
   faHeading,
   faListOl,
   faListUl,
+  faImage,
+  faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
 
 export const initLibrary = () => {
@@ -33,6 +35,8 @@ export const initLibrary = () => {
     faCaretDown,
     faHeading,
     faListOl,
-    faListUl
+    faListUl,
+    faImage,
+    faExclamationTriangle
   );
 };
