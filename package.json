@@ -85,7 +85,6 @@
     "@testing-library/react": "^10.3.0",
     "@testing-library/react-hooks": "^3.3.0",
     "@testing-library/user-event": "^12.0.6",
-    "@types/draft-js": "^0.10.38",
     "@types/jest": "^24.9.1",
     "@types/js-cookie": "^2.2.4",
     "@types/katex": "^0.11.0",
