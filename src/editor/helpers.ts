@@ -13,7 +13,6 @@ import {
   BlockVoidElement,
   CustomEditor,
 } from "./types";
-import { HistoryEditor } from "slate-history";
 
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
   const marks = Editor.marks(editor);
