@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { RenderElementProps, ReactEditor, useEditor } from "slate-react";
+import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { InlineLatexElement } from "../types";
 import * as katex from "katex";
 import PopoverWrapper from "./PopoverWrapper";
@@ -10,7 +10,7 @@ const InlineLatex: React.FC<RenderElementProps> = (
   props: RenderElementProps
 ) => {
   const element = props.element as InlineLatexElement;
-  const editor = useEditor();
+  const editor = useSlateStatic();
 
   const [show, setShow] = useState<boolean>(false);
 
