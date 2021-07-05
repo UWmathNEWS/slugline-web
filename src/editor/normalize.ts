@@ -132,8 +132,6 @@ export const normalizeBlock = (
     ).length !== 0;
 
   if (isListType(block.type) && !hasListItems) {
-    console.log(block);
-    console.log(path);
     Transforms.removeNodes(editor, { at: path, mode: "highest" });
   }
 };
