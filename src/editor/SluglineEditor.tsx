@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 
-import { Node, Range } from "slate";
+import { Descendant, Node, Range } from "slate";
 import {
   Slate,
   Editable,
@@ -65,7 +65,7 @@ const renderElement = (props: RenderElementProps) => {
   }
 };
 
-const EDITOR_STATE_EMPTY: Node[] = [
+const EDITOR_STATE_EMPTY: Descendant[] = [
   {
     type: BlockElementType.Default,
     children: [
@@ -80,7 +80,7 @@ interface SluglineEditorProps {
   title?: string;
   subtitle?: string;
   author?: string;
-  content_raw?: Node[];
+  content_raw?: Descendant[];
   saveArticle: (title: string, subtitle: string, author: string) => void;
   saveArticleContent: (content: Node[]) => void;
 }
@@ -93,7 +93,7 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
     []
   );
 
-  const [value, setValue] = useState<Node[]>(
+  const [value, setValue] = useState<Descendant[]>(
     props.content_raw || EDITOR_STATE_EMPTY
   );
   const [selection, setSelection] = useState<Range | null>(editor.selection);

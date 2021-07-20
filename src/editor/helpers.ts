@@ -11,15 +11,15 @@ import {
   ElementType,
   ListElementType,
   BlockVoidElement,
+  CustomEditor,
 } from "./types";
-import { HistoryEditor } from "slate-history";
 
 export const isMarkActive = (editor: Editor, mark: Mark): boolean => {
   const marks = Editor.marks(editor);
   return marks !== null && marks[mark] === true;
 };
 
-export const toggleMark = (editor: Editor, mark: Mark): void => {
+export const toggleMark = (editor: CustomEditor, mark: Mark): void => {
   const active = isMarkActive(editor, mark);
   if (active) {
     Editor.removeMark(editor, mark);
@@ -294,7 +294,7 @@ const MARK_HOTKEYS: Array<[Mark, string]> = [
 ];
 
 export const keyDown = (
-  editor: HistoryEditor,
+  editor: CustomEditor,
   evt: React.KeyboardEvent
 ): void => {
   MARK_HOTKEYS.forEach(([mark, hotkey]) => {
@@ -309,7 +309,7 @@ export const keyDown = (
 };
 
 export const keyPressed = (
-  editor: HistoryEditor,
+  editor: CustomEditor,
   evt: React.KeyboardEvent
 ): void => {
   if (isHotkey("mod+z", evt.nativeEvent)) {

@@ -1,3 +1,7 @@
+import { BaseEditor } from "slate";
+import { HistoryEditor } from "slate-history";
+import { ReactEditor } from "slate-react";
+
 export enum Mark {
   Emph1 = "emph-1",
   Emph2 = "emph-2",
@@ -131,9 +135,12 @@ export type SluglineElement =
   | BlockElement
   | BlockVoidElement;
 
+export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
+
 declare module "slate" {
   interface CustomTypes {
     Element: SluglineElement;
     Text: CustomText;
+    Editor: CustomEditor;
   }
 }

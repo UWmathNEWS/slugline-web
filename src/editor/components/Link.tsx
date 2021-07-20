@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { RenderElementProps, useEditor, ReactEditor } from "slate-react";
+import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { LinkElement } from "../types";
 import LinkPopover from "./LinkPopover";
 import { Transforms } from "slate";
@@ -23,7 +23,7 @@ export const formatHref = (href: string) => {
 
 const Link: React.FC<RenderElementProps> = (props: RenderElementProps) => {
   const element = props.element as LinkElement;
-  const editor = useEditor();
+  const editor = useSlateStatic();
 
   const [show, setShow] = useState<boolean>(false);
   const ref = useRef<HTMLAnchorElement>(null);

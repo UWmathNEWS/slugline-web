@@ -5,8 +5,8 @@ import { Transforms } from "slate";
 import {
   ReactEditor,
   RenderElementProps,
-  useEditor,
   useSelected,
+  useSlateStatic,
 } from "slate-react";
 import { ImageElement } from "../types";
 import ImagePopover from "./ImagePopover";
@@ -19,7 +19,7 @@ const Image: React.FC<RenderElementProps> = (props) => {
   const [hasError, setHasError] = useState<boolean>(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const errorDivRef = useRef<HTMLDivElement>(null);
-  const editor = useEditor();
+  const editor = useSlateStatic();
   const selected = useSelected();
 
   const element = props.element as ImageElement;
