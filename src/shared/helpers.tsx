@@ -10,6 +10,91 @@ export { url };
 export { user };
 
 /**
+ * Formats a string using Python-style syntax without sanitizing its parameters.
+ * NOT SAFE FOR PRODUCTION USE.
+ *
+ * @param fmtStr The format string
+ * @param params Parameters to pass in to be formatted
+ */
+export const __unsafeRawFormat = (
+  fmtStr: string,
+  params?: Record<string | number, any> | any[]
+): string => {
+  if (!params) return fmtStr;
+
+  // TODO: When TS 4.4 comes out, replace isArray checks with isParamsArray to take advantage of
+  //  microsoft/TypeScript#44730
+  // const isParamsArray = Array.isArray(params);
+  const maxOffset = Array.isArray(params) ? params.length : 0;
+
+  let strBuilder = [];
+  let lastFmtStrInd = 0;
+  let unlabelledMatches = 0;
+
+  for (let i = 0, len = fmtStr.length; i < len; ) {
+    if (
+      (fmtStr[i] === "{" && fmtStr[i + 1] === "{") ||
+      (fmtStr[i] === "}" && fmtStr[i + 1] === "}")
+    ) {
+      // handle escapes
+      strBuilder.push(fmtStr.slice(lastFmtStrInd, i + 1));
+      i += 2; // skip escape sequence
+      lastFmtStrInd = i;
+    } else if (fmtStr[i] === "{") {
+      // regular interpolation
+      // save everything up to this brace
+      strBuilder.push(fmtStr.slice(lastFmtStrInd, i));
+      lastFmtStrInd = i;
+
+      // search for matching closing brace
+      do {
+        i += 1;
+      } while (i < len && fmtStr[i] !== "{" && fmtStr[i] !== "}");
+
+      if (fmtStr[i] === "}") {
+        // success, matched brace
+        const paramName = fmtStr.slice(lastFmtStrInd + 1, i);
+        if (Array.isArray(params)) {
+          // If params were given as an array, we want to accommodate empty idents and negative indices
+          const ind = parseInt(paramName);
+          let sub: string;
+          if (!paramName) {
+            // unlabelled format ident, fall back on last index seen
+            sub = params[unlabelledMatches++];
+          } else if (ind < 0 && ind >= -maxOffset) {
+            // negative index, go from end of array
+            sub = params[maxOffset + ind];
+          } else if (0 <= ind && ind < maxOffset) {
+            // positive index, treat as normal
+            sub = params[ind];
+          } else {
+            // OOB or not a valid numeric index, don't substitute
+            sub = `{${paramName}}`;
+          }
+          strBuilder.push(sub);
+        } else {
+          if (params.hasOwnProperty(paramName)) {
+            strBuilder.push(params[paramName]);
+          } else {
+            strBuilder.push(`{${paramName}}`);
+          }
+        }
+        lastFmtStrInd = i + 1;
+      } else {
+        // failure, unmatched brace or opening brace found, so we restart search here
+        strBuilder.push(fmtStr.slice(lastFmtStrInd, i));
+        lastFmtStrInd = i;
+      }
+    } else {
+      i += 1;
+    }
+  }
+  strBuilder.push(fmtStr.slice(lastFmtStrInd));
+
+  return strBuilder.join("");
+};
+
+/**
  * Formats a string using Python-style syntax.
  *
  *     format("Hello, {}!", "world") // => Hello, world!
@@ -21,30 +106,47 @@ export { user };
  */
 export const format: {
   (fmtStr: string): string;
-  (fmtStr: string, params: Record<string | number, any>): string;
+  <T extends string | number = string | number>(
+    fmtStr: string,
+    params: Record<T, any>
+  ): string;
   (fmtStr: string, ...params: (string | number)[]): string;
 } = (fmtStr: string, ...params: any[]) => {
-  if (params.length === 0) return fmtStr;
-
+  // If the only parameter is not of type number or string, treat it as a dictionary parameter
   const paramsObj =
-    typeof params[0] === "number" ||
-    typeof params[0] === "string" ||
-    typeof params[0] === "undefined"
-      ? params
-      : params[0];
-  let unlabelledMatches = 0;
+    params.length === 1 &&
+    typeof params[0] !== "number" &&
+    typeof params[0] !== "string" &&
+    params[0] !== undefined &&
+    params[0] !== null
+      ? params[0]
+      : params;
 
-  return fmtStr.replace(/{([^}]*)}/g, (match, paramName, offset) => {
-    if (!paramName) {
-      return paramsObj[unlabelledMatches++];
-    }
-    if (paramName[0] === "{" && fmtStr[offset + match.length] === "}") {
-      return paramName;
-    }
-    return paramsObj[
-      parseInt(paramName) in paramsObj ? parseInt(paramName) : paramName
-    ];
-  });
+  // If no parameters were given, just return the format string
+  if (
+    paramsObj.length === 0 ||
+    Object.getOwnPropertyNames(paramsObj).length === 0
+  ) {
+    return fmtStr;
+  }
+
+  // Sanitize params before passing into __unsafeRawFormat
+  // For now, this is commented out because I can't think of any sanitization we need at the moment
+
+  // let safedParams: Record<string, string> | string[];
+
+  // if (Array.isArray(paramsObj)) {
+  //   safedParams = paramsObj.map((param) => param.toString());
+  // } else {
+  //   safedParams = {};
+  //   for (const key in paramsObj) {
+  //     if (paramsObj.hasOwnProperty(key)) {
+  //       safedParams[key.toString()] = paramsObj[key].toString();
+  //     }
+  //   }
+  // }
+
+  return __unsafeRawFormat(fmtStr, paramsObj);
 };
 
 /**
