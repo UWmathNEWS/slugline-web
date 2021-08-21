@@ -1,4 +1,4 @@
-@import "../../../styles/slugline_vars";
+@import "../../../styles/primary_style_vars";
 
 .editor-control {
   height: 30px;
@@ -83,4 +83,9 @@
   border: solid 1px gray;
   border-radius: $border-radius;
   width: auto;
+}
+
+// A custom selected style for editor nodes that don't have browser selections
+@mixin node-selected {
+  box-shadow: 0px 0px 0px 2px lightblue;
 }

@@ -429,3 +429,281 @@ describe("insertBreakWithReset", () => {
     ]);
   });
 });
+
+describe("deleteForward", () => {
+  it("deletes the void block when a void spacer is selected", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteForward("character");
+
+    expect(editor.children).toEqual([]);
+  });
+
+  it("deletes void orphans at the beginning of the document", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteForward("character");
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ]);
+  });
+
+  it("deletes void orphans at the end of a document", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [{ text: "" }],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [3, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [3, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteForward("character");
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ]);
+  });
+});
+
+describe("deleteBackward", () => {
+  it("deletes the void block when a void spacer is selected", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ];
+    editor.selection = {
+      anchor: {
+        path: [2, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [2, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteBackward("character");
+
+    expect(editor.children).toEqual([]);
+  });
+
+  it("deletes void orphans at the beginning of the document", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.Default,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteBackward("character");
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ]);
+  });
+
+  it("deletes void orphans at the end of a document", () => {
+    const editor = createCustomEditor();
+    editor.children = [
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Default,
+        children: [{ text: "" }],
+      },
+    ];
+
+    editor.selection = {
+      anchor: {
+        path: [3, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [3, 0],
+        offset: 0,
+      },
+    };
+
+    editor.deleteBackward("character");
+
+    expect(editor.children).toEqual([
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+      {
+        type: BlockElementType.Image,
+        children: [{ text: "" }],
+        src: "image",
+      },
+      {
+        type: BlockElementType.VoidSpacer,
+        children: [{ text: "" }],
+      },
+    ]);
+  });
+});

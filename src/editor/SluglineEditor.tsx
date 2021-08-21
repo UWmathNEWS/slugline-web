@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 
-import { Node, Range } from "slate";
+import { Descendant, Node, Range } from "slate";
 import {
   Slate,
   Editable,
@@ -19,6 +19,9 @@ import Link from "./components/Link";
 import EditorControls from "./EditorControls";
 import InlineLatex from "./components/InlineLatex";
 import createCustomEditor from "./CustomEditor";
+import Image from "./components/Image";
+import ImageCaption from "./components/ImageCaption";
+import VoidSpacer from "./components/VoidSpacer";
 
 const renderLeaf = (props: RenderLeafProps) => {
   return <Leaf {...props} />;
@@ -46,18 +49,25 @@ const renderElement = (props: RenderElementProps) => {
         </pre>
       );
     case BlockElementType.OrderedList:
-      return <ol>{props.children}</ol>;
+      return <ol {...props.attributes}>{props.children}</ol>;
     case BlockElementType.UnorderedList:
-      return <ul>{props.children}</ul>;
+      return <ul {...props.attributes}>{props.children}</ul>;
     case BlockElementType.ListItem:
-      return <li>{props.children}</li>;
+      return <li {...props.attributes}>{props.children}</li>;
+    case BlockElementType.VoidSpacer:
+      return <VoidSpacer {...props} />;
+    case BlockElementType.Image:
+      return <Image {...props} />;
+    case BlockElementType.ImageCaption:
+      return <ImageCaption {...props} />;
     default:
       return <p {...props.attributes}>{props.children}</p>;
   }
 };
 
-const EDITOR_STATE_EMPTY: Node[] = [
+const EDITOR_STATE_EMPTY: Descendant[] = [
   {
+    type: BlockElementType.Default,
     children: [
       {
         text: "",
@@ -70,7 +80,7 @@ interface SluglineEditorProps {
   title?: string;
   subtitle?: string;
   author?: string;
-  content_raw?: Node[];
+  content_raw?: Descendant[];
   saveArticle: (title: string, subtitle: string, author: string) => void;
   saveArticleContent: (content: Node[]) => void;
 }
@@ -83,7 +93,7 @@ const SluglineEditor: React.FC<SluglineEditorProps> = (
     []
   );
 
-  const [value, setValue] = useState<Node[]>(
+  const [value, setValue] = useState<Descendant[]>(
     props.content_raw || EDITOR_STATE_EMPTY
   );
   const [selection, setSelection] = useState<Range | null>(editor.selection);
