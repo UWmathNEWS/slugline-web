@@ -29,6 +29,7 @@ import Hero from "../shared/components/Hero";
 import Breadcrumbs from "../shared/components/Breadcrumbs";
 
 import "./styles/IssuesList.scss";
+import { IssueCover } from "../shared/components/IssueCover";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -49,18 +50,8 @@ const VolumeIssues: React.FC<VolumeIssuesProps> = (props) => {
               className="VolumeIssue"
               key={issue.id}
             >
-              <div
-                className="VolumeIssue_imgWrapper mb-2"
-                style={{
-                  backgroundColor: `var(--paper-${issue.colour})`,
-                }}
-              >
-                <img
-                  className="VolumeIssue_img"
-                  srcSet={`${coverSrc(issue, 1)}, ${coverSrc(issue, 2)} 2x`}
-                  src={coverSrc(issue, 1)}
-                  alt={`Volume ${issue.volume_num} Issue ${issue.issue_code} cover`}
-                />
+              <div className="mb-2">
+                <IssueCover issue={issue} useBackground />
               </div>
               <p className="VolumeIssue_number h6 text-center">{`Issue ${issue.issue_code}`}</p>
             </Link>

@@ -38,16 +38,11 @@
     text-decoration: none;
   }
 
-  &_img {
-    width: 100%;
-    mix-blend-mode: multiply;
-  }
-
   &_number {
     text-decoration: underline;
   }
 
-  &:hover &_imgWrapper {
+  &:hover .IssueCover {
     opacity: 0.9;
   }
 

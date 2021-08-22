@@ -26,20 +26,23 @@ import { LinkButton } from "./Button";
 import { coverSrc } from "../helpers";
 
 import "./styles/IssueEntry.scss";
+import { IssueCover } from "./IssueCover";
 
 interface IssueEntryPropsBase {
   issue: Issue;
 }
 
-export interface IssueEntryProps extends IssueEntryPropsBase {
+interface IssueEntryProps extends IssueEntryPropsBase {
   tagline?: string;
   showFooter?: boolean;
 }
 
-export interface IssueEntryHeroProps extends IssueEntryPropsBase {
+interface IssueEntryHeroProps extends IssueEntryPropsBase {
   tagline?: string;
   showCover?: boolean;
 }
+
+export type { IssueEntryPropsBase, IssueEntryProps, IssueEntryHeroProps };
 
 /**
  * Display an issue's metadata and link to its page.
@@ -110,19 +113,8 @@ export const IssueEntryHero: React.FC<
         </div>
         {issue.pdf && (
           <div className="ml-auto">
-            <Link
-              to={`/issues/${issue.id}`}
-              className="d-inline-block"
-              style={{
-                backgroundColor: `var(--paper-${issue.colour})`,
-              }}
-            >
-              <img
-                alt={`Cover of Volume ${issue.volume_num} Issue ${issue.issue_code}`}
-                className="Hero_coverImg"
-                srcSet={`${coverSrc(issue, 1)}, ${coverSrc(issue, 2)} 2x`}
-                src={coverSrc(issue, 1)}
-              />
+            <Link to={`/issues/${issue.id}`} className="d-inline-block">
+              <IssueCover issue={issue} useBackground />
             </Link>
           </div>
         )}
