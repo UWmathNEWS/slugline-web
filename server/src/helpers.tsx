@@ -8,6 +8,7 @@ import { Helmet } from "react-helmet";
 import { appFactory } from "../../src/App";
 import ErrorPage, { ErrorPageProps } from "../../src/shared/errors/ErrorPage";
 import Public from "../../src/routes/Public";
+import { ThemeProvider } from "../../src/shared/contexts/ThemeContext";
 
 export const BUILD_DIR = path.resolve(__dirname, "..", "..", "build");
 
@@ -22,15 +23,17 @@ export const serverAppWrapper: {
 } = (Component: any, location: any, context: any = {}, props: any = {}) => {
   return (
     <Auth.Provider value={defaultAuthContext}>
-      <ToastProvider>
-        <StaticRouter
-          location={location}
-          context={context as StaticRouterContext}
-        >
-          <Component {...props} />
-        </StaticRouter>
-        <ToastContainer />
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <StaticRouter
+            location={location}
+            context={context as StaticRouterContext}
+          >
+            <Component {...props} />
+          </StaticRouter>
+          <ToastContainer />
+        </ToastProvider>
+      </ThemeProvider>
     </Auth.Provider>
   );
 };

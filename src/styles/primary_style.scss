@@ -1,6 +1,6 @@
 /**
  * goosePRESS is a news publishing platform.
- * Copyright (C) 2020  Kevin Trieu, Terry Chen
+ * Copyright (C) 2020-2021  Kevin Trieu, Terry Chen, Yang Zhong
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,6 +20,36 @@
 @import "primary_style_fonts";
 
 @import "../../node_modules/bootstrap/scss/bootstrap";
+
+:root {
+  --black: #{$black};
+  --white: #{$white};
+
+  @each $name, $clr in $grays {
+    --gray-#{$name}: #{$clr};
+  }
+
+  --paper-paper: var(--white);
+  --paper-paper-light: var(--gray-200);
+  --paper-paper-dark: var(--gray-900);
+  @each $name, $clr in $paper-colours {
+    --paper-#{$name}: #{$clr};
+    @if str-index($name, "pastel") != null {
+      // pastel colours
+      --paper-#{$name}-light: #{scale-color(mix(adjust-hue($clr, -10deg), $white, 15%), $saturation: 10%)};
+      --paper-#{$name}-dark: #{scale-color(mix(adjust-hue($clr, -10deg), $black, 30%), $saturation: -25%)};
+    } @else {
+      // astrobright colours
+      --paper-#{$name}-light: #{scale-color(mix($clr, $white, 10%), $saturation: 10%)};
+      --paper-#{$name}-dark: #{scale-color(mix($clr, $black, 30%), $saturation: -25%)};
+    }
+  }
+}
+
+body {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+}
 
 h1, .h1,
 h2, .h2,
@@ -56,20 +86,6 @@ a {
       border-right: none;
       border-radius: 0;
     }
-  }
-}
-
-:root {
-  --black: #{$black};
-  --white: #{$white};
-
-  --paper-paper: var(--white);
-  --paper-paper-light: #{$pink-150};
-  --paper-paper-dark: #{$pink-700};
-  @each $name, $clr in $paper-colours {
-    --paper-#{$name}: #{$clr};
-    --paper-#{$name}-light: #{mix($clr, $white)};
-    --paper-#{$name}-dark: #{scale-color(mix($clr, $black), $saturation: -50%)};
   }
 }
 

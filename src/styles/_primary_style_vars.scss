@@ -16,8 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Pinks
+
+$pink-100: #ffebf3;
 $pink-150: #ffc2de;
+$pink-200: #ff99cb;
+$pink-300: #ff69b4;
+$pink-400: #ee4499;
+$pink-500: #d72c83;
+$pink-600: #b81c6d;
 $pink-700: #8e1155;
+$pink-800: #5d0938;
+$pink-900: #290319;
+
+$pinks: (
+        "100": $pink-100,
+        "150": $pink-150,
+        "200": $pink-200,
+        "300": $pink-300,
+        "400": $pink-400,
+        "500": $pink-500,
+        "600": $pink-600,
+        "700": $pink-700,
+        "800": $pink-800,
+        "900": $pink-900,
+);
 
 // These variables have to be before the import because they'll break otherwise
 
@@ -34,11 +57,14 @@ $headings-font-family: $headings-ff;
 @import "../../node_modules/bootstrap/scss/variables";
 @import "../../node_modules/bootstrap/scss/mixins";
 
+// Colours
+$body-color: var(--primary-text);
+
 // Headers
-$headings-color: black;
+$headings-color: var(--primary-text);
 
 // Links
-$link-color: black;
+$link-color: var(--primary-link);
 
 // Navbar variables
 $navbar-light-color: $pink-150;
