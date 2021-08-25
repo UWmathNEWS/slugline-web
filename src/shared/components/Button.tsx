@@ -25,13 +25,7 @@ import type { LinkProps } from "react-router-dom";
 import "./styles/Button.scss";
 
 export interface ButtonProps {
-  variant:
-    | "dark"
-    | "light"
-    | "pink-dark"
-    | "pink-light"
-    | "grey-dark"
-    | "grey-light";
+  variant: "primary" | "secondary" | "accent" | "text";
 }
 
 /**

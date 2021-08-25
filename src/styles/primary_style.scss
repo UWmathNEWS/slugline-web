@@ -25,6 +25,8 @@
   --black: #{$black};
   --white: #{$white};
 
+  --active-highlight: #{$blue};
+
   @each $name, $clr in $grays {
     --gray-#{$name}: #{$clr};
   }

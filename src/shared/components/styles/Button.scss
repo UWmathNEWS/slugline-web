@@ -20,15 +20,14 @@
 @import "../../../styles/primary_style_vars";
 
 $gp-btn-variants: (
-  "dark": $black,
-  "light": $white,
-  "pink-dark": $pink-700,
-  "pink-light": $pink-150,
-  "grey-dark": $gray-700,
-  "grey-light": $gray-300,
+  "primary": ("bg": var(--primary-text), "text": var(--primary-bg)),
+  "secondary": ("bg": var(--secondary-bg), "text": var(--secondary-text)),
+  "accent": ("bg": var(--primary-link), "text": var(--primary-text)),
+        "text": ("bg": transparent, "text": var(--primary-text)),
 );
 
 .Button {
+  border-width: spacing(1);
   border-radius: 0;
   text-transform: uppercase;
   text-decoration: none;
@@ -45,14 +44,41 @@ $gp-btn-variants: (
   }
 }
 
-@each $variant, $clr in $gp-btn-variants {
+@each $variant, $clrs in $gp-btn-variants {
+  $text: map-get($clrs, "text");
+  $bg: map-get($clrs, "bg");
+
   .Button--#{$variant} {
-    @if $variant == "dark" {
-      @include button-variant($clr, $clr,
-                              $hover-background: lighten($clr, 17.5%),
-                              $active-background: lighten($clr, 25%));
-    } @else {
-      @include button-variant($clr, $clr);
+    // Ripped from button-variant mixin
+    color: $text;
+    background-color: $bg;
+    border-color: $bg;
+
+    @include hover() {
+      color: $bg;
+      background-color: $text;
+      border-color: $bg;
+    }
+
+    &:focus,
+    &.focus {
+      color: $text;
+      background-color: $bg;
+      border-color: $bg;
+      box-shadow: 0 0 0 $btn-focus-width var(--active-highlight);
+    }
+
+    &:not(:disabled):not(.disabled):active,
+    &:not(:disabled):not(.disabled).active,
+    .show > &.dropdown-toggle {
+      color: $bg;
+      background-color: $text;
+      border-color: $bg;
+
+      &:focus,
+      &.focus {
+        box-shadow: 0 0 0 $btn-focus-width var(--active-highlight);
+      }
     }
   }
 }

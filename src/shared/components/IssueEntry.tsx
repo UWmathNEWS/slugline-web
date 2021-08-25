@@ -103,7 +103,7 @@ export const IssueEntryHero: React.FC<
           <div className="mt-3">
             <LinkButton
               to={`/issues/${issue.id}`}
-              variant="dark"
+              variant="primary"
               className="IssueEntry_cta"
             >
               Read Volume {issue.volume_num} Issue {issue.issue_code}
@@ -131,7 +131,7 @@ export const IssueEntryHero: React.FC<
         <div className="mt-3">
           <LinkButton
             to={`/issues/${issue.id}`}
-            variant="dark"
+            variant="primary"
             className="IssueEntry_cta"
           >
             Read Volume {issue.volume_num} Issue {issue.issue_code}

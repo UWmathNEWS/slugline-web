@@ -9,7 +9,7 @@ describe("Button", () => {
   it("forwards refs", () => {
     const testRef = React.createRef<BsButton & HTMLButtonElement>();
     render(
-      <Button variant="dark" ref={testRef}>
+      <Button variant="primary" ref={testRef}>
         Test
       </Button>
     );
@@ -20,35 +20,27 @@ describe("Button", () => {
 
   it("renders different variants", () => {
     const { getByRole, rerender } = render(
-      <Button variant="dark">Test</Button>
+      <Button variant="primary">Test</Button>
     );
 
-    expect(getByRole("button").className).toMatch(/Button-dark/);
+    expect(getByRole("button").className).toMatch(/Button--primary/);
 
-    rerender(<Button variant="light">Test</Button>);
+    rerender(<Button variant="secondary">Test</Button>);
 
-    expect(getByRole("button").className).toMatch(/Button-light/);
+    expect(getByRole("button").className).toMatch(/Button-secondary/);
 
-    rerender(<Button variant="pink-dark">Test</Button>);
+    rerender(<Button variant="accent">Test</Button>);
 
-    expect(getByRole("button").className).toMatch(/Button-pink-dark/);
+    expect(getByRole("button").className).toMatch(/Button-accent/);
 
-    rerender(<Button variant="pink-light">Test</Button>);
+    rerender(<Button variant="text">Test</Button>);
 
-    expect(getByRole("button").className).toMatch(/Button-pink-light/);
-
-    rerender(<Button variant="grey-dark">Test</Button>);
-
-    expect(getByRole("button").className).toMatch(/Button-grey-dark/);
-
-    rerender(<Button variant="grey-light">Test</Button>);
-
-    expect(getByRole("button").className).toMatch(/Button-grey-light/);
+    expect(getByRole("button").className).toMatch(/Button-text/);
   });
 
   it("renders with added classes", () => {
     const { getByRole } = render(
-      <Button variant="dark" className="bingo">
+      <Button variant="primary" className="bingo">
         Test
       </Button>
     );
@@ -59,7 +51,7 @@ describe("Button", () => {
 
   it("forwards extra props", () => {
     const { getByRole } = render(
-      <Button variant="dark" role="link">
+      <Button variant="primary" role="link">
         Test
       </Button>
     );
@@ -74,7 +66,7 @@ describe("LinkButton", () => {
     const testRef = React.createRef<HTMLAnchorElement>();
     render(
       <Router history={history}>
-        <LinkButton variant="dark" ref={testRef} to="/test">
+        <LinkButton variant="primary" ref={testRef} to="/test">
           Test
         </LinkButton>
       </Router>
@@ -89,70 +81,50 @@ describe("LinkButton", () => {
     const history = createMemoryHistory();
     const { getByRole, rerender } = render(
       <Router history={history}>
-        <LinkButton variant="dark" to="/test">
+        <LinkButton variant="primary" to="/test">
           Test
         </LinkButton>
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-dark/);
+    expect(getByRole("link").className).toMatch(/Button-primary/);
 
     rerender(
       <Router history={history}>
-        <LinkButton variant="light" to="/test">
+        <LinkButton variant="secondary" to="/test">
           Test
         </LinkButton>
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-light/);
+    expect(getByRole("link").className).toMatch(/Button-secondary/);
 
     rerender(
       <Router history={history}>
-        <LinkButton variant="pink-dark" to="/test">
+        <LinkButton variant="accent" to="/test">
           Test
         </LinkButton>
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-pink-dark/);
+    expect(getByRole("link").className).toMatch(/Button-accent/);
 
     rerender(
       <Router history={history}>
-        <LinkButton variant="pink-light" to="/test">
+        <LinkButton variant="text" to="/test">
           Test
         </LinkButton>
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-pink-light/);
-
-    rerender(
-      <Router history={history}>
-        <LinkButton variant="grey-dark" to="/test">
-          Test
-        </LinkButton>
-      </Router>
-    );
-
-    expect(getByRole("link").className).toMatch(/Button-grey-dark/);
-
-    rerender(
-      <Router history={history}>
-        <LinkButton variant="grey-light" to="/test">
-          Test
-        </LinkButton>
-      </Router>
-    );
-
-    expect(getByRole("link").className).toMatch(/Button-grey-light/);
+    expect(getByRole("link").className).toMatch(/Button-text/);
   });
 
   it("renders with added classes", () => {
     const history = createMemoryHistory();
     const { getByRole } = render(
       <Router history={history}>
-        <LinkButton variant="dark" to="/test" className="bingo">
+        <LinkButton variant="primary" to="/test" className="bingo">
           Test
         </LinkButton>
       </Router>
@@ -166,7 +138,7 @@ describe("LinkButton", () => {
     const history = createMemoryHistory();
     const { getByRole } = render(
       <Router history={history}>
-        <LinkButton variant="dark" to="/test" role="button">
+        <LinkButton variant="primary" to="/test" role="button">
           Test
         </LinkButton>
       </Router>

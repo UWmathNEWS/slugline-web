@@ -32,4 +32,9 @@
   &--hero {
     min-width: 200px;
   }
+
+  @at-root .Hero &_cta {
+    --primary-bg: var(--secondary-bg);
+    --primary-text: var(--secondary-link);
+  }
 }
