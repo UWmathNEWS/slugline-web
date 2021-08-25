@@ -1,6 +1,6 @@
 /**
  * goosePRESS is a news publishing platform.
- * Copyright (C) 2020  Terry Chen
+ * Copyright (C) 2020-2021  Terry Chen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,7 +23,6 @@ import format from "date-fns/format";
 import { Link } from "react-router-dom";
 import ActionLink from "./ActionLink";
 import { LinkButton } from "./Button";
-import { coverSrc } from "../helpers";
 
 import "./styles/IssueEntry.scss";
 import { IssueCover } from "./IssueCover";

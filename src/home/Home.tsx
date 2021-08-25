@@ -1,6 +1,6 @@
 /**
  * goosePRESS is a news publishing platform.
- * Copyright (C) 2020  Terry Chen
+ * Copyright (C) 2020-2021  Terry Chen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,12 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useMemo, useRef } from "react";
-import { Helmet } from "react-helmet";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import type { Issue, Pagination, RouteComponentProps } from "../shared/types";
-import { useSSRData } from "../shared/hooks";
-import { RequestState } from "../api/hooks";
-import ErrorPage from "../shared/errors/ErrorPage";
 import Visor from "../shared/components/Visor";
 import Loader from "../shared/components/Loader";
 import Dateline from "../shared/components/Dateline";
@@ -30,6 +26,13 @@ import IssueEntry, { IssueEntryHero } from "../shared/components/IssueEntry";
 import Hero from "../shared/components/Hero";
 
 import "./styles/Home.scss";
+import {
+  inverseMode,
+  resetThemeVariables,
+  setThemeVariables,
+  useTheme,
+} from "../shared/contexts/ThemeContext";
+import { withSSRData } from "../shared/hoc/withSSRData";
 
 const taglines = [
   /* Contributed by terrifiED */
@@ -94,6 +97,90 @@ const HeroLoader: React.FC = () => {
   );
 };
 
+const HomeContent: React.FC<{
+  data: [Pagination<Issue>, Issue];
+  setLatestIssueRef: React.RefCallback<Issue>;
+  location: string;
+  page: number;
+}> = ({ data, setLatestIssueRef, location, page }) => {
+  const { mode } = useTheme();
+  let issues = data[0];
+  const latestIssue = data[1];
+  let title = "";
+  let heroType: string;
+  let hero: React.ReactNode;
+
+  setLatestIssueRef(latestIssue);
+
+  useEffect(() => {
+    setThemeVariables({
+      secondaryBg: `var(--paper-${latestIssue.colour}-${mode})`,
+      secondaryLink: `var(--paper-${latestIssue.colour}-${inverseMode[mode]})`,
+    });
+  }, [mode, latestIssue]);
+
+  // On the first page, we want a full latest issue hero. However, on subsequent pages, we want a more subtle hero.
+  if (page === 1) {
+    issues.results = issues.results.filter(
+      (issue) =>
+        issue.volume_num !== latestIssue.volume_num &&
+        issue.issue_code !== latestIssue.issue_code
+    );
+    heroType = "full";
+    hero = (
+      <IssueEntryHero
+        issue={latestIssue}
+        tagline={taglines[Math.floor(Math.random() * taglines.length)]}
+        showCover
+      />
+    );
+  } else {
+    title = `Page ${page}`;
+    heroType = "short";
+    hero = <IssueEntryHero issue={latestIssue} tagline="Latest Issue" />;
+  }
+
+  return (
+    <>
+      <Visor key="visor" title={title} location={location} />
+      <Hero key="hero" variant="theme" className={`Hero--${heroType}`}>
+        {hero}
+      </Hero>
+      <div key="content" className="container mt-5" data-testid="home-content">
+        {issues.results.map((issue, i) => (
+          <IssueEntry key={i} issue={issue} className="mb-5" />
+        ))}
+        <Paginator pagination={issues} url={(page) => `/?paged=${page}`} />
+      </div>
+    </>
+  );
+};
+
+const HomeLoading: React.FC<{
+  data?: [Pagination<Issue>, any];
+  latestIssue: Issue | null;
+  location: string;
+}> = ({ data, latestIssue, location }) => {
+  return (
+    <>
+      <Visor key="visor" location={location} />
+      <Hero key="hero" variant="theme" className="Hero--short">
+        {latestIssue ? (
+          <IssueEntryHero issue={latestIssue} tagline="Latest Issue" />
+        ) : (
+          <HeroLoader />
+        )}
+      </Hero>
+      <div key="content" className="container mt-5" data-testid="home-content">
+        <Loader variant="spinner" />
+        {data && (
+          <Paginator pagination={data[0]} url={(page) => `/?paged=${page}`} />
+        )}
+      </div>
+    </>
+  );
+};
+
 /**
  * The component for our home page.
  *
@@ -111,110 +198,34 @@ const Home: React.FC<RouteComponentProps<any, [Pagination<Issue>, Issue]>> = ({
     location.search,
   ]);
   const page = parseInt(search.get("paged") || "") || 1;
-  const [resp, reqInfo, fail] = useSSRData(
-    useCallback(() => route.loadData!({ query: { paged: page } }), [
-      page,
-      route.loadData,
-    ]),
-    staticContext?.data
+  const fetchData = useCallback(
+    () => route.loadData!({ query: { paged: page } }),
+    [page, route.loadData]
   );
   // Store the latest issue so we don't show an unnecessary loader when changing pages
-  const latestIssueRef = useRef<Issue>();
+  // React's typings are a bit weird (useRef<T> with no initializer returns a MutableRefObject<T | undefined>, but we
+  // want MutableRefObject<T | null>), which is why we have two explicit nulls here
+  const latestIssueRef = useRef<Issue | null>(null);
 
-  if (!fail && resp && reqInfo.state !== RequestState.Running) {
-    let issues = resp[0];
-    const latestIssue = resp[1];
-    let title = "";
-    let heroType: string;
-    let hero: React.ReactNode;
+  useEffect(() => resetThemeVariables, []);
 
-    latestIssueRef.current = latestIssue;
+  const RenderedComponent = withSSRData(
+    [fetchData, staticContext?.data],
+    HomeContent,
+    undefined,
+    HomeLoading
+  );
 
-    // On the first page, we want a full latest issue hero. However, on subsequent pages, we want a more subtle hero.
-    if (page === 1) {
-      issues.results = issues.results.filter(
-        (issue) =>
-          issue.volume_num !== latestIssue.volume_num &&
-          issue.issue_code !== latestIssue.issue_code
-      );
-      heroType = "full";
-      hero = (
-        <IssueEntryHero
-          issue={latestIssue}
-          tagline={taglines[Math.floor(Math.random() * taglines.length)]}
-          showCover
-        />
-      );
-    } else {
-      title = `Page ${page}`;
-      heroType = "short";
-      hero = <IssueEntryHero issue={latestIssue} tagline="Latest Issue" />;
-    }
-    return (
-      <>
-        <Visor key="visor" title={title} location={location.pathname} />
-        <Helmet>
-          {/* We want the navbar to share the issue's colour */}
-          <style key="nav-style">
-            {`.SluglineNav, .Hero {
-              --background-clr: var(--paper-${latestIssue.colour}-light) !important;
-            }`}
-          </style>
-        </Helmet>
-        <Hero key="hero" variant="custom" className={`Hero--${heroType}`}>
-          {hero}
-        </Hero>
-        <div
-          key="content"
-          className="container mt-5"
-          data-testid="home-content"
-        >
-          {issues.results.map((issue, i) => (
-            <IssueEntry key={i} issue={issue} className="mb-5" />
-          ))}
-          <Paginator pagination={issues} url={(page) => `/?paged=${page}`} />
-        </div>
-      </>
-    );
-  } else if (fail) {
-    return <ErrorPage statusCode={reqInfo.statusCode || 500} />;
-  } else {
-    return (
-      <>
-        <Visor key="visor" location={location.pathname} />
-        <Helmet>
-          {/* We want to preserve the latest issue's colour */}
-          <style key="nav-style">
-            {`.SluglineNav, .Hero {
-              --background-clr: var(--paper-${
-                latestIssueRef.current?.colour || "paper"
-              }-light) !important;
-            }`}
-          </style>
-        </Helmet>
-        <Hero key="hero" variant="custom" className="Hero--short">
-          {latestIssueRef.current ? (
-            <IssueEntryHero
-              issue={latestIssueRef.current}
-              tagline="Latest Issue"
-            />
-          ) : (
-            <HeroLoader />
-          )}
-        </Hero>
-        <div
-          key="content"
-          className="container mt-5"
-          data-testid="home-content"
-        >
-          <Loader variant="spinner" />
-          {resp && (
-            <Paginator pagination={resp[0]} url={(page) => `/?paged=${page}`} />
-          )}
-        </div>
-      </>
-    );
-  }
+  return (
+    <RenderedComponent
+      latestIssue={latestIssueRef.current}
+      setLatestIssueRef={(issue) => {
+        latestIssueRef.current = issue;
+      }}
+      location={location.pathname}
+      page={page}
+    />
+  );
 };
 
 export default Home;

@@ -1,6 +1,6 @@
 /**
  * goosePRESS is a news publishing platform.
- * Copyright (C) 2020  Kevin Trieu, Terry Chen
+ * Copyright (C) 2020-2021  Kevin Trieu, Terry Chen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,16 +20,13 @@ import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Issue, Pagination, RouteComponentProps } from "../shared/types";
 import Visor from "../shared/components/Visor";
-import { RequestState } from "../api/hooks";
 import Loader from "../shared/components/Loader";
-import ErrorPage from "../shared/errors/ErrorPage";
-import { useSSRData } from "../shared/hooks";
-import { coverSrc } from "../shared/helpers";
 import Hero from "../shared/components/Hero";
 import Breadcrumbs from "../shared/components/Breadcrumbs";
 
 import "./styles/IssuesList.scss";
 import { IssueCover } from "../shared/components/IssueCover";
+import { withSSRData } from "../shared/hoc/withSSRData";
 
 export interface VolumeIssuesProps {
   volume: Issue[];
@@ -84,30 +81,21 @@ const issuesToVolumes = (paginatedIssues: Pagination<Issue>): Issue[][] => {
   return vols;
 };
 
-const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
-  route,
-  location,
-  staticContext,
-}) => {
-  const [volumes, dataInfo, fail] = useSSRData(
-    useCallback(() => route.loadData!({}), [route.loadData]),
-    staticContext?.data ? issuesToVolumes(staticContext.data) : [],
-    issuesToVolumes
-  );
-
-  if (fail) {
-    return <ErrorPage statusCode={dataInfo.statusCode || 500} />;
-  }
-
+const IssuesListContent: React.FC<{
+  data: Issue[][];
+  isLoading: boolean;
+  title: string;
+  location: string;
+}> = ({ data: volumes, isLoading, title, location }) => {
   return (
     <>
-      <Visor title={route.title} location={location.pathname} />
-      <Hero variant="primary">
+      <Visor title={title} location={location} />
+      <Hero variant="theme">
         <Breadcrumbs items={[]} />
         <h1>Issues</h1>
       </Hero>
       <div className="container mt-5">
-        {dataInfo.state === RequestState.Running ? (
+        {isLoading ? (
           <Loader variant="spinner" />
         ) : (
           volumes.map((volume, i) => {
@@ -117,6 +105,24 @@ const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
       </div>
     </>
   );
+};
+
+const IssuesList: React.FC<RouteComponentProps<any, Pagination<Issue>>> = ({
+  route,
+  location,
+  staticContext,
+}) => {
+  const fetchVolumes = useCallback(() => route.loadData!({}), [route.loadData]);
+  const RenderedComponent = withSSRData(
+    [
+      fetchVolumes,
+      staticContext?.data ? issuesToVolumes(staticContext.data) : [],
+      issuesToVolumes,
+    ],
+    IssuesListContent
+  );
+
+  return <RenderedComponent title={route.title} location={location.pathname} />;
 };
 
 export default IssuesList;

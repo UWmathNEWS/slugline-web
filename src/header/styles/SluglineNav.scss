@@ -1,21 +1,38 @@
+/**
+ * goosePRESS is a news publishing platform.
+ * Copyright (C) 2020-2021  Kevin Trieu, Terry Chen, Yang Zhong
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 @import "../../styles/primary_style_vars";
 
 .SluglineNav {
-  --background-clr: #{$primary};
-  --foreground-clr: #{$black};
-
-  background-color: var(--background-clr);
+  background-color: var(--secondary-bg);
 
   a.nav-link {
     margin: 0 $spacer;
     font-weight: normal;
-    color: var(--foreground-clr) !important;
+    color: var(--secondary-text) !important;
     text-transform: uppercase;
     text-decoration: none;
   }
 
-  .navbar-brand {
-    color: var(--foreground-clr);
+  .navbar-brand,
+  .navbar-brand:hover,
+  .navbar-brand:focus {
+    color: var(--secondary-text);
   }
 
   .navbar-logo {
@@ -38,8 +55,8 @@
   }
 
   .custom-toggler.navbar-toggler {
-    color: var(--foreground-clr);
-    border-color: var(--foreground-clr);
+    color: var(--secondary-text);
+    border-color: var(--secondary-text);
 
     & > .navbar-toggler-icon {
       //custom SVG image with the color we need
