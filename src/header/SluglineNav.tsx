@@ -1,6 +1,6 @@
 /**
  * goosePRESS is a news publishing platform.
- * Copyright (C) 2021 Yang Zhong
+ * Copyright (C) 2020-2021  Kevin Trieu, Terry Chen, Yang Zhong
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- import React from "react";
+import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -25,6 +25,8 @@ import { useToast } from "../shared/contexts/ToastContext";
 
 import { ReactComponent as Logo } from "../logo.svg";
 import "./styles/SluglineNav.scss";
+import { inverseMode, useTheme } from "../shared/contexts/ThemeContext";
+import Button from "../shared/components/Button";
 
 const LoginLogoutLink = () => {
   const auth = useAuth();
@@ -88,6 +90,7 @@ const NavLink: React.FC<NavLinkProps> = (props) => {
 
 const SluglineNav = () => {
   const auth = useAuth();
+  const { mode, setMode } = useTheme();
 
   return (
     <Navbar className="SluglineNav" expand="lg">
@@ -95,10 +98,7 @@ const SluglineNav = () => {
         <Navbar.Brand as={Link} to="/" href="/">
           <Logo height={28} className="navbar-logo align-top" />
         </Navbar.Brand>
-        <Navbar.Toggle
-          className="custom-toggler"
-          aria-controls="header-nav"
-        />
+        <Navbar.Toggle className="custom-toggler" aria-controls="header-nav" />
         <Navbar.Collapse id="header-nav">
           <Nav>
             <NavLink text="Home" to="/" />
@@ -109,6 +109,14 @@ const SluglineNav = () => {
             )}
             {auth.isEditor() && <NavLink text="admin" to="/dash/admin" />}
             <LoginLogoutLink />
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setMode(inverseMode[mode]);
+              }}
+            >
+              {inverseMode[mode]} mode
+            </Button>
           </Nav>
         </Navbar.Collapse>
       </div>
