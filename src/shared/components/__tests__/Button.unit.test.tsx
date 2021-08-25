@@ -27,15 +27,15 @@ describe("Button", () => {
 
     rerender(<Button variant="secondary">Test</Button>);
 
-    expect(getByRole("button").className).toMatch(/Button-secondary/);
+    expect(getByRole("button").className).toMatch(/Button--secondary/);
 
     rerender(<Button variant="accent">Test</Button>);
 
-    expect(getByRole("button").className).toMatch(/Button-accent/);
+    expect(getByRole("button").className).toMatch(/Button--accent/);
 
     rerender(<Button variant="text">Test</Button>);
 
-    expect(getByRole("button").className).toMatch(/Button-text/);
+    expect(getByRole("button").className).toMatch(/Button--text/);
   });
 
   it("renders with added classes", () => {
@@ -87,7 +87,7 @@ describe("LinkButton", () => {
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-primary/);
+    expect(getByRole("link").className).toMatch(/Button--primary/);
 
     rerender(
       <Router history={history}>
@@ -97,7 +97,7 @@ describe("LinkButton", () => {
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-secondary/);
+    expect(getByRole("link").className).toMatch(/Button--secondary/);
 
     rerender(
       <Router history={history}>
@@ -107,7 +107,7 @@ describe("LinkButton", () => {
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-accent/);
+    expect(getByRole("link").className).toMatch(/Button--accent/);
 
     rerender(
       <Router history={history}>
@@ -117,7 +117,7 @@ describe("LinkButton", () => {
       </Router>
     );
 
-    expect(getByRole("link").className).toMatch(/Button-text/);
+    expect(getByRole("link").className).toMatch(/Button--text/);
   });
 
   it("renders with added classes", () => {
